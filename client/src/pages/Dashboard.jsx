@@ -78,14 +78,14 @@ const teamWorkload = [
 
 const Dashboard = () => {
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
       {/* Welcome Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Welcome back, John!</h1>
-          <p className="text-slate-500 mt-1 font-medium italic">Here's what's happening with your business today.</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight animate-in slide-in-from-left duration-500">Welcome back, John!</h1>
+          <p className="text-slate-500 mt-1 font-medium italic text-sm sm:text-base">Here's what's happening with your business today.</p>
         </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
+        <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
           <Calendar size={18} className="text-blue-500" />
           <span>May 20, 2024</span>
           <ChevronDown size={16} />
@@ -181,14 +181,14 @@ const Dashboard = () => {
                   <option>This Month</option>
                 </select>
               </div>
-              <div className="flex items-center gap-10 h-[320px]">
-                <div className="w-1/2 h-full relative group">
+              <div className="flex flex-col md:flex-row items-center gap-6 lg:gap-10 h-auto md:h-[320px]">
+                <div className="w-full md:w-1/2 h-[280px] md:h-full relative group">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={financialData}
-                        innerRadius={80}
-                        outerRadius={110}
+                        innerRadius={70}
+                        outerRadius={100}
                         paddingAngle={10}
                         dataKey="value"
                         stroke="none"
@@ -201,17 +201,17 @@ const Dashboard = () => {
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none group-hover:scale-110 transition-transform duration-500">
-                    <span className="text-3xl font-black text-slate-900 tracking-tighter">₹245k</span>
+                    <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter">₹245k</span>
                     <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black">Received</span>
                   </div>
                 </div>
-                <div className="w-1/2 space-y-5">
+                <div className="w-full md:w-1/2 space-y-4 sm:space-y-5">
                   {financialData.map((item, i) => (
                     <div key={i} className="group cursor-pointer">
                       <div className="flex justify-between items-center mb-1.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-3 h-3 rounded-full shadow-lg" style={{backgroundColor: item.color, boxShadow: `0 4px 6px ${item.color}33`}}></div>
-                          <span className="text-xs font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-wider">{item.name}</span>
+                          <div className="w-2.5 h-2.5 rounded-full shadow-lg" style={{backgroundColor: item.color, boxShadow: `0 4px 6px ${item.color}33`}}></div>
+                          <span className="text-[10px] sm:text-xs font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-wider">{item.name}</span>
                         </div>
                         <span className="text-xs font-black text-slate-900 tracking-tight">₹{(item.value / 1000).toFixed(1)}k</span>
                       </div>
@@ -230,7 +230,7 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Recent Tenders Table */}
-            <div className="card col-span-2 overflow-hidden bg-white border-none shadow-xl shadow-slate-200/40">
+            <div className="card col-span-1 xl:col-span-2 overflow-hidden bg-white border-none shadow-xl shadow-slate-200/40">
               <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
                 <div>
                   <h3 className="font-black text-slate-900 text-xl tracking-tight">Recent Tenders</h3>
