@@ -16,6 +16,8 @@ function App() {
   const [activeTab, setActiveTab] = useState('Dashboard')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [editTenderData, setEditTenderData] = useState(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [clients, setClients] = useState([
     { id: '1001', name: 'Acme Corp', industry: 'Industry', status: 'Active', manager: 'John Doe', date: '12/3/2023', value: '$1000.00' },
     { id: '1002', name: 'Global Industries', industry: 'Lead Processes', status: 'Lead', manager: 'John Dove', date: '12/3/2023', value: '$1000.00' },
@@ -64,11 +66,29 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="flex min-h-screen bg-slate-50 relative overflow-x-hidden">
+      {/* Sidebar Overlay for Mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[45] lg:hidden animate-in fade-in duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      )}
+
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={(tab) => { setActiveTab(tab); setIsMobileMenuOpen(false); }} 
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+        isOpen={isMobileMenuOpen}
+        setIsOpen={setIsMobileMenuOpen}
+      />
       
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header onCreateTender={() => { setEditTenderData(null); setActiveTab('Create Tender'); }} />
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-0' : ''}`}>
+        <Header 
+          onCreateTender={() => { setEditTenderData(null); setActiveTab('Create Tender'); }} 
+          toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        />
         
         <main className="flex-1 overflow-y-auto">
           {activeTab === 'Dashboard' && <Dashboard />}
