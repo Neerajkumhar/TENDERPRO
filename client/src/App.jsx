@@ -84,7 +84,7 @@ function App() {
         setIsOpen={setIsMobileMenuOpen}
       />
       
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-0' : ''}`}>
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 w-full">
         <Header 
           onCreateTender={() => { setEditTenderData(null); setActiveTab('Create Tender'); }} 
           toggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

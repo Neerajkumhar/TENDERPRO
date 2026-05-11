@@ -26,10 +26,10 @@ const menuItems = [
 const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen, setIsOpen }) => {
   return (
     <aside className={`
-      bg-white border-r border-slate-200 flex flex-col sticky top-0 h-screen z-50 transition-all duration-300
-      ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      ${isCollapsed ? 'w-20' : 'w-64'}
-      fixed lg:sticky
+      bg-white border-r border-slate-200 flex flex-col h-screen transition-all duration-300 ease-in-out overflow-hidden
+      ${isOpen ? 'translate-x-0 w-64 z-[100] fixed shadow-2xl' : '-translate-x-full w-0 lg:w-auto lg:translate-x-0 lg:sticky lg:z-40'}
+      ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
+      top-0 left-0
     `}>
       <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
