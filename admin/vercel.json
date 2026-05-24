@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://tenderpro-ytx4.vercel.app/api/:match*"
+      "destination": "https://tenderpro-ytx4-git-main-neerajs-projects-eb108de5.vercel.app/api/:match*"
     },
     {
       "source": "/uploads/:match*",
-      "destination": "https://tenderpro-ytx4.vercel.app/uploads/:match*"
+      "destination": "https://tenderpro-ytx4-git-main-neerajs-projects-eb108de5.vercel.app/uploads/:match*"
     },
     {
       "source": "/(.*)",
