@@ -76,9 +76,9 @@ const CalendarPage = () => {
   const fetchEvents = async () => {
     try {
       const [tendersRes, assignmentsRes, remindersRes] = await Promise.all([
-        fetch('http://localhost:5000/api/tenders'),
-        fetch('http://localhost:5000/api/assignments'),
-        fetch('http://localhost:5000/api/reminders')
+        fetch('/api/tenders'),
+        fetch('/api/assignments'),
+        fetch('/api/reminders')
       ]);
 
       const tenders = await tendersRes.json();
@@ -134,7 +134,7 @@ const CalendarPage = () => {
   const handleAddReminder = async (e) => {
     e.preventDefault();
     try {
-      await fetch('http://localhost:5000/api/reminders', {
+      await fetch('/api/reminders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newReminder)
@@ -151,7 +151,7 @@ const CalendarPage = () => {
     if (!id) return;
     try {
       const plainId = typeof id === 'string' && id.startsWith('r_') ? id.slice(2) : id;
-      await fetch(`http://localhost:5000/api/reminders/${plainId}`, {
+      await fetch(`/api/reminders/${plainId}`, {
         method: 'DELETE'
       });
       setSelectedEventId(null);

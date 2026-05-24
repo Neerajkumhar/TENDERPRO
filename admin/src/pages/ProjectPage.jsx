@@ -96,7 +96,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
         status: editStatus
       };
       
-      const response = await fetch(`http://localhost:5000/api/assignments/${editingProject.id}`, {
+      const response = await fetch(`/api/assignments/${editingProject.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -118,7 +118,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/assignments/${deletingProjectId}`, {
+      const response = await fetch(`/api/assignments/${deletingProjectId}`, {
         method: 'DELETE'
       });
       if (response.ok) {

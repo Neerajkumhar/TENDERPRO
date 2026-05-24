@@ -138,7 +138,7 @@ function App() {
 
   const fetchDepartments = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/departments');
+      const response = await fetch('/api/departments');
       if (response.ok) {
         const data = await response.json();
         setDepartments(data);
@@ -150,7 +150,7 @@ function App() {
 
   const fetchTenders = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/tenders');
+      const response = await fetch('/api/tenders');
       if (response.ok) {
         const data = await response.json();
         setTenders(data);
@@ -162,7 +162,7 @@ function App() {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/clients');
+      const response = await fetch('/api/clients');
       if (response.ok) {
         const data = await response.json();
         setClients(data);
@@ -174,7 +174,7 @@ function App() {
 
   const fetchAssignments = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/assignments');
+      const response = await fetch('/api/assignments');
       if (response.ok) {
         const data = await response.json();
         setAssignments(data);
@@ -186,7 +186,7 @@ function App() {
 
   const fetchMembers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/members');
+      const response = await fetch('/api/members');
       if (response.ok) {
         const data = await response.json();
         setMembers(data);
@@ -207,8 +207,8 @@ function App() {
   const handleSaveTender = async (tenderData) => {
     try {
       const url = tenderData.id
-        ? `http://localhost:5000/api/tenders/${tenderData.id}`
-        : 'http://localhost:5000/api/tenders';
+        ? `/api/tenders/${tenderData.id}`
+        : '/api/tenders';
       const method = tenderData.id ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -299,7 +299,7 @@ function App() {
     const activeUser = JSON.parse(localStorage.getItem('user') || '{}');
     if (activeUser?.sessionId) {
       try {
-        await fetch('http://localhost:5000/api/auth/logout', {
+        await fetch('/api/auth/logout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -476,7 +476,7 @@ function App() {
                     status: data.status === 'In Progress' ? 'In Progress' : 'Pending'
                   };
 
-                  const response = await fetch('http://localhost:5000/api/assignments', {
+                  const response = await fetch('/api/assignments', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

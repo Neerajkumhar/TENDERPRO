@@ -176,7 +176,7 @@ const Invoices = ({ onInvoiceClick }) => {
   useEffect(() => {
     const loadBackendInvoices = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/invoices');
+        const response = await fetch('/api/invoices');
         if (!response.ok) return;
         const data = await response.json();
         const backendData = data.map(inv => ({
@@ -203,8 +203,8 @@ const Invoices = ({ onInvoiceClick }) => {
     const loadClientsAndTenders = async () => {
       try {
         const [cRes, tRes] = await Promise.all([
-          fetch('http://localhost:5000/api/clients'),
-          fetch('http://localhost:5000/api/tenders')
+          fetch('/api/clients'),
+          fetch('/api/tenders')
         ]);
         if (cRes.ok) setClients(await cRes.json());
         if (tRes.ok) setTenders(await tRes.json());

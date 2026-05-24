@@ -44,7 +44,7 @@ const CreateProject = ({ onCancel, onSave, clients = [], tenders = [] }) => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/members');
+        const response = await fetch('/api/members');
         if (response.ok) {
           const data = await response.json();
           setMembers(data);

@@ -61,7 +61,7 @@ const Attendance = ({ user }) => {
   // Fetch all global attendance records dynamically
   const fetchAllAttendance = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/attendance/all/records`);
+      const res = await fetch(`/api/auth/attendance/all/records`);
       if (res.ok) {
         const data = await res.json();
         // Map backend model format to UI structure

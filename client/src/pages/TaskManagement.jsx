@@ -37,7 +37,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/tasks');
+      const response = await fetch('/api/tasks');
       if (response.ok) {
         const data = await response.json();
         if (data.length > 0) {
@@ -99,7 +99,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/tasks', {
+      const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -184,7 +184,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
     if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
       try {
         const dbStatus = targetStatus === 'To Do' ? 'Pending' : targetStatus;
-        await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        await fetch(`/api/tasks/${taskId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: dbStatus })

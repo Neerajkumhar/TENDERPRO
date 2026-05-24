@@ -80,7 +80,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
 
     const fetchInvoice = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/invoices/${invoiceId}`);
+        const response = await fetch(`/api/invoices/${invoiceId}`);
         if (response.ok) {
           const data = await response.json();
           setInvoice(data);
@@ -239,7 +239,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/invoices', {
+      const res = await fetch('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -267,7 +267,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:5000/api/invoices/${invoice.id}`, {
+      const res = await fetch(`/api/invoices/${invoice.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -344,7 +344,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:5000/api/upload', {
+      const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -369,7 +369,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:5000/api/upload', {
+      const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });

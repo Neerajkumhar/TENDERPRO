@@ -50,7 +50,7 @@ const ClientDetails = ({ clientId, onBack }) => {
 
   const fetchClientDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/clients`);
+      const response = await fetch(`/api/clients`);
       const data = await response.json();
       if (response.ok) {
         // Find the specific client from the list (ideally there would be a GET /api/clients/:id)
@@ -58,7 +58,7 @@ const ClientDetails = ({ clientId, onBack }) => {
         setClient(foundClient);
       }
       
-      const tenderResponse = await fetch(`http://localhost:5000/api/tenders`);
+      const tenderResponse = await fetch(`/api/tenders`);
       const tenderData = await tenderResponse.json();
       if (tenderResponse.ok) {
         setAssociatedTenders(tenderData.filter(t => t.clientId === clientId));
@@ -73,7 +73,7 @@ const ClientDetails = ({ clientId, onBack }) => {
   const handleClientUpdate = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/api/clients/${clientId}`, {
+      const response = await fetch(`/api/clients/${clientId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(clientFormData)
@@ -106,7 +106,7 @@ const ClientDetails = ({ clientId, onBack }) => {
   const handleManagerUpdate = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:5000/api/clients/${clientId}`, {
+      const response = await fetch(`/api/clients/${clientId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(managerData)
@@ -138,7 +138,7 @@ const ClientDetails = ({ clientId, onBack }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });

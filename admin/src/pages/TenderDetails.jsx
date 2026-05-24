@@ -30,7 +30,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
     const fetchTenderDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/tenders/${tenderId}`);
+        const response = await fetch(`/api/tenders/${tenderId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch tender details.');
         }

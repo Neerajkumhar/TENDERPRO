@@ -56,7 +56,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const fetchUnreadCounts = async () => {
     if (!user?.id) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/messages/${user.id}/unread`);
+      const response = await fetch(`/api/messages/${user.id}/unread`);
       if (response.ok) {
         const data = await response.json();
         setUnreadCounts(data);
@@ -69,7 +69,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const fetchMessages = async (chatId) => {
     if (!chatId || !user?.id) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/messages/${user.id}/${chatId}`);
+      const response = await fetch(`/api/messages/${user.id}/${chatId}`);
       if (response.ok) {
         const data = await response.json();
         const formatted = data.map(msg => ({
@@ -90,7 +90,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const markAsRead = async (chatId) => {
     if (!chatId || !user?.id) return;
     try {
-      await fetch(`http://localhost:5000/api/messages/${chatId}/${user.id}/read`, { method: 'PUT' });
+      await fetch(`/api/messages/${chatId}/${user.id}/read`, { method: 'PUT' });
       fetchUnreadCounts();
     } catch (err) {}
   };
@@ -188,7 +188,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     setShowEmojiPicker(false);
 
     try {
-      await fetch('http://localhost:5000/api/messages', {
+      await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -212,7 +212,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     
     let uploadedUrl = null;
     try {
-      const uploadRes = await fetch('http://localhost:5000/api/upload', {
+      const uploadRes = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -239,7 +239,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     setCurrentChatMessages(prev => [...prev, tempMessage]);
 
     try {
-      await fetch('http://localhost:5000/api/messages', {
+      await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

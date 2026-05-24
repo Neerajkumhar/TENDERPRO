@@ -30,7 +30,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
 
   const fetchAssignment = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/assignments/${assignmentId}`);
+      const response = await fetch(`/api/assignments/${assignmentId}`);
       if (response.ok) {
         const data = await response.json();
         setAssignment(data);
@@ -57,7 +57,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
   const handleStatusUpdate = async (newStatus) => {
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:5000/api/assignments/${assignmentId}/status`, {
+      const response = await fetch(`/api/assignments/${assignmentId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -76,7 +76,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
   const handleUpdateAssignment = async () => {
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:5000/api/assignments/${assignmentId}`, {
+      const response = await fetch(`/api/assignments/${assignmentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editData)
@@ -211,7 +211,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
                   <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 overflow-hidden">
                     {assignment.assignee.image ? (
                       <img 
-                        src={(assignment.assignee.image.startsWith('http') ? assignment.assignee.image : `http://localhost:5000${assignment.assignee.image}`) || null} 
+                        src={(assignment.assignee.image.startsWith('http') ? assignment.assignee.image : `${assignment.assignee.image}`) || null} 
                         alt={assignment.assignee.name} 
                         className="w-full h-full object-cover" 
                       />

@@ -65,7 +65,7 @@ const TeamAttendance = ({ user }) => {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/attendance/department/${user.departmentId}`);
+      const res = await fetch(`/api/auth/attendance/department/${user.departmentId}`);
       if (res.ok) {
         const data = await res.json();
         // Map backend model format to UI structure

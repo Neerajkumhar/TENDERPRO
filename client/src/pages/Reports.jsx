@@ -55,7 +55,7 @@ const Reports = () => {
   useEffect(() => {
     const fetchReportData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/tenders/reports');
+        const response = await fetch('/api/tenders/reports');
         if (!response.ok) {
           throw new Error('Failed to load dynamic reports database.');
         }

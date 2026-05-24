@@ -103,13 +103,13 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
   const fetchInvoicesAndStats = async () => {
     try {
-      const invRes = await fetch('http://localhost:5000/api/invoices');
+      const invRes = await fetch('/api/invoices');
       if (invRes.ok) {
         const invData = await invRes.json();
         setInvoicesList(invData);
       }
       
-      const statsRes = await fetch('http://localhost:5000/api/invoices/stats');
+      const statsRes = await fetch('/api/invoices/stats');
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
@@ -131,7 +131,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/invoices', {
+      const response = await fetch('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

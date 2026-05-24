@@ -87,7 +87,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
     ));
 
     try {
-      await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+      await fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: targetStatus })
@@ -102,7 +102,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
       if (!projectId) return;
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/tenders/${projectId}`);
+        const response = await fetch(`/api/tenders/${projectId}`);
         if (!response.ok) throw new Error('Failed to fetch project details');
         const data = await response.json();
         setProject(data);
@@ -119,7 +119,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
     const fetchTasks = async () => {
       if (!projectId) return;
       try {
-        const response = await fetch(`http://localhost:5000/api/tasks?tenderId=${projectId}`);
+        const response = await fetch(`/api/tasks?tenderId=${projectId}`);
         if (response.ok) {
           const data = await response.json();
           setTasks(data);
@@ -140,7 +140,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
 
     try {
       setTaskLoading(true);
-      const response = await fetch('http://localhost:5000/api/tasks', {
+      const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,7 +180,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
 
     try {
       setIsDeleting(true);
-      const response = await fetch(`http://localhost:5000/api/assignments/${assignment.id}`, {
+      const response = await fetch(`/api/assignments/${assignment.id}`, {
         method: 'DELETE'
       });
 

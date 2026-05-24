@@ -9,7 +9,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
     const fetchUnread = async () => {
       if (!user?.id) return;
       try {
-        const response = await fetch(`http://localhost:5000/api/messages/${user.id}/unread`);
+        const response = await fetch(`/api/messages/${user.id}/unread`);
         if (response.ok) {
           const data = await response.json();
           const total = Object.values(data).reduce((acc, curr) => acc + curr, 0);

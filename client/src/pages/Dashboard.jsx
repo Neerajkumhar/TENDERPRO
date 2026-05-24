@@ -49,8 +49,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   const fetchData = async () => {
     try {
       const [tasksRes, tendersRes] = await Promise.all([
-        fetch('http://localhost:5000/api/tasks'),
-        fetch('http://localhost:5000/api/tenders')
+        fetch('/api/tasks'),
+        fetch('/api/tenders')
       ]);
       
       if (tasksRes.ok) {

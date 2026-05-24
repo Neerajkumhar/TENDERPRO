@@ -48,7 +48,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -72,7 +72,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         
         // Save to DB if it's a database task (UUID format)
         if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
-          await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+          await fetch(`/api/tasks/${taskId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ attachments: JSON.stringify(updatedAttachments) })
@@ -93,7 +93,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     // Save to DB if it's a database task
     if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
       try {
-        await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        await fetch(`/api/tasks/${taskId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ attachments: JSON.stringify(updatedAttachments) })
@@ -123,7 +123,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
       }
       
       try {
-        const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`);
+        const response = await fetch(`/api/tasks/${taskId}`);
         if (response.ok) {
           const data = await response.json();
           setTask(data);
@@ -156,7 +156,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
     if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
       try {
-        await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        await fetch(`/api/tasks/${taskId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: newStatus })

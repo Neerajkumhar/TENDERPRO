@@ -38,7 +38,7 @@ const MemberDashboard = ({ user }) => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/tasks');
+        const response = await fetch('/api/tasks');
         if (response.ok) {
           const data = await response.json();
           const memberTasks = data.filter(t => t.assigneeId === user.id || t.assignee?.email === user.email);
@@ -89,7 +89,7 @@ const MemberDashboard = ({ user }) => {
     // 2. Persist to Backend (only for non-mock tasks)
     if (!String(taskId).startsWith('m') && !String(taskId).startsWith('s')) {
       try {
-        await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        await fetch(`/api/tasks/${taskId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: targetStatus })

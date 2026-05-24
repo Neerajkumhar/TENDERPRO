@@ -44,7 +44,7 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
 
   const fetchMemberDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/members`);
+      const response = await fetch(`/api/members`);
       if (response.ok) {
         const data = await response.json();
         const found = data.find(m => m.id === memberId);
@@ -91,7 +91,7 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -110,7 +110,7 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
     e.preventDefault();
     setUpdateError('');
     try {
-      const response = await fetch(`http://localhost:5000/api/members/${memberId}`, {
+      const response = await fetch(`/api/members/${memberId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editFormData)

@@ -86,7 +86,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
     if (!window.confirm('Are you sure you want to delete this assignment?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/assignments/${id}`, {
+      const response = await fetch(`/api/assignments/${id}`, {
         method: 'DELETE'
       });
 
@@ -104,7 +104,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
 
   const handleAssignmentSubmit = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/assignments', {
+      const response = await fetch('/api/assignments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(assignmentData)

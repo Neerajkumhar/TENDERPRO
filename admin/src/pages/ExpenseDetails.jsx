@@ -31,7 +31,7 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:5000/api/expenses/${expenseId}`);
+        const response = await fetch(`/api/expenses/${expenseId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.document && typeof data.document === 'string') {

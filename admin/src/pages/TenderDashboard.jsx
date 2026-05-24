@@ -313,7 +313,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                         <button onClick={() => onEdit(tender)} className="p-1.5 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors"><Edit2 size={16} /></button>
                         <button onClick={() => {
                           if(window.confirm('Delete this tender?')) {
-                            fetch(`http://localhost:5000/api/tenders/${tender.id}`, { method: 'DELETE' })
+                            fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
                               .then(() => setTenders(prev => prev.filter(t => t.id !== tender.id)));
                           }
                         }} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"><Trash2 size={16} /></button>

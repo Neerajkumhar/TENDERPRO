@@ -96,7 +96,7 @@ const Attendance = ({ user }) => {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:5000/api/auth/attendance/${user.id}`);
+        const res = await fetch(`/api/auth/attendance/${user.id}`);
         if (res.ok) {
           const data = await res.json();
           // Map backend model format to UI sessions structure

@@ -42,7 +42,7 @@ const ProjectDetails = ({ projectId, onBack }) => {
       if (!projectId) return;
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/tenders/${projectId}`);
+        const response = await fetch(`/api/tenders/${projectId}`);
         if (!response.ok) throw new Error('Failed to fetch tender details');
         const data = await response.json();
         setProject(data);

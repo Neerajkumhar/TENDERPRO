@@ -56,7 +56,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
 
   const fetchMembers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/members');
+      const response = await fetch('/api/members');
       if (response.ok) {
         const data = await response.json();
         setTeamMembers(data);
@@ -73,7 +73,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
   const handleAddMember = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/members', {
+      const response = await fetch('/api/members', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(memberFormData)
@@ -116,7 +116,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/departments', {
+      const response = await fetch('/api/departments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(deptData)
@@ -282,7 +282,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                         <button 
                           onClick={async () => {
                             if(window.confirm('Remove this member?')) {
-                              await fetch(`http://localhost:5000/api/members/${member.id}`, { method: 'DELETE' });
+                              await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
                               fetchMembers();
                               fetchDepartments();
                             }
@@ -348,7 +348,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                         <button 
                           onClick={async () => {
                             if(window.confirm('Delete this department?')) {
-                              await fetch(`http://localhost:5000/api/departments/${dept.id}`, { method: 'DELETE' });
+                              await fetch(`/api/departments/${dept.id}`, { method: 'DELETE' });
                               fetchDepartments();
                             }
                           }}

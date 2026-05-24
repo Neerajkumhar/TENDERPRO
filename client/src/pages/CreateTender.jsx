@@ -45,7 +45,7 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/members');
+        const response = await fetch('/api/members');
         if (response.ok) {
           const data = await response.json();
           setMembers(data);
@@ -85,7 +85,7 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
     formDataUpload.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formDataUpload
       });
