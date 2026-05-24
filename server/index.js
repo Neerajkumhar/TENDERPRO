@@ -48,79 +48,37 @@ app.use('/api/installation-challans', installationChallanRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/messages', messageRoutes);
 
+app.get('/', (req, res) => {
+  res.json({ message: 'Tender Management API is running', env: process.env.NODE_ENV });
+});
+
+app.get('/api/health', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.json({ status: 'healthy', database: 'connected' });
+  } catch (error) {
+    res.status(500).json({ status: 'unhealthy', error: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 let server;
 
 // Database connection and initialization
 async function initializeDatabase() {
+  // Use a flag to avoid multiple syncs in a single process lifetime
+  if (global.dbInitialized) return;
+  
   try {
     await sequelize.authenticate();
     console.log('Database connection authenticated successfully.');
     
-    await sequelize.sync();
+    // In production/Vercel, we might want to skip heavy syncs on every request
+    // but for now we'll just keep it simple but catch errors
+    await sequelize.sync({ alter: false }); // Avoid 'alter: true' in serverless if possible
     console.log('Database connected and synced');
     
-    try {
-      await sequelize.query("ALTER TABLE Tasks ADD COLUMN attachments TEXT NULL");
-      console.log("Added attachments column to Tasks table");
-    } catch (err) {
-      // Column already exists
-    }
-
-    const invoiceColumns = [
-      { sql: "ALTER TABLE Invoices ADD COLUMN billingAddress TEXT NULL", label: 'billingAddress' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN reference VARCHAR(255) NULL", label: 'reference' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN poNumber VARCHAR(255) NULL", label: 'poNumber' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN dueDate DATE NULL", label: 'dueDate' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN amount_due DECIMAL(15,2) NULL DEFAULT 0", label: 'amount_due' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN paid_amount DECIMAL(15,2) NULL DEFAULT 0", label: 'paid_amount' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN bankName VARCHAR(255) NULL", label: 'bankName' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN accountNumber VARCHAR(255) NULL", label: 'accountNumber' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN paidAt DATE NULL", label: 'paidAt' },
-      { sql: "ALTER TABLE Invoices ADD COLUMN sentAt DATE NULL", label: 'sentAt' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN items JSON NULL", label: 'items' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN attachments JSON NULL", label: 'attachments' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN gstDetails VARCHAR(255) NULL", label: 'gstDetails' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN poAddress TEXT NULL", label: 'poAddress' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyName VARCHAR(255) NULL", label: 'companyName' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyAddress TEXT NULL", label: 'companyAddress' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyPhone VARCHAR(255) NULL", label: 'companyPhone' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyEmail VARCHAR(255) NULL", label: 'companyEmail' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyGSTIN VARCHAR(255) NULL", label: 'companyGSTIN' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyPAN VARCHAR(255) NULL", label: 'companyPAN' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyWebsite VARCHAR(255) NULL", label: 'companyWebsite' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN companyLogo VARCHAR(255) NULL", label: 'companyLogo' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN bankIFSC VARCHAR(255) NULL", label: 'bankIFSC' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN bankBranch VARCHAR(255) NULL", label: 'bankBranch' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN authorizedSignature VARCHAR(255) NULL", label: 'authorizedSignature' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN project VARCHAR(255) NULL", label: 'project' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN invoiceRef VARCHAR(255) NULL", label: 'invoiceRef' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN poRef VARCHAR(255) NULL", label: 'poRef' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN poDate DATE NULL", label: 'poDate' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN ewayBill VARCHAR(255) NULL", label: 'ewayBill' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN dispatchDate DATE NULL", label: 'dispatchDate' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN deliveryDate DATE NULL", label: 'deliveryDate' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN transporter VARCHAR(255) NULL", label: 'transporter' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN vehicleNumber VARCHAR(255) NULL", label: 'vehicleNumber' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN lrNo VARCHAR(255) NULL", label: 'lrNo' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN driverName VARCHAR(255) NULL", label: 'driverName' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN clientGstin VARCHAR(255) NULL", label: 'clientGstin' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN contactPerson VARCHAR(255) NULL", label: 'contactPerson' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN contactPhone VARCHAR(255) NULL", label: 'contactPhone' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN placeOfSupply VARCHAR(255) NULL", label: 'placeOfSupply' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN dispatchFrom VARCHAR(255) NULL", label: 'dispatchFrom' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN dispatchTo VARCHAR(255) NULL", label: 'dispatchTo' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN shippingAddress TEXT NULL", label: 'shippingAddress' }
-      , { sql: "ALTER TABLE Invoices ADD COLUMN notes TEXT NULL", label: 'notes' }
-    ];
-
-    for (const column of invoiceColumns) {
-      try {
-        await sequelize.query(column.sql);
-      } catch (err) {
-        // Column already exists
-      }
-    }
+    global.dbInitialized = true;
   } catch (err) {
     console.error('Database initialization failed:', err.message);
   }

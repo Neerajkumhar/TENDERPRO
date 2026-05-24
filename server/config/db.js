@@ -12,10 +12,13 @@ if (dbUrl) {
   sequelize = new Sequelize(dbUrl, {
     dialect: 'mysql',
     logging: false,
+    dialectOptions: {
+      connectTimeout: 60000 // Increase timeout for remote connections
+    },
     pool: {
       max: 5,
       min: 0,
-      acquire: 30000,
+      acquire: 60000,
       idle: 10000
     }
   });
@@ -29,10 +32,13 @@ if (dbUrl) {
       port: process.env.MYSQLPORT || 3306,
       dialect: 'mysql',
       logging: false,
+      dialectOptions: {
+        connectTimeout: 60000
+      },
       pool: {
         max: 5,
         min: 0,
-        acquire: 30000,
+        acquire: 60000,
         idle: 10000
       }
     }
