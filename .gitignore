@@ -1,0 +1,32 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+
+# IDE/Editor
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Project specific
+patch_*.py
+scratch.py
+cleanup.py
+check_users.js
+server/uploads/*
+!server/uploads/.gitkeep

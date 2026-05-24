@@ -12,11 +12,16 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
     "clsx": "^2.1.1",
+    "emoji-picker-react": "^4.19.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "recharts": "^3.8.1",
-    "tailwind-merge": "^3.5.0"
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^3.5.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

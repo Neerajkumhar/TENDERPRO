@@ -1,270 +1,246 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   FileText,
-  HelpCircle,
-  Clock,
-  Trophy,
-  Filter,
+  Plus,
   Search,
-  MoreVertical,
-  ChevronDown,
-  Edit2,
-  Trash2,
+  Filter,
   Eye,
+  Edit3,
   Calendar,
-  X
+  Briefcase,
+  IndianRupee,
+  CheckCircle2,
+  TrendingUp,
+  XCircle,
+  Clock,
+  ExternalLink
 } from 'lucide-react';
-import { useState } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Legend,
-  Cell
-} from 'recharts';
 
-const stats = [
-  { label: 'Tenders in Submission', value: '18', trend: '+5%', icon: FileText, color: 'blue' },
-  { label: 'Clarification Questions Open', value: '24', trend: 'High', icon: HelpCircle, color: 'rose', isAlert: true },
-  { label: 'Avg. Response Time (Clarifications)', value: '2.5 days', trend: 'Optimal', icon: Clock, color: 'amber' },
-  { label: 'Won Tenders (Last 30 Days)', value: '15', trend: '+12%', icon: Trophy, color: 'emerald' },
-];
+const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients = [] }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
 
-const funnelData = [
-  { name: 'Pre-Qualification', value: 12500 },
-  { name: 'Clarification', value: 10000 },
-  { name: 'Final Proposal', value: 7500 },
-  { name: 'Evaluation', value: 5000 },
-  { name: 'Awarded/Lost', value: 2000 },
-];
+  // Live Stats for Tenders Management (dynamically derived from tenders array)
+  const statsData = [
+    { label: 'TOTAL TENDERS', value: tenders.length, color: 'slate', icon: Briefcase },
+    { label: 'REGISTERED', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo', icon: Clock },
+    { label: 'ACTIVE', value: tenders.filter(t => t.status === 'Active').length, color: 'blue', icon: TrendingUp },
+    { label: 'WON TENDERS', value: tenders.filter(t => t.status === 'Won').length, color: 'emerald', icon: CheckCircle2 },
+    { label: 'LOST TENDERS', value: tenders.filter(t => t.status === 'Lost').length, color: 'rose', icon: XCircle },
+    { label: 'DRAFTS', value: tenders.filter(t => t.status === 'Draft').length, color: 'slate', icon: FileText },
+  ];
 
-const clarificationData = [
-  { month: 'Jan', received: 5, responded: 3 },
-  { month: 'Feb', received: 8, responded: 6 },
-  { month: 'Mar', received: 12, responded: 10 },
-  { month: 'Apr', received: 7, responded: 7 },
-  { month: 'May', received: 15, responded: 12 },
-  { month: 'Jun', received: 20, responded: 15 },
-  { month: 'Jul', received: 18, responded: 16 },
-  { month: 'Aug', received: 25, responded: 22 },
-];
+  // Filtering logic
+  const filteredTenders = tenders.filter(tender => {
+    const matchesSearch = 
+      tender.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tender.reference?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tender.client?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tender.category?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    const matchesStatus = statusFilter === 'All' || tender.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
-const workQueue = [
-  { task: 'Clarification questions: New five questions here is that tender clarification?', date: 'Due today', resp: 'Team', status: 'Awarded' },
-  { task: 'Clarification questions: High priority learn! Final Proposal clarification question?', date: 'Due today', resp: 'Team', status: 'Submitted' },
-  { task: 'Clarification posted to sent or clarification question?', date: 'Due tomorrow', resp: 'Team', status: 'Awarded' },
-];
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Won': return 'bg-emerald-100 text-emerald-600 border-emerald-200';
+      case 'Lost': return 'bg-rose-100 text-rose-600 border-rose-200';
+      case 'Active': return 'bg-blue-100 text-blue-600 border-blue-200';
+      case 'Registered': return 'bg-indigo-100 text-indigo-600 border-indigo-200';
+      case 'Draft': return 'bg-slate-100 text-slate-500 border-slate-200';
+      default: return 'bg-slate-100 text-slate-500 border-slate-200';
+    }
+  };
 
-const TenderManagement = ({ onView, onEdit, onCreate, tenders, setTenders }) => {
-  const [selectedTender, setSelectedTender] = useState(null);
-  const [modalMode, setModalMode] = useState(null);
-
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this tender? This action cannot be undone.')) {
-      setTenders(tenders.filter(t => t.id !== id));
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'Government': return 'bg-amber-50 text-amber-700 border-amber-100';
+      case 'Private': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+      case 'PSU': return 'bg-purple-50 text-purple-700 border-purple-100';
+      default: return 'bg-slate-50 text-slate-700 border-slate-100';
     }
   };
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-10">
       {/* Page Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Active Tender Management</h1>
-          <p className="text-slate-500 mt-1 font-medium italic">Track and manage your ongoing tender lifecycles.</p>
+          <h1 className="text-3xl font-black text-[#1e293b] tracking-tight">Tenders Management</h1>
+          <p className="text-slate-500 mt-1 font-semibold">Register and manage won or upcoming client tenders in real-time</p>
         </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-            <Calendar size={18} className="text-blue-500" />
-            <span>Select Period</span>
-            <ChevronDown size={16} />
-          </button>
-        </div>
+        <button 
+          onClick={onCreate}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
+        >
+          <Plus size={16} />
+          <span>Register New Tender</span>
+        </button>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <div key={i} className="card p-6 bg-white shadow-xl shadow-slate-200/50 border-none group cursor-pointer relative overflow-hidden">
-            {stat.isAlert && <div className="absolute top-0 right-0 p-2"><HelpCircle size={14} className="text-rose-500 animate-pulse" /></div>}
-            <div className={`p-3 w-fit rounded-2xl bg-${stat.color}-50 text-${stat.color}-600 mb-4 group-hover:scale-110 transition-transform`}>
-              <stat.icon size={24} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        {statsData.map((stat, i) => (
+          <div key={i} className="bg-white p-6 rounded-2xl shadow-xl shadow-slate-200/20 border border-slate-100/60 flex flex-col items-start group hover:scale-[1.03] transition-all duration-300 cursor-pointer">
+            <div className="flex justify-between items-center w-full mb-3">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight">{stat.label}</span>
+              <stat.icon size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
             </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-            <div className="flex items-end justify-between mt-1">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</h3>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${stat.color === 'rose' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                {stat.trend}
-              </span>
-            </div>
+            <h3 className="text-3xl font-black text-slate-800 tracking-tight leading-none mt-1">{stat.value}</h3>
           </div>
         ))}
       </div>
 
-      {/* Analytics Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Tender Funnel Stage */}
-        <div className="card p-8 bg-white shadow-xl shadow-slate-200/40 border-none">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Tender Funnel Stage</h3>
-            <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors"><MoreVertical size={20} className="text-slate-400" /></button>
+      {/* Filters & Tenders Table Container */}
+      <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+        {/* Table Toolbar */}
+        <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-50/20">
+          <div>
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Active Tender Portfolio</h2>
+            <p className="text-xs text-slate-400 font-medium">Search and filter registered contracts</p>
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={funnelData} layout="vertical" margin={{ left: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 11, fontWeight: 700 }} width={120} />
-                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={30}>
-                  {funnelData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={['#475569', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0'][index % 5]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Clarification Question Volume */}
-        <div className="card p-8 bg-white shadow-xl shadow-slate-200/40 border-none">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Clarification Question Volume</h3>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div><span className="text-[10px] font-bold text-slate-500">Received</span></div>
-              <div className="flex items-center gap-2"><div className="w-2 h-2 bg-slate-400 rounded-full"></div><span className="text-[10px] font-bold text-slate-500">Responded</span></div>
+          
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            {/* Search Input */}
+            <div className="relative flex-1 md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search title, client, ref..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all shadow-sm"
+              />
             </div>
-          </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={clarificationData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} />
-                <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }} />
-                <Line type="monotone" dataKey="received" stroke="#3b82f6" strokeWidth={4} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="responded" stroke="#94a3b8" strokeWidth={2} dot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
 
-      {/* Work Queue */}
-      {/* <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden">
-        <div className="p-8 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
-          <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Work Queue</h3>
-          <p className="text-xs text-slate-500 font-bold">Tender Clarifications & Action Items</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <th className="px-8 py-4 w-10"><input type="checkbox" className="rounded" /></th>
-                <th className="px-8 py-4">Tender Clarifications & Action Items</th>
-                <th className="px-8 py-4">Due Date</th>
-                <th className="px-8 py-4">Responsible</th>
-                <th className="px-8 py-4 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {workQueue.map((item, i) => (
-                <tr key={i} className="hover:bg-blue-50/30 transition-all cursor-pointer group">
-                  <td className="px-8 py-5"><input type="checkbox" className="rounded" /></td>
-                  <td className="px-8 py-5 text-sm font-black text-slate-800">{item.task}</td>
-                  <td className="px-8 py-5 text-xs font-bold text-slate-400">{item.date}</td>
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600">JS</div>
-                      <span className="text-xs font-bold text-slate-600">{item.resp}</span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-5">
-                    <div className={`mx-auto w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
-                      ${item.status === 'Awarded' ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}>
-                      {item.status}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div> */}
-
-      {/* Tables - Active Tenders Master List */}
-      <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden">
-        <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 items-center justify-between bg-slate-50/30">
-          <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Active Tenders Master List</h3>
-          <div className="flex flex-wrap gap-3">
+            {/* Status Filter */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-400" />
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-12 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 outline-none appearance-none cursor-pointer focus:border-blue-400 transition-all shadow-sm"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Registered">Registered</option>
+                <option value="Active">Active</option>
+                <option value="Won">Won</option>
+                <option value="Lost">Lost</option>
+                <option value="Draft">Draft</option>
+              </select>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600">
-              <Filter size={16} />
-              <span>Filters</span>
-            </button>
-            <button 
-              onClick={onCreate}
-              className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
-            >
-              Add New
-            </button>
           </div>
         </div>
+
+        {/* Table content */}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <th className="px-8 py-4">ID</th>
-                <th className="px-8 py-4">Tender Title</th>
-                <th className="px-8 py-4">Client</th>
-                <th className="px-8 py-4">Primary Contact</th>
-                <th className="px-8 py-4">Status</th>
-                <th className="px-8 py-4">Due Date</th>
-                <th className="px-8 py-4">Value (₹)</th>
-                <th className="px-8 py-4 text-center">Actions</th>
+              <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50">
+                <th className="px-8 py-6">Tender Details</th>
+                <th className="px-8 py-6">Client</th>
+                <th className="px-8 py-6">Category</th>
+                <th className="px-8 py-6">Submission Date</th>
+                <th className="px-8 py-6">Budget</th>
+                <th className="px-8 py-6">Status</th>
+                <th className="px-8 py-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {tenders.map((tender, i) => (
-                <tr key={i} className="hover:bg-blue-50/30 transition-all cursor-pointer group">
-                  <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.id}</td>
-                  <td className="px-8 py-5 text-sm font-black text-slate-800">{tender.title}</td>
-                  <td className="px-8 py-5 text-sm font-bold text-slate-600">{tender.client}</td>
-                  <td className="px-8 py-5 text-sm font-bold text-slate-600">{tender.contact}</td>
-                  <td className="px-8 py-5">
-                    <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit
-                      ${tender.status === 'Submission in Progress' ? 'bg-blue-100 text-blue-600' :
-                        tender.status === 'Under Evaluation' ? 'bg-amber-100 text-amber-600' :
-                          tender.status === 'Awarded' ? 'bg-emerald-100 text-emerald-600' :
-                            'bg-rose-100 text-rose-600'}`}>
-                      {tender.status}
-                    </div>
-                  </td>
-                  <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.due}</td>
-                  <td className="px-8 py-5 text-sm font-black text-slate-900">{tender.value}</td>
-                  <td className="px-8 py-5">
-                    <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => onView(tender.id)} className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"><Eye size={16} /></button>
-                      <button onClick={() => onEdit(tender)} className="p-1.5 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors"><Edit2 size={16} /></button>
-                      <button onClick={() => handleDelete(tender.id)} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"><Trash2 size={16} /></button>
+              {filteredTenders.length > 0 ? (
+                filteredTenders.map((tender) => (
+                  <tr 
+                    key={tender.id} 
+                    className="hover:bg-slate-50/50 transition-all cursor-pointer group"
+                    onClick={() => onView(tender.id)}
+                  >
+                    <td className="px-8 py-6">
+                      <div>
+                        <p 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onView(tender.id);
+                          }}
+                          className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors leading-tight cursor-pointer hover:underline"
+                        >
+                          {tender.title}
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                          REF: {tender.reference || 'N/A'}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-xs font-bold text-slate-500">
+                        {tender.client?.name || 'Unassigned'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getCategoryColor(tender.category)}`}>
+                        {tender.category || 'Private'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                        <Calendar size={14} className="text-slate-400" />
+                        <span>
+                          {tender.submissionDate 
+                            ? new Date(tender.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : 'Not Set'
+                          }
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center text-sm font-black text-slate-800">
+                        <IndianRupee size={14} className="text-slate-500 mr-0.5" />
+                        <span>{parseFloat(tender.budget || 0).toLocaleString('en-IN')}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border ${getStatusColor(tender.status)}`}>
+                        {tender.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => onView(tender.id)}
+                          title="View Details"
+                          className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-all active:scale-95 shadow-sm"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          onClick={() => onEdit(tender)}
+                          title="Edit Tender"
+                          className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100 transition-all active:scale-95 shadow-sm"
+                        >
+                          <Edit3 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-8 py-24 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="p-4 bg-slate-50 rounded-full text-slate-300">
+                        <FileText size={48} />
+                      </div>
+                      <p className="text-slate-400 font-bold">No tenders found.</p>
+                      <p className="text-[10px] text-slate-300 uppercase font-black tracking-widest">Register a won tender using the button above.</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
-      {/* Edit Tender Modal removed - using detailed CreateTender instead */}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -11,303 +11,489 @@ import {
   Briefcase,
   Users,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
+  X,
+  User as UserIcon,
+  Target,
+  BarChart3,
+  Trophy,
+  Hourglass,
+  ArrowRight,
+  Eye,
+  Edit2,
+  MoreVertical
 } from 'lucide-react';
 import { 
-  LineChart, 
-  Line, 
+  BarChart, 
+  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
+  PieChart, 
+  Pie, 
+  Cell, 
+  Legend,
+  AreaChart,
+  Area
 } from 'recharts';
 
-const statsData = [
-  { label: 'Total', value: '128', trend: '+ 12%', isUp: true, color: 'blue' },
-  { label: 'Active Tenders', value: '45', trend: '+ 8%', isUp: true, color: 'green' },
-  { label: 'Pending Apps', value: '18', trend: '+ 5%', isUp: true, color: 'amber' },
-  { label: 'Due Today', value: '7', trend: '- 13%', isUp: false, color: 'red' },
-  { label: 'Payments', value: '₹245,670', trend: '+ 15%', isUp: true, color: 'emerald' },
-  { label: 'Overdue Items', value: '9', trend: '- 10%', isUp: false, color: 'orange' },
-];
+const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => {
+  const [tasks, setTasks] = useState([]);
+  const [tenders, setTenders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const chartData = [
-  { name: 'Dec 2023', created: 40, won: 24, lost: 16 },
-  { name: 'Jan 2024', created: 65, won: 35, lost: 20 },
-  { name: 'Feb 2024', created: 55, won: 42, lost: 15 },
-  { name: 'Mar 2024', created: 85, won: 45, lost: 25 },
-  { name: 'Apr 2024', created: 70, won: 52, lost: 18 },
-  { name: 'May 2024', created: 75, won: 55, lost: 20 },
-];
+  const fetchData = async () => {
+    try {
+      const [tasksRes, tendersRes] = await Promise.all([
+        fetch('http://localhost:5000/api/tasks'),
+        fetch('http://localhost:5000/api/tenders')
+      ]);
+      
+      if (tasksRes.ok) {
+        const tasksData = await tasksRes.json();
+        setTasks(tasksData);
+      }
+      if (tendersRes.ok) {
+        const tendersData = await tendersRes.json();
+        setTenders(tendersData);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const tenderTable = [
-  { id: 'TND-2024-128', name: 'IT Infrastructure Upgrade', client: 'TechCorp Inc.', value: '₹250,000', date: 'May 24, 2024', status: 'Active' },
-  { id: 'TND-2024-127', name: 'Office Renovation', client: 'BuildWell Ltd.', value: '₹180,000', date: 'May 22, 2024', status: 'Active' },
-  { id: 'TND-2024-126', name: 'Supply of Office Furniture', client: 'GreenField LLC', value: '₹75,000', date: 'May 21, 2024', status: 'Pending' },
-  { id: 'TND-2024-125', name: 'Security System Installation', client: 'SecureBase Co.', value: '₹120,000', date: 'May 18, 2024', status: 'Submitted' },
-  { id: 'TND-2024-124', name: 'Facility Maintenance', client: 'Prime Solutions', value: '₹90,000', date: 'May 17, 2024', status: 'Lost' },
-];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-const tasks = [
-  { title: 'Review tender TND-2024-128', due: 'Due today', color: 'red' },
-  { title: 'Prepare financial proposal', due: 'Due today', color: 'red' },
-  { title: 'Client meeting with TechCorp', due: 'Tomorrow', color: 'slate' },
-  { title: 'Submit tender TND-2024-127', due: 'May 22', color: 'slate' },
-  { title: 'Follow up with BuildWell Ltd.', due: 'May 23', color: 'slate' },
-];
+  // RENDER TENDER MANAGER DASHBOARD (Based on Image 2 & 3)
+  if (user.role === 'Tender Manager') {
+    const statsData = [
+      { label: 'TOTAL TENDERS', value: tenders.length || '1,245', color: 'slate' },
+      { label: 'ACTIVE BIDS', value: tenders.filter(t => t.status === 'Active').length || '312', color: 'blue' },
+      { label: 'SUBMITTED', value: tenders.filter(t => t.status === 'Submitted').length || '458', color: 'indigo' },
+      { label: 'WON', value: tenders.filter(t => t.status === 'Won').length || '289', color: 'emerald' },
+      { label: 'LOST', value: tenders.filter(t => t.status === 'Lost').length || '163', color: 'rose' },
+      { label: 'APPROVAL PENDING', value: '23', color: 'amber' },
+    ];
 
-const financialData = [
-  { name: 'Received', value: 245670, color: '#3b82f6' },
-  { name: 'Outstanding', value: 74830, color: '#fbbf24' },
-  { name: 'Overdue', value: 18250, color: '#ef4444' },
-  { name: 'Draft', value: 320500, color: '#10b981' },
-];
+    const pipelineData = [
+      { name: 'Stage', value: 1000 },
+      { name: 'Submit', value: tenders.filter(t => t.status === 'Submitted').length || 312 },
+      { name: 'Won', value: tenders.filter(t => t.status === 'Won').length || 450 },
+      { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').length || 50 },
+    ];
 
-const teamWorkload = [
-  { name: 'Sarah Johnson', tasks: 12, workload: 80, image: 'https://i.pravatar.cc/150?u=sarah' },
-  { name: 'Michael Brown', tasks: 9, workload: 65, image: 'https://i.pravatar.cc/150?u=michael' },
-  { name: 'Emma Wilson', tasks: 7, workload: 50, image: 'https://i.pravatar.cc/150?u=emma' },
-  { name: 'David Lee', tasks: 6, workload: 40, image: 'https://i.pravatar.cc/150?u=david' },
-  { name: 'James Carter', tasks: 5, workload: 35, image: 'https://i.pravatar.cc/150?u=james' },
-];
+    const categoryData = [
+      { name: 'IT services', value: 45, color: '#a855f7' },
+      { name: 'Construction', value: 35, color: '#8b5cf6' },
+      { name: 'Cleaning', value: 25, color: '#6366f1' },
+      { name: 'Infrastructure', value: 15, color: '#3b82f6' },
+    ];
 
+    const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
 
-const Dashboard = () => {
-  return (
-    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-      {/* Welcome Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight animate-in slide-in-from-left duration-500">Welcome back, John!</h1>
-          <p className="text-slate-500 mt-1 font-medium italic text-sm sm:text-base">Here's what's happening with your business today.</p>
-        </div>
-        <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
-          <Calendar size={18} className="text-blue-500" />
-          <span>May 20, 2024</span>
-          <ChevronDown size={16} />
-        </button>
-      </div>
-
-      <div className="grid grid-cols-12 gap-8">
-        {/* Main Content Area */}
-        <div className="col-span-12 space-y-8">
-          
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-            {statsData.map((stat, i) => (
-              <div key={i} className="card p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer relative overflow-hidden bg-white border-none shadow-lg shadow-slate-200/50">
-                <div className={`absolute top-0 left-0 w-full h-1 bg-${stat.color}-500`}></div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`p-3 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all duration-300 shadow-inner`}>
-                    <FileText size={20} />
-                  </div>
-                  <div className={`flex items-center gap-0.5 px-2.5 py-1 rounded-full text-[10px] font-black ${stat.isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                    {stat.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                    <span>{stat.trend}</span>
-                  </div>
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <h3 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">{stat.value}</h3>
-              </div>
-            ))}
+    return (
+      <div className="p-8 space-y-8 animate-in fade-in duration-700 bg-[#fbfcfd]">
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tender Overview</h1>
+            <p className="text-slate-500 mt-1 font-medium italic text-sm">Welcome back, {user.name}. Here is your global tender analytics.</p>
           </div>
+          <div className="flex gap-3">
+             <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
+                <Calendar size={18} className="text-indigo-600" />
+                <span>Select Period</span>
+                <ChevronDown size={16} />
+             </button>
+          </div>
+        </div>
 
-          {/* Graphs Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Tender Overview Chart */}
-            <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
-                <TrendingUp size={120} />
+        {/* Stats Grid - Matching Image 2 */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {statsData.map((stat, i) => (
+            <div key={i} className="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Charts Row - Matching Image 2 */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-6 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h3 className="text-base font-black text-slate-900 tracking-tight uppercase tracking-widest">TENDER PIPELINE</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">DISTRIBUTION ACROSS STAGES</p>
               </div>
-              <div className="flex justify-between items-center mb-10">
-                <div>
-                  <h3 className="font-black text-slate-900 text-xl tracking-tight">Tender Overview</h3>
-                  <p className="text-xs text-slate-500 font-medium">Performance tracking for last 6 months</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-4 mr-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Created</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200"></div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Won</span>
-                    </div>
-                  </div>
-                  <select className="text-xs font-bold bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 outline-none shadow-sm cursor-pointer hover:bg-white hover:border-blue-300 transition-all">
-                    <option>Last 6 Months</option>
-                  </select>
-                </div>
-              </div>
-              <div className="h-[320px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}}
-                      dy={10}
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}}
-                    />
-                    <Tooltip 
-                      contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
-                    />
-                    <Line type="monotone" dataKey="created" stroke="#3b82f6" strokeWidth={5} dot={{r: 6, fill: '#3b82f6', strokeWidth: 3, stroke: '#fff'}} activeDot={{r: 8}} />
-                    <Line type="monotone" dataKey="won" stroke="#10b981" strokeWidth={3} strokeDasharray="6 6" dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                <Target size={20} />
               </div>
             </div>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                <BarChart data={pipelineData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dy={10} />
+                  <Tooltip cursor={{fill: '#f8fafc'}} />
+                  <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={40}>
+                    {pipelineData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#8b5cf6' : '#a78bfa'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-            {/* Financial Snapshot Donut */}
-            <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40">
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h3 className="font-black text-slate-900 text-xl tracking-tight">Financial Snapshot</h3>
-                  <p className="text-xs text-slate-500 font-medium">Revenue and payment distribution</p>
-                </div>
-                <select className="text-xs font-bold bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 outline-none shadow-sm cursor-pointer hover:bg-white hover:border-blue-300 transition-all">
-                  <option>This Month</option>
-                </select>
+          <div className="lg:col-span-6 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h3 className="text-base font-black text-slate-900 tracking-tight uppercase tracking-widest">VALUE BY CATEGORY</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">CATEGORICAL BREAKDOWN</p>
               </div>
-              <div className="flex flex-col md:flex-row items-center gap-6 lg:gap-10 h-auto md:h-[320px]">
-                <div className="w-full md:w-1/2 h-[280px] md:h-full relative group">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={financialData}
-                        innerRadius={70}
-                        outerRadius={100}
-                        paddingAngle={10}
-                        dataKey="value"
-                        stroke="none"
-                      >
-                        {financialData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} className="hover:opacity-80 transition-opacity cursor-pointer" />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none group-hover:scale-110 transition-transform duration-500">
-                    <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter">₹245k</span>
-                    <span className="text-[10px] text-slate-400 uppercase tracking-widest font-black">Received</span>
-                  </div>
-                </div>
-                <div className="w-full md:w-1/2 space-y-4 sm:space-y-5">
-                  {financialData.map((item, i) => (
-                    <div key={i} className="group cursor-pointer">
-                      <div className="flex justify-between items-center mb-1.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-2.5 h-2.5 rounded-full shadow-lg" style={{backgroundColor: item.color, boxShadow: `0 4px 6px ${item.color}33`}}></div>
-                          <span className="text-[10px] sm:text-xs font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-wider">{item.name}</span>
-                        </div>
-                        <span className="text-xs font-black text-slate-900 tracking-tight">₹{(item.value / 1000).toFixed(1)}k</span>
+              <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
+                <BarChart3 size={20} />
+              </div>
+            </div>
+            <div className="flex items-center h-[300px] gap-8">
+               <div className="flex-1 space-y-4">
+                  {categoryData.map((cat, i) => (
+                    <div key={i} className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <span>{cat.name}</span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                        <div 
-                          className="h-full rounded-full transition-all duration-1000 ease-out" 
-                          style={{backgroundColor: item.color, width: `${(item.value / 660600 * 100)}%`}}
-                        ></div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                         <div className="h-full bg-indigo-500 rounded-full" style={{width: `${cat.value * 2}%`}}></div>
                       </div>
                     </div>
                   ))}
-                </div>
+               </div>
+               <div className="w-1/2 h-full relative flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        innerRadius={60}
+                        outerRadius={85}
+                        paddingAngle={8}
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-3xl font-black text-slate-900 tracking-tighter">1.2k</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total</span>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Tenders Section - MATCHING IMAGE 4 UI */}
+        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
+          <div className="px-8 py-6 flex justify-between items-center border-b border-slate-50">
+             <h3 className="text-xs font-black text-slate-900 tracking-widest uppercase">RECENT TENDERS</h3>
+             <button className="text-[10px] font-black text-blue-600 tracking-widest uppercase hover:underline">VIEW ALL</button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] bg-slate-50/30">
+                  <th className="px-8 py-5">TENDER ID</th>
+                  <th className="px-8 py-5">CLIENT</th>
+                  <th className="px-8 py-5">TITLE</th>
+                  <th className="px-8 py-5">VALUE</th>
+                  <th className="px-8 py-5">DEADLINE</th>
+                  <th className="px-8 py-5">STATUS</th>
+                  <th className="px-8 py-5 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
+                  <tr key={tender.id || i} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                    <td className="px-8 py-6 text-[11px] font-bold text-slate-500">
+                      {tender.id?.substring(0, 8).toUpperCase() || '310700' + (i+1)}
+                    </td>
+                    <td className="px-8 py-6 text-xs font-black text-slate-800">
+                      Client or Department
+                    </td>
+                    <td className="px-8 py-6 text-xs font-black text-slate-800 max-w-[200px] truncate">
+                      {tender.title}
+                    </td>
+                    <td className="px-8 py-6 text-xs font-black text-slate-900 font-black">
+                      ₹{parseFloat(tender.budget || 0).toLocaleString()}
+                    </td>
+                    <td className="px-8 py-6 text-[11px] font-bold text-slate-500">
+                      {tender.submissionDate ? new Date(tender.submissionDate).toLocaleDateString() : '06/13/2024'}
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest w-fit
+                        ${tender.status === 'Won' ? 'bg-emerald-50 text-emerald-600' : 
+                          tender.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
+                          'bg-indigo-50 text-indigo-600'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${tender.status === 'Won' ? 'bg-emerald-500' : tender.status === 'Active' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
+                        {tender.status === 'Won' ? 'WON' : tender.status === 'Active' ? 'STATUS' : 'PRIMARY'}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                         <Edit2 size={14} className="text-slate-300 hover:text-blue-600 transition-colors" />
+                         <MoreHorizontal size={14} className="text-slate-200 hover:text-slate-400 transition-colors" />
+                      </div>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // DEFAULT PROJECT MANAGER DASHBOARD
+  const departmentProjects = assignments.filter(
+    item => String(item.departmentId) === String(user.departmentId)
+  );
+
+  const stats = [
+    { label: 'Total Projects', value: departmentProjects.length, subtext: 'Assigned', color: 'slate' },
+    { label: 'Active Tasks', value: tasks.filter(t => t.status !== 'Completed').length, subtext: 'In Progress', color: 'blue' },
+    { label: 'Done Tasks', value: tasks.filter(t => t.status === 'Completed').length, subtext: 'Completed', color: 'emerald' },
+    { label: 'Team Size', value: members.filter(m => m.departmentId === user.departmentId).length, subtext: 'Members', color: 'slate' },
+    { label: 'High Priority', value: tasks.filter(t => t.priority === 'High' || t.priority === 'Critical').length, subtext: 'Critical', color: 'rose', hasAlert: true },
+  ];
+
+  const workloadData = members.filter(m => m.departmentId === user.departmentId).slice(0, 6).map(m => ({
+    name: m.name.split(' ')[0],
+    active: tasks.filter(t => t.assigneeId === m.id && t.status !== 'Completed').length,
+    done: tasks.filter(t => t.assigneeId === m.id && t.status === 'Completed').length
+  }));
+
+  return (
+    <div className="p-8 space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
+      {/* Welcome Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
+          <p className="text-slate-500 mt-1 font-medium italic">Welcome back, {user.name}. Here is your department overview.</p>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {stats.map((stat, i) => (
+          <div key={i} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
+            {stat.hasAlert && stat.value > 0 && (
+              <div className="absolute top-4 right-4 w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
+                <AlertTriangle size={12} />
+              </div>
+            )}
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
+            <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-1">{stat.value}</h3>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.subtext}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Active Projects Overview */}
+      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
+          <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Projects Overview</h3>
+          <MoreHorizontal className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors" />
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                <th className="px-8 py-5">Project Name</th>
+                <th className="px-8 py-5">Status</th>
+                <th className="px-8 py-5">Progress %</th>
+                <th className="px-8 py-5">Deadline</th>
+                <th className="px-8 py-5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {departmentProjects.length > 0 ? departmentProjects.map((item, i) => {
+                const projectTasks = tasks.filter(t => t.tenderId === item.tenderId);
+                const completedCount = projectTasks.filter(t => t.status === 'Completed').length;
+                const progress = projectTasks.length > 0 ? Math.round((completedCount / projectTasks.length) * 100) : 0;
+
+                return (
+                  <tr key={i} onClick={() => onProjectClick(item.tenderId)} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-3">
+                        <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
+                        <span className="text-sm font-black text-slate-700">{item.title || item.tender?.title || 'Unknown Project'}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest
+                        ${item.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 
+                          item.status === 'In Progress' ? 'bg-blue-100 text-blue-600' : 
+                          'bg-amber-100 text-amber-600'}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-black text-slate-900 w-10">{progress}%</span>
+                        <div className="flex-1 max-w-[100px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{width: `${progress}%`}}></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-xs font-bold text-slate-400">
+                      {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'No Deadline'}
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <ExternalLink className="text-slate-300 hover:text-blue-600 inline-block" size={18} />
+                    </td>
+                  </tr>
+                );
+              }) : (
+                <tr>
+                  <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">No projects assigned to your department.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Graphs Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Team Workload */}
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h3 className="font-black text-slate-900 text-lg tracking-tight">Team Workload</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Operational Capacity Overview</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 rounded-xl">
+                 <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active</span>
+                 </div>
+                 <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Done</span>
+                 </div>
               </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Recent Tenders Table */}
-            <div className="card col-span-1 xl:col-span-2 overflow-hidden bg-white border-none shadow-xl shadow-slate-200/40">
-              <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-                <div>
-                  <h3 className="font-black text-slate-900 text-xl tracking-tight">Recent Tenders</h3>
-                  <p className="text-xs text-slate-500 font-medium mt-1">Manage and track your latest applications</p>
-                </div>
-                <button className="bg-white text-blue-600 px-4 py-2 rounded-xl text-xs font-black shadow-sm border border-slate-100 hover:border-blue-200 transition-all uppercase tracking-widest active:scale-95">View all</button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                      <th className="px-8 py-4">ID</th>
-                      <th className="px-8 py-4">Tender Name</th>
-                      <th className="px-8 py-4">Client</th>
-                      <th className="px-8 py-4">Value</th>
-                      <th className="px-8 py-4 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {tenderTable.map((tender, i) => (
-                      <tr key={i} className="hover:bg-blue-50/30 transition-all cursor-pointer group">
-                        <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.id}</td>
-                        <td className="px-8 py-5">
-                          <p className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors">{tender.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase">Due: {tender.date}</p>
-                        </td>
-                        <td className="px-8 py-5 text-sm font-bold text-slate-600">{tender.client}</td>
-                        <td className="px-8 py-5 text-sm font-black text-slate-900">{tender.value}</td>
-                        <td className="px-8 py-5">
-                          <div className={`mx-auto w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm
-                            ${tender.status === 'Active' ? 'bg-blue-500 text-white shadow-blue-200' : 
-                              tender.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-200' : 
-                              tender.status === 'Submitted' ? 'bg-emerald-500 text-white shadow-emerald-200' : 
-                              'bg-rose-500 text-white shadow-rose-200'}`}>
-                            {tender.status}
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+              <BarChart data={workloadData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} />
+                <Tooltip 
+                  cursor={{fill: '#f8fafc'}} 
+                  contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white p-4 rounded-2xl shadow-2xl border border-slate-100">
+                          <p className="text-xs font-black text-slate-900 mb-2 uppercase tracking-widest">{payload[0].payload.name}'s Tasks</p>
+                          <div className="space-y-1">
+                            <div className="flex justify-between gap-4">
+                              <span className="text-[10px] font-bold text-slate-500">Active Tasks:</span>
+                              <span className="text-[10px] font-black text-blue-600">{payload[0].value}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                              <span className="text-[10px] font-bold text-slate-500">Completed:</span>
+                              <span className="text-[10px] font-black text-emerald-600">{payload[1].value}</span>
+                            </div>
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="active" name="Active Tasks" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="done" name="Completed Tasks" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-            {/* Team Workload Section (Compact UI) */}
-            <div className="card bg-white border-none shadow-xl shadow-slate-200/40 p-6 flex flex-col h-full max-h-[500px]">
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-50">
-                <div>
-                  <h3 className="font-black text-slate-900 text-lg tracking-tight">Team Workload</h3>
-                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Capacity</p>
-                </div>
-                <MoreHorizontal className="text-slate-400 cursor-pointer" size={16} />
-              </div>
-              <div className="space-y-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                {teamWorkload.map((member, i) => (
-                  <div key={i} className="group cursor-pointer p-3 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="relative">
-                        <img src={member.image} className="w-10 h-10 rounded-full border-2 border-white shadow-sm group-hover:scale-105 transition-transform" alt={member.name} />
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-black text-slate-900 text-xs tracking-tight truncate">{member.name}</h4>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{member.tasks} Tasks</p>
-                      </div>
-                      <span className={`text-[10px] font-black ${member.workload > 75 ? 'text-rose-500' : 'text-slate-900'}`}>{member.workload}%</span>
+        {/* Project Status Distribution */}
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+           <div className="flex justify-between items-center mb-10">
+            <div>
+              <h3 className="font-black text-slate-900 text-lg tracking-tight">Project Status</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Portfolio Distribution</p>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Average Progress</span>
+              <span className="text-lg font-black text-blue-600">
+                {departmentProjects.length > 0 ? Math.round(departmentProjects.reduce((acc, p) => {
+                  const pTasks = tasks.filter(t => t.tenderId === p.tenderId);
+                  return acc + (pTasks.length > 0 ? (pTasks.filter(t => t.status === 'Completed').length / pTasks.length) * 100 : 0);
+                }, 0) / departmentProjects.length) : 0}%
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="h-[250px] w-full md:w-1/2">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'In Progress', value: departmentProjects.filter(p => p.status === 'In Progress').length || 1, color: '#3b82f6' },
+                      { name: 'Completed', value: departmentProjects.filter(p => p.status === 'Completed').length, color: '#10b981' },
+                      { name: 'Pending', value: departmentProjects.filter(p => p.status === 'Pending').length, color: '#f59e0b' }
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    <Cell fill="#3b82f6" stroke="none" />
+                    <Cell fill="#10b981" stroke="none" />
+                    <Cell fill="#f59e0b" stroke="none" />
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="w-full md:w-1/2 space-y-4">
+               {[
+                 { label: 'In Progress', count: departmentProjects.filter(p => p.status === 'In Progress').length, color: 'blue' },
+                 { label: 'Completed', count: departmentProjects.filter(p => p.status === 'Completed').length, color: 'emerald' },
+                 { label: 'Pending', count: departmentProjects.filter(p => p.status === 'Pending').length, color: 'amber' }
+               ].map((item, i) => (
+                 <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="flex items-center gap-3">
+                       <div className={`w-3 h-3 rounded-full bg-${item.color}-500 shadow-[0_0_8px_rgba(59,130,246,0.2)]`}></div>
+                       <span className="text-xs font-bold text-slate-600">{item.label}</span>
                     </div>
-                    
-                    <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-1000 ease-out ${member.workload > 75 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : member.workload > 50 ? 'bg-blue-500' : 'bg-emerald-500'}`} 
-                        style={{width: `${member.workload}%`}}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    <span className="text-sm font-black text-slate-900">{item.count} <span className="text-[9px] text-slate-400 ml-1">Projects</span></span>
+                 </div>
+               ))}
             </div>
           </div>
         </div>

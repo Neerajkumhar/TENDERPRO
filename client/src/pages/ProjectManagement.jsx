@@ -18,7 +18,8 @@ import {
   X,
   UserPlus,
   ChevronLeft,
-  Info
+  Info,
+  IndianRupee
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -33,94 +34,84 @@ import {
   CartesianGrid
 } from 'recharts';
 
-const statsData = [
-  { label: 'Total Projects', value: '512', trend: '', isUp: true, color: 'slate', icon: Briefcase },
-  { label: 'Active Projects', value: '345', trend: '', isUp: true, color: 'blue', icon: TrendingUp },
-  { label: 'Completed Projects', value: '112', trend: '', isUp: true, color: 'emerald', icon: CheckCircle2 },
-  { label: 'Delayed Projects', value: '15', trend: '', isUp: false, color: 'rose', icon: Clock },
-  { label: 'Tasks In Progress', value: '1,230', trend: '', isUp: true, color: 'indigo', icon: ListTodo },
-  { label: 'Milestones Completed', value: '890', trend: '', isUp: true, color: 'amber', icon: Flag },
-  { label: 'Budget Used', value: '$1.2M', trend: '', isUp: true, color: 'blue', icon: DollarSign },
-  { label: 'Risks Open', value: '23', trend: '', isUp: false, color: 'orange', icon: ShieldAlert },
-];
 
-const projectStatusData = [
-  { name: 'Corp', value: 400, color: '#3b82f6' },
-  { name: 'Greck', value: 300, color: '#8b5cf6' },
-  { name: 'Mnen', value: 300, color: '#10b981' },
-  { name: 'Low', value: 200, color: '#ef4444' },
-];
 
-const recentProjects = [
-  { name: 'Project Phoenix', client: 'Corporate', budget: '$1200.00', status: 'On Track', color: 'emerald' },
-  { name: 'Project Alpha', client: 'Asset SaaS', budget: '$2000.00', status: 'Delayed', color: 'rose' },
-  { name: 'Project Phoenix', client: 'Corporate', budget: '$2500.00', status: 'On Track', color: 'emerald' },
-  { name: 'Project Cona', client: 'Corporate', budget: '$1200.00', status: 'On Track', color: 'emerald' },
-  { name: 'Project Wilpon', client: 'Corporate', budget: '$2500.00', status: 'On Track', color: 'emerald' },
-];
 
-const teamAllocation = [
-  { name: 'John Doe', team: 'Design', current: 33, total: 33, progress: 100, status: 'On Track' },
-  { name: 'Team Member', team: 'Frontend', current: 21, total: 22, progress: 95, status: 'Delayed' },
-  { name: 'John Smith', team: 'Backend', current: 21, total: 16, progress: 75, status: 'On Track' },
-  { name: 'John Doe', team: 'QA', current: 3, total: 11, progress: 27, status: 'Delayed' },
-  { name: 'John Doe', team: 'Management', current: 7, total: 9, progress: 77, status: 'Delayed' },
-  { name: 'John Doe', team: 'Support', current: 3, total: 7, progress: 42, status: 'On Track' },
-];
-
-const detailedTimelineData = [
-  { 
-    name: 'Project Phoenix', 
-    start: 0.5, 
-    duration: 3, 
-    progress: 65, 
-    color: '#3b82f6', 
-    milestones: [1, 2.5],
-    status: 'In Progress'
-  },
-  { 
-    name: 'Project Alpha', 
-    start: 2, 
-    duration: 4.5, 
-    progress: 40, 
-    color: '#8b5cf6', 
-    milestones: [3, 5],
-    status: 'Critical'
-  },
-  { 
-    name: 'Infra Dev 2024', 
-    start: 1, 
-    duration: 8, 
-    progress: 90, 
-    color: '#10b981', 
-    milestones: [2, 4, 7],
-    status: 'On Track'
-  },
-  { 
-    name: 'Smart City Phase II', 
-    start: 4, 
-    duration: 5, 
-    progress: 25, 
-    color: '#f59e0b', 
-    milestones: [6, 8],
-    status: 'Delayed'
-  },
-  { 
-    name: 'Project Wilpon', 
-    start: 7, 
-    duration: 3, 
-    progress: 10, 
-    color: '#ef4444', 
-    milestones: [9],
-    status: 'Starting'
-  },
-];
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const ProjectManagement = ({ onProjectClick }) => {
+const ProjectManagement = ({ onProjectClick, onAssignmentClick, onCreateProject, tenders, departments, members, assignments, fetchAssignments }) => {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [timeView, setTimeView] = useState('Month');
+  const [assignmentData, setAssignmentData] = useState({
+    tenderId: '',
+    departmentId: '',
+    assigneeId: '',
+    description: '',
+    priority: 'Medium',
+    deadline: ''
+  });
+
+  const statsData = [
+    { label: 'Total Tenders', value: tenders.length, trend: '100%', isUp: true, color: 'slate', icon: Briefcase },
+    { label: 'Active Tenders', value: tenders.filter(t => t.status === 'Active' || t.status === 'Registered').length, trend: 'Active', isUp: true, color: 'blue', icon: TrendingUp },
+    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, trend: 'Won', isUp: true, color: 'emerald', icon: CheckCircle2 },
+    { label: 'Total Budget', value: `₹${(tenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0) / 10000000).toFixed(2)}Cr`, trend: 'Valuation', isUp: true, color: 'blue', icon: IndianRupee },
+  ];
+
+  const projectStatusData = [
+    { name: 'Active', value: tenders.filter(t => t.status === 'Active').length, color: '#3b82f6' },
+    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: '#10b981' },
+    { name: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: '#8b5cf6' },
+    { name: 'Other', value: tenders.filter(t => !['Active', 'Won', 'Registered'].includes(t.status)).length, color: '#94a3b8' },
+  ].filter(d => d.value > 0);
+
+  const detailedTimelineData = tenders.slice(0, 5).map((t, i) => ({
+    name: t.title,
+    start: (new Date(t.createdAt).getMonth() + (new Date(t.createdAt).getDate() / 30)),
+    duration: 2 + Math.random() * 4,
+    progress: t.status === 'Won' ? 100 : t.status === 'Active' ? 40 : 10,
+    color: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5],
+    milestones: [1, 2], // Dummy milestones for visualization
+    status: t.status
+  }));
+
+  const teamAllocation = departments.map(dept => ({
+    name: `${dept.name} Team`,
+    team: dept.name,
+    progress: Math.floor(Math.random() * 40) + 60,
+    status: 'On Track'
+  }));
+
+  const handleAssignmentSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(assignmentData)
+      });
+
+      if (response.ok) {
+        alert('Work assigned successfully!');
+        setShowProjectModal(false);
+        fetchAssignments(); // Refresh the list
+        setAssignmentData({
+          tenderId: '',
+          departmentId: '',
+          assigneeId: '',
+          description: '',
+          priority: 'Medium',
+          deadline: ''
+        });
+      } else {
+        const err = await response.json();
+        alert(`Error: ${err.message}`);
+      }
+    } catch (error) {
+      console.error('Error submitting assignment:', error);
+      alert('Failed to assign work.');
+    }
+  };
 
   return (
     <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
@@ -141,7 +132,7 @@ const ProjectManagement = ({ onProjectClick }) => {
             />
           </div>
           <button 
-            onClick={() => setShowProjectModal(true)}
+            onClick={onCreateProject}
             className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg active:scale-95"
           >
             <Briefcase size={18} />
@@ -300,10 +291,10 @@ const ProjectManagement = ({ onProjectClick }) => {
       </div>
 
       <div className="grid grid-cols-12 gap-8">
-        {/* Recent Projects Table */}
-        <div className="col-span-12 lg:col-span-8 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
+        {/* Active Tenders Portfolio */}
+        <div className="col-span-12 lg:col-span-6 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-slate-50 flex justify-between items-center">
-            <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Projects Portfolio</h3>
+            <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Tenders Portfolio</h3>
             <button className="text-xs font-black text-blue-600 hover:underline uppercase tracking-widest">View All Projects</button>
           </div>
           <div className="overflow-x-auto">
@@ -318,30 +309,30 @@ const ProjectManagement = ({ onProjectClick }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {recentProjects.map((project, i) => (
-                  <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
+                {tenders.map((tender, i) => (
+                  <tr key={tender.id || i} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs">
-                          {project.name.charAt(0)}
+                          {tender.title.charAt(0)}
                         </div>
-                        <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{project.name}</span>
+                        <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{tender.title}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs font-bold text-slate-500">{project.client}</span>
+                      <span className="text-xs font-bold text-slate-500">{tender.client?.name || 'Unknown'}</span>
                     </td>
-                    <td className="px-6 py-4 font-mono text-sm font-bold text-slate-700">{project.budget}</td>
+                    <td className="px-6 py-4 font-mono text-sm font-bold text-slate-700">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                        project.status === 'On Track' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                        tender.status === 'Won' || tender.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                       }`}>
-                        {project.status}
+                        {tender.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button 
-                        onClick={() => onProjectClick(i)}
+                        onClick={() => onProjectClick(tender.id)}
                         className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-blue-600 shadow-sm border border-transparent hover:border-slate-100"
                       >
                         <ChevronRight size={16} />
@@ -354,95 +345,72 @@ const ProjectManagement = ({ onProjectClick }) => {
           </div>
         </div>
 
-        {/* Project Status Distribution */}
-        <div className="col-span-12 lg:col-span-4 card bg-white border-none shadow-xl shadow-slate-200/40 p-6">
-          <h3 className="font-black text-slate-900 text-lg tracking-tight mb-6">Status Distribution</h3>
-          <div className="h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={projectStatusData}
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={8}
-                  dataKey="value"
-                >
-                  {projectStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            {projectStatusData.map((entry, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{entry.name}</p>
-                  <p className="text-sm font-black text-slate-900 mt-1">{entry.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-8">
-        {/* Team Allocation */}
-        <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-          <div className="p-6 border-b border-slate-50 flex justify-between items-center">
-            <h3 className="font-black text-slate-900 text-lg tracking-tight">Resource & Team Allocation</h3>
-            <div className="flex gap-2">
-              <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Filter size={16} /></button>
-              <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><MoreHorizontal size={16} /></button>
+        {/* Assigned Tender Work List */}
+        <div className="col-span-12 lg:col-span-6 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+            <h3 className="font-black text-slate-900 text-lg tracking-tight">Assigned Project Work</h3>
+            <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-100">
+              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{assignments.length} Tasks</span>
             </div>
           </div>
-          <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teamAllocation.map((member, i) => (
-              <div key={i} className="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-slate-200/30 transition-all group cursor-pointer">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600 font-black text-lg">
-                      {member.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors">{member.name}</h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{member.team}</p>
-                    </div>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                    member.status === 'On Track' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
-                  }`}>
-                    {member.status}
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Workload</span>
-                    <span className="text-[10px] font-black text-slate-900">{member.progress}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-white rounded-full overflow-hidden shadow-inner border border-slate-100">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-1000 ${
-                        member.progress > 90 ? 'bg-rose-500' : member.progress > 70 ? 'bg-amber-500' : 'bg-blue-500'
-                      }`}
-                      style={{ width: `${member.progress}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between items-center pt-2">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map(a => (
-                        <div key={a} className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white text-[8px] flex items-center justify-center font-black">P</div>
-                      ))}
-                      <div className="w-6 h-6 rounded-full bg-blue-50 border-2 border-white text-[8px] flex items-center justify-center font-black text-blue-600">+1</div>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 italic">4 Active Tasks</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Project</th>
+                  <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Department</th>
+                  <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Priority</th>
+                  <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Deadline</th>
+                  <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {assignments.length > 0 ? (
+                  assignments.slice(0, 8).map((task, i) => (
+                    <tr 
+                      key={task.id || i} 
+                      onClick={() => onProjectClick(task.tenderId || task.tender?.id)}
+                      className="group hover:bg-blue-50/30 transition-all cursor-pointer"
+                    >
+                      <td className="px-6 py-4">
+                         <div className="max-w-[150px]">
+                           <p className="text-xs font-black text-slate-900 truncate">{task.tender?.title || 'Unknown'}</p>
+                           <p className="text-[9px] font-bold text-slate-400 mt-0.5 line-clamp-1 italic">"{task.description}"</p>
+                         </div>
+                       </td>
+                       <td className="px-6 py-4">
+                         <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest px-2 py-1 bg-blue-50 rounded-lg border border-blue-100">
+                           {task.department?.name}
+                         </span>
+                       </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                          task.priority === 'High' ? 'bg-rose-100 text-rose-600' : 
+                          task.priority === 'Medium' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'
+                        }`}>
+                          {task.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-xs font-bold text-slate-500 whitespace-nowrap">
+                        {task.deadline ? new Date(task.deadline).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                          task.status === 'Completed' ? 'bg-emerald-500 text-white' : 
+                          task.status === 'In Progress' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'
+                        }`}>
+                          {task.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-8 text-center text-slate-400 text-xs italic">No assignments</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -474,30 +442,69 @@ const ProjectManagement = ({ onProjectClick }) => {
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Tender <span className="text-rose-500">*</span></label>
-                  <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer">
-                    <option>Select active tender</option>
-                    <option>Annual Infra Dev 2024</option>
-                    <option>Smart City Phase II</option>
+                  <select 
+                    value={assignmentData.tenderId}
+                    onChange={(e) => setAssignmentData({...assignmentData, tenderId: e.target.value})}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Select active tender</option>
+                    {tenders.map(t => (
+                      <option key={t.id} value={t.id}>{t.title}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assign to Team <span className="text-rose-500">*</span></label>
-                  <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer">
-                    <option>Select department</option>
-                    <option>Technical Team</option>
-                    <option>Financial Reviewers</option>
-                    <option>Legal & Compliance</option>
+                  <select 
+                    value={assignmentData.departmentId}
+                    onChange={(e) => setAssignmentData({...assignmentData, departmentId: e.target.value})}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Select department</option>
+                    {departments.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
                   </select>
                 </div>
+                {/* Member selection hidden as per new logic: Assign to Dept, then Dept PM handles sub-tasks */}
+                {/* 
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assign to Member</label>
+                  <select 
+                    value={assignmentData.assigneeId}
+                    onChange={(e) => setAssignmentData({...assignmentData, assigneeId: e.target.value})}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Select team member</option>
+                    {members.map(m => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div> 
+                */}
                 <div className="col-span-2 space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Description <span className="text-rose-500">*</span></label>
-                  <textarea placeholder="Outline the specific tasks for this assignment..." rows={4} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all resize-none shadow-sm" />
+                  <textarea 
+                    value={assignmentData.description}
+                    onChange={(e) => setAssignmentData({...assignmentData, description: e.target.value})}
+                    placeholder="Outline the specific tasks for this assignment..." 
+                    rows={4} 
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all resize-none shadow-sm" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority Level <span className="text-rose-500">*</span></label>
                   <div className="flex gap-2">
                     {['Low', 'Medium', 'High'].map(p => (
-                      <button key={p} className="flex-1 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                      <button 
+                        key={p} 
+                        onClick={() => setAssignmentData({...assignmentData, priority: p})}
+                        className={`flex-1 py-3 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                          assignmentData.priority === p 
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' 
+                          : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
                         {p}
                       </button>
                     ))}
@@ -505,7 +512,12 @@ const ProjectManagement = ({ onProjectClick }) => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Internal Deadline <span className="text-rose-500">*</span></label>
-                  <input type="date" className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                  <input 
+                    type="date" 
+                    value={assignmentData.deadline}
+                    onChange={(e) => setAssignmentData({...assignmentData, deadline: e.target.value})}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" 
+                  />
                 </div>
               </div>
             </div>
@@ -517,7 +529,10 @@ const ProjectManagement = ({ onProjectClick }) => {
               >
                 Cancel
               </button>
-              <button className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95 uppercase tracking-widest">
+              <button 
+                onClick={handleAssignmentSubmit}
+                className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95 uppercase tracking-widest"
+              >
                 Confirm Assignment
               </button>
             </div>

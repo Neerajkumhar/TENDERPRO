@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   Target,
@@ -19,10 +19,11 @@ import {
 
 const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   const [activeStep, setActiveStep] = useState(1);
+  const [members, setMembers] = useState([]);
   const [formData, setFormData] = useState(initialData || {
     id: null,
     title: '',
-    client: '',
+    clientId: '',
     reference: '',
     category: 'Private',
     submissionDate: '',
@@ -33,8 +34,28 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
     terms: '',
     budget: '',
     tax: '18',
-    paymentTerms: 'Milestone Based'
+    paymentTerms: 'Milestone Based',
+    teamAssignments: {
+      managerId: '',
+      reviewerId: '',
+      approverId: ''
+    }
   });
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/members');
+        if (response.ok) {
+          const data = await response.json();
+          setMembers(data);
+        }
+      } catch (error) {
+        console.error('Error fetching members:', error);
+      }
+    };
+    fetchMembers();
+  }, []);
 
   const handleFinalSubmit = () => {
     onSave(formData);
@@ -55,18 +76,51 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
     }]);
   };
 
+  const [isUploading, setIsUploading] = useState(null); // Track which slot is uploading
+
+  const handleFileUpload = async (file, slotId) => {
+    if (!file) return;
+    setIsUploading(slotId);
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formDataUpload
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDocumentSlots(prev => prev.map(slot => 
+          slot.id === slotId ? { ...slot, url: data.url, fileName: file.name } : slot
+        ));
+        
+        // Also update main formData.documents
+        const newDoc = { label: documentSlots.find(s => s.id === slotId).label, url: data.url, fileName: file.name };
+        setFormData(prev => ({
+          ...prev,
+          documents: [...(prev.documents || []), newDoc]
+        }));
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setIsUploading(null);
+    }
+  };
+
   const removeDocumentSlot = (id) => {
     setDocumentSlots(documentSlots.filter(slot => slot.id !== id));
   };
 
   const sections = [
-    { id: 1, title: 'Basic Details', subtitle: 'Tender basic information', icon: FileText },
-    { id: 2, title: 'Project Scope', subtitle: 'Define project scope', icon: Target },
-    { id: 3, title: 'Eligibility & Conditions', subtitle: 'Set eligibility criteria', icon: ShieldCheck },
-    { id: 4, title: 'Financial Details', subtitle: 'Budget and financial info', icon: IndianRupee },
-    { id: 5, title: 'Documents Upload', subtitle: 'Upload required documents', icon: UploadCloud },
-    { id: 6, title: 'Assignments', subtitle: 'Assign responsible people', icon: Users },
-    { id: 7, title: 'Submission', subtitle: 'Submission details & checklist', icon: Send },
+    { id: 1, title: 'Opportunity Overview', subtitle: 'Basic tender details', icon: FileText },
+    { id: 2, title: 'Scope & Requirements', subtitle: 'Project boundaries', icon: Target },
+    { id: 3, title: 'Internal Eligibility', subtitle: 'Match company criteria', icon: ShieldCheck },
+    { id: 4, title: 'Financial Valuation', subtitle: 'Budget & expected value', icon: IndianRupee },
+    { id: 5, title: 'Reference Docs', subtitle: 'Attach tender documents', icon: UploadCloud },
+    { id: 6, title: 'Internal Team', subtitle: 'Assign team members', icon: Users },
+    { id: 7, title: 'Registration', subtitle: 'Finalize internal entry', icon: Send },
   ];
 
   const handleNext = () => {
@@ -89,9 +143,9 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
       <div className="sticky top-0 z-50 bg-white border-b border-slate-100 px-8 py-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-600 rounded-lg text-white">
-            <FileText size={20} />
+            <Plus size={20} />
           </div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">Create Tender</h1>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">Register New Tender</h1>
         </div>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 text-slate-600 font-bold text-sm hover:bg-slate-50 rounded-xl transition-all">
@@ -167,8 +221,8 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                     <FileText size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Basic Details</h3>
-                    <p className="text-xs text-slate-500 font-medium">Provide the essential information about your tender.</p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Opportunity Overview</h3>
+                    <p className="text-xs text-slate-500 font-medium">Log the essential information about this tender opportunity.</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-8">
@@ -185,13 +239,13 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name <span className="text-rose-500">*</span></label>
                     <select 
-                      value={formData.client}
-                      onChange={(e) => setFormData({...formData, client: e.target.value})}
+                      value={formData.clientId}
+                      onChange={(e) => setFormData({...formData, clientId: e.target.value})}
                       className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"
                     >
                       <option value="">Select registered client</option>
                       {clients?.map(client => (
-                        <option key={client.id} value={client.name}>{client.name}</option>
+                        <option key={client.id} value={client.id}>{client.name}</option>
                       ))}
                     </select>
                   </div>
@@ -213,14 +267,16 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                       className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"
                     >
                       <option value="Private">Private Firm</option>
-                      <option value="Govt">Govt. Firm</option>
+                      <option value="Government">Govt. Firm</option>
+                      <option value="PSU">PSU</option>
+                      <option value="Non-Profit">Non-Profit</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Submission Deadline <span className="text-rose-500">*</span></label>
                     <input 
                       type="date" 
-                      value={formData.submissionDate}
+                      value={formData.submissionDate ? formData.submissionDate.split('T')[0] : ''}
                       onChange={(e) => setFormData({...formData, submissionDate: e.target.value})}
                       className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" 
                     />
@@ -386,14 +442,38 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                           </button>
                         )}
                       </div>
-                      <div className="border-2 border-dashed border-slate-200 rounded-[2.5rem] p-10 text-center hover:border-blue-500 hover:bg-blue-50/50 transition-all group cursor-pointer relative overflow-hidden h-full flex flex-col justify-center">
-                        <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all text-slate-400">
-                          <Upload size={32} />
-                        </div>
-                        <p className="text-sm font-black text-slate-900 mb-1">Drop file here</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">or click to browse</p>
-                        <div className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:border-blue-500 group-hover:text-blue-600 transition-all shadow-sm">Browse Files</div>
-                        <p className="text-[9px] text-slate-400 mt-6 font-bold italic">{upload.format}</p>
+                      <div className={`border-2 border-dashed rounded-[2.5rem] p-10 text-center transition-all group cursor-pointer relative overflow-hidden h-full flex flex-col justify-center
+                        ${upload.url ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50 hover:border-blue-500 hover:bg-blue-50/50'}
+                      `}>
+                        {isUploading === upload.id ? (
+                          <div className="flex flex-col items-center animate-pulse">
+                            <Upload size={32} className="text-blue-600 animate-bounce mb-4" />
+                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Uploading...</p>
+                          </div>
+                        ) : upload.url ? (
+                          <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-[1.5rem] flex items-center justify-center mb-6">
+                              <CheckSquare size={32} />
+                            </div>
+                            <p className="text-sm font-black text-slate-900 mb-1 truncate w-full px-4">{upload.fileName}</p>
+                            <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">File Secured</p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all text-slate-400 shadow-sm">
+                              <Upload size={32} />
+                            </div>
+                            <p className="text-sm font-black text-slate-900 mb-1">Drop file here</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">or click to browse</p>
+                            <div className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:border-blue-500 group-hover:text-blue-600 transition-all shadow-sm">Browse Files</div>
+                          </>
+                        )}
+                        <input 
+                          type="file" 
+                          className="absolute inset-0 opacity-0 cursor-pointer" 
+                          onChange={(e) => handleFileUpload(e.target.files[0], upload.id)}
+                        />
+                        {!upload.url && <p className="text-[9px] text-slate-400 mt-6 font-bold italic">{upload.format}</p>}
                       </div>
                     </div>
                   ))}
@@ -409,33 +489,57 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                     <Users size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Assignments</h3>
-                    <p className="text-xs text-slate-500 font-medium">Assign key stakeholders and review teams.</p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Internal Team Assignment</h3>
+                    <p className="text-xs text-slate-500 font-medium">Assign internal team members to manage this tender flow.</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-8">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Manager <span className="text-rose-500">*</span></label>
-                    <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
-                      <option>Select manager</option>
-                      <option>John Doe</option>
-                      <option>Sarah Wilson</option>
+                    <select 
+                      value={formData.teamAssignments?.managerId}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        teamAssignments: { ...formData.teamAssignments, managerId: e.target.value }
+                      })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                    >
+                      <option value="">Select manager</option>
+                      {members.map(member => (
+                        <option key={member.id} value={member.id}>{member.name} ({member.role})</option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Review Team <span className="text-rose-500">*</span></label>
-                    <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
-                      <option>Select team</option>
-                      <option>Technical Review</option>
-                      <option>Financial Audit</option>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reviewer <span className="text-rose-500">*</span></label>
+                    <select 
+                      value={formData.teamAssignments?.reviewerId}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        teamAssignments: { ...formData.teamAssignments, reviewerId: e.target.value }
+                      })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                    >
+                      <option value="">Select reviewer</option>
+                      {members.map(member => (
+                        <option key={member.id} value={member.id}>{member.name} ({member.role})</option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Approval Owner <span className="text-rose-500">*</span></label>
-                    <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
-                      <option>Select owner</option>
-                      <option>Admin Principal</option>
-                      <option>Director of Ops</option>
+                    <select 
+                      value={formData.teamAssignments?.approverId}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        teamAssignments: { ...formData.teamAssignments, approverId: e.target.value }
+                      })}
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                    >
+                      <option value="">Select owner</option>
+                      {members.filter(m => m.role === 'Admin').map(member => (
+                        <option key={member.id} value={member.id}>{member.name} (Admin)</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -450,8 +554,8 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                     <Send size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Final Submission</h3>
-                    <p className="text-xs text-slate-500 font-medium">Verify all details before submitting for approval.</p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Entry Completion</h3>
+                    <p className="text-xs text-slate-500 font-medium">Review and finalize the tender entry in our management system.</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-12 gap-10">
@@ -523,7 +627,7 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                   className="flex items-center gap-3 px-10 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-emerald-600 transition-all shadow-xl active:scale-95 uppercase tracking-widest group"
                 >
                   <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  <span>{initialData ? 'Update Tender' : 'Submit Tender'}</span>
+                  <span>{initialData ? 'Update Entry' : 'Register Opportunity'}</span>
                 </button>
               ) : (
                 <button
