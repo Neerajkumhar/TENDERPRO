@@ -8,15 +8,20 @@ const dbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
 
 let sequelize;
 
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+
 if (dbUrl) {
   sequelize = new Sequelize(dbUrl, {
     dialect: 'mysql',
     logging: false,
     dialectOptions: {
-      connectTimeout: 60000 // Increase timeout for remote connections
+      connectTimeout: 60000,
+      ssl: {
+        rejectUnauthorized: false // Often needed for remote DBs
+      }
     },
     pool: {
-      max: 5,
+      max: isProduction ? 1 : 5, // Serverless should have small pools
       min: 0,
       acquire: 60000,
       idle: 10000
@@ -33,10 +38,13 @@ if (dbUrl) {
       dialect: 'mysql',
       logging: false,
       dialectOptions: {
-        connectTimeout: 60000
+        connectTimeout: 60000,
+        ssl: {
+          rejectUnauthorized: false
+        }
       },
       pool: {
-        max: 5,
+        max: isProduction ? 1 : 5,
         min: 0,
         acquire: 60000,
         idle: 10000

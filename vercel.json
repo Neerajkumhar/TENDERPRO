@@ -16,6 +16,10 @@
       "dest": "server/uploads/$1"
     },
     {
+      "src": "/",
+      "dest": "server/index.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "server/index.js"
     }
