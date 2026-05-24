@@ -1,5 +1,11 @@
 {
+  "name": "tender-management-root",
+  "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
-    "glob": "^13.0.6"
+    "glob": "^13.0.6",
+    "mysql2": "^3.22.3"
   }
 }

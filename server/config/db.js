@@ -1,4 +1,6 @@
 const { Sequelize } = require('sequelize');
+// Explicitly require mysql2 to ensure it's bundled by Vercel
+require('mysql2');
 require('dotenv').config();
 
 // Support for Railway and other environments
