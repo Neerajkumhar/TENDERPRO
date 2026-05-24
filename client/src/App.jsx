@@ -127,7 +127,7 @@ function App() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       const encodedUser = encodeURIComponent(JSON.stringify(user));
-      window.location.href = `http://localhost:5174/?token=${token}&user=${encodedUser}`;
+      window.location.href = `${import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'}/?token=${token}&user=${encodedUser}`;
     }
   }, [isAuthenticated, user]);
 
@@ -330,7 +330,7 @@ function App() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       const encodedUser = encodeURIComponent(JSON.stringify(userObj));
-      window.location.href = `http://localhost:5174/?token=${userData.token}&user=${encodedUser}`;
+      window.location.href = `${import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'}/?token=${userData.token}&user=${encodedUser}`;
       return;
     }
     setUser(userObj);

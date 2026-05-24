@@ -57,7 +57,7 @@ function App() {
           
           return { token: urlToken, user: parsedUser };
         } else {
-          window.location.href = `http://localhost:5173/?token=${urlToken}&user=${urlUser}`;
+          window.location.href = `${import.meta.env.VITE_CLIENT_URL || 'http://localhost:5173'}/?token=${urlToken}&user=${urlUser}`;
         }
       } catch (e) {
         console.error("Failed to parse user redirect query parameters:", e);
@@ -128,7 +128,7 @@ function App() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       const encodedUser = encodeURIComponent(JSON.stringify(user));
-      window.location.href = `http://localhost:5173/?token=${token}&user=${encodedUser}`;
+      window.location.href = `${import.meta.env.VITE_CLIENT_URL || 'http://localhost:5173'}/?token=${token}&user=${encodedUser}`;
     }
   }, [isAuthenticated, user]);
 
@@ -331,7 +331,7 @@ function App() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       const encodedUser = encodeURIComponent(JSON.stringify(userObj));
-      window.location.href = `http://localhost:5173/?token=${userData.token}&user=${encodedUser}`;
+      window.location.href = `${import.meta.env.VITE_CLIENT_URL || 'http://localhost:5173'}/?token=${userData.token}&user=${encodedUser}`;
       return;
     }
     setUser(userObj);

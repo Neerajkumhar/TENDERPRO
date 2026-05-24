@@ -128,7 +128,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
 
         {user?.role === 'Admin' && (
           <a 
-            href={`http://localhost:5174/?token=${localStorage.getItem('token')}&user=${encodeURIComponent(JSON.stringify(user))}`} 
+            href={`${import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'}/?token=${localStorage.getItem('token')}&user=${encodeURIComponent(JSON.stringify(user))}`} 
             target="_blank" 
             rel="noopener noreferrer"
             className="hidden lg:flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg active:scale-95"
