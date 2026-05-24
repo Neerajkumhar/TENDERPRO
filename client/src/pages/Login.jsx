@@ -37,10 +37,12 @@ const Login = ({ onLoginSuccess }) => {
         }));
         onLoginSuccess(data);
       } else {
-        setError(data.message || 'Invalid credentials');
+        // Show specific error from backend if available (e.g. 401 Invalid Credentials)
+        setError(data.message || `Server returned error: ${response.status}`);
       }
     } catch (err) {
-      setError('Failed to connect to the server. Please ensure the backend is running.');
+      console.error('Login error:', err);
+      setError('Failed to connect to the server. Please check your internet or Vercel proxy settings.');
     } finally {
       setIsLoading(false);
     }
