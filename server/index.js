@@ -17,21 +17,52 @@ const installationChallanRoutes = require('./routes/installationChallanRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
-const Attendance = require('./models/Attendance');
-const Invoice = require('./models/Invoice');
-const DeliveryChallan = require('./models/DeliveryChallan');
-const InstallationChallan = require('./models/InstallationChallan');
-const Expense = require('./models/Expense');
-const Message = require('./models/Message');
+// Load models to ensure they are registered with Sequelize
+require('./models/Attendance');
+require('./models/Invoice');
+require('./models/DeliveryChallan');
+require('./models/InstallationChallan');
+require('./models/Expense');
+require('./models/Message');
 require('dotenv').config();
 
-// Dev reload trigger for models
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Database connection and initialization
+let isDbInitialized = false;
+async function initializeDatabase() {
+  if (isDbInitialized) return;
+  
+  try {
+    console.log('Initializing database connection...');
+    await sequelize.authenticate();
+    console.log('Database connection authenticated successfully.');
+    
+    // Sync models - using alter: false for production performance
+    // If you need to update schema, run a migration script instead
+    await sequelize.sync(); 
+    console.log('Database connected and synced');
+    
+    isDbInitialized = true;
+  } catch (err) {
+    console.error('Database initialization failed:', err.message);
+    // In serverless, we don't necessarily want to kill the process here
+    // as it might succeed on a subsequent request
+  }
+}
+
+// Middleware to ensure DB is initialized before handling requests
+app.use(async (req, res, next) => {
+  if (!isDbInitialized) {
+    await initializeDatabase();
+  }
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/clients', clientRoutes);
@@ -49,7 +80,11 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/messages', messageRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Tender Management API is running', env: process.env.NODE_ENV });
+  res.json({ 
+    message: 'Tender Management API is running', 
+    env: process.env.NODE_ENV,
+    dbStatus: isDbInitialized ? 'connected' : 'initializing'
+  });
 });
 
 app.get('/api/health', async (req, res) => {
@@ -62,32 +97,11 @@ app.get('/api/health', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-let server;
 
-// Database connection and initialization
-async function initializeDatabase() {
-  // Use a flag to avoid multiple syncs in a single process lifetime
-  if (global.dbInitialized) return;
-  
-  try {
-    await sequelize.authenticate();
-    console.log('Database connection authenticated successfully.');
-    
-    // In production/Vercel, we might want to skip heavy syncs on every request
-    // but for now we'll just keep it simple but catch errors
-    await sequelize.sync({ alter: false }); // Avoid 'alter: true' in serverless if possible
-    console.log('Database connected and synced');
-    
-    global.dbInitialized = true;
-  } catch (err) {
-    console.error('Database initialization failed:', err.message);
-  }
-}
-
-// Only start the server if not running on Vercel
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+// Local development server startup
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   initializeDatabase().then(() => {
-    server = app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
 
@@ -98,32 +112,18 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
       }
     });
   });
-} else {
-  // On Vercel, we still want to ensure DB is initialized
-  // This is a simple way to run it on cold start
-  initializeDatabase();
 }
 
 module.exports = app;
 
-// Global error handling...
+// Global error handling
 process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err.name, err.message, err.stack);
-  process.exit(1);
+  console.error('UNCAUGHT EXCEPTION! 💥', err.name, err.message);
+  // In serverless, we let Vercel handle the crash
+  if (process.env.NODE_ENV !== 'production') process.exit(1);
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err.name, err.message, err.stack);
-  if (server && typeof server.close === 'function') {
-    server.close(() => {
-      process.exit(1);
-    });
-  } else {
-    process.exit(1);
-  }
+  console.error('UNHANDLED REJECTION! 💥', err.name, err.message);
+  if (process.env.NODE_ENV !== 'production') process.exit(1);
 });
-
-// Deployment Update: 2026-05-24
-// Triggering auto-restart after freeing port 5000
