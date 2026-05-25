@@ -270,10 +270,10 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
 
   return (
     <>
-      <div className={`flex bg-white overflow-hidden animate-in fade-in duration-300 ${isPopup ? 'fixed inset-0 sm:inset-auto sm:top-[80px] sm:right-[80px] z-[100] sm:w-[800px] md:w-[1000px] sm:h-[600px] md:h-[700px] rounded-none sm:rounded-3xl border-none sm:border border-slate-100 shadow-2xl zoom-in-95 origin-top-right' : 'h-[calc(100vh-64px)] w-full rounded-none lg:rounded-[3rem] lg:m-6 lg:h-[calc(100vh-140px)] lg:w-[calc(100%-3rem)] border-slate-100 lg:border lg:shadow-2xl zoom-in-95'}`}>
+      <div className={`flex bg-white overflow-hidden animate-in fade-in duration-300 ${isPopup ? 'fixed inset-0 lg:inset-auto lg:top-[80px] lg:right-[40px] z-[100] lg:w-[850px] xl:w-[1000px] lg:h-[650px] xl:h-[750px] rounded-none lg:rounded-[2.5rem] border-none lg:border lg:border-slate-100 lg:shadow-2xl lg:zoom-in-95 lg:origin-top-right' : 'h-[calc(100vh-64px)] w-full rounded-none lg:rounded-[3rem] lg:m-6 lg:h-[calc(100vh-140px)] lg:w-[calc(100%-3rem)] border-slate-100 lg:border lg:shadow-2xl zoom-in-95'}`}>
       
       {/* Sidebar - Chat List */}
-      <div className={`${showChatList ? 'flex' : 'hidden lg:flex'} w-full lg:w-[380px] border-r border-slate-50 flex flex-col bg-slate-50/20`}>
+      <div className={`${showChatList ? 'flex' : 'hidden lg:flex'} w-full lg:w-[320px] xl:w-[380px] border-r border-slate-50 flex flex-col bg-slate-50/20`}>
         <div className="p-5 sm:p-8 space-y-4 sm:space-y-6">
           <div className="flex justify-between items-center">
              <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">TEAM MESSAGES</h2>
@@ -589,9 +589,9 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
         </div>
       )}
 
-      {/* Pointer Tail for popup */}
+      {/* Pointer Tail for popup - Hidden on mobile/tablet */}
       {isPopup && (
-        <div className="fixed top-[74px] right-[100px] w-4 h-4 bg-white border-t border-l border-slate-100 rotate-45 z-[101] animate-in fade-in duration-300 origin-bottom-left"></div>
+        <div className="hidden lg:block fixed top-[74px] right-[100px] w-4 h-4 bg-white border-t border-l border-slate-100 rotate-45 z-[101] animate-in fade-in duration-300 origin-bottom-left"></div>
       )}
     </>
   );
