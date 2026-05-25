@@ -209,24 +209,24 @@ const Payments = () => {
   ];
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header - Matching Reference Image */}
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">PAYMENTS</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic uppercase">PAYMENTS</h1>
           <p className="text-[10px] font-black text-slate-400 tracking-[0.2em] mt-1">TRANSACTION MANAGEMENT & RECONCILIATION</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
           >
             <Download size={16} />
             <span>Export</span>
           </button>
           <button 
             onClick={() => setIsRecordModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
           >
             <Plus size={18} />
             <span>Record Payment</span>
@@ -235,180 +235,182 @@ const Payments = () => {
       </div>
 
       {/* Search & Main Filters - Matching Reference Image */}
-      <div className="flex gap-4 mb-10">
+      <div className="flex flex-col md:flex-row gap-4 mb-8 sm:mb-10">
         <div className="relative flex-1">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
             placeholder="Search transactions..." 
-            className="w-full pl-16 pr-6 py-4 bg-white border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+            className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className="relative">
-          <button 
-            onClick={() => {
-              setShowDateFilterDropdown(!showDateFilterDropdown);
-              setShowQuickFilterDropdown(false);
-            }}
-            className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Calendar size={18} className="text-blue-500" />
-            <span>{startDateFilter || endDateFilter ? 'Date Active' : 'Date Filter'}</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-none">
+            <button 
+              onClick={() => {
+                setShowDateFilterDropdown(!showDateFilterDropdown);
+                setShowQuickFilterDropdown(false);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Calendar size={18} className="text-blue-500" />
+              <span>{startDateFilter || endDateFilter ? 'Date Active' : 'Date Filter'}</span>
+            </button>
 
-          {showDateFilterDropdown && (
-            <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-100 shadow-2xl rounded-2xl p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Filter by Date</h4>
-                {(startDateFilter || endDateFilter) && (
+            {showDateFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white border border-slate-100 shadow-2xl rounded-2xl p-4 sm:p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Filter by Date</h4>
+                  {(startDateFilter || endDateFilter) && (
+                    <button 
+                      onClick={() => {
+                        setStartDateFilter('');
+                        setEndDateFilter('');
+                      }}
+                      className="text-[8px] font-black text-rose-500 hover:underline uppercase tracking-widest"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
+                    <input 
+                      type="date"
+                      value={startDateFilter}
+                      onChange={(e) => setStartDateFilter(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
+                    <input 
+                      type="date"
+                      value={endDateFilter}
+                      onChange={(e) => setEndDateFilter(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
+                    />
+                  </div>
                   <button 
-                    onClick={() => {
-                      setStartDateFilter('');
-                      setEndDateFilter('');
-                    }}
-                    className="text-[8px] font-black text-rose-500 hover:underline uppercase tracking-widest"
+                    onClick={() => setShowDateFilterDropdown(false)}
+                    className="w-full mt-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md"
                   >
-                    Clear
+                    Apply Filter
                   </button>
-                )}
-              </div>
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
-                  <input 
-                    type="date"
-                    value={startDateFilter}
-                    onChange={(e) => setStartDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
-                  />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
-                  <input 
-                    type="date"
-                    value={endDateFilter}
-                    onChange={(e) => setEndDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
-                  />
-                </div>
-                <button 
-                  onClick={() => setShowDateFilterDropdown(false)}
-                  className="w-full mt-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md"
-                >
-                  Apply Filter
-                </button>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        <div className="relative">
-          <button 
-            onClick={() => {
-              setShowQuickFilterDropdown(!showQuickFilterDropdown);
-              setShowDateFilterDropdown(false);
-            }}
-            className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Filter size={18} className="text-blue-500" />
-            <span>Quick: {quickFilter}</span>
-          </button>
+          <div className="relative flex-1 md:flex-none">
+            <button 
+              onClick={() => {
+                setShowQuickFilterDropdown(!showQuickFilterDropdown);
+                setShowDateFilterDropdown(false);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Filter size={18} className="text-blue-500" />
+              <span>Quick: {quickFilter}</span>
+            </button>
 
-          {showQuickFilterDropdown && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              {['ALL', 'RECEIVED', 'PENDING'].map(status => (
-                <button
-                  key={status}
-                  onClick={() => {
-                    setQuickFilter(status);
-                    setShowQuickFilterDropdown(false);
-                  }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    quickFilter === status 
-                      ? 'bg-blue-50 text-blue-600' 
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
-          )}
+            {showQuickFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {['ALL', 'RECEIVED', 'PENDING'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => {
+                      setQuickFilter(status);
+                      setShowQuickFilterDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      quickFilter === status 
+                        ? 'bg-blue-50 text-blue-600' 
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Stats Cards Grid - Matching Reference Image */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-50 flex flex-col items-start group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} mb-6 transition-transform group-hover:scale-110`}>
-              <stat.icon size={24} />
+          <div key={index} className="bg-white p-4 sm:p-6 lg:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-slate-50 flex flex-col items-start group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl ${stat.bg} ${stat.color} mb-4 sm:mb-6 transition-transform group-hover:scale-110`}>
+              <stat.icon size={20} className="sm:w-6 sm:h-6" />
             </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</span>
-            <span className="text-2xl font-black text-slate-900 tracking-tight mb-2">{stat.value}</span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight italic">{stat.sub}</span>
+            <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1 sm:mb-2">{stat.value}</span>
+            <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-tight italic">{stat.sub}</span>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-8">
+      <div className="flex flex-col xl:flex-row gap-6 sm:gap-8">
         {/* Main Table Section - Matching Reference Image */}
-        <div className="flex-1 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-          <div className="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
-            <h2 className="text-lg font-black text-slate-800 tracking-tight italic uppercase">Payment Transactions</h2>
-            <div className="flex items-center gap-4">
+        <div className="flex-1 bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+          <div className="p-6 sm:p-10 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white gap-4">
+            <h2 className="text-base sm:text-lg font-black text-slate-800 tracking-tight italic uppercase">Payment Transactions</h2>
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center">
-                    <User size={14} className="text-slate-300" />
+                  <div key={i} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center">
+                    <User size={12} className="text-slate-300 sm:w-[14px] sm:h-[14px]" />
                   </div>
                 ))}
               </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+12 Active Users</span>
+              <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">+12 Active Users</span>
             </div>
           </div>
           
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                  <th className="px-10 py-6">Payment ID</th>
-                  <th className="px-10 py-6">Client</th>
-                  <th className="px-10 py-6">Invoice No.</th>
-                  <th className="px-10 py-6">Date</th>
-                  <th className="px-10 py-6">Method</th>
-                  <th className="px-10 py-6 text-right">Amount</th>
-                  <th className="px-10 py-6 text-center">Status</th>
+                <tr className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                  <th className="px-6 sm:px-10 py-5 sm:py-6">Payment ID</th>
+                  <th className="px-6 sm:px-10 py-5 sm:py-6">Client</th>
+                  <th className="px-6 sm:px-10 py-5 sm:py-6">Invoice No.</th>
+                  <th className="px-6 sm:px-10 py-5 sm:py-6">Date</th>
+                  <th className="px-6 sm:px-10 py-5 sm:py-6">Method</th>
+                  <th className="px-6 sm:px-10 py-5 sm:py-6 text-right">Amount</th>
+                  <th className="px-6 sm:px-10 py-5 sm:py-6 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredTransactions.length > 0 ? (
                   filteredTransactions.map((tx, index) => (
                     <tr key={tx.id || index} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
-                      <td className="px-10 py-8">
-                        <span className="text-sm font-black text-blue-600 tracking-tight">{tx.id}</span>
+                      <td className="px-6 sm:px-10 py-6 sm:py-8">
+                        <span className="text-xs sm:text-sm font-black text-blue-600 tracking-tight">{tx.id}</span>
                       </td>
-                      <td className="px-10 py-8">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-50">
+                      <td className="px-6 sm:px-10 py-6 sm:py-8">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[9px] sm:text-[10px] font-black text-slate-400 border border-slate-50">
                             {tx.initials}
                           </div>
-                          <span className="text-sm font-black text-slate-800 uppercase tracking-tight">{tx.client}</span>
+                          <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{tx.client}</span>
                         </div>
                       </td>
-                      <td className="px-10 py-8 text-sm font-bold text-slate-400">{tx.invoice}</td>
-                      <td className="px-10 py-8 text-sm font-bold text-slate-500 uppercase tracking-tighter leading-tight whitespace-pre-line">
+                      <td className="px-6 sm:px-10 py-6 sm:py-8 text-xs sm:text-sm font-bold text-slate-400">{tx.invoice}</td>
+                      <td className="px-6 sm:px-10 py-6 sm:py-8 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-tighter leading-tight whitespace-pre-line">
                         {tx.date.split(',').join('\n')}
                       </td>
-                      <td className="px-10 py-8 text-sm font-bold text-slate-500">{tx.method}</td>
-                      <td className="px-10 py-8 text-sm font-black text-slate-900 text-right">
+                      <td className="px-6 sm:px-10 py-6 sm:py-8 text-xs sm:text-sm font-bold text-slate-500">{tx.method}</td>
+                      <td className="px-6 sm:px-10 py-6 sm:py-8 text-xs sm:text-sm font-black text-slate-900 text-right">
                         ${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="px-10 py-8 text-center">
-                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest
+                      <td className="px-6 sm:px-10 py-6 sm:py-8 text-center">
+                        <span className={`px-3 sm:px-4 py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest
                           ${tx.status === 'RECEIVED' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
                           {tx.status}
                         </span>
@@ -417,7 +419,7 @@ const Payments = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="px-10 py-10 text-center text-slate-400 font-bold italic">
+                    <td colSpan="7" className="px-6 sm:px-10 py-10 text-center text-slate-400 text-xs sm:text-sm font-bold italic">
                       No payments matching criteria
                     </td>
                   </tr>
@@ -429,27 +431,30 @@ const Payments = () => {
 
         {/* Sidebar Alerts - Matching Reference Image */}
         <div className="w-full xl:w-96 space-y-6">
-          <div className="bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 border border-slate-100">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest italic">Overdue Alerts</h3>
+          <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-slate-200/40 border border-slate-100">
+            <div className="flex justify-between items-center mb-6 sm:mb-8">
+              <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-widest italic">Overdue Alerts</h3>
               <AlertCircle size={18} className="text-rose-500" />
             </div>
             
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {mockAlerts.map((alert, index) => (
                 <div key={index} className="flex justify-between items-start group">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-slate-800 uppercase tracking-tight">{alert.client}</span>
-                      {alert.days && <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest italic">({alert.days})</span>}
+                      <span className="text-[11px] sm:text-xs font-black text-slate-800 uppercase tracking-tight">{alert.client}</span>
+                      {alert.days && <span className="text-[9px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest italic">({alert.days})</span>}
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 block mt-1">{alert.invoice}</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 block mt-1">{alert.invoice}</span>
                   </div>
                   <button className="text-slate-200 hover:text-blue-500 transition-colors">
                     <ExternalLink size={14} />
                   </button>
                 </div>
               ))}
+              {mockAlerts.length === 0 && (
+                <p className="text-[10px] sm:text-xs font-bold text-slate-400 italic">No overdue alerts found.</p>
+              )}
             </div>
           </div>
         </div>
@@ -463,11 +468,11 @@ const Payments = () => {
             onClick={() => setIsRecordModalOpen(false)}
           ></div>
           
-          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
-            <div className="p-10 overflow-y-auto custom-scrollbar">
+          <div className="bg-white w-full max-w-2xl rounded-3xl sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Record New Payment</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Record New Payment</h2>
                   <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Setup transaction billing details</p>
                 </div>
                 <button 
@@ -479,7 +484,7 @@ const Payments = () => {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name</label>
                     <input 
@@ -519,7 +524,7 @@ const Payments = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Date</label>
                     <input 
@@ -544,7 +549,7 @@ const Payments = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Amount (USD)</label>
                     <div className="relative">
@@ -571,18 +576,18 @@ const Payments = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2">
                   <button 
                     type="button"
                     onClick={() => setIsRecordModalOpen(false)}
-                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                    className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                   >
                     Cancel
                   </button>
                   <button 
                     type="button"
                     onClick={handleRecordPayment}
-                    className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+                    className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
                   >
                     Record Transaction
                   </button>

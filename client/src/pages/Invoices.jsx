@@ -527,13 +527,13 @@ const Invoices = ({ onInvoiceClick }) => {
   ];
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header Row - Matching Reference Image */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-10 gap-6">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">INVOICES</h1>
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 sm:mb-10 gap-6">
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic uppercase">INVOICES</h1>
         
-        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-          <div className="relative flex-1 min-w-[200px] xl:w-80">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full xl:w-auto">
+          <div className="relative w-full sm:flex-1 sm:min-w-[200px] xl:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
@@ -544,105 +544,107 @@ const Invoices = ({ onInvoiceClick }) => {
             />
           </div>
           
-          <div className="relative">
-            <button 
-              onClick={() => {
-                setShowDateFilterDropdown(!showDateFilterDropdown);
-                setShowStatusDropdown(false);
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-            >
-              <Calendar size={16} className="text-blue-500" />
-              <span>{startDateFilter || endDateFilter ? 'Date Active' : 'Date Filter'}</span>
-            </button>
-            
-            {showDateFilterDropdown && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-100 shadow-2xl rounded-2xl p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Filter by Issue Date</h4>
-                  {(startDateFilter || endDateFilter) && (
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-none">
+              <button 
+                onClick={() => {
+                  setShowDateFilterDropdown(!showDateFilterDropdown);
+                  setShowStatusDropdown(false);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+              >
+                <Calendar size={16} className="text-blue-500" />
+                <span>{startDateFilter || endDateFilter ? 'Date Active' : 'Date Filter'}</span>
+              </button>
+              
+              {showDateFilterDropdown && (
+                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white border border-slate-100 shadow-2xl rounded-2xl p-4 sm:p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Filter by Issue Date</h4>
+                    {(startDateFilter || endDateFilter) && (
+                      <button 
+                        onClick={() => {
+                          setStartDateFilter('');
+                          setEndDateFilter('');
+                        }}
+                        className="text-[8px] font-black text-rose-500 hover:underline uppercase tracking-widest"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
+                      <input 
+                        type="date"
+                        value={startDateFilter}
+                        onChange={(e) => setStartDateFilter(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
+                      <input 
+                        type="date"
+                        value={endDateFilter}
+                        onChange={(e) => setEndDateFilter(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
+                      />
+                    </div>
                     <button 
-                      onClick={() => {
-                        setStartDateFilter('');
-                        setEndDateFilter('');
-                      }}
-                      className="text-[8px] font-black text-rose-500 hover:underline uppercase tracking-widest"
+                      onClick={() => setShowDateFilterDropdown(false)}
+                      className="w-full mt-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md shadow-blue-100"
                     >
-                      Clear
+                      Apply Filter
                     </button>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
-                    <input 
-                      type="date"
-                      value={startDateFilter}
-                      onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
-                    />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
-                    <input 
-                      type="date"
-                      value={endDateFilter}
-                      onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all"
-                    />
-                  </div>
-                  <button 
-                    onClick={() => setShowDateFilterDropdown(false)}
-                    className="w-full mt-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md shadow-blue-100"
-                  >
-                    Apply Filter
-                  </button>
                 </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="relative">
-            <button 
-              onClick={() => {
-                setShowStatusDropdown(!showStatusDropdown);
-                setShowDateFilterDropdown(false);
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-            >
-              <Filter size={16} className="text-blue-500" />
-              <span>Status: {statusFilter}</span>
-            </button>
+              )}
+            </div>
             
-            {showStatusDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                {['ALL', 'PAID', 'PENDING', 'OVERDUE', 'DRAFT'].map(status => (
-                  <button
-                    key={status}
-                    onClick={() => {
-                      setStatusFilter(status);
-                      setShowStatusDropdown(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                      statusFilter === status 
-                        ? 'bg-blue-50 text-blue-600' 
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="relative flex-1 sm:flex-none">
+              <button 
+                onClick={() => {
+                  setShowStatusDropdown(!showStatusDropdown);
+                  setShowDateFilterDropdown(false);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+              >
+                <Filter size={16} className="text-blue-500" />
+                <span>Status: {statusFilter}</span>
+              </button>
+              
+              {showStatusDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {['ALL', 'PAID', 'PENDING', 'OVERDUE', 'DRAFT'].map(status => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setStatusFilter(status);
+                        setShowStatusDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                        statusFilter === status 
+                          ? 'bg-blue-50 text-blue-600' 
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <button 
+              onClick={handleExportCSV}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Download size={16} className="text-blue-500" />
+              <span>Export</span>
+            </button>
           </div>
-          
-          <button 
-            onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Download size={16} className="text-blue-500" />
-            <span>Export</span>
-          </button>
           
           <button 
             onClick={() => {
@@ -683,7 +685,7 @@ const Invoices = ({ onInvoiceClick }) => {
               });
               setIsModalOpen(true);
             }}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
           >
             <Plus size={18} />
             <span>Create Invoice</span>
@@ -692,11 +694,11 @@ const Invoices = ({ onInvoiceClick }) => {
       </div>
 
       {/* Stats Bar - Matching Reference Image */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 flex flex-col justify-center">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{stat.label}</span>
-            <span className={`text-2xl font-black ${stat.color} tracking-tight`}>
+          <div key={index} className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 flex flex-col justify-center">
+            <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 sm:mb-2">{stat.label}</span>
+            <span className={`text-xl sm:text-2xl font-black ${stat.color} tracking-tight`}>
               {stat.value}
             </span>
           </div>
@@ -704,10 +706,10 @@ const Invoices = ({ onInvoiceClick }) => {
       </div>
 
       {/* Table Section - Matching Reference Image */}
-      <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 overflow-hidden">
-        <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-white">
-          <h2 className="text-lg font-black text-slate-800 tracking-tight italic uppercase">Detailed Invoice List</h2>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-500 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">
+      <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 overflow-hidden">
+        <div className="p-4 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white gap-4">
+          <h2 className="text-base sm:text-lg font-black text-slate-800 tracking-tight italic uppercase">Detailed Invoice List</h2>
+          <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-500 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">
             <Filter size={14} />
             <span>Filter List</span>
           </button>
@@ -716,17 +718,17 @@ const Invoices = ({ onInvoiceClick }) => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                <th className="px-8 py-5">Invoice No.</th>
-                <th className="px-8 py-5">Client</th>
-                <th className="px-8 py-5">Project</th>
-                <th className="px-8 py-5">Dispatch</th>
-                <th className="px-8 py-5">Transporter</th>
-                <th className="px-8 py-5">Issue Date</th>
-                <th className="px-8 py-5">Due Date</th>
-                <th className="px-8 py-5">Amount</th>
-                <th className="px-8 py-5">Status</th>
-                <th className="px-8 py-5 text-right">Action</th>
+              <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Invoice No.</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Client</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Project</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Dispatch</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Transporter</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Issue Date</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Due Date</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Amount</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5">Status</th>
+                <th className="px-6 sm:px-8 py-4 sm:py-5 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -737,54 +739,51 @@ const Invoices = ({ onInvoiceClick }) => {
                     onClick={() => onInvoiceClick && onInvoiceClick(invoice.id)}
                     className="transition-all cursor-pointer group"
                   >
-                    <td className="px-8 py-6">
-                      <span className="text-sm font-black text-blue-600 hover:underline">{invoice.invoiceNumber || invoice.id}</span>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6">
+                      <span className="text-xs sm:text-sm font-black text-blue-600 hover:underline">{invoice.invoiceNumber || invoice.id}</span>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className="text-sm font-black text-slate-800">{invoice.client}</span>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6">
+                      <span className="text-xs sm:text-sm font-black text-slate-800">{invoice.client}</span>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className="text-sm font-bold text-slate-500">{invoice.project}</span>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6">
+                      <span className="text-xs sm:text-sm font-bold text-slate-500">{invoice.project}</span>
                     </td>
-                    <td className="px-8 py-6 text-sm font-bold text-slate-400">{invoice.dispatchDate || '-'}</td>
-                    <td className="px-8 py-6 text-sm font-bold text-slate-400">{invoice.transporter || '-'}</td>
-                    <td className="px-8 py-6 text-sm font-bold text-slate-400">{invoice.issueDate}</td>
-                    <td className="px-8 py-6 text-sm font-bold text-slate-400">{invoice.dueDate}</td>
-                    <td className="px-8 py-6 text-sm font-black text-slate-900">${invoice.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="px-8 py-6">
-                      <span className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-400">{invoice.dispatchDate || '-'}</td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-400">{invoice.transporter || '-'}</td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-400">{invoice.issueDate}</td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-400">{invoice.dueDate}</td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-black text-slate-900">${invoice.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6">
+                      <span className={`px-2 sm:px-4 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest
                         ${invoice.status === 'PAID' ? 'bg-emerald-500 text-white' : 
                           invoice.status === 'PENDING' ? 'bg-amber-500 text-white' : 
                           invoice.status === 'OVERDUE' ? 'bg-rose-500 text-white' : 'bg-slate-400 text-white'}`}>
                         {invoice.status}
                       </span>
                     </td>
-                    <td className="px-8 py-6 text-right">
-                      <div className="flex items-center justify-end gap-4 transition-opacity">
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-right">
+                      <div className="flex items-center justify-end gap-3 sm:gap-4 transition-opacity">
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleEditClick(invoice); }}
-                          className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors"
+                          className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors"
                         >
-                          <Edit size={14} />
-                          <span>Edit</span>
+                          <Edit size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden sm:inline">Edit</span>
                         </button>
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleDeleteInvoice(invoice.id); }}
-                          className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
+                          className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors"
                         >
-                          <Trash2 size={14} />
-                          <span>Delete</span>
+                          <Trash2 size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden sm:inline">Delete</span>
                         </button>
                       </div>
-                      <button className="group-hover:hidden text-slate-300">
-                        <MoreVertical size={18} />
-                      </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="px-8 py-10 text-center text-slate-400 font-bold italic">
+                  <td colSpan="10" className="px-6 sm:px-8 py-10 text-center text-slate-400 font-bold italic">
                     No invoices matching search criteria
                   </td>
                 </tr>
@@ -793,13 +792,13 @@ const Invoices = ({ onInvoiceClick }) => {
           </table>
         </div>
         
-        <div className="p-8 bg-slate-50/50 border-t border-slate-50 flex justify-between items-center">
-          <span className="text-xs font-bold text-slate-400">
+        <div className="p-4 sm:p-8 bg-slate-50/50 border-t border-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <span className="text-[10px] sm:text-xs font-bold text-slate-400">
             Showing {filteredInvoices.length} of {invoices.length} invoices
           </span>
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50" disabled>Previous</button>
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm">Next</button>
+            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50" disabled>Previous</button>
+            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm">Next</button>
           </div>
         </div>
       </div>
@@ -812,11 +811,11 @@ const Invoices = ({ onInvoiceClick }) => {
             onClick={() => setIsModalOpen(false)}
           ></div>
           
-          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
-            <div className="p-10 overflow-y-auto custom-scrollbar">
+          <div className="bg-white w-full max-w-2xl rounded-3xl sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">
                     {editInvoiceId ? `Edit Invoice: ${editInvoiceId}` : 'Generate New Invoice'}
                   </h2>
                   <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">
@@ -869,7 +868,7 @@ const Invoices = ({ onInvoiceClick }) => {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name</label>
                       <select
@@ -913,7 +912,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Date</label>
                     <input 
@@ -948,7 +947,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Address</label>
                     <textarea
@@ -971,7 +970,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reference / Invoice Ref.</label>
                     <input
@@ -994,7 +993,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Invoice Ref.</label>
                     <input
@@ -1017,7 +1016,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PO Date</label>
                     <input
@@ -1049,7 +1048,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Vehicle Number</label>
                     <input
@@ -1082,7 +1081,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dispatch Date</label>
                     <input
@@ -1113,7 +1112,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client GSTIN</label>
                     <input
@@ -1136,7 +1135,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Phone</label>
                     <input
@@ -1159,7 +1158,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dispatch From</label>
                     <input
@@ -1193,7 +1192,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Amount Due</label>
                     <input
@@ -1222,7 +1221,7 @@ const Invoices = ({ onInvoiceClick }) => {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`relative border-2 border-dashed rounded-[2rem] p-8 transition-all flex flex-col items-center justify-center text-center
+                    className={`relative border-2 border-dashed rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 transition-all flex flex-col items-center justify-center text-center
                       ${isDragging ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200'}`}
                   >
                     <input 
@@ -1231,11 +1230,11 @@ const Invoices = ({ onInvoiceClick }) => {
                       onChange={handleFileSelect}
                       className="absolute inset-0 opacity-0 cursor-pointer"
                     />
-                    <div className={`p-4 rounded-2xl bg-white shadow-sm mb-4 transition-transform ${isDragging ? 'scale-110 text-blue-600' : 'text-slate-400'}`}>
+                    <div className={`p-3 sm:p-4 rounded-2xl bg-white shadow-sm mb-4 transition-transform ${isDragging ? 'scale-110 text-blue-600' : 'text-slate-400'}`}>
                       <UploadCloud size={32} />
                     </div>
-                    <p className="text-sm font-black text-slate-800 tracking-tight">Drop documents here or click to browse</p>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Supports PDF, PNG, JPG (Max 10MB)</p>
+                    <p className="text-xs sm:text-sm font-black text-slate-800 tracking-tight">Drop documents here or click to browse</p>
+                    <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Supports PDF, PNG, JPG (Max 10MB)</p>
                   </div>
 
                   {files.length > 0 && (
@@ -1247,8 +1246,8 @@ const Invoices = ({ onInvoiceClick }) => {
                               <File size={16} />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-xs font-black text-slate-800 truncate max-w-[200px]">{file.name}</span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                              <span className="text-xs font-black text-slate-800 truncate max-w-[150px] sm:max-w-[200px]">{file.name}</span>
+                              <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                             </div>
                           </div>
                           <button 
@@ -1275,7 +1274,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   ></textarea>
                 </div>
 
-                <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2">
                   <button 
                     type="button"
                     onClick={() => {
@@ -1298,14 +1297,14 @@ const Invoices = ({ onInvoiceClick }) => {
                         notes: ''
                       });
                     }}
-                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                    className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                   >
                     {editInvoiceId ? 'Cancel' : 'Discard Draft'}
                   </button>
                   <button 
                     type="button"
                     onClick={handleCreateInvoice}
-                    className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+                    className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
                   >
                     {editInvoiceId ? 'Save Changes' : 'Generate & Send Invoice'}
                   </button>
