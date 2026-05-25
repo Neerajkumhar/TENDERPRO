@@ -11,6 +11,7 @@ let sequelize;
 const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
 
 if (dbUrl) {
+  console.log('Connecting to DB via URL:', dbUrl.split('@')[1] || 'URL present');
   sequelize = new Sequelize(dbUrl, {
     dialect: 'mysql',
     dialectModule: mysql2,
