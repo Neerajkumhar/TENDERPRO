@@ -28,12 +28,16 @@ require('./models/InstallationChallan');
 require('./models/Expense');
 require('./models/Message');
 require('./models/LeaveRequest');
+require('./models/LeaveBalance');
 
 // Set up associations
 const User = require('./models/User');
 const LeaveRequest = require('./models/LeaveRequest');
+const LeaveBalance = require('./models/LeaveBalance');
 User.hasMany(LeaveRequest, { foreignKey: 'userId' });
 LeaveRequest.belongsTo(User, { foreignKey: 'userId' });
+User.hasOne(LeaveBalance, { foreignKey: 'userId' });
+LeaveBalance.belongsTo(User, { foreignKey: 'userId' });
 
 const app = express();
 

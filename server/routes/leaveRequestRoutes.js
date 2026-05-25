@@ -5,6 +5,7 @@ const leaveRequestController = require('../controllers/leaveRequestController');
 router.post('/', leaveRequestController.createLeaveRequest);
 router.get('/', leaveRequestController.getAllLeaveRequests);
 router.get('/department/:departmentId', leaveRequestController.getLeaveRequestsByDepartment);
+router.get('/balance/:userId', leaveRequestController.getLeaveBalance);
 router.put('/:id/status', leaveRequestController.updateLeaveRequestStatus);
 
 module.exports = router;

@@ -30,6 +30,14 @@ const LeaveRequest = sequelize.define('LeaveRequest', {
   status: {
     type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
     defaultValue: 'Pending',
+  },
+  approverId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  managerComment: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   }
 }, {
   timestamps: true,
