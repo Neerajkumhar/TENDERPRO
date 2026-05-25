@@ -565,7 +565,7 @@ const CalendarPage = () => {
   ];
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-black text-slate-800 tracking-tight">Calendar</h1>
         <div className="flex items-center gap-3">

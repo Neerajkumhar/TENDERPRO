@@ -168,7 +168,7 @@ const InstallationChallan = () => {
   };
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto min-h-screen bg-[#f8fafc]">
+    <div className="p-8 min-h-screen bg-[#f8fafc]">
       <div className="bg-white px-8 py-6 rounded-[2rem] shadow-2xl shadow-slate-200/30 border border-slate-100 mb-8">
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
           <div>

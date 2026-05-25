@@ -90,7 +90,7 @@ const ClientManagement = ({ clients = [], setClients, onView }) => {
   ];
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] pb-12">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] pb-12">
       {/* Header Area */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-black text-slate-800 tracking-tight">Client Directory</h1>

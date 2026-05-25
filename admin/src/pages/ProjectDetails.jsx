@@ -87,7 +87,7 @@ const ProjectDetails = ({ projectId, onBack }) => {
   ];
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Area */}
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-start">

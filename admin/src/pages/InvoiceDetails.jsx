@@ -387,7 +387,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
   };
 
   return (
-    <div className="p-8 print:p-0 max-w-[1200px] mx-auto space-y-6 print:space-y-0 print:max-w-none">
+    <div className="p-8 print:p-0 space-y-6 print:space-y-0 print:max-w-none">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">

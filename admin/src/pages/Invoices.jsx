@@ -527,7 +527,7 @@ const Invoices = ({ onInvoiceClick }) => {
   ];
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header Row - Matching Reference Image */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-10 gap-6">
         <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">INVOICES</h1>

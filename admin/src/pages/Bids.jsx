@@ -55,7 +55,7 @@ const Bids = () => {
   ];
 
   return (
-    <div className="px-8 pt-8 pb-4 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="px-8 pt-8 pb-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       {/* Header Area */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-black text-slate-800 tracking-tight">Bids</h1>

@@ -100,7 +100,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
   };
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-8">
+    <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-8">
       {/* Header breadcrumb & Navigation */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-6">

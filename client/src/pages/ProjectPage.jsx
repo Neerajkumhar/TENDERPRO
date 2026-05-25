@@ -165,7 +165,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
   };
 
   return (
-    <div className="p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header - Matching Image */}
       <div className="flex justify-between items-start mb-10">
         <div>

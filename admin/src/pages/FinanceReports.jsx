@@ -66,7 +66,7 @@ const FinanceReports = () => {
   ];
 
   return (
-    <div className="p-8 space-y-10 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-8 space-y-10 animate-in fade-in duration-700">
       
       {/* Header & Controls */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">

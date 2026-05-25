@@ -242,7 +242,7 @@ const Budget = () => {
   }
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen relative">
+    <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen relative">
       {/* Header - Matching Reference Image */}
       <div className="flex justify-between items-start mb-6">
         <div>

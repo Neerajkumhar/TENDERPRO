@@ -72,7 +72,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
   const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation Header */}
       <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white">
         <div className="flex gap-2">

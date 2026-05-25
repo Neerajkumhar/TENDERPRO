@@ -6,7 +6,7 @@ const Profile = ({ user, onLogout, departments = [] }) => {
     d.id && user?.departmentId && String(d.id).toLowerCase() === String(user.departmentId).toLowerCase()
   );
   return (
-    <div className="p-4 sm:p-8 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">
           {department?.name ? `${department.name} ` : ''}{user?.role || 'User'} Account Settings

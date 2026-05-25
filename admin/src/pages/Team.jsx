@@ -23,7 +23,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
   );
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-8 space-y-8 animate-in fade-in duration-700">
       {/* Header Section */}
       <div>
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Team</h1>

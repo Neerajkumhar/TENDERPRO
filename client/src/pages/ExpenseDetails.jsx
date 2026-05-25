@@ -92,7 +92,7 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
   };
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">

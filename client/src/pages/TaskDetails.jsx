@@ -209,7 +209,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   };
 
   return (
-    <div className="p-8 space-y-8 max-w-[1400px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-start gap-4">

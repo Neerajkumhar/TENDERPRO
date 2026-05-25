@@ -209,7 +209,7 @@ const Payments = () => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header - Matching Reference Image */}
       <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
         <div>

@@ -104,7 +104,7 @@ const CreateProject = ({ onCancel, onSave, clients = [], tenders = [] }) => {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-8 py-8 grid grid-cols-12 gap-8">
+      <div className="px-8 py-8 grid grid-cols-12 gap-8">
         {/* Left Sidebar - Steps */}
         <div className="col-span-12 lg:col-span-3">
           <div className="sticky top-28 space-y-8">

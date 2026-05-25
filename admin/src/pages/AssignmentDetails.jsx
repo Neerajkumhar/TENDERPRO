@@ -97,7 +97,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
   if (!assignment) return <div className="p-8 text-center">Assignment not found.</div>;
 
   return (
-    <div className="p-8 space-y-8 max-w-[1200px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex justify-between items-center">
         <button 
           onClick={onBack}

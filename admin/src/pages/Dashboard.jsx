@@ -78,7 +78,7 @@ const teamWorkload = [
 
 const Dashboard = () => {
   return (
-    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>

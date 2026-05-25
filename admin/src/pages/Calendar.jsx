@@ -41,7 +41,7 @@ const CalendarPage = () => {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] ">
+    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] ">
       {/* Header Area - Matching Image 9 */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-black text-slate-800 tracking-tight">Calendar</h1>

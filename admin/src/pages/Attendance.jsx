@@ -338,7 +338,7 @@ const Attendance = ({ user }) => {
   };
 
   return (
-    <div className="p-8 space-y-10 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-8 space-y-10 animate-in fade-in duration-700">
       
       {/* Premium Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">

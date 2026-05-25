@@ -138,7 +138,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     : teamMembers.filter(m => m.dept === selectedDept);
 
   return (
-    <div className="p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-8 space-y-8 animate-in fade-in duration-700">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
