@@ -803,13 +803,30 @@ const Attendance = ({ user }) => {
 
                 {/* Modal Form Body */}
                 <form 
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
+                    if (!user?.id) return;
                     setIsSubmittingLeave(true);
-                    setTimeout(() => {
+                    try {
+                      const response = await fetch('/api/leave-requests', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          userId: user.id,
+                          leaveType,
+                          startDate: leaveStart,
+                          endDate: leaveEnd,
+                          reason: leaveReason
+                        })
+                      });
+                      if (response.ok) {
+                        setLeaveSubmitted(true);
+                      }
+                    } catch (err) {
+                      console.error('Failed to submit leave request:', err);
+                    } finally {
                       setIsSubmittingLeave(false);
-                      setLeaveSubmitted(true);
-                    }, 1200);
+                    }
                   }}
                   className="p-8 space-y-6"
                 >

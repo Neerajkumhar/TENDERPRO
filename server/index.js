@@ -19,12 +19,21 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
 // Load models to ensure they are registered with Sequelize
+require('./models/User');
+require('./models/Department');
 require('./models/Attendance');
 require('./models/Invoice');
 require('./models/DeliveryChallan');
 require('./models/InstallationChallan');
 require('./models/Expense');
 require('./models/Message');
+require('./models/LeaveRequest');
+
+// Set up associations
+const User = require('./models/User');
+const LeaveRequest = require('./models/LeaveRequest');
+User.hasMany(LeaveRequest, { foreignKey: 'userId' });
+LeaveRequest.belongsTo(User, { foreignKey: 'userId' });
 
 const app = express();
 
@@ -78,6 +87,7 @@ app.use('/api/delivery-challans', deliveryChallanRoutes);
 app.use('/api/installation-challans', installationChallanRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/leave-requests', require('./routes/leaveRequestRoutes'));
 
 app.get('/', (req, res) => {
   res.json({ 
