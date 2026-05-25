@@ -19,7 +19,8 @@ import {
   PieChart,
   MessageSquare,
   Clock,
-  Truck
+  Truck,
+  X
 } from 'lucide-react';
 
 const menuItems = [
@@ -73,16 +74,34 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
 
   return (
     <aside className={`
-      print:hidden bg-white border-r border-slate-200 flex flex-col h-screen transition-all duration-300
-      ${isOpen ? 'translate-x-0 w-64 z-[100] fixed shadow-2xl' : '-translate-x-full w-0 lg:w-auto lg:translate-x-0 lg:sticky lg:z-40'}
+      print:hidden bg-white border-r border-slate-200 flex flex-col h-screen transition-all duration-300 ease-in-out
+      ${isOpen 
+        ? 'translate-x-0 w-[280px] sm:w-64 z-[100] fixed shadow-2xl' 
+        : '-translate-x-full w-[280px] sm:w-64 fixed lg:relative lg:translate-x-0 lg:w-auto lg:sticky lg:z-40'}
       ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
       top-0 left-0
     `}>
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-          <div className="w-4 h-4 border-2 border-white rotate-45"></div>
+      <div className="p-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-blue-200">
+            <div className="w-4 h-4 border-2 border-white rotate-45"></div>
+          </div>
+          {(!isCollapsed || isOpen) && (
+            <span className="font-black text-xl text-slate-800 tracking-tight animate-in fade-in slide-in-from-left-2 duration-300">
+              TENDERPRO
+            </span>
+          )}
         </div>
-        {!isCollapsed && <span className="font-black text-xl text-slate-800 tracking-tight">TENDERPRO</span>}
+        
+        {/* Mobile Close Button */}
+        {isOpen && (
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="lg:hidden p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+          >
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
@@ -92,14 +111,25 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
             <button
               key={index}
               onClick={() => setActiveTab(item.activeTab)}
-              className={`w-full flex items-center px-3 py-3 rounded-xl transition-all group ${
+              className={`w-full flex items-center px-3 py-3 rounded-xl transition-all group relative ${
                 isActive 
                   ? 'bg-blue-600 text-white shadow-xl shadow-blue-100' 
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-              } ${isCollapsed ? 'justify-center' : ''}`}
+              } ${(isCollapsed && !isOpen) ? 'justify-center' : ''}`}
             >
               <item.icon size={20} className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-              {!isCollapsed && <span className="ml-3 text-sm font-bold">{item.label}</span>}
+              {(!isCollapsed || isOpen) && (
+                <span className="ml-3 text-sm font-bold truncate animate-in fade-in slide-in-from-left-2 duration-300">
+                  {item.label}
+                </span>
+              )}
+              
+              {/* Tooltip for collapsed state */}
+              {isCollapsed && !isOpen && (
+                <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                  {item.label}
+                </div>
+              )}
             </button>
           );
         })}
@@ -108,10 +138,12 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
       <div className="p-4 border-t border-slate-100 bg-slate-50/50">
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-blue-600 rounded-xl transition-all"
+          className={`w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-blue-600 rounded-xl transition-all ${
+            (isCollapsed && !isOpen) ? 'justify-center' : ''
+          }`}
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          {!isCollapsed && <span className="text-sm font-bold">Collapse</span>}
+          {(!isCollapsed || isOpen) && <span className="text-sm font-bold">Collapse Sidebar</span>}
         </button>
       </div>
     </aside>
