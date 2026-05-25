@@ -27,7 +27,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
       <div className="flex items-center gap-4 flex-1">
         <button 
           onClick={toggleMobileMenu}
-          className="p-2 lg:hidden text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+          className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
         >
           <Menu size={24} />
         </button>

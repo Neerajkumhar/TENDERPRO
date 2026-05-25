@@ -78,19 +78,17 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
       ${isOpen 
         ? 'translate-x-0 w-[280px] sm:w-64 z-[100] fixed shadow-2xl' 
         : '-translate-x-full w-[280px] sm:w-64 fixed lg:relative lg:translate-x-0 lg:sticky lg:z-40'}
-      ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
+      ${isCollapsed ? 'lg:w-0 lg:overflow-hidden lg:border-none' : 'lg:w-64'}
       top-0 left-0
     `}>
-      <div className="p-6 flex items-center justify-between gap-3">
+      <div className="p-6 flex items-center justify-between gap-3 min-w-[256px]">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-blue-200">
             <div className="w-4 h-4 border-2 border-white rotate-45"></div>
           </div>
-          {(!isCollapsed || isOpen) && (
-            <span className="font-black text-xl text-slate-800 tracking-tight animate-in fade-in slide-in-from-left-2 duration-300">
-              TENDERPRO
-            </span>
-          )}
+          <span className="font-black text-xl text-slate-800 tracking-tight animate-in fade-in slide-in-from-left-2 duration-300">
+            TENDERPRO
+          </span>
         </div>
         
         {/* Mobile Close Button */}
@@ -104,7 +102,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         )}
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar min-w-[256px]">
         {filteredMenuItems.map((item, index) => {
           const isActive = activeTab === item.activeTab;
           return (
@@ -115,35 +113,24 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
                 isActive 
                   ? 'bg-blue-600 text-white shadow-xl shadow-blue-100' 
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-              } ${(isCollapsed && !isOpen) ? 'justify-center' : ''}`}
+              }`}
             >
               <item.icon size={20} className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-              {(!isCollapsed || isOpen) && (
-                <span className="ml-3 text-sm font-bold truncate animate-in fade-in slide-in-from-left-2 duration-300">
-                  {item.label}
-                </span>
-              )}
-              
-              {/* Tooltip for collapsed state */}
-              {isCollapsed && !isOpen && (
-                <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
-                  {item.label}
-                </div>
-              )}
+              <span className="ml-3 text-sm font-bold truncate animate-in fade-in slide-in-from-left-2 duration-300">
+                {item.label}
+              </span>
             </button>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+      <div className="p-4 border-t border-slate-100 bg-slate-50/50 min-w-[256px]">
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-blue-600 rounded-xl transition-all ${
-            (isCollapsed && !isOpen) ? 'justify-center' : ''
-          }`}
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-blue-600 rounded-xl transition-all"
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          {(!isCollapsed || isOpen) && <span className="text-sm font-bold">Collapse Sidebar</span>}
+          <span className="text-sm font-bold">Collapse Sidebar</span>
         </button>
       </div>
     </aside>
