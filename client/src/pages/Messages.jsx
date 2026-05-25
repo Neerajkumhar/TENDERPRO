@@ -270,7 +270,9 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
 
   return (
     <>
-      <div className={`flex bg-white overflow-hidden animate-in fade-in duration-300 ${isPopup ? 'fixed inset-0 sm:inset-auto sm:top-[80px] sm:right-[80px] z-[100] sm:w-[800px] md:w-[1000px] sm:h-[600px] md:h-[700px] rounded-none sm:rounded-3xl border-none sm:border border-slate-100 shadow-2xl zoom-in-95 origin-top-right' : 'h-[calc(100vh-64px)] w-full rounded-none lg:rounded-[3rem] lg:m-6 lg:h-[calc(100vh-140px)] lg:w-[calc(100%-3rem)] border-slate-100 lg:border lg:shadow-2xl zoom-in-95'}`}>
+      <div className={`flex bg-white overflow-hidden animate-in fade-in duration-300 ${isPopup 
+        ? 'fixed inset-0 sm:inset-auto sm:top-[80px] sm:right-[80px] z-[100] sm:w-[800px] md:w-[1000px] sm:h-[600px] md:h-[700px] rounded-none sm:rounded-3xl border-none sm:border border-slate-100 shadow-2xl zoom-in-95 origin-top-right' 
+        : 'h-full w-full'}`}>
       
       {/* Sidebar - Chat List */}
       <div className={`${showChatList ? 'flex' : 'hidden lg:flex'} w-full lg:w-[380px] border-r border-slate-50 flex flex-col bg-slate-50/20`}>

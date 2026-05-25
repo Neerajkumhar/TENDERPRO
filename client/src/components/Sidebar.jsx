@@ -38,7 +38,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Tender Dashboard', roles: ['Tender Manager'] },
   { icon: FileText, label: 'Tenders', activeTab: 'Tender Management', roles: ['Tender Manager'] },
   { icon: Briefcase, label: 'Projects', activeTab: 'Projects', roles: ['Tender Manager'] },
-  { icon: Users, label: 'Clients', activeTab: 'Client Management', roles: ['Tender Manager', 'Project Manager'] },
+  { icon: Users, label: 'Clients', activeTab: 'Client Management', roles: ['Tender Manager'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Tender Manager'] },
   { icon: Calendar, label: 'Calendar', activeTab: 'Calendar', roles: ['Tender Manager'] },
 
@@ -59,6 +59,7 @@ const menuItems = [
   { icon: Truck, label: 'Delivery Challan', activeTab: 'Delivery Challan', roles: ['Finance Manager'] },
   { icon: PieChart, label: 'Budget', activeTab: 'Budget', roles: ['Finance Manager'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Finance Manager'] },
+  { icon: MessageSquare, label: 'Messages', activeTab: 'Messages', roles: ['Admin', 'Tender Manager', 'Project Manager', 'Finance Manager', 'Core Team'] },
 
   // Team Member
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Member Dashboard', roles: ['Core Team'] },

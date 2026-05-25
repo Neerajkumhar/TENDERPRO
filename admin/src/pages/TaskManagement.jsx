@@ -208,7 +208,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
   const totalTasks = tasks.length || 1;
   const stats = [
-    { label: 'TO DO', value: getTasksByStatus('To Do').length, percent: `${Math.round((getTasksByStatus('To Do').length / totalTasks) * 100)}% OF TOTAL`, icon: ClipboardList, color: 'bg-blue-600', light: 'bg-blue-50' },
+    { label: 'TO DO', value: getTasksByStatus('To Do').length, percent: `${Math.round((getTasksByStatus('To Do').length / totalTasks) * 100)}% OF TOTAL`, icon: null, color: 'bg-blue-600', light: 'bg-blue-50' },
     { label: 'IN PROGRESS', value: getTasksByStatus('In Progress').length, percent: `${Math.round((getTasksByStatus('In Progress').length / totalTasks) * 100)}% OF TOTAL`, icon: Clock, color: 'bg-emerald-500', light: 'bg-emerald-50' },
     { label: 'REVIEW', value: getTasksByStatus('Review').length, percent: `${Math.round((getTasksByStatus('Review').length / totalTasks) * 100)}% OF TOTAL`, icon: Eye, color: 'bg-purple-600', light: 'bg-purple-50' },
     { label: 'DUE TODAY', value: 3, percent: '12% OF TOTAL', icon: Calendar, color: 'bg-orange-500', light: 'bg-orange-50' },
@@ -216,40 +216,39 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
   ];
 
   return (
-    <div className="p-8 space-y-10 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full overflow-x-hidden relative">
+    <div className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-10 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full overflow-x-hidden relative">
       
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-            <div className="flex justify-between items-start mb-6">
-               <div className={`p-3 rounded-2xl ${stat.light} ${stat.color.replace('bg-', 'text-')} shadow-sm`}>
-                  {stat.label === 'TO DO' ? <ClipboardList size={22} /> : <stat.icon size={22} />}
+          <div key={i} className={`bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-500 ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
+               <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${stat.light} ${stat.color.replace('bg-', 'text-')} shadow-sm`}>
+                  {stat.label === 'TO DO' ? <ClipboardListIcon size={20} /> : <stat.icon size={20} />}
                </div>
-               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{stat.percent}</span>
+               <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">{stat.percent}</span>
             </div>
             <div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-               <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{stat.value}</h3>
+               <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 sm:mb-1 truncate">{stat.label}</p>
+               <h3 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tighter truncate">{stat.value}</h3>
             </div>
-            <div className={`absolute bottom-0 left-0 right-0 h-1.5 ${stat.color} opacity-80`}></div>
+            <div className={`absolute bottom-0 left-0 right-0 h-1 sm:h-1.5 ${stat.color} opacity-80`}></div>
           </div>
         ))}
       </div>
 
       {/* Board Header Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pt-4">
-        <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 pt-4">
+        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter uppercase italic">
           {user.role === 'Core Team' ? 'MY TASKS BOARD' : 'PROJECT TASKS HUB'}
         </h2>
         
-        <div className="flex flex-wrap items-center gap-4">
-
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* CREATE TASK BUTTON FOR PROJECT MANAGERS */}
           {user.role === 'Project Manager' && (
             <button 
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
             >
               <Plus size={16} />
               <span>CREATE TASK</span>
@@ -258,14 +257,14 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 pb-10">
         
         {/* Kanban Board - Main Area */}
-        <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
           {columns.map((col) => (
             <div 
               key={col.id} 
-              className="space-y-6 flex flex-col h-full group/column"
+              className="space-y-4 sm:space-y-6 flex flex-col h-full group/column"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.id)}
             >
@@ -283,14 +282,14 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                   {user.role === 'Project Manager' && (
                     <button 
                       onClick={() => setShowCreateModal(true)}
-                      className="text-slate-200 hover:text-blue-600 opacity-0 group-hover/column:opacity-100 transition-all"
+                      className="text-slate-200 hover:text-blue-600 transition-all"
                     >
                        <Plus size={16} />
                     </button>
                   )}
               </div>
 
-              <div className="space-y-4 flex-1 min-h-[600px] p-2 rounded-[2.5rem] bg-slate-50/20 border-2 border-transparent hover:border-blue-100/50 transition-all duration-300 border-dashed">
+              <div className="space-y-4 flex-1 min-h-[300px] lg:min-h-[600px] p-2 rounded-3xl sm:rounded-[2.5rem] bg-slate-50/20 border-2 border-transparent hover:border-blue-100/50 transition-all duration-300 border-dashed">
                 {getTasksByStatus(col.id).map((task) => (
                   <div 
                     key={task.id} 
@@ -298,7 +297,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                     draggable
                     onDragStart={(e) => handleDragStart(e, task.id)}
                     onDragEnd={handleDragEnd}
-                    className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing group relative overflow-hidden"
+                    className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing group relative overflow-hidden"
                   >
                     <div className={`absolute top-0 left-0 right-0 h-1 ${
                        task.priority === 'High' || task.priority === 'HIGH' ? 'bg-rose-500' : 
@@ -327,18 +326,18 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-6 line-clamp-1">{task.desc || task.description || 'NO DESCRIPTION'}</p>
                     
                     <div className="flex items-center justify-between border-t border-slate-50 pt-5">
-                      <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${
+                      <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-2 h-2 rounded-full shrink-0 ${
                             col.id === 'In Progress' ? 'bg-orange-500' : 
                             col.id === 'Review' ? 'bg-purple-600' : 
                             col.id === 'Completed' ? 'bg-emerald-500' : 
                             'bg-blue-600'
                           }`}></div>
-                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">
                             {task.project || (task.tender?.title ? task.tender.title.substring(0, 15) : 'GENERAL')}
                           </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-300">
+                      <div className="flex items-center gap-1.5 text-slate-300 shrink-0 ml-2">
                           <Clock size={12} />
                           <span className="text-[9px] font-black uppercase tracking-tight">
                             {task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'NO DEADLINE'}
@@ -354,7 +353,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
         {/* Task Activity Sidebar - Secondary Board */}
         <div className="lg:col-span-3 space-y-6">
-            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full sticky top-6">
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full sticky top-6">
                <div className="flex items-center gap-3 mb-6 px-1">
                   <LayoutGrid size={18} className="text-blue-600" />
                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">TASK ACTIVITY</h3>
@@ -404,15 +403,15 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                        </h4>
                      </div>
                      <div className="flex justify-between items-end">
-                       <div className="space-y-1">
-                         <p className="text-[9px] font-bold text-slate-400 tracking-tight italic">
+                       <div className="space-y-1 min-w-0 flex-1 pr-3">
+                         <p className="text-[9px] font-bold text-slate-400 tracking-tight italic truncate">
                            {task.project || (task.tender?.title ? task.tender.title.substring(0, 15) : 'General Project')}
                          </p>
                          <p className={`text-[8px] font-black uppercase tracking-widest ${task.status === 'Completed' ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'DUE SOON'}
                          </p>
                        </div>
-                       <div className="flex -space-x-2">
+                       <div className="flex -space-x-2 shrink-0">
                           {[1, 2].map(i => (
                             <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-black text-slate-400">
                               {i === 1 ? 'JD' : '+1'}
@@ -422,7 +421,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                      </div>
                    </div>
                  ));
-                 })()}
+               })()}
                </div>
 
                <button className="mt-8 w-full py-4 bg-slate-50 border border-slate-100 rounded-2xl text-[9px] font-black text-slate-400 uppercase tracking-widest hover:bg-white hover:text-blue-600 hover:border-blue-100 transition-all">
@@ -435,40 +434,40 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
       {/* CREATE TASK POPUP MODAL FOR PROJECT MANAGER */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 w-full max-w-lg shadow-2xl p-10 space-y-8 relative my-8 animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-3xl sm:rounded-[2.5rem] border border-slate-100 w-full max-w-lg shadow-2xl p-6 sm:p-10 space-y-6 sm:space-y-8 relative my-8 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
             {/* Header */}
-            <div className="flex justify-between items-center pb-2 border-b border-slate-50">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-50 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl hidden xs:block">
                   <Plus size={20} />
                 </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Create Department Task</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Assign task to a teammate under your department</p>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-black text-slate-800 uppercase tracking-tight truncate">Create Task</h3>
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Assign task to a teammate</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowCreateModal(false)}
-                className="p-2.5 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-xl transition-all"
+                className="p-2 sm:p-2.5 hover:bg-slate-50 text-slate-400 hover:text-slate-800 rounded-xl transition-all"
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleCreateTask} className="space-y-6">
+            <form onSubmit={handleCreateTask} className="space-y-5 sm:space-y-6 overflow-y-auto pr-2 custom-scrollbar">
               
               {/* Project Select */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
                   <FileText size={14} className="text-blue-500" />
-                  <span>Associated Project / Assignment *</span>
+                  <span>Project *</span>
                 </label>
                 <select 
                   required
                   value={selectedAssignmentId}
                   onChange={(e) => setSelectedAssignmentId(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
                 >
                   <option value="">-- Choose Project --</option>
                   {activeProjectsList.map((proj) => (
@@ -491,39 +490,39 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                   placeholder="E.G. DEVELOP API ENDPOINTS"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-300"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-300"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] block">Task Description</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] block">Description</label>
                 <textarea 
                   rows="3"
-                  placeholder="Provide precise execution details for the task..."
+                  placeholder="Provide precise execution details..."
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-300 resize-none"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-300 resize-none"
                 />
               </div>
 
               {/* Team Assignee & Priority Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                 {/* Assignee */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
                     <User size={14} className="text-blue-500" />
-                    <span>Teammate Assignee</span>
+                    <span>Teammate</span>
                   </label>
                   <select 
                     value={selectedAssigneeId}
                     onChange={(e) => setSelectedAssigneeId(e.target.value)}
-                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
                   >
-                    <option value="">-- Unassigned (Core Team) --</option>
+                    <option value="">-- Unassigned --</option>
                     {assigneeList.map((member) => (
                       <option key={member.id} value={member.id}>
-                        {member.name} ({member.role || 'Teammate'})
+                        {member.name}
                       </option>
                     ))}
                   </select>
@@ -531,15 +530,15 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
                 {/* Priority */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] block">Priority Label</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] block">Priority</label>
                   <select 
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value)}
-                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
+                    className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
                   >
-                    <option value="Low">Low Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="High">High Priority</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
                   </select>
                 </div>
               </div>
@@ -548,28 +547,28 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
                   <Calendar size={14} className="text-blue-500" />
-                  <span>Task Deadline</span>
+                  <span>Deadline</span>
                 </label>
                 <input 
                   type="date"
                   value={newDeadline}
                   onChange={(e) => setNewDeadline(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-xs font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500 transition-all shadow-sm"
                 />
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4 pt-4 border-t border-slate-50">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-slate-50 shrink-0">
                 <button 
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-4 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="flex-1 py-3.5 sm:py-4 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+                  className="flex-1 py-3.5 sm:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 active:scale-95"
                 >
                   Save Task
                 </button>
@@ -584,7 +583,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
   );
 };
 
-const ClipboardList = ({ size }) => (
+const ClipboardListIcon = ({ size }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />

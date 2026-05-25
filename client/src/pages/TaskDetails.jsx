@@ -209,9 +209,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="flex items-start gap-4">
           <button 
             onClick={onBack}
@@ -219,63 +219,63 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           >
             <ArrowLeft size={18} />
           </button>
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getPriorityColor(task.priority)}`}>
-                <Flag size={10} className="inline mr-1" /> {task.priority || 'NORMAL'} PRIORITY
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className={`px-2.5 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest border ${getPriorityColor(task.priority)}`}>
+                <Flag size={10} className="inline mr-1" /> {task.priority || 'NORMAL'}
               </span>
-              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${getStatusColor(task.status)}`}>
+              <span className={`px-2.5 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm ${getStatusColor(task.status)}`}>
                 {task.status}
               </span>
-              <span className="text-[10px] font-bold text-slate-400">ID: #{String(task.id).substring(0, 8)}</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400">#{String(task.id).substring(0, 8)}</span>
             </div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase">{task.title}</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase truncate">{task.title}</h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {task.status === 'Completed' || task.status === 'Done' ? (
-            <button disabled className="flex items-center gap-2 px-6 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
-              <CheckCircle2 size={16} /> Completed
+            <button disabled className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
+              <CheckCircle2 size={16} /> <span className="hidden xs:inline">Completed</span>
             </button>
           ) : user.role === 'Project Manager' ? (
             <button 
               onClick={() => updateTaskStatus('Completed')}
-              className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
             >
-              <CheckCircle2 size={16} /> Mark Complete
+              <CheckCircle2 size={16} /> <span>Mark Done</span>
             </button>
           ) : (
             // Core Team / General Members
             task.status === 'Review' || task.status === 'In Review' ? (
-              <button disabled className="flex items-center gap-2 px-6 py-2.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
-                <Clock size={16} /> Submitted for Review
+              <button disabled className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
+                <Clock size={16} /> <span className="hidden xs:inline">Under Review</span>
               </button>
             ) : (
               <button 
                 onClick={() => updateTaskStatus('Review')}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
               >
-                <Clock size={16} /> Submit for Review
+                <Clock size={16} /> <span>Submit Review</span>
               </button>
             )
           )}
-          <button className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm">
-            <MoreVertical size={16} />
+          <button className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+            <MoreVertical size={18} />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Main Left Content */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-6 sm:space-y-8">
           
           {/* Description Card */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
+          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <ListTodo size={16} className="text-blue-500" /> Task Description
             </h3>
-            <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-slate-100">
+            <div className="p-5 sm:p-6 bg-slate-50/50 rounded-2xl sm:rounded-[1.5rem] border border-slate-100">
               <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
                 {task.desc || task.description || 'No detailed description provided for this task.'}
               </p>
@@ -283,38 +283,38 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-emerald-500" /> Subtasks & Checklist
+              <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <CheckCircle2 size={16} className="text-emerald-500" /> <span className="hidden xs:inline">Subtasks &</span> Checklist
               </h3>
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">1/3 Completed</span>
+              <span className="text-[9px] sm:text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">1/3 Done</span>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {[
                 { text: 'Review initial requirements doc', done: true },
                 { text: 'Draft technical specifications', done: false },
                 { text: 'Get approval from lead engineer', done: false }
               ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
+                <label key={idx} className="flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
                   <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
                     <CheckCircle2 size={14} />
                   </div>
-                  <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
+                  <span className={`text-xs sm:text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
                 </label>
               ))}
             </div>
-            <button className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1">+ ADD SUBTASK</button>
+            <button className="mt-4 text-[9px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1">+ ADD ITEM</button>
           </div>
 
           {/* Task Attachments Card */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem] space-y-6">
+          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Paperclip size={16} className="text-indigo-500" /> Attachments & Documents
+              <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <Paperclip size={16} className="text-indigo-500" /> <span className="hidden xs:inline">Task</span> Attachments
               </h3>
-              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg">
+              <span className="text-[9px] sm:text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg shrink-0">
                 {attachments.length} {attachments.length === 1 ? 'File' : 'Files'}
               </span>
             </div>
@@ -330,7 +330,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 handleFileUpload(file);
               }}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative py-8 px-6 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer group
+              className={`relative py-8 sm:py-10 px-6 rounded-3xl sm:rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer group
                 ${isDragging ? 'border-blue-500 bg-blue-50/50 scale-[1.02]' : 'border-slate-200 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/20'}
               `}
             >
@@ -341,16 +341,16 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 onChange={(e) => handleFileUpload(e.target.files[0])}
               />
               <UploadCloud className={`mb-3 transition-transform duration-300 group-hover:scale-110 ${isUploading ? 'animate-bounce text-blue-500' : 'text-slate-400'}`} size={32} />
-              <p className="text-xs font-black text-slate-700 uppercase tracking-wider text-center">
-                {isUploading ? 'Uploading Document...' : 'Drag & Drop Document or Click to Upload'}
+              <p className="text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wider text-center px-4">
+                {isUploading ? 'Uploading...' : 'Drop file here or click to upload'}
               </p>
-              <p className="text-[9px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest">Supports PDF, PNG, JPG, JPEG, and Word docs</p>
+              <p className="text-[8px] sm:text-[9px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest">PDF, PNG, JPG, JPEG, DOC</p>
             </div>
 
             {/* Attachments List */}
             {attachments.length === 0 ? (
               <div className="text-center py-6 bg-slate-50/30 rounded-2xl border border-dashed border-slate-100">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest italic">No documents uploaded yet</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">No documents yet</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -366,41 +366,26 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                       <div className="overflow-hidden">
                         <p className="text-xs font-black text-slate-800 truncate pr-2 group-hover:text-blue-600 transition-colors" title={att.name}>{att.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{att.size}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-200"></span>
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{att.uploadedAt}</span>
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest shrink-0">{att.size}</span>
+                          <span className="w-0.5 h-0.5 rounded-full bg-slate-200 shrink-0"></span>
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate">{att.uploadedAt}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity lg:opacity-80">
                       {/* Doc Preview */}
                       <button 
                         onClick={(e) => { e.stopPropagation(); setPreviewFile(att); }}
-                        className="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100"
-                        title="Preview Document"
+                        className="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100 shrink-0"
                       >
                         <Eye size={14} />
                       </button>
 
-                      {/* Download */}
-                      <a 
-                        href={att.url} 
-                        download={att.name}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-2 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100 flex items-center justify-center"
-                        title="Download Document"
-                      >
-                        <Download size={14} />
-                      </a>
-
                       {/* Delete */}
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleAttachmentDelete(att.id); }}
-                        className="p-2 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100"
-                        title="Delete Document"
+                        className="p-2 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100 shrink-0"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -412,42 +397,42 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Comments / Activity */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <MessageSquare size={16} className="text-purple-500" /> Comments & Activity
+          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
+              <MessageSquare size={16} className="text-purple-500" /> Discussion
             </h3>
             
             <div className="space-y-6 mb-8">
               {/* Mock Comments */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-inner">
                   <User size={16} />
                 </div>
-                <div className="flex-1 bg-slate-50 p-5 rounded-2xl rounded-tl-none border border-slate-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-black text-slate-800">Sarah Wilson</span>
-                    <span className="text-[9px] font-bold text-slate-400">2 HOURS AGO</span>
+                <div className="flex-1 bg-slate-50 p-4 sm:p-5 rounded-2xl rounded-tl-none border border-slate-100">
+                  <div className="flex justify-between items-center mb-1.5 sm:mb-2">
+                    <span className="text-[11px] sm:text-xs font-black text-slate-800">Sarah Wilson</span>
+                    <span className="text-[8px] sm:text-[9px] font-bold text-slate-400">2 HOURS AGO</span>
                   </div>
-                  <p className="text-xs text-slate-600 font-medium">I've started looking into this. The initial requirements are a bit vague, could we clarify step 2?</p>
+                  <p className="text-[11px] sm:text-xs text-slate-600 font-medium leading-relaxed">I've started looking into this. The initial requirements are a bit vague, could we clarify step 2?</p>
                 </div>
               </div>
             </div>
 
             {/* Comment Input */}
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 border border-blue-200">
+               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 border border-blue-200 shadow-sm hidden xs:flex">
                  {user?.name ? user.name.charAt(0) : <User size={16} />}
                </div>
-               <div className="flex-1 relative">
+               <div className="flex-1 relative group">
                  <input 
                    type="text" 
                    value={comment}
                    onChange={(e) => setComment(e.target.value)}
-                   placeholder="Type a comment or update..." 
-                   className="w-full pl-6 pr-24 py-4 bg-white border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-400 shadow-sm"
+                   placeholder="Type a message..." 
+                   className="w-full pl-5 sm:pl-6 pr-20 sm:pr-24 py-3.5 sm:py-4 bg-white border border-slate-200 rounded-[2rem] text-xs sm:text-sm font-bold text-slate-700 outline-none focus:border-blue-400 shadow-sm transition-all"
                  />
                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                   <button className="p-2 text-slate-400 hover:text-blue-500 transition-colors rounded-full hover:bg-slate-50">
+                   <button className="p-2 text-slate-300 hover:text-blue-500 transition-colors rounded-full hover:bg-slate-50">
                      <Paperclip size={18} />
                    </button>
                    <button className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-md active:scale-95">
@@ -462,48 +447,48 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
         {/* Sidebar Info */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem] space-y-6">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-              <AlertCircle size={16} className="text-orange-500" /> Task Meta
+          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
+            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+              <AlertCircle size={16} className="text-orange-500" /> Task Info
             </h3>
             
             <div className="space-y-5">
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Project / Tender</p>
+                <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Project</p>
                 <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
+                  <div className="w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm shrink-0">
                     <ListTodo size={12} />
                   </div>
-                  <span className="text-xs font-black text-slate-800">{task.project || 'General Workflow'}</span>
+                  <span className="text-[11px] sm:text-xs font-black text-slate-800 truncate">{task.project || 'General Workflow'}</span>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assignee</p>
+                <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assignee</p>
                 <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px]">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px] shrink-0 shadow-inner">
                     {task.assigneeId ? 'ID' : 'UN'}
                   </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-800">{task.assigneeId ? 'Assigned Member' : 'Unassigned'}</p>
-                    <p className="text-[9px] font-bold text-slate-400">Engineering</p>
+                  <div className="min-w-0">
+                    <p className="text-[11px] sm:text-xs font-black text-slate-800 truncate">{task.assigneeId ? 'Assigned Member' : 'Unassigned'}</p>
+                    <p className="text-[9px] font-bold text-slate-400">Project Team</p>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Due Date</p>
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Due Date</p>
                   <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-slate-400" />
-                    <span className="text-sm font-black text-rose-600">{task.deadline || 'No Date'}</span>
+                    <Calendar size={14} className="text-slate-400 shrink-0" />
+                    <span className="text-[11px] sm:text-xs font-black text-rose-600 truncate">{task.deadline || 'No Date'}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Est. Time</p>
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estimate</p>
                   <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-slate-400" />
-                    <span className="text-sm font-black text-slate-800">4 Hours</span>
+                    <Clock size={14} className="text-slate-400 shrink-0" />
+                    <span className="text-[11px] sm:text-xs font-black text-slate-800">4 Hours</span>
                   </div>
                 </div>
               </div>
@@ -511,23 +496,23 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Minimal Activity Log */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <History size={16} className="text-slate-400" /> History
+          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
+              <History size={16} className="text-slate-400" /> Recent History
             </h3>
             <div className="space-y-4">
               <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 rounded-full bg-emerald-500"></div>
+                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></div>
                 <div>
-                  <p className="text-xs font-bold text-slate-600">Task status changed to <span className="text-slate-900 font-black">In Progress</span></p>
-                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">YESTERDAY, 4:30 PM</p>
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-600">Status changed to <span className="text-slate-900 font-black">In Progress</span></p>
+                  <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">YESTERDAY</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500"></div>
+                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
                 <div>
-                  <p className="text-xs font-bold text-slate-600">Task created by <span className="text-slate-900 font-black">Admin</span></p>
-                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">OCT 14, 2026</p>
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-600">Task created by <span className="text-slate-900 font-black">Admin</span></p>
+                  <p className="text-[8px] sm:text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">OCT 14, 2026</p>
                 </div>
               </div>
             </div>
