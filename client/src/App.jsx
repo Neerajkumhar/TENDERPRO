@@ -424,7 +424,7 @@ function App() {
               }}
             />
           )}
-          {activeTab === 'Client Management' && (
+          {activeTab === 'Client Management' && ['Admin', 'Tender Manager'].includes(user.role) && (
             <ClientManagement
               clients={clients}
               setClients={setClients}
@@ -434,7 +434,7 @@ function App() {
               }}
             />
           )}
-          {activeTab === 'Client Details' && (
+          {activeTab === 'Client Details' && ['Admin', 'Tender Manager'].includes(user.role) && (
             <ClientDetails
               clientId={selectedClientId}
               onBack={() => {
