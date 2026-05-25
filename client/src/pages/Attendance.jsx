@@ -11,7 +11,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Coffee,
-  CalendarDays
+  CalendarDays,
+  XCircle,
+  Clock3
 } from 'lucide-react';
 
 const Attendance = ({ user }) => {
@@ -41,6 +43,24 @@ const Attendance = ({ user }) => {
   const [leaveReason, setLeaveReason] = useState('');
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
   const [leaveSubmitted, setLeaveSubmitted] = useState(false);
+  const [userLeaveRequests, setUserLeaveRequests] = useState([]);
+  const [loadingLeaves, setLoadingLeaves] = useState(false);
+
+  const fetchUserLeaveRequests = async () => {
+    if (!user?.id) return;
+    setLoadingLeaves(true);
+    try {
+      const res = await fetch(`/api/leave-requests/user/${user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserLeaveRequests(data);
+      }
+    } catch (err) {
+      console.error("Error fetching leave requests:", err);
+    } finally {
+      setLoadingLeaves(false);
+    }
+  };
 
   // Raw database of multiple login/logout dashboard sessions for self (Sarah/logged-in user)
   const sessionsDatabase = [
@@ -135,6 +155,7 @@ const Attendance = ({ user }) => {
     };
 
     fetchRealAttendance();
+    fetchUserLeaveRequests();
   }, [user?.id]);
 
   // Parse stats from real database logs, falling back to mock values if no database records exist
@@ -419,6 +440,176 @@ const Attendance = ({ user }) => {
     return `${sStr} - ${eStr}`.toUpperCase();
   };
 
+  function renderLeaveModal() {
+    if (!showLeaveModal) return null;
+    return (
+      <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => { if (!isSubmittingLeave) setShowLeaveModal(false); }}></div>
+        <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          
+          {/* Success State Overlay */}
+          {leaveSubmitted ? (
+            <div className="p-12 text-center flex flex-col items-center justify-center space-y-6 bg-white min-h-[450px]">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center border border-emerald-100 shadow-md animate-bounce">
+                <CheckCircle2 size={40} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Request Submitted!</h3>
+                <p className="text-xs text-slate-400 font-medium max-w-xs mx-auto text-center">
+                  Your leave request for <span className="font-black text-slate-800">{leaveType}</span> has been logged and forwarded to your manager for approval.
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  setLeaveSubmitted(false);
+                  setShowLeaveModal(false);
+                  setLeaveStart('');
+                  setLeaveEnd('');
+                  setLeaveReason('');
+                  fetchUserLeaveRequests();
+                }}
+                className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shadow-sm">
+                    <Coffee size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-slate-900 tracking-tight uppercase">Request Time Off</h2>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Submit request for manager review</p>
+                  </div>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setShowLeaveModal(false)}
+                  className="p-2 bg-white hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm cursor-pointer"
+                >
+                  <ChevronRight size={18} className="rotate-45" />
+                </button>
+              </div>
+
+              {/* Modal Form Body */}
+              <form 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!user?.id) return;
+                  setIsSubmittingLeave(true);
+                  try {
+                    const response = await fetch('/api/leave-requests', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        userId: user.id,
+                        leaveType,
+                        startDate: leaveStart,
+                        endDate: leaveEnd,
+                        reason: leaveReason
+                      })
+                    });
+                    if (response.ok) {
+                      setLeaveSubmitted(true);
+                    }
+                  } catch (err) {
+                    console.error('Failed to submit leave request:', err);
+                  } finally {
+                    setIsSubmittingLeave(false);
+                  }
+                }}
+                className="p-8 space-y-6"
+              >
+                {/* Leave Type Selector */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Category</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: 'Annual Leave', desc: 'Vacation time' },
+                      { label: 'Sick Leave', desc: 'Medical emergency' },
+                      { label: 'Casual Leave', desc: 'Personal errands' },
+                      { label: 'Unpaid Leave', desc: 'Special exceptions' },
+                    ].map((item) => (
+                      <div 
+                        key={item.label}
+                        onClick={() => setLeaveType(item.label)}
+                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between hover:scale-[1.02]
+                          ${leaveType === item.label 
+                            ? 'border-blue-500 bg-blue-50/20 text-blue-600 hover:border-blue-500' 
+                            : 'border-slate-100 bg-slate-50/50 text-slate-600 hover:border-slate-200'
+                          }`}
+                      >
+                        <span className="text-xs font-black uppercase tracking-tight">{item.label}</span>
+                        <span className="text-[9px] font-bold text-slate-400 mt-1">{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date Selection Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
+                    <input 
+                      type="date" 
+                      required
+                      value={leaveStart}
+                      onChange={(e) => setLeaveStart(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
+                    <input 
+                      type="date" 
+                      required
+                      value={leaveEnd}
+                      onChange={(e) => setLeaveEnd(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Reason Textarea */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reason / Description</label>
+                  <textarea 
+                    required
+                    placeholder="Please explain the reason for your time-off request..."
+                    rows={3}
+                    value={leaveReason}
+                    onChange={(e) => setLeaveReason(e.target.value)}
+                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400 resize-none"
+                  ></textarea>
+                </div>
+
+                {/* Submit Button */}
+                <button 
+                  type="submit"
+                  disabled={isSubmittingLeave}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-100 hover:shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmittingLeave ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Logging Request...</span>
+                    </>
+                  ) : (
+                    <span>Submit Request</span>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 space-y-10 animate-in fade-in duration-700">
       {/* Premium Dynamic Page Header */}
@@ -558,90 +749,158 @@ const Attendance = ({ user }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
         
         {/* Main Attendance List */}
-        <div className="lg:col-span-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm">
-            <div className="flex justify-between items-center mb-10 px-2">
-               <div className="flex flex-col">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">DAILY VIEW ({view})</h3>
-                  {view === 'DAY' && (
-                    <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1.5">
-                      {processedRecords.length} Dashboard {processedRecords.length === 1 ? 'Login' : 'Logins'} Today
-                    </p>
-                  )}
-               </div>
-               <button 
-                 onClick={handleExportReport}
-                 className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
-               >
-                  <Download size={16} />
-                  <span>EXPORT REPORT</span>
-               </button>
+        <div className="lg:col-span-8 space-y-8">
+          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm">
+              <div className="flex justify-between items-center mb-10 px-2">
+                <div className="flex flex-col">
+                    <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">DAILY VIEW ({view})</h3>
+                    {view === 'DAY' && (
+                      <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1.5">
+                        {processedRecords.length} Dashboard {processedRecords.length === 1 ? 'Login' : 'Logins'} Today
+                      </p>
+                    )}
+                </div>
+                <button 
+                  onClick={handleExportReport}
+                  className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
+                >
+                    <Download size={16} />
+                    <span>EXPORT REPORT</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-50">
+                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">NAME</th>
+                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">DATE</th>
+                          {view === 'DAY' ? (
+                            <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">SESSION</th>
+                          ) : (
+                            <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">TOTAL LOGINS</th>
+                          )}
+                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">IN-TIME</th>
+                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">OUT-TIME</th>
+                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">{view === 'DAY' ? 'SESSION WORK' : 'TOTAL WORK'}</th>
+                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {processedRecords.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
+                            No attendance records found matching this window
+                          </td>
+                        </tr>
+                      ) : (
+                        processedRecords.map((record, i) => (
+                          <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
+                              <td className="py-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-white shadow-sm transition-all group-hover:scale-110">
+                                      {record.initial}
+                                    </div>
+                                    <span className="text-sm font-black text-slate-800 uppercase tracking-tight">{record.name}</span>
+                                </div>
+                              </td>
+                              <td className="py-6 text-sm font-bold text-slate-500">
+                                {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </td>
+                              {view === 'DAY' ? (
+                                <td className="py-6 text-sm font-black text-blue-600">
+                                  <span className="bg-blue-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
+                                    Session #{record.sessionNum}
+                                  </span>
+                                </td>
+                              ) : (
+                                <td className="py-6 text-sm font-black text-slate-600">
+                                  <span className="bg-slate-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
+                                    {record.sessionNum} {record.sessionNum === 1 ? 'Login' : 'Logins'}
+                                  </span>
+                                </td>
+                              )}
+                              <td className="py-6 text-sm font-black text-slate-900">{record.in}</td>
+                              <td className="py-6 text-sm font-black text-slate-900">{record.out}</td>
+                              <td className="py-6 text-sm font-black text-slate-900">{record.work}</td>
+                              <td className="py-6">
+                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${record.sColor}`}>
+                                    {record.status}
+                                  </span>
+                              </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                </table>
+              </div>
+          </div>
+
+          {/* User's Leave Requests History */}
+          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm">
+            <div className="flex justify-between items-center mb-8 px-2">
+              <div className="flex flex-col">
+                <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">My Leave Requests</h3>
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1.5">
+                  Track the status of your time-off applications
+                </p>
+              </div>
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                <Coffee size={20} />
+              </div>
             </div>
 
-            <div className="overflow-x-auto">
-               <table className="w-full">
-                  <thead>
-                     <tr className="border-b border-slate-50">
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">NAME</th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">DATE</th>
-                        {view === 'DAY' ? (
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">SESSION</th>
-                        ) : (
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">TOTAL LOGINS</th>
+            <div className="space-y-4">
+              {loadingLeaves ? (
+                <div className="flex flex-col items-center justify-center py-10 text-slate-400 space-y-3">
+                  <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="font-black text-[9px] uppercase tracking-widest">Loading history...</p>
+                </div>
+              ) : userLeaveRequests.length === 0 ? (
+                <div className="py-12 text-center text-xs font-black uppercase text-slate-300 tracking-widest italic border-2 border-dashed border-slate-50 rounded-[2rem]">
+                  No leave applications found
+                </div>
+              ) : (
+                userLeaveRequests.map((request) => (
+                  <div key={request.id} className="p-6 bg-slate-50/50 border border-slate-100 rounded-[2rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:bg-white hover:shadow-xl transition-all duration-300">
+                    <div className="flex items-center gap-6">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm 
+                        ${request.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' : 
+                          request.status === 'Rejected' ? 'bg-rose-100 text-rose-600' : 
+                          'bg-amber-100 text-amber-600'}`}>
+                        {request.status === 'Approved' ? <CheckCircle2 size={24} /> : 
+                         request.status === 'Rejected' ? <XCircle size={24} /> : 
+                         <Clock3 size={24} />}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{request.leaveType}</h4>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                            <CalendarIcon size={12} className="text-blue-500" />
+                            {new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 w-full md:w-auto">
+                      <div className="flex-1 md:text-right">
+                         <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm
+                          ${request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 
+                            request.status === 'Rejected' ? 'bg-rose-500 text-white shadow-rose-100' : 
+                            'bg-amber-500 text-white shadow-amber-100'}`}>
+                          {request.status}
+                        </span>
+                        {request.managerComment && (
+                          <p className="text-[9px] font-bold text-slate-400 mt-2 italic">"{request.managerComment}"</p>
                         )}
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">IN-TIME</th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">OUT-TIME</th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">{view === 'DAY' ? 'SESSION WORK' : 'TOTAL WORK'}</th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">STATUS</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                     {processedRecords.length === 0 ? (
-                       <tr>
-                         <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
-                           No attendance records found matching this window
-                         </td>
-                       </tr>
-                     ) : (
-                       processedRecords.map((record, i) => (
-                         <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
-                            <td className="py-6">
-                               <div className="flex items-center gap-4">
-                                  <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-white shadow-sm transition-all group-hover:scale-110">
-                                     {record.initial}
-                                  </div>
-                                  <span className="text-sm font-black text-slate-800 uppercase tracking-tight">{record.name}</span>
-                               </div>
-                            </td>
-                            <td className="py-6 text-sm font-bold text-slate-500">
-                              {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </td>
-                            {view === 'DAY' ? (
-                              <td className="py-6 text-sm font-black text-blue-600">
-                                <span className="bg-blue-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
-                                  Session #{record.sessionNum}
-                                </span>
-                              </td>
-                            ) : (
-                              <td className="py-6 text-sm font-black text-slate-600">
-                                <span className="bg-slate-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
-                                  {record.sessionNum} {record.sessionNum === 1 ? 'Login' : 'Logins'}
-                                </span>
-                              </td>
-                            )}
-                            <td className="py-6 text-sm font-black text-slate-900">{record.in}</td>
-                            <td className="py-6 text-sm font-black text-slate-900">{record.out}</td>
-                            <td className="py-6 text-sm font-black text-slate-900">{record.work}</td>
-                            <td className="py-6">
-                               <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${record.sColor}`}>
-                                  {record.status}
-                                </span>
-                            </td>
-                         </tr>
-                       ))
-                     )}
-                  </tbody>
-               </table>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
+          </div>
         </div>
 
         {/* Calendar Sidebar */}
@@ -748,172 +1007,7 @@ const Attendance = ({ user }) => {
         </div>
       </div>
 
-      {/* Premium Slide-in Leave Request Modal */}
-      {showLeaveModal && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => { if (!isSubmittingLeave) setShowLeaveModal(false); }}></div>
-          <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            
-            {/* Success State Overlay */}
-            {leaveSubmitted ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center space-y-6 bg-white min-h-[450px]">
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center border border-emerald-100 shadow-md animate-bounce">
-                  <CheckCircle2 size={40} />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Request Submitted!</h3>
-                  <p className="text-xs text-slate-400 font-medium max-w-xs mx-auto text-center">
-                    Your leave request for <span className="font-black text-slate-800">{leaveType}</span> has been logged and forwarded to your manager for approval.
-                  </p>
-                </div>
-                <button 
-                  onClick={() => {
-                    setLeaveSubmitted(false);
-                    setShowLeaveModal(false);
-                    setLeaveStart('');
-                    setLeaveEnd('');
-                    setLeaveReason('');
-                  }}
-                  className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95 cursor-pointer"
-                >
-                  Return to Dashboard
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Modal Header */}
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shadow-sm">
-                      <Coffee size={18} />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-black text-slate-900 tracking-tight uppercase">Request Time Off</h2>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Submit request for manager review</p>
-                    </div>
-                  </div>
-                  <button 
-                    type="button"
-                    onClick={() => setShowLeaveModal(false)}
-                    className="p-2 bg-white hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm cursor-pointer"
-                  >
-                    <ChevronRight size={18} className="rotate-45" />
-                  </button>
-                </div>
-
-                {/* Modal Form Body */}
-                <form 
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!user?.id) return;
-                    setIsSubmittingLeave(true);
-                    try {
-                      const response = await fetch('/api/leave-requests', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          userId: user.id,
-                          leaveType,
-                          startDate: leaveStart,
-                          endDate: leaveEnd,
-                          reason: leaveReason
-                        })
-                      });
-                      if (response.ok) {
-                        setLeaveSubmitted(true);
-                      }
-                    } catch (err) {
-                      console.error('Failed to submit leave request:', err);
-                    } finally {
-                      setIsSubmittingLeave(false);
-                    }
-                  }}
-                  className="p-8 space-y-6"
-                >
-                  {/* Leave Type Selector */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Category</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { label: 'Annual Leave', desc: 'Vacation time' },
-                        { label: 'Sick Leave', desc: 'Medical emergency' },
-                        { label: 'Casual Leave', desc: 'Personal errands' },
-                        { label: 'Unpaid Leave', desc: 'Special exceptions' },
-                      ].map((item) => (
-                        <div 
-                          key={item.label}
-                          onClick={() => setLeaveType(item.label)}
-                          className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between hover:scale-[1.02]
-                            ${leaveType === item.label 
-                              ? 'border-blue-500 bg-blue-50/20 text-blue-600 hover:border-blue-500' 
-                              : 'border-slate-100 bg-slate-50/50 text-slate-600 hover:border-slate-200'
-                            }`}
-                        >
-                          <span className="text-xs font-black uppercase tracking-tight">{item.label}</span>
-                          <span className="text-[9px] font-bold text-slate-400 mt-1">{item.desc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Date Selection Row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
-                      <input 
-                        type="date" 
-                        required
-                        value={leaveStart}
-                        onChange={(e) => setLeaveStart(e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
-                      <input 
-                        type="date" 
-                        required
-                        value={leaveEnd}
-                        onChange={(e) => setLeaveEnd(e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Reason Textarea */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reason / Description</label>
-                    <textarea 
-                      required
-                      placeholder="Please explain the reason for your time-off request..."
-                      rows={3}
-                      value={leaveReason}
-                      onChange={(e) => setLeaveReason(e.target.value)}
-                      className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400 resize-none"
-                    ></textarea>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button 
-                    type="submit"
-                    disabled={isSubmittingLeave}
-                    className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-100 hover:shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSubmittingLeave ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        <span>Logging Request...</span>
-                      </>
-                    ) : (
-                      <span>Submit Request</span>
-                    )}
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {renderLeaveModal()}
     </div>
   );
 };

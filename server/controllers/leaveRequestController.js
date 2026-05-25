@@ -98,6 +98,19 @@ exports.getLeaveBalance = async (req, res) => {
   }
 };
 
+exports.getLeaveRequestsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const leaveRequests = await LeaveRequest.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(leaveRequests);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.getAllLeaveRequests = async (req, res) => {
   try {
     const leaveRequests = await LeaveRequest.findAll({
