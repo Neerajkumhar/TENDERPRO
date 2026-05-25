@@ -32,6 +32,7 @@ import {
   Cell
 } from 'recharts';
 
+// Test comment
 const statsData = [
   { label: 'Total', value: '128', trend: '+ 12%', isUp: true, color: 'blue' },
   { label: 'Active Tenders', value: '45', trend: '+ 8%', isUp: true, color: 'green' },
@@ -88,10 +89,19 @@ const Dashboard = ({ user, members, assignments, onProjectClick }) => {
   const [loadingLeaves, setLoadingLeaves] = useState(false);
 
   const fetchLeaveRequests = async () => {
-    if (!user?.departmentId) return;
     setLoadingLeaves(true);
     try {
-      const response = await fetch(`/api/leave-requests/department/${user.departmentId}`);
+      // Admin should see all leave requests, while other managers see by department
+      const url = user?.role === 'Admin' 
+        ? '/api/leave-requests' 
+        : `/api/leave-requests/department/${user?.departmentId}`;
+        
+      if (user?.role !== 'Admin' && !user?.departmentId) {
+        setLoadingLeaves(false);
+        return;
+      }
+
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setLeaveRequests(data);
@@ -108,7 +118,7 @@ const Dashboard = ({ user, members, assignments, onProjectClick }) => {
       const response = await fetch(`/api/leave-requests/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, approverId: user?.id })
       });
       if (response.ok) {
         fetchLeaveRequests();

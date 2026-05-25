@@ -98,6 +98,21 @@ exports.getLeaveBalance = async (req, res) => {
   }
 };
 
+exports.getAllLeaveRequests = async (req, res) => {
+  try {
+    const leaveRequests = await LeaveRequest.findAll({
+      include: [{ 
+        model: User, 
+        attributes: ['id', 'name', 'email', 'role', 'image'] 
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(leaveRequests);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.getLeaveRequestsByDepartment = async (req, res) => {
   try {
     const { departmentId } = req.params;
