@@ -77,7 +77,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
       print:hidden bg-white border-r border-slate-200 flex flex-col h-screen transition-all duration-300 ease-in-out
       ${isOpen 
         ? 'translate-x-0 w-[280px] sm:w-64 z-[100] fixed shadow-2xl' 
-        : '-translate-x-full w-[280px] sm:w-64 fixed lg:relative lg:translate-x-0 lg:w-auto lg:sticky lg:z-40'}
+        : '-translate-x-full w-[280px] sm:w-64 fixed lg:relative lg:translate-x-0 lg:sticky lg:z-40'}
       ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
       top-0 left-0
     `}>
