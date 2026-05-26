@@ -421,16 +421,16 @@ const Attendance = ({ user }) => {
       ])
     ];
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
-      
-    const encodedUri = encodeURI(csvContent);
-    const downloadLink = document.createElement("a");
-    downloadLink.setAttribute("href", encodedUri);
-    downloadLink.setAttribute("download", `TenderPro_Attendance_Report_${view}_${startDate}_to_${endDate}.csv`);
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    const csvContent = csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `TenderPro_Attendance_Report_${view}_${startDate}_to_${endDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // Convert dates to human readable string format

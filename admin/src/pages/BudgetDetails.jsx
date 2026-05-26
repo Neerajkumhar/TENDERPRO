@@ -26,6 +26,32 @@ const BudgetDetails = ({ category, onBack }) => {
 
   if (!category) return null;
 
+  const handleExportReport = () => {
+    const headers = ['Transaction ID', 'Date', 'Description', 'Status', 'Amount'];
+    const rows = mockTransactions.map(trx => [
+      trx.id,
+      trx.date,
+      trx.description,
+      trx.status,
+      trx.amount.toFixed(2)
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Budget_Report_${category.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header with Back Button */}
@@ -44,8 +70,8 @@ const BudgetDetails = ({ category, onBack }) => {
               </span>
               <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest
                 ${category.status === 'ON TRACK' ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 
-                  category.status === 'OVER BUDGET' ? 'bg-rose-500 text-white shadow-md shadow-rose-100' : 
-                  'bg-emerald-500 text-white shadow-md shadow-emerald-100'}`}>
+                  category.status === 'OVER BUDGET' ? 'bg-rose-50 text-rose-600' : 
+                  'bg-emerald-50 text-emerald-600'}`}>
                 {category.status}
               </span>
             </div>
@@ -55,7 +81,10 @@ const BudgetDetails = ({ category, onBack }) => {
           </div>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+          <button 
+            onClick={handleExportReport}
+            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
+          >
             <Download size={16} />
             <span>Export Report</span>
           </button>
