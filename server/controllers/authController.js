@@ -7,8 +7,35 @@ const generateToken = (id) => {
   });
 };
 
-exports.register = async (req, res) => {
+exports.initAdmin = async (req, res) => {
   try {
+    const adminEmail = 'vikash@vagwiin.com';
+    const adminPass = '12345678';
+    const adminName = 'Vikash';
+
+    const existingUser = await User.findOne({ where: { email: adminEmail } });
+    if (existingUser) {
+      existingUser.password = adminPass;
+      existingUser.role = 'Admin';
+      await existingUser.save();
+      return res.json({ message: 'Admin user updated successfully' });
+    }
+
+    await User.create({
+      name: adminName,
+      email: adminEmail,
+      password: adminPass,
+      role: 'Admin'
+    });
+
+    res.json({ message: 'Admin user created successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.register = async (req, res) => {
+...
     const { name, email, password } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
