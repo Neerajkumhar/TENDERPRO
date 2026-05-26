@@ -71,10 +71,21 @@ async function initializeDatabase() {
 
 // Middleware to ensure DB is initialized before handling requests
 app.use(async (req, res, next) => {
-  if (!isDbInitialized) {
-    await initializeDatabase();
+  try {
+    if (!isDbInitialized) {
+      await initializeDatabase();
+    }
+    
+    if (!isDbInitialized && !req.path.includes('/health')) {
+      return res.status(500).json({ 
+        error: 'Database not initialized', 
+        message: 'The server is unable to connect to the database. Please check connection settings.' 
+      });
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Server initialization error', message: err.message });
   }
-  next();
 });
 
 app.use('/api/auth', authRoutes);
