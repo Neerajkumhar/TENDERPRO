@@ -35,7 +35,7 @@ exports.initAdmin = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-...
+  try {
     const { name, email, password } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
