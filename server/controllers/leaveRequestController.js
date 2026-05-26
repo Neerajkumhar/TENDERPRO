@@ -33,8 +33,19 @@ exports.createLeaveRequest = async (req, res) => {
 
     // 2. Check balance (if not unpaid)
     if (leaveType !== 'Unpaid Leave') {
-      const balance = await LeaveBalance.findOne({ where: { userId, year: new Date().getFullYear() } });
-      if (!balance) return res.status(400).json({ message: 'Leave balance record not found.' });
+      let balance = await LeaveBalance.findOne({ where: { userId, year: new Date().getFullYear() } });
+      
+      // Auto-create balance if not found
+      if (!balance) {
+        balance = await LeaveBalance.create({
+          userId,
+          year: new Date().getFullYear(),
+          annual: 20,
+          sick: 10,
+          casual: 8,
+          unpaid: 0
+        });
+      }
       
       const requestedDays = calculateDays(startDate, endDate);
       const typeKey = leaveType.split(' ')[0].toLowerCase(); // 'annual', 'sick', etc.

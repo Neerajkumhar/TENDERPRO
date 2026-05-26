@@ -43,6 +43,7 @@ const Attendance = ({ user }) => {
   const [leaveReason, setLeaveReason] = useState('');
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
   const [leaveSubmitted, setLeaveSubmitted] = useState(false);
+  const [leaveError, setLeaveError] = useState('');
   const [userLeaveRequests, setUserLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
 
@@ -501,6 +502,7 @@ const Attendance = ({ user }) => {
                   e.preventDefault();
                   if (!user?.id) return;
                   setIsSubmittingLeave(true);
+                  setLeaveError('');
                   try {
                     const response = await fetch('/api/leave-requests', {
                       method: 'POST',
@@ -513,17 +515,31 @@ const Attendance = ({ user }) => {
                         reason: leaveReason
                       })
                     });
+                    
+                    const data = await response.json();
+                    
                     if (response.ok) {
                       setLeaveSubmitted(true);
+                    } else {
+                      setLeaveError(data.message || data.error || 'Failed to submit leave request');
                     }
                   } catch (err) {
                     console.error('Failed to submit leave request:', err);
+                    setLeaveError('Network error. Please try again later.');
                   } finally {
                     setIsSubmittingLeave(false);
                   }
                 }}
                 className="p-8 space-y-6"
               >
+                {/* Error Alert */}
+                {leaveError && (
+                  <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-in fade-in zoom-in-95">
+                    <AlertCircle size={18} className="shrink-0" />
+                    <p className="text-xs font-bold uppercase tracking-tight">{leaveError}</p>
+                  </div>
+                )}
+
                 {/* Leave Type Selector */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Category</label>
