@@ -552,7 +552,7 @@ function App() {
               onBack={handleBackToInvoices}
             />
           )}
-          {activeTab === 'Financial Management' && <FinancialManagement onInvoiceClick={handleInvoiceClick} />}
+          {activeTab === 'Financial Management' && <FinancialManagement onInvoiceClick={handleInvoiceClick} user={user} />}
           {activeTab === 'Invoices' && <Invoices onInvoiceClick={handleInvoiceClick} />}
           {activeTab === 'Payments' && <Payments />}
           {activeTab === 'Expenses' && <Expenses onViewExpense={(id) => { setSelectedExpenseId(id); localStorage.setItem('selectedExpenseId', id); setActiveTab('Expense Details'); }} />}
