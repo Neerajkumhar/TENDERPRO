@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import ExportModal from '../components/ExportModal';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -82,6 +84,7 @@ const alerts = [
 
 const FinancialManagement = ({ onInvoiceClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     client: '',
     amount: '',
@@ -160,69 +163,86 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     }
   };
 
-  const handleExportReport = () => {
+  const handleExportReport = ({ format, startDate, endDate }) => {
     if (!invoicesList || invoicesList.length === 0) {
       alert("No data available to export.");
       return;
     }
 
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.setTextColor(15, 23, 42); // slate-900
-    doc.text("TenderPro Financial Summary Report", 14, 22);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100, 116, 139); // slate-500
-    doc.text(`Generated On: ${new Date().toLocaleDateString('en-IN')}`, 14, 30);
-    
-    // Metrics Section
-    doc.setFontSize(14);
-    doc.setTextColor(15, 23, 42);
-    doc.text("Financial Metrics Overview", 14, 45);
-
-    const metricsData = [
-      ["Total Revenue", `Rs. ${stats.totalRevenue.toLocaleString('en-IN')}`],
-      ["Total Expenses", `Rs. ${stats.totalExpenses.toLocaleString('en-IN')}`],
-      ["Net Profit", `Rs. ${stats.netProfit.toLocaleString('en-IN')}`],
-      ["Cash Flow", `Rs. ${stats.cashFlow.toLocaleString('en-IN')}`],
-      ["Outstanding Dues", `Rs. ${stats.outstandingDues.toLocaleString('en-IN')}`]
-    ];
-
-    doc.autoTable({
-      startY: 50,
-      head: [["Metric", "Value"]],
-      body: metricsData,
-      theme: 'grid',
-      headStyles: { fillColor: [59, 130, 246] },
-      margin: { bottom: 20 }
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const filteredData = invoicesList.filter(inv => {
+      if (!inv.date) return false;
+      const invDate = new Date(inv.date);
+      return invDate >= start && invDate <= end;
     });
 
-    // Invoices Section
-    doc.setFontSize(14);
-    doc.setTextColor(15, 23, 42);
-    const nextY = doc.lastAutoTable.finalY + 15;
-    doc.text("Recent Transactions Log", 14, nextY);
+    if (filteredData.length === 0) {
+      alert("No transactions found for the selected period.");
+      return;
+    }
 
-    const invoiceData = invoicesList.map(inv => [
-      inv.invoiceNumber || inv.id,
-      inv.date ? new Date(inv.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }) : 'N/A',
-      inv.client,
-      `Rs. ${typeof inv.amount === 'number' || !isNaN(inv.amount) ? parseFloat(inv.amount).toLocaleString('en-IN') : inv.amount}`,
-      inv.status
-    ]);
+    const filename = `Financial_Report_${startDate}_to_${endDate}`;
 
-    doc.autoTable({
-      startY: nextY + 5,
-      head: [["Invoice ID", "Date", "Client", "Amount", "Status"]],
-      body: invoiceData,
-      theme: 'grid',
-      headStyles: { fillColor: [59, 130, 246] },
-      styles: { fontSize: 9 }
-    });
+    if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(20);
+      doc.setTextColor(15, 23, 42);
+      doc.text("TenderPro Financial Summary Report", 14, 22);
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 30);
+      
+      const invoiceData = filteredData.map(inv => [
+        inv.invoiceNumber || inv.id,
+        inv.date ? new Date(inv.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }) : 'N/A',
+        inv.client,
+        `Rs. ${typeof inv.amount === 'number' || !isNaN(inv.amount) ? parseFloat(inv.amount).toLocaleString('en-IN') : inv.amount}`,
+        inv.status
+      ]);
 
-    doc.save(`Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.autoTable({
+        startY: 40,
+        head: [["Invoice ID", "Date", "Client", "Amount", "Status"]],
+        body: invoiceData,
+        theme: 'grid',
+        headStyles: { fillColor: [59, 130, 246] },
+        styles: { fontSize: 9 }
+      });
+
+      doc.save(`${filename}.pdf`);
+    } else if (format === 'xlsx') {
+      const exportRows = filteredData.map(inv => ({
+        "Invoice ID": inv.invoiceNumber || inv.id,
+        "Date": inv.date,
+        "Client": inv.client,
+        "Amount": inv.amount,
+        "Status": inv.status
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'csv') {
+      const headers = ['Invoice ID', 'Date', 'Client', 'Amount', 'Status'];
+      const rows = filteredData.map(inv => [
+        inv.invoiceNumber || inv.id,
+        inv.date,
+        inv.client,
+        inv.amount,
+        inv.status
+      ]);
+      const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const statsData = [
@@ -245,7 +265,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         </div>
         <div className="flex items-center gap-4">
           <button 
-            onClick={handleExportReport}
+            onClick={() => setIsExportModalOpen(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             <Download size={18} />
@@ -579,6 +599,12 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           </div>
         </div>
       )}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Financial Report"
+      />
     </div>
   );
 };

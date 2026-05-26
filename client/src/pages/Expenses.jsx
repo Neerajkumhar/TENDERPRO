@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import ExportModal from '../components/ExportModal';
 import { 
   Search, 
   Filter, 
@@ -35,6 +39,7 @@ const mockExpenses = [
 const Expenses = ({ onViewExpense }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -208,38 +213,77 @@ const Expenses = ({ onViewExpense }) => {
     setDeleteConfirmId(null);
   };
 
-  const handleExportCSV = () => {
-    if (filteredExpenses.length === 0) {
-      triggerToast('No expenses to export');
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = expenses.filter(item => {
+      if (!item.date) return false;
+      const itemDate = new Date(item.date);
+      return itemDate >= start && itemDate <= end;
+    });
+
+    if (exportData.length === 0) {
+      alert("No expenses found for the selected time period.");
       return;
     }
 
-    const headers = ['Expense ID', 'Category', 'Vendor', 'Date', 'Description', 'Amount', 'Status'];
-    const rows = filteredExpenses.map(item => [
-      item.id,
-      item.category,
-      item.vendor,
-      item.date,
-      item.description,
-      Number(item.amount).toFixed(2),
-      item.status
-    ]);
+    const filename = `Expenses_Report_${startDate}_to_${endDate}`;
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    if (format === 'csv') {
+      const headers = ['Expense ID', 'Category', 'Vendor', 'Date', 'Description', 'Amount', 'Status'];
+      const rows = exportData.map(item => [
+        item.id,
+        item.category,
+        item.vendor,
+        item.date,
+        item.description,
+        Number(item.amount).toFixed(2),
+        item.status
+      ]);
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `expenses_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
 
-    triggerToast('CSV export downloaded successfully!');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (format === 'xlsx') {
+      const exportRows = exportData.map(item => ({
+        "Expense ID": item.id,
+        "Category": item.category,
+        "Vendor": item.vendor,
+        "Date": item.date,
+        "Description": item.description,
+        "Amount": item.amount,
+        "Status": item.status
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Expense Ledger Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(item => [item.id, item.category, item.vendor, item.date, item.amount.toLocaleString(), item.status]);
+      doc.autoTable({
+        startY: 35,
+        head: [["ID", "Category", "Vendor", "Date", "Amount", "Status"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    }
   };
 
   // Filter conditions
@@ -365,7 +409,7 @@ const Expenses = ({ onViewExpense }) => {
             </div>
             
             <button 
-              onClick={handleExportCSV}
+              onClick={() => setIsExportModalOpen(true)}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
             >
               <Download size={16} className="text-blue-500" />
@@ -669,6 +713,12 @@ const Expenses = ({ onViewExpense }) => {
           <span className="text-xs font-black uppercase tracking-widest">{toastMessage}</span>
         </div>
       )}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Expense Ledger"
+      />
     </div>
   );
 };

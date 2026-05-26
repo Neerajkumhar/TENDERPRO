@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import ExportModal from '../components/ExportModal';
 import {
   ArrowLeft,
   Calendar,
@@ -23,33 +27,76 @@ const mockTransactions = [
 
 const BudgetDetails = ({ category, onBack }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   if (!category) return null;
 
-  const handleExportReport = () => {
-    const headers = ['Transaction ID', 'Date', 'Description', 'Status', 'Amount'];
-    const rows = mockTransactions.map(trx => [
-      trx.id,
-      trx.date,
-      trx.description,
-      trx.status,
-      trx.amount.toFixed(2)
-    ]);
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = mockTransactions.filter(trx => {
+      const trxDate = new Date(trx.date);
+      return trxDate >= start && trxDate <= end;
+    });
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    if (exportData.length === 0) {
+      alert("No transactions found for the selected time period.");
+      return;
+    }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Budget_Report_${category.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const filename = `Admin_Budget_Report_${category.name.replace(/\s+/g, '_')}_${startDate}_to_${endDate}`;
+
+    if (format === 'csv') {
+      const headers = ['Transaction ID', 'Date', 'Description', 'Status', 'Amount'];
+      const rows = exportData.map(trx => [
+        trx.id,
+        trx.date,
+        trx.description,
+        trx.status,
+        trx.amount.toFixed(2)
+      ]);
+
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (format === 'xlsx') {
+      const exportRows = exportData.map(trx => ({
+        "Transaction ID": trx.id,
+        "Date": trx.date,
+        "Description": trx.description,
+        "Status": trx.status,
+        "Amount": trx.amount
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Budget");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text(`Budget Report: ${category.name}`, 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(trx => [trx.id, trx.date, trx.description, trx.status, trx.amount.toLocaleString()]);
+      doc.autoTable({
+        startY: 35,
+        head: [["ID", "Date", "Description", "Status", "Amount"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    }
   };
 
   return (
@@ -82,7 +129,7 @@ const BudgetDetails = ({ category, onBack }) => {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={handleExportReport}
+            onClick={() => setIsExportModalOpen(true)}
             className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
           >
             <Download size={16} />
@@ -209,6 +256,12 @@ const BudgetDetails = ({ category, onBack }) => {
           </table>
         </div>
       </div>
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Budget Details"
+      />
     </div>
   );
 };

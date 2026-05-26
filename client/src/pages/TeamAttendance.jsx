@@ -1,4 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import ExportModal from '../components/ExportModal';
 import { 
   Search, 
   Calendar as CalendarIcon, 
@@ -22,6 +26,7 @@ const TeamAttendance = ({ user }) => {
   const [startDate, setStartDate] = useState('2026-05-01');
   const [endDate, setEndDate] = useState('2026-05-31');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const datePickerRef = useRef(null);
 
   // Expanded rows state to toggle details for specific user + date rows
@@ -301,32 +306,66 @@ const TeamAttendance = ({ user }) => {
   })();
 
   // CSV Report Exporter
-  const handleExportReport = () => {
-    const csvRows = [
-      ['Teammate Name', 'Teammate Email', 'Role', 'Date', view === 'DAY' ? 'Sessions Count' : 'Days Present', 'Clock In', 'Clock Out', 'Work Hours', 'Status'],
-      ...processedRecords.map(r => [
-        r.name, 
-        r.email,
-        r.role,
-        r.date, 
-        r.type === 'DAY' ? `${r.sessionNum} Logins` : `${r.sessionNum} Days Present`,
-        r.in, 
-        r.out, 
-        r.work, 
-        r.status
-      ])
-    ];
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = rawRecords.filter(r => {
+      const rDate = new Date(r.date);
+      return rDate >= start && rDate <= end;
+    });
 
-    const csvContent = csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `TenderPro_Department_Attendance_${view}_${startDate}_to_${endDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (exportData.length === 0) {
+      alert("No team attendance records found for the selected time period.");
+      return;
+    }
+
+    const filename = `Team_Attendance_${startDate}_to_${endDate}`;
+
+    if (format === 'csv') {
+      const csvRows = [
+        ['Teammate Name', 'Teammate Email', 'Role', 'Date', 'Clock In', 'Clock Out', 'Status'],
+        ...exportData.map(r => [r.name, r.email, r.role, r.date, r.in, r.out, r.status])
+      ];
+      const csvContent = csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (format === 'xlsx') {
+      const exportRows = exportData.map(r => ({
+        "Name": r.name,
+        "Email": r.email,
+        "Role": r.role,
+        "Date": r.date,
+        "Clock In": r.in,
+        "Clock Out": r.out,
+        "Status": r.status
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Team Attendance");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Team Attendance Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(r => [r.name, r.date, r.in, r.out, r.status]);
+      doc.autoTable({
+        startY: 35,
+        head: [["Name", "Date", "In", "Out", "Status"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    }
   };
 
   const formatRangeText = (start, end) => {
@@ -486,7 +525,7 @@ const TeamAttendance = ({ user }) => {
                   </p>
                </div>
                <button 
-                 onClick={handleExportReport}
+                 onClick={() => setIsExportModalOpen(true)}
                  className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
                >
                   <Download size={16} />
@@ -704,6 +743,12 @@ const TeamAttendance = ({ user }) => {
             </div>
         </div>
       </div>
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Team Attendance"
+      />
     </div>
   );
 };

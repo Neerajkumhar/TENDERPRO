@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
 import {
   Search,
   Filter,
@@ -32,6 +35,7 @@ import {
 
 const Reports = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const stats = [
     { label: 'Total Tenders', value: '2,500' },
@@ -59,18 +63,49 @@ const Reports = () => {
     { name: 'Jun', value: 900 },
   ];
 
-  const handleExportExcel = () => {
-    const exportRows = [
-      ...stats.map(s => ({ "Metric": s.label, "Value": s.value })),
-      { "Metric": "", "Value": "" }, // separator
-      { "Metric": "Category Breakdown", "Value": "" },
-      ...pieData.map(p => ({ "Metric": p.name, "Value": p.value.toLocaleString() }))
-    ];
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const filename = `Admin_Overview_${startDate}_to_${endDate}`;
 
-    const worksheet = XLSX.utils.json_to_sheet(exportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "System Overview");
-    XLSX.writeFile(workbook, `TenderPro_Admin_Overview_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    if (format === 'xlsx') {
+      const exportRows = [
+        ...stats.map(s => ({ "Metric": s.label, "Value": s.value })),
+        { "Metric": "", "Value": "" }, 
+        { "Metric": `Period: ${startDate} to ${endDate}`, "Value": "" },
+        { "Metric": "Category Breakdown", "Value": "" },
+        ...pieData.map(p => ({ "Metric": p.name, "Value": p.value.toLocaleString() }))
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Overview");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("TenderPro Admin Overview Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = stats.map(s => [s.label, s.value]);
+      doc.autoTable({
+        startY: 35,
+        head: [["Metric", "Value"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    } else if (format === 'csv') {
+      const rows = stats.map(s => [s.label, s.value]);
+      const csvContent = [["Metric", "Value"], ...rows].map(e => e.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -95,7 +130,7 @@ const Reports = () => {
           </button>
         </div>
         <button 
-          onClick={handleExportExcel}
+          onClick={() => setIsExportModalOpen(true)}
           className="flex items-center gap-2 px-6 py-2.5 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-slate-100 active:scale-95"
         >
           <Download size={16} />
@@ -171,6 +206,12 @@ const Reports = () => {
           </div>
         </div>
       </div>
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Admin Report"
+      />
     </div>
   );
 };

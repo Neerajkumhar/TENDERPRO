@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
 import {
   Search,
   Filter,
@@ -39,6 +42,7 @@ const Reports = () => {
   const [deadlineType, setDeadlineType] = useState('tenders');
   const [selectedTimeframe, setSelectedTimeframe] = useState('All Time');
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Premium Toast Notification state
   const [toastMessage, setToastMessage] = useState('');
@@ -209,28 +213,68 @@ const Reports = () => {
 
 
 
-  const handleExportExcel = () => {
-    if (filteredTenders.length === 0) {
-      alert("No data matched your criteria to export.");
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = filteredTenders.filter(t => {
+      if (!t.date || t.date === 'N/A') return false;
+      const tDate = new Date(t.date);
+      return tDate >= start && tDate <= end;
+    });
+
+    if (exportData.length === 0) {
+      alert("No data matched the selected time period.");
       return;
     }
 
-    const exportRows = filteredTenders.map(t => ({
-      "Tender ID": t.id,
-      "Tender Title": t.title,
-      "Client": t.client,
-      "Budget Value": t.value,
-      "Status": t.status,
-      "Win/Loss": t.winLoss,
-      "Deadline": t.date,
-      "Category": t.category
-    }));
+    const filename = `Tenders_Report_${startDate}_to_${endDate}`;
 
-    const worksheet = XLSX.utils.json_to_sheet(exportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Tenders Report");
-    XLSX.writeFile(workbook, `Tenders_Analytics_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    triggerToast("Excel analytics report downloaded successfully!");
+    if (format === 'xlsx') {
+      const exportRows = exportData.map(t => ({
+        "Tender ID": t.id,
+        "Tender Title": t.title,
+        "Client": t.client,
+        "Budget Value": t.value,
+        "Status": t.status,
+        "Win/Loss": t.winLoss,
+        "Deadline": t.date,
+        "Category": t.category
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Tenders Report");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+      triggerToast("Excel analytics report downloaded!");
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("TenderPro Analytics Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(t => [t.id, t.title, t.client, t.value, t.status, t.date]);
+      doc.autoTable({
+        startY: 35,
+        head: [["ID", "Title", "Client", "Value", "Status", "Deadline"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    } else if (format === 'csv') {
+      const headers = ["ID", "Title", "Client", "Value", "Status", "Deadline"];
+      const rows = exportData.map(t => [t.id, t.title, t.client, t.value, t.status, t.date]);
+      const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -307,7 +351,7 @@ const Reports = () => {
           </div>
         </div>
         <button 
-          onClick={handleExportExcel}
+          onClick={() => setIsExportModalOpen(true)}
           className="flex items-center gap-2 px-6 py-2.5 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-slate-100 active:scale-95"
         >
           <Download size={16} />
@@ -521,6 +565,12 @@ const Reports = () => {
           <span className="text-xs font-black uppercase tracking-widest">{toastMessage}</span>
         </div>
       )}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Analytics Report"
+      />
     </div>
   );
 };

@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import ExportModal from '../components/ExportModal';
 import { 
   Search, 
   Calendar, 
@@ -35,6 +39,7 @@ const Budget = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [period, setPeriod] = useState('ANNUAL');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [selectedCategoryDetails, setSelectedCategoryDetails] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -155,38 +160,55 @@ const Budget = () => {
     setIsModalOpen(false);
   };
 
-  const handleExportCSV = () => {
+  const handleExportReport = ({ format, startDate, endDate }) => {
     if (filteredBudgets.length === 0) {
       triggerToast('No budget allocations to export');
       return;
     }
 
-    const headers = ['Category ID', 'Budget Category', 'Status', 'Allocated Amount', 'Spent Amount', 'Utilization %', 'Trend'];
-    const rows = filteredBudgets.map(item => [
-      item.id,
-      item.name,
-      item.status,
-      item.allocated.toFixed(2),
-      item.spent.toFixed(2),
-      `${item.utilization}%`,
-      item.trend
-    ]);
+    const filename = `Admin_Budget_Report_${startDate}_to_${endDate}`;
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `budget_report_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    triggerToast('Budget report CSV downloaded successfully!');
+    if (format === 'xlsx') {
+      const exportRows = filteredBudgets.map(item => ({
+        "ID": item.id,
+        "Category": item.name,
+        "Department": item.department,
+        "Status": item.status,
+        "Allocated": item.allocated,
+        "Spent": item.spent,
+        "Utilization %": item.utilization
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Budgets");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Global Budget Planning Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = filteredBudgets.map(item => [item.id, item.name, item.department, item.status, item.allocated.toLocaleString(), item.spent.toLocaleString()]);
+      doc.autoTable({
+        startY: 35,
+        head: [["ID", "Category", "Dept", "Status", "Allocated", "Spent"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    } else if (format === 'csv') {
+      const rows = filteredBudgets.map(item => [item.id, item.name, item.department, item.status, item.allocated, item.spent]);
+      const csvContent = [["ID", "Category", "Dept", "Status", "Allocated", "Spent"], ...rows].map(e => e.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   // Filter criteria logic
@@ -251,7 +273,7 @@ const Budget = () => {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={handleExportCSV}
+            onClick={() => setIsExportModalOpen(true)}
             className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
           >
             <Download size={16} />
@@ -538,7 +560,7 @@ const Budget = () => {
                           <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all
                             ${cat.status === 'ON TRACK' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 
                               cat.status === 'OVER BUDGET' ? 'bg-rose-500 text-white shadow-lg shadow-rose-100' : 
-                              'bg-emerald-500 text-white shadow-lg shadow-emerald-100'}`}>
+                              'bg-emerald-50 text-white shadow-lg shadow-emerald-100'}`}>
                             {cat.status}
                           </span>
                         </td>
@@ -728,6 +750,12 @@ const Budget = () => {
           <span className="text-xs font-black uppercase tracking-widest">{toastMessage}</span>
         </div>
       )}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Admin Budget Report"
+      />
     </div>
   );
 };

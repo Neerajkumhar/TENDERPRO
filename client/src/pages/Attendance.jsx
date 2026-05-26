@@ -1,4 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import ExportModal from '../components/ExportModal';
 import { 
   Search, 
   Calendar as CalendarIcon, 
@@ -46,6 +50,7 @@ const Attendance = ({ user }) => {
   const [leaveError, setLeaveError] = useState('');
   const [userLeaveRequests, setUserLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const fetchUserLeaveRequests = async () => {
     if (!user?.id) return;
@@ -407,30 +412,67 @@ const Attendance = ({ user }) => {
   })();
 
   // Direct CSV Export capability
-  const handleExportReport = () => {
-    const csvRows = [
-      ['Teammate Name', 'Date', view === 'DAY' ? 'Session' : 'Total Sessions', 'Clock In', 'Clock Out', 'Work Hours', 'Status'],
-      ...processedRecords.map(r => [
-        r.name, 
-        r.date, 
-        view === 'DAY' ? `Session #${r.sessionNum}` : `${r.sessionNum} Logins`,
-        r.in, 
-        r.out, 
-        r.work, 
-        r.status
-      ])
-    ];
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Use base records for full historical export
+    const baseRecords = [...sessions, ...sessionsDatabase];
+    const exportData = baseRecords.filter(r => {
+      const rDate = new Date(r.date);
+      return rDate >= start && rDate <= end;
+    });
 
-    const csvContent = csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `TenderPro_Attendance_Report_${view}_${startDate}_to_${endDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (exportData.length === 0) {
+      alert("No attendance records found for the selected time period.");
+      return;
+    }
+
+    const filename = `Attendance_Report_${startDate}_to_${endDate}`;
+
+    if (format === 'csv') {
+      const csvRows = [
+        ['Teammate Name', 'Date', 'Clock In', 'Clock Out', 'Status'],
+        ...exportData.map(r => [selfName, r.date, r.in, r.out, r.status])
+      ];
+      const csvContent = csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (format === 'xlsx') {
+      const exportRows = exportData.map(r => ({
+        "Name": selfName,
+        "Date": r.date,
+        "Clock In": r.in,
+        "Clock Out": r.out,
+        "Status": r.status
+      }));
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Attendance Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Name: ${selfName}`, 14, 28);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 34);
+      
+      const rows = exportData.map(r => [r.date, r.in, r.out, r.status]);
+      doc.autoTable({
+        startY: 40,
+        head: [["Date", "Clock In", "Clock Out", "Status"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    }
   };
 
   // Convert dates to human readable string format
@@ -777,7 +819,7 @@ const Attendance = ({ user }) => {
                     )}
                 </div>
                 <button 
-                  onClick={handleExportReport}
+                  onClick={() => setIsExportModalOpen(true)}
                   className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
                 >
                     <Download size={16} />
@@ -1024,6 +1066,12 @@ const Attendance = ({ user }) => {
       </div>
 
       {renderLeaveModal()}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Attendance Report"
+      />
     </div>
   );
 };
