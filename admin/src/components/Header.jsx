@@ -31,21 +31,6 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
         >
           <Menu size={24} />
         </button>
-
-        <div className="flex-1 max-w-xl hidden md:block">
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search tenders, clients, projects..." 
-              className="w-full pl-10 pr-12 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-400">
-              <Command size={10} />
-              <span>K</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="flex items-center gap-4">
