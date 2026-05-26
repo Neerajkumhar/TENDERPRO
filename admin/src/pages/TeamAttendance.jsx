@@ -701,25 +701,10 @@ const TeamAttendance = ({ user }) => {
                      <span className="text-slate-900 font-bold"># P = Present Members</span>
                   </div>
                </div>
-            </div>
-
-            <div className="bg-slate-900 p-8 rounded-[3rem] text-white overflow-hidden relative group cursor-pointer hover:scale-[1.02] transition-all">
-               <div className="absolute -right-4 -bottom-4 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Coffee size={120} />
                </div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">DEPT TIME OFF MANAGER</p>
-               <h4 className="text-xl font-black tracking-tight uppercase leading-tight mb-6">Review pending leave applications.</h4>
-               <button 
-                 onClick={() => setView('MONTH')}
-                 className="px-6 py-2.5 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-xl cursor-pointer"
-               >
-                  OPEN REQUESTS
-               </button>
-            </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+               </div>
+               </div>
+               </div>
+               );
+               };
 export default TeamAttendance;
