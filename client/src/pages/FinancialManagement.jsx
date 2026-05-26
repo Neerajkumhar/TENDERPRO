@@ -768,6 +768,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
           </div>
         </div>
       )}
+      {renderLeaveModal()}
     </div>
   );
 };
