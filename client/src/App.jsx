@@ -397,6 +397,7 @@ function App() {
               tenders={tenders}
               setTenders={setTenders}
               clients={clients}
+              user={user}
               onView={handleTenderClick}
               onEdit={(tender) => {
                 setEditTenderData(tender);

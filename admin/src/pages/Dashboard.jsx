@@ -143,7 +143,7 @@ const Dashboard = ({ user, members, assignments, onProjectClick }) => {
           <p className="text-slate-500 mt-1 font-medium italic text-sm sm:text-base">Here's what's happening with your team today.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          {(user?.role === 'Admin' || user?.role === 'Project Manager') && (
+          {(user?.role === 'Admin' || user?.role?.includes('Manager')) && (
             <button 
               onClick={() => setShowLeaveModal(true)}
               className="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"

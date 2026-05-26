@@ -17,7 +17,11 @@ import {
   Download,
   Wallet,
   XCircle,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  Coffee,
+  X,
+  User as UserIcon,
+  Calendar
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -80,7 +84,7 @@ const alerts = [
   { type: 'Approval', message: 'New invoice generated for TechCorp.', time: '5 hours ago', color: 'blue' },
 ];
 
-const FinancialManagement = ({ onInvoiceClick }) => {
+const FinancialManagement = ({ onInvoiceClick, user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     client: '',
@@ -100,6 +104,47 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     paidCount: 113,
     overdueCount: 4
   });
+
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [loadingLeaves, setLoadingLeaves] = useState(false);
+
+  const fetchLeaveRequests = async () => {
+    if (!user?.departmentId) return;
+    setLoadingLeaves(true);
+    try {
+      const response = await fetch(`/api/leave-requests/department/${user.departmentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setLeaveRequests(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch leave requests:', err);
+    } finally {
+      setLoadingLeaves(false);
+    }
+  };
+
+  const handleLeaveStatusUpdate = async (id, status) => {
+    try {
+      const response = await fetch(`/api/leave-requests/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, approverId: user?.id })
+      });
+      if (response.ok) {
+        fetchLeaveRequests();
+      }
+    } catch (err) {
+      console.error('Failed to update leave status:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (showLeaveModal) {
+      fetchLeaveRequests();
+    }
+  }, [showLeaveModal]);
 
   const fetchInvoicesAndStats = async () => {
     try {
@@ -191,7 +236,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     ];
 
     doc.autoTable({
-      startY: 50,
+      startY: 45,
       head: [["Metric", "Value"]],
       body: metricsData,
       theme: 'grid',
@@ -235,6 +280,143 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     { label: 'Paid Invoices', value: String(stats.paidCount), trend: '+ 12', isUp: true, color: 'blue', icon: CheckCircle2 },
     { label: 'Outstanding Dues', value: `₹${stats.outstandingDues.toLocaleString('en-IN')}`, trend: '- 5%', isUp: true, color: 'rose', icon: AlertCircle },
   ];
+
+  function renderLeaveModal() {
+    if (!showLeaveModal) return null;
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowLeaveModal(false)}></div>
+        <div className="bg-white w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col text-left">
+          {/* Modal Header */}
+          <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-amber-500 text-white rounded-2xl shadow-lg shadow-amber-200">
+                <Coffee size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Team Leave Requests</h2>
+                <p className="text-xs text-slate-500 font-medium italic">Review and manage your department's time-off applications</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowLeaveModal(false)}
+              className="p-3 hover:bg-white rounded-full text-slate-400 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100 shadow-sm"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Modal Content */}
+          <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+            {loadingLeaves ? (
+              <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="font-black text-[10px] uppercase tracking-widest">Fetching applications...</p>
+              </div>
+            ) : leaveRequests.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4 opacity-50">
+                <Coffee size={64} strokeWidth={1} />
+                <p className="font-black text-[10px] uppercase tracking-widest">No pending leave requests found</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {leaveRequests.map((request) => (
+                  <div key={request.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-blue-100 transition-all group relative overflow-hidden">
+                    {/* Status Badge */}
+                    <div className="absolute top-6 right-6">
+                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm
+                        ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : 
+                          request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 
+                          'bg-rose-500 text-white shadow-rose-100'}`}>
+                        {request.status}
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xl border-2 border-white shadow-sm overflow-hidden shrink-0">
+                        {request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0 pr-16">
+                        <h4 className="font-black text-slate-900 uppercase tracking-tight truncate">{request.User?.name}</h4>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{request.User?.role}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50">
+                        <div className="p-2 bg-white rounded-xl text-blue-500 shadow-sm">
+                          <Calendar size={16} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Duration</p>
+                          <p className="text-xs font-black text-slate-700">
+                            {new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50">
+                        <div className="p-2 bg-white rounded-xl text-amber-500 shadow-sm">
+                          <AlertCircle size={16} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Type & Reason</p>
+                          <p className="text-xs font-bold text-slate-600 italic">
+                            <span className="text-slate-900 font-black not-italic">{request.leaveType}: </span>
+                            "{request.reason || 'No reason provided'}"
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {request.status === 'Pending' && (
+                      <div className="flex gap-3 mt-6">
+                        <button 
+                          onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')}
+                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                        >
+                          <CheckCircle2 size={14} />
+                          Approve
+                        </button>
+                        <button 
+                          onClick={() => handleLeaveStatusUpdate(request.id, 'Rejected')}
+                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-white border border-rose-100 text-rose-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all shadow-sm active:scale-95"
+                        >
+                          <XCircle size={14} />
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          <div className="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center px-10">
+             <div className="flex items-center gap-4">
+                <div className="flex -space-x-3">
+                   {[1,2,3].map(i => (
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm overflow-hidden">
+                         <UserIcon size={14} />
+                      </div>
+                   ))}
+                </div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{leaveRequests.filter(r => r.status === 'Pending').length} Pending Reviews</p>
+             </div>
+             <button 
+              onClick={() => setShowLeaveModal(false)}
+              className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95"
+             >
+               Close Panel
+             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
       {/* Header */}
@@ -244,6 +426,13 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium italic">Track revenue, expenses, and overall financial health.</p>
         </div>
         <div className="flex items-center gap-4 w-full sm:w-auto">
+          <button 
+            onClick={() => setShowLeaveModal(true)}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
+          >
+            <Coffee size={18} />
+            <span>Leave Requests</span>
+          </button>
           <button 
             onClick={handleExportReport}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95 cursor-pointer"
