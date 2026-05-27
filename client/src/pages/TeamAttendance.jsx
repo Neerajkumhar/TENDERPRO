@@ -376,17 +376,17 @@ const TeamAttendance = ({ user }) => {
   };
 
   return (
-    <div className="p-8 space-y-10 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       
       {/* Premium Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Team Attendance Panel</h1>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">Team Attendance Panel</h1>
+          <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
             Department-wide real-time tracking, login logs auditing, and attendance sheets
           </p>
         </div>
-        <div className="flex items-center gap-4 bg-slate-900 px-6 py-4 rounded-2xl text-white shadow-lg shrink-0 border border-slate-800">
+        <div className="flex items-center gap-4 bg-slate-900 px-5 sm:px-6 py-3 sm:py-4 rounded-2xl text-white shadow-lg shrink-0 border border-slate-800 w-full xl:w-auto">
           <Clock size={20} className="text-blue-400 animate-pulse" />
           <div className="flex flex-col">
             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">REAL TIME TIMER</span>
@@ -398,24 +398,24 @@ const TeamAttendance = ({ user }) => {
       </div>
 
       {/* Header Actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="relative w-full max-w-md group">
+      <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 sm:gap-6">
+        <div className="relative w-full xl:max-w-md group">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={20} />
           <input 
             type="text" 
             placeholder="Search team member name or email..."
-            className="w-full pl-16 pr-8 py-5 bg-white border border-slate-100 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:shadow-xl focus:shadow-blue-500/5 transition-all"
+            className="w-full pl-16 pr-8 py-4 sm:py-5 bg-white border border-slate-100 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:shadow-xl focus:shadow-blue-500/5 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-6">
           {/* Active Date Range Trigger */}
           <div className="relative" ref={datePickerRef}>
             <button 
               onClick={() => setShowDatePicker(!showDatePicker)}
-              className="flex items-center gap-3 bg-white hover:bg-slate-50 transition-colors px-6 py-4 rounded-[1.5rem] border border-slate-100 shadow-sm text-xs font-black text-slate-600 uppercase tracking-widest cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 transition-colors px-6 py-4 rounded-2xl sm:rounded-[1.5rem] border border-slate-100 shadow-sm text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest cursor-pointer"
             >
                <CalendarIcon size={18} className="text-blue-500" />
                <span>{formatRangeText(startDate, endDate)}</span>
@@ -423,7 +423,7 @@ const TeamAttendance = ({ user }) => {
 
             {/* Popover */}
             {showDatePicker && (
-              <div className="absolute right-0 mt-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-[60] w-80 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="absolute right-0 left-0 sm:left-auto mt-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-[60] w-auto sm:w-80 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="flex items-center justify-between pb-1 border-b border-slate-50">
                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Configure Date Window</h4>
                   <span className="text-[9px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">Filter</span>
@@ -484,12 +484,12 @@ const TeamAttendance = ({ user }) => {
           </div>
 
           {/* View Tab Selector */}
-          <div className="flex bg-white p-1 rounded-2xl border border-slate-50 shadow-sm">
+          <div className="flex bg-white p-1 rounded-2xl border border-slate-50 shadow-sm w-full sm:w-auto">
              {['MONTH', 'WEEK', 'DAY'].map(t => (
                 <button 
                   key={t}
                   onClick={() => setView(t)}
-                  className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer
+                  className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer
                     ${view === t ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                   {t}
@@ -500,13 +500,13 @@ const TeamAttendance = ({ user }) => {
       </div>
 
       {/* Stats Panel */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
+          <div key={i} className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
              <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
+             <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 sm:mb-4">{stat.label}</p>
              <div className="flex items-center justify-between">
-                <span className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</span>
+                <span className="text-sm sm:text-2xl font-black text-slate-900 tracking-tight">{stat.value}</span>
              </div>
           </div>
         ))}
@@ -516,17 +516,17 @@ const TeamAttendance = ({ user }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
         
         {/* Attendance Log Table */}
-        <div className="lg:col-span-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm">
-            <div className="flex justify-between items-center mb-10 px-2">
+        <div className="lg:col-span-8 bg-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3.5rem] border border-slate-50 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-10 px-2 gap-4">
                <div className="flex flex-col">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">DEPT ATTENDANCE LOG ({view})</h3>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tighter uppercase italic">DEPT ATTENDANCE LOG ({view})</h3>
                   <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1.5">
-                    {processedRecords.length} records matching the current layout window
+                    {processedRecords.length} records matching current view
                   </p>
                </div>
                <button 
                  onClick={() => setIsExportModalOpen(true)}
-                 className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
+                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
                >
                   <Download size={16} />
                   <span>EXPORT REPORT</span>
