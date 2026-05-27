@@ -296,7 +296,6 @@ const ProjectDetails = ({ projectId, onBack }) => {
             </div>
           </div>
         </div>
-      </div>
 
         {/* Bottom Row: Documents & Timeline & Team */}
         <div className="col-span-12 lg:col-span-8">
