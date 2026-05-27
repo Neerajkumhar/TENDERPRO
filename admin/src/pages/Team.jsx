@@ -66,7 +66,8 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
               {filteredMembers.length > 0 ? filteredMembers.map((member) => (
                 <tr 
                   key={member.id} 
-                  className="hover:bg-blue-50/20 transition-all group"
+                  onClick={() => onMemberClick && onMemberClick(member.id)}
+                  className="hover:bg-blue-50/20 transition-all group cursor-pointer"
                 >
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">

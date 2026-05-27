@@ -564,6 +564,10 @@ function App() {
                 user={members.find(m => m.email === user.email) || user}
                 members={members}
                 departments={departments}
+                onMemberClick={(id) => {
+                  setSelectedMemberId(id);
+                  setActiveTab('Member Profile');
+                }}
               />
             ) : (
               <TeamManagement
