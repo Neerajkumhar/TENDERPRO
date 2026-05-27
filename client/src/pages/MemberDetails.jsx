@@ -428,6 +428,58 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
             )}
           </div>
 
+          {/* Pending / Unapproved Requests - NEW SECTION */}
+          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
+              <div className="flex items-center gap-4">
+                <div className="p-2 sm:p-3 bg-amber-50 text-amber-600 rounded-xl sm:rounded-2xl">
+                  <Clock size={20} className="sm:w-6 sm:h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">Pending Requests</h3>
+                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic">Unapproved leave or system applications.</p>
+                </div>
+              </div>
+              <div className="px-4 py-1.5 bg-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-widest">
+                {leaveRequests.filter(l => l.status === 'Pending').length} Pending
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {leaveRequests.filter(l => l.status === 'Pending').length === 0 ? (
+                <div className="py-10 text-center border-2 border-dashed border-slate-50 rounded-[2rem]">
+                  <CheckCircle2 className="mx-auto text-slate-200 mb-2" size={32} />
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No unapproved requests found</p>
+                </div>
+              ) : (
+                leaveRequests.filter(l => l.status === 'Pending').map((leave, i) => (
+                  <div key={i} className="p-5 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group hover:bg-white hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600">
+                        <Calendar size={18} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight">{leave.leaveType}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                          {new Date(leave.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(leave.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
+                       <div className="flex flex-col items-start sm:items-end">
+                          <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Reason</p>
+                          <p className="text-[11px] font-bold text-slate-600 italic">"{leave.reason || 'No reason provided'}"</p>
+                       </div>
+                       <button className="p-2 bg-white text-slate-400 hover:text-blue-600 rounded-xl shadow-sm transition-all">
+                          <ExternalLink size={16} />
+                       </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
           {/* Role Responsibilities */}
           <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex items-center gap-4 mb-6 sm:mb-8">
