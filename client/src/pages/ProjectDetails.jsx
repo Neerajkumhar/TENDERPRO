@@ -423,84 +423,90 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
             </button>
           </div>
 
-          <div className="flex lg:grid lg:grid-cols-4 gap-6 overflow-x-auto pb-6 lg:pb-0 snap-x no-scrollbar">
-            {[
-              { id: 'To Do', label: 'TO DO', color: 'bg-blue-600' },
-              { id: 'In Progress', label: 'IN PROGRESS', color: 'bg-orange-500' },
-              { id: 'Review', label: 'REVIEW', color: 'bg-purple-600' },
-              { id: 'Completed', label: 'COMPLETED', color: 'bg-emerald-500' },
-            ].map((col) => (
-              <div 
-                key={col.id} 
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => handleDrop(e, col.id)}
-                className="flex flex-col h-full group/column min-w-[280px] sm:min-w-[320px] lg:min-w-0 snap-center"
-              >
-                <div className="flex justify-between items-center mb-4 sm:mb-6 px-2">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-1 h-5 rounded-full ${col.color}`}></div>
-                    <span className="text-[11px] font-black text-slate-800 tracking-[0.2em] uppercase">{col.label}</span>
-                    <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-black">
-                      {tasks.filter(t => t.status === col.id || (col.id === 'To Do' && t.status === 'Pending') || (col.id === 'Completed' && t.status === 'Done')).length}
-                    </span>
+          <div className="flex flex-col gap-2">
+            <div className="flex lg:grid lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-4 lg:pb-0 snap-x snap-mandatory scroll-smooth custom-scrollbar">
+              {[
+                { id: 'To Do', label: 'TO DO', color: 'bg-blue-600' },
+                { id: 'In Progress', label: 'IN PROGRESS', color: 'bg-orange-500' },
+                { id: 'Review', label: 'REVIEW', color: 'bg-purple-600' },
+                { id: 'Completed', label: 'COMPLETED', color: 'bg-emerald-500' },
+              ].map((col) => (
+                <div 
+                  key={col.id} 
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => handleDrop(e, col.id)}
+                  className="flex flex-col h-full group/column min-w-[85vw] sm:min-w-[320px] lg:min-w-0 snap-center"
+                >
+                  <div className="flex justify-between items-center mb-4 sm:mb-6 px-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-1 h-5 rounded-full ${col.color}`}></div>
+                      <span className="text-[11px] font-black text-slate-800 tracking-[0.2em] uppercase">{col.label}</span>
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-black">
+                        {tasks.filter(t => t.status === col.id || (col.id === 'To Do' && t.status === 'Pending') || (col.id === 'Completed' && t.status === 'Done')).length}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-4 min-h-[400px] sm:min-h-[500px] p-2 rounded-[2rem] sm:rounded-[2.5rem] bg-slate-50/20 border-2 border-transparent hover:border-blue-100/50 transition-all duration-300 border-dashed">
+                    {tasks.filter(t => t.status === col.id || (col.id === 'To Do' && t.status === 'Pending') || (col.id === 'Completed' && t.status === 'Done')).map((task) => (
+                      <div 
+                        key={task.id} 
+                        id={`task-${task.id}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        onDragEnd={handleDragEnd}
+                        className="bg-white p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing group relative overflow-hidden"
+                      >
+                        <div className={`absolute top-0 left-0 right-0 h-1 ${
+                          task.priority === 'High' ? 'bg-rose-500' : 
+                          task.priority === 'Medium' ? 'bg-orange-500' : 
+                          'bg-emerald-500'
+                        }`}></div>
+
+                        <div className="flex justify-between items-start mb-4">
+                          <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-slate-50
+                            ${task.priority === 'High' ? 'text-rose-500' : 
+                              task.priority === 'Medium' ? 'text-orange-500' : 
+                              'text-emerald-500'}`}>
+                            {task.priority}
+                          </span>
+                          <button className="text-slate-200 hover:text-slate-400 transition-colors">
+                            <MoreHorizontal size={14} />
+                          </button>
+                        </div>
+
+                        <h4 className="text-xs sm:text-[13px] font-black text-slate-900 tracking-tight leading-snug uppercase mb-1 line-clamp-1">{task.title}</h4>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-6 line-clamp-2 italic">"{task.description}"</p>
+                        
+                        <div className="flex items-center justify-between border-t border-slate-50 pt-5">
+                          <div className="flex items-center gap-2">
+                             <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border border-white">
+                                {task.assignee?.image ? <img src={task.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={10} className="text-slate-400" />}
+                             </div>
+                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[80px]">{task.assignee?.name || 'Unassigned'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-slate-300">
+                            <Clock size={12} />
+                            <span className="text-[9px] font-black uppercase tracking-tight">
+                              {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No Date'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <button onClick={() => setShowTaskModal(true)} className="w-full h-20 rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-slate-100 flex items-center justify-center gap-3 text-slate-200 hover:border-blue-200 hover:text-blue-500 hover:bg-white transition-all">
+                      <Plus size={18} />
+                      <span className="text-[9px] font-black uppercase tracking-widest">ADD TASK</span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex-1 space-y-4 min-h-[400px] sm:min-h-[500px] p-2 rounded-[2rem] sm:rounded-[2.5rem] bg-slate-50/20 border-2 border-transparent hover:border-blue-100/50 transition-all duration-300 border-dashed">
-                  {tasks.filter(t => t.status === col.id || (col.id === 'To Do' && t.status === 'Pending') || (col.id === 'Completed' && t.status === 'Done')).map((task) => (
-                    <div 
-                      key={task.id} 
-                      id={`task-${task.id}`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, task.id)}
-                      onDragEnd={handleDragEnd}
-                      className="bg-white p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing group relative overflow-hidden"
-                    >
-                      <div className={`absolute top-0 left-0 right-0 h-1 ${
-                        task.priority === 'High' ? 'bg-rose-500' : 
-                        task.priority === 'Medium' ? 'bg-orange-500' : 
-                        'bg-emerald-500'
-                      }`}></div>
-
-                      <div className="flex justify-between items-start mb-4">
-                        <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-slate-50
-                          ${task.priority === 'High' ? 'text-rose-500' : 
-                            task.priority === 'Medium' ? 'text-orange-500' : 
-                            'text-emerald-500'}`}>
-                          {task.priority}
-                        </span>
-                        <button className="text-slate-200 hover:text-slate-400 transition-colors">
-                          <MoreHorizontal size={14} />
-                        </button>
-                      </div>
-
-                      <h4 className="text-xs sm:text-[13px] font-black text-slate-900 tracking-tight leading-snug uppercase mb-1 line-clamp-1">{task.title}</h4>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-6 line-clamp-2 italic">"{task.description}"</p>
-                      
-                      <div className="flex items-center justify-between border-t border-slate-50 pt-5">
-                        <div className="flex items-center gap-2">
-                           <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border border-white">
-                              {task.assignee?.image ? <img src={task.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={10} className="text-slate-400" />}
-                           </div>
-                           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate max-w-[80px]">{task.assignee?.name || 'Unassigned'}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-slate-300">
-                          <Clock size={12} />
-                          <span className="text-[9px] font-black uppercase tracking-tight">
-                            {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No Date'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <button onClick={() => setShowTaskModal(true)} className="w-full h-20 rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-slate-100 flex items-center justify-center gap-3 text-slate-200 hover:border-blue-200 hover:text-blue-500 hover:bg-white transition-all">
-                    <Plus size={18} />
-                    <span className="text-[9px] font-black uppercase tracking-widest">ADD TASK</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="flex lg:hidden items-center justify-center gap-2 text-slate-300 font-black text-[8px] uppercase tracking-[0.2em] animate-pulse">
+               <span>Scroll horizontally for more columns</span>
+               <ChevronRight size={10} />
+            </div>
           </div>
         </div>
       )}
