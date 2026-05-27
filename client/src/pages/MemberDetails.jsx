@@ -567,198 +567,201 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
 
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsEditModalOpen(false)}></div>
-          <div className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div className="relative w-full max-w-2xl bg-white h-full sm:h-auto sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="p-6 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl text-white shadow-lg bg-blue-600 shadow-blue-100">
-                  <Edit size={24} />
+                <div className="p-2 sm:p-3 rounded-2xl text-white shadow-lg bg-blue-600 shadow-blue-100">
+                  <Edit size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Edit Profile</h2>
-                  <p className="text-xs text-slate-500 font-medium">Update member information and photo</p>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase italic">Edit Profile</h2>
+                  <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">Update member info & photo</p>
                 </div>
               </div>
-              <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-white rounded-full text-slate-400 transition-all">
+              <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-white rounded-full text-slate-400 transition-all border border-transparent hover:border-slate-100 shadow-sm">
                 <Plus size={20} className="rotate-45" />
               </button>
             </div>
 
-            {updateError && (
-              <div className="mx-8 mt-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-in fade-in duration-300">
-                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse flex-shrink-0"></div>
-                <span className="text-xs font-black uppercase tracking-wider">{updateError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleUpdate} className="p-8 space-y-6">
-              <div className="grid grid-cols-12 gap-8">
-                {/* Photo Upload Section */}
-                <div className="col-span-12 md:col-span-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block text-center md:text-left">Profile Photo</label>
-                  <div 
-                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                    onDragLeave={() => setIsDragging(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragging(false);
-                      const file = e.dataTransfer.files[0];
-                      handleFileUpload(file);
-                    }}
-                    className={`relative w-40 h-40 mx-auto md:mx-0 rounded-[2.5rem] border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden group
-                      ${isDragging ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-200 bg-slate-50 hover:border-blue-400'}
-                    `}
-                  >
-                    {editFormData.image ? (
-                      <>
-                        <img src={editFormData.image || null} className="w-full h-full object-cover" alt="Preview" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                          <UploadCloud className="text-white" size={24} />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center p-4">
-                        <UploadCloud className={`mx-auto mb-2 ${isUploading ? 'animate-bounce text-blue-500' : 'text-slate-400'}`} size={24} />
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{isUploading ? 'Uploading...' : 'Drop Photo Here'}</p>
-                      </div>
-                    )}
-                    <input 
-                      type="file" 
-                      className="absolute inset-0 opacity-0 cursor-pointer" 
-                      onChange={(e) => handleFileUpload(e.target.files[0])}
-                    />
-                  </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {updateError && (
+                <div className="mx-6 sm:mx-8 mt-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-in fade-in duration-300">
+                  <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse flex-shrink-0"></div>
+                  <span className="text-[10px] font-black uppercase tracking-wider">{updateError}</span>
                 </div>
+              )}
 
-                {/* Form Fields Section */}
-                <div className="col-span-12 md:col-span-8 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                      <input 
-                        required 
-                        value={editFormData.name}
-                        onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm" 
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
-                      <input 
-                        value={editFormData.phone}
-                        onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm" 
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-                    <input 
-                      type="email"
-                      required 
-                      value={editFormData.email}
-                      onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
-                      className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm" 
-                    />
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Change Password (Leave blank to keep current)</label>
-                    <div className="relative">
-                      <input 
-                        type={showPassword ? "text" : "password"}
-                        value={editFormData.password}
-                        onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
-                        placeholder="••••••••"
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm pr-12" 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-all"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Role</label>
-                      <select 
-                        required 
-                        value={editFormData.role}
-                        onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-sm"
-                      >
-                        <option value="Admin">Admin</option>
-                        <option value="Tender Manager">Tender Manager</option>
-                        <option value="Project Manager">Project Manager</option>
-                        <option value="Finance Manager">Finance Manager</option>
-                        <option value="Core Team">Core Team</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Department</label>
-                      <select 
-                        required 
-                        value={editFormData.departmentId}
-                        onChange={(e) => setEditFormData({...editFormData, departmentId: e.target.value})}
-                        className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-sm"
-                      >
-                        <option value="">Select Department</option>
-                        {departments.map(d => (
-                          <option key={d.id} value={d.id}>{d.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Member Status</label>
-                    <div className="flex gap-4">
-                      {['Active', 'On Leave', 'Inactive'].map(s => (
-                        <label key={s} className="flex-1 cursor-pointer">
-                          <input 
-                            type="radio" 
-                            name="status" 
-                            value={s} 
-                            checked={editFormData.status === s}
-                            onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
-                            className="sr-only peer" 
-                          />
-                          <div className={`py-3 text-center rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 border-slate-100 bg-slate-50 hover:bg-white`}>
-                            {s}
+              <form onSubmit={handleUpdate} className="p-6 sm:p-8 space-y-8">
+                <div className="flex flex-col md:flex-row gap-8">
+                  {/* Photo Upload Section */}
+                  <div className="flex-shrink-0">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-3 block text-center md:text-left">Profile Photo</label>
+                    <div 
+                      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDragging(false);
+                        const file = e.dataTransfer.files[0];
+                        handleFileUpload(file);
+                      }}
+                      className={`relative w-32 h-32 sm:w-40 sm:h-40 mx-auto md:mx-0 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden group
+                        ${isDragging ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-200 bg-slate-50 hover:border-blue-400'}
+                      `}
+                    >
+                      {editFormData.image ? (
+                        <>
+                          <img src={editFormData.image || null} className="w-full h-full object-cover" alt="Preview" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                            <UploadCloud className="text-white" size={24} />
                           </div>
-                        </label>
-                      ))}
+                        </>
+                      ) : (
+                        <div className="text-center p-4">
+                          <UploadCloud className={`mx-auto mb-2 ${isUploading ? 'animate-bounce text-blue-500' : 'text-slate-400'}`} size={24} />
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{isUploading ? 'Uploading...' : 'Drop Photo'}</p>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                        onChange={(e) => handleFileUpload(e.target.files[0])}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Form Fields Section */}
+                  <div className="flex-1 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <input 
+                          required 
+                          value={editFormData.name}
+                          onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                          className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" 
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+                        <input 
+                          value={editFormData.phone}
+                          onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+                          className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                      <input 
+                        type="email"
+                        required 
+                        value={editFormData.email}
+                        onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" 
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Password <span className="text-[8px] opacity-60">(Optional)</span></label>
+                      <div className="relative">
+                        <input 
+                          type={showPassword ? "text" : "password"}
+                          value={editFormData.password}
+                          onChange={(e) => setEditFormData({...editFormData, password: e.target.value})}
+                          placeholder="••••••••"
+                          className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm pr-12" 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-all"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Role</label>
+                        <select 
+                          required 
+                          value={editFormData.role}
+                          onChange={(e) => setEditFormData({...editFormData, role: e.target.value})}
+                          className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm appearance-none"
+                        >
+                          <option value="Admin">Admin</option>
+                          <option value="Tender Manager">Tender Manager</option>
+                          <option value="Project Manager">Project Manager</option>
+                          <option value="Finance Manager">Finance Manager</option>
+                          <option value="Core Team">Core Team</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Department</label>
+                        <select 
+                          required 
+                          value={editFormData.departmentId}
+                          onChange={(e) => setEditFormData({...editFormData, departmentId: e.target.value})}
+                          className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm appearance-none"
+                        >
+                          <option value="">Select Department</option>
+                          {departments.map(d => (
+                            <option key={d.id} value={d.id}>{d.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Member Status</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {['Active', 'On Leave', 'Inactive'].map(s => (
+                          <label key={s} className="cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name="status" 
+                              value={s} 
+                              checked={editFormData.status === s}
+                              onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                              className="sr-only peer" 
+                            />
+                            <div className={`py-3 text-center rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 border-slate-100 bg-slate-50 hover:bg-white shadow-sm`}>
+                              {s}
+                            </div>
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </form>
+            </div>
 
-              <div className="flex gap-4 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditModalOpen(false)} 
-                  className="flex-1 py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:text-slate-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isUploading}
-                  className="flex-1 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest disabled:opacity-50"
-                >
-                  {isUploading ? 'Uploading...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
+            <div className="p-6 sm:p-8 border-t border-slate-50 bg-slate-50/50 flex flex-col sm:flex-row gap-3 sm:gap-4 flex-shrink-0">
+              <button 
+                type="button" 
+                onClick={() => setIsEditModalOpen(false)} 
+                className="flex-1 py-4 text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-slate-700 transition-colors bg-white sm:bg-transparent rounded-2xl sm:rounded-none"
+              >
+                Discard Changes
+              </button>
+              <button 
+                onClick={handleUpdate}
+                disabled={isUploading}
+                className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+              >
+                {isUploading ? 'Uploading Data...' : 'Save Member Profile'}
+              </button>
+            </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
