@@ -109,11 +109,11 @@ const Reports = () => {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="relative flex-1 md:w-[300px]">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
+          <div className="relative w-full sm:w-[300px]">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
@@ -123,15 +123,17 @@ const Reports = () => {
               className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-400 transition-all shadow-sm" 
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm cursor-pointer">
-            <Calendar size={16} />
-            Timeframe
-            <ChevronDown size={14} />
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm cursor-pointer">
+              <Calendar size={16} />
+              Timeframe
+              <ChevronDown size={14} />
+            </button>
+          </div>
         </div>
         <button 
           onClick={() => setIsExportModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-slate-100 active:scale-95"
+          className="w-full xl:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-slate-100 active:scale-95"
         >
           <Download size={16} />
           Export Report

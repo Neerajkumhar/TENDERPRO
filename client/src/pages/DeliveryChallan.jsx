@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer } from 'lucide-react';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle } from 'lucide-react';
 
 const mockChallans = [
   { id: 'DEL-2026-001', client: 'Acme Corp.', project: 'Solar Substation', transporter: 'Shree Transports', lrGatePass: 'LR12345 / GP678', dispatchDate: '2026-05-22', materialValue: 18800, eWayBill: 'EWB-998877', shipVia: 'Road', itemsQty: 32, estWeight: '1.8T', signedCopy: 'Uploaded', status: 'DELIVERED' },
@@ -590,14 +590,21 @@ const DeliveryChallan = () => {
             }
           `}</style>
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setReceiptOpen(false)}></div>
-          <div id="delivery-receipt" className="relative bg-white w-full max-w-[1100px] shadow-2xl overflow-hidden border border-slate-300 max-h-[90vh] overflow-y-auto rounded-3xl">
+          <div id="delivery-receipt" className="relative bg-white w-full sm:max-w-[1100px] sm:w-[95vw] shadow-2xl overflow-hidden border-x sm:border border-slate-300 h-full sm:h-auto sm:max-h-[95vh] overflow-y-auto rounded-none sm:rounded-[2.5rem]">
             {/* Receipt Header Edit Bar */}
-            <div className="bg-slate-100 border-b-2 border-slate-300 p-4 flex items-center justify-between print:hidden">
-              <div className="text-[10px] font-black uppercase tracking-widest text-slate-600">Receipt Customization</div>
-              <button onClick={() => setReceiptOpen(false)} className="text-slate-400 hover:text-slate-600"><XCircle size={20} /></button>
+            <div className="bg-slate-100 border-b-2 border-slate-300 p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 print:hidden sticky top-0 z-[100]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-600">Receipt Customization</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button onClick={() => window.print()} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition shadow-lg shadow-blue-200 active:scale-95">Print Receipt</button>
+                <button onClick={() => setReceiptOpen(false)} className="p-2.5 bg-white hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition border border-slate-200 shadow-sm"><XCircle size={20} /></button>
+              </div>
             </div>
 
-            <div className="relative z-0 p-6 sm:p-10 print:p-8 space-y-6 print:space-y-4 print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
+            <div className="relative z-0 p-4 sm:p-10 print:p-8 space-y-6 print:space-y-4 print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
               {/* WATERMARK */}
               {receiptConfig.logoSrc && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[-1] opacity-[0.1]">
@@ -605,10 +612,10 @@ const DeliveryChallan = () => {
                 </div>
               )}
               {/* HEADER: Logo, Company Info, Title, and Challan Details */}
-              <div className="flex flex-col sm:flex-row items-start justify-between gap-8">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
                 {/* Left: Logo and Company Info */}
-                <div className="flex items-start gap-5 flex-[1.5] w-full sm:w-auto">
-                  <label className="group w-24 h-24 rounded-2xl border-2 border-slate-200 print:border-none flex items-center justify-center overflow-hidden bg-slate-50 print:bg-transparent cursor-pointer hover:bg-slate-100 transition relative flex-shrink-0 shadow-inner">
+                <div className="flex flex-col sm:flex-row items-start gap-5 flex-[1.5] w-full lg:w-auto">
+                  <label className="group w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-slate-200 print:border-none flex items-center justify-center overflow-hidden bg-slate-50 print:bg-transparent cursor-pointer hover:bg-slate-100 transition relative flex-shrink-0 shadow-inner">
                     {receiptConfig.logoSrc ? (
                       <>
                         <img src={receiptConfig.logoSrc} alt="Logo" className="h-full w-full object-contain p-2 print:p-0" />
@@ -621,11 +628,11 @@ const DeliveryChallan = () => {
                     )}
                     <input type="file" accept="image/*" onChange={handleReceiptLogoSelect} className="hidden" />
                   </label>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 w-full sm:min-w-0">
                     <input
                       value={receiptConfig.companyName}
                       onChange={(e) => setReceiptConfig(prev => ({ ...prev, companyName: e.target.value }))}
-                      className="w-full text-xl font-black text-slate-900 bg-white print:bg-transparent border-2 border-transparent hover:border-slate-200 print:border-none rounded-lg px-1 outline-none transition mb-2 truncate"
+                      className="w-full text-lg sm:text-xl font-black text-slate-900 bg-white print:bg-transparent border-2 border-transparent hover:border-slate-200 print:border-none rounded-lg px-1 outline-none transition mb-2 truncate"
                     />
                     <div className="text-[11px] text-slate-600 leading-relaxed space-y-1">
                       <textarea
@@ -642,9 +649,9 @@ const DeliveryChallan = () => {
                 </div>
 
                 {/* Right: Challan Info */}
-                <div className="flex-1 text-left sm:text-right w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                  <div className="text-2xl font-black text-blue-600 tracking-tight italic">DELIVERY CHALLAN</div>
-                  <div className="mt-4 sm:ml-auto inline-block text-left bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="flex-1 text-left lg:text-right w-full lg:w-auto pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                  <div className="text-xl sm:text-2xl font-black text-blue-600 tracking-tight italic">DELIVERY CHALLAN</div>
+                  <div className="mt-4 lg:ml-auto inline-block text-left bg-slate-50 p-4 rounded-2xl border border-slate-100 w-full sm:w-auto">
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
                         <span className="font-black text-slate-400 uppercase tracking-widest">Number</span>
                         <span className="font-bold text-slate-900">{selected.id}</span>
@@ -658,7 +665,7 @@ const DeliveryChallan = () => {
               </div>
 
               {/* DETAILS GRID: Clean format */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 border-y-2 border-slate-50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 py-8 border-y-2 border-slate-50">
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Name</span>

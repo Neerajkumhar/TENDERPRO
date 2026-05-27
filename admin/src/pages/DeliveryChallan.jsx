@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer } from 'lucide-react';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle } from 'lucide-react';
 
 const mockChallans = [
   { id: 'DEL-2026-001', client: 'Acme Corp.', project: 'Solar Substation', transporter: 'Shree Transports', lrGatePass: 'LR12345 / GP678', dispatchDate: '2026-05-22', materialValue: 18800, eWayBill: 'EWB-998877', shipVia: 'Road', itemsQty: 32, estWeight: '1.8T', signedCopy: 'Uploaded', status: 'DELIVERED' },
@@ -590,11 +590,12 @@ const DeliveryChallan = () => {
             }
           `}</style>
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setReceiptOpen(false)}></div>
-          <div id="delivery-receipt" className="relative bg-white w-full max-w-[1100px] shadow-2xl overflow-hidden border border-slate-300 max-h-[90vh] overflow-y-auto">
+          <div id="delivery-receipt" className="relative bg-white w-full sm:max-w-[1100px] sm:w-[95vw] shadow-2xl overflow-hidden border-x sm:border border-slate-300 h-full sm:h-auto sm:max-h-[95vh] overflow-y-auto rounded-none sm:rounded-[2.5rem]">
             {/* Receipt Header Edit Bar */}
-            <div className="bg-slate-100 border-b-2 border-slate-300 p-4 flex items-center justify-between print:hidden">
-              <div className="text-[10px] font-black uppercase tracking-widest text-slate-600">Receipt Customization</div>
-              <div className="flex items-center gap-2">
+            <div className="bg-slate-100 border-b-2 border-slate-300 p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4 print:hidden sticky top-0 z-[100]">
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-600 bg-white px-3 py-1.5 rounded-lg shadow-sm">Receipt Customization</div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button onClick={() => window.print()} className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition shadow-lg shadow-blue-200 active:scale-95">Print Receipt</button>
                 <label className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] text-slate-700 hover:bg-slate-50 cursor-pointer transition">
                   <span>📤 Change Logo</span>
                   <input 
@@ -604,10 +605,11 @@ const DeliveryChallan = () => {
                     className="hidden" 
                   />
                 </label>
+                <button onClick={() => setReceiptOpen(false)} className="p-2.5 bg-white hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition border border-slate-200 shadow-sm"><XCircle size={20} /></button>
               </div>
             </div>
 
-            <div className="relative z-0 p-8 print:p-8 space-y-6 print:space-y-4 print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
+            <div className="relative z-0 p-4 sm:p-10 print:p-8 space-y-6 print:space-y-4 print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
               {/* WATERMARK */}
               {receiptConfig.logoSrc && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[-1] opacity-[0.1]">
@@ -615,13 +617,13 @@ const DeliveryChallan = () => {
                 </div>
               )}
               {/* HEADER: Logo, Company Info, Title, and Challan Details */}
-              <div className="flex items-start justify-between gap-6">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
                 {/* Left: Logo and Company Info */}
-                <div className="flex items-start gap-4 flex-[1.5]">
-                  <label className="group w-24 h-24 rounded-lg border-2 border-slate-300 print:border-none flex items-center justify-center overflow-hidden bg-slate-50 print:bg-transparent cursor-pointer hover:bg-slate-100 transition relative flex-shrink-0">
+                <div className="flex flex-col sm:flex-row items-start gap-5 flex-[1.5] w-full lg:w-auto">
+                  <label className="group w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-slate-200 print:border-none flex items-center justify-center overflow-hidden bg-slate-50 print:bg-transparent cursor-pointer hover:bg-slate-100 transition relative flex-shrink-0 shadow-inner">
                     {receiptConfig.logoSrc ? (
                       <>
-                        <img src={receiptConfig.logoSrc} alt="Logo" className="h-full w-full object-contain p-1 print:p-0" />
+                        <img src={receiptConfig.logoSrc} alt="Logo" className="h-full w-full object-contain p-2 print:p-0" />
                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center print:hidden">
                           <span className="text-xs font-black text-white">Change</span>
                         </div>
@@ -631,44 +633,44 @@ const DeliveryChallan = () => {
                     )}
                     <input type="file" accept="image/*" onChange={handleReceiptLogoSelect} className="hidden" />
                   </label>
-                  <div className="flex-1">
+                  <div className="flex-1 w-full sm:min-w-0">
                     <textarea
                       value={receiptConfig.companyName}
                       onChange={(e) => setReceiptConfig(prev => ({ ...prev, companyName: e.target.value }))}
                       rows="2"
-                      className="w-full text-lg font-black text-slate-900 bg-white print:bg-transparent border-2 border-slate-300 print:border-none print:p-0 rounded-lg px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition mb-2 resize-none overflow-hidden leading-tight"
+                      className="w-full text-lg sm:text-xl font-black text-slate-900 bg-white print:bg-transparent border-2 border-slate-300 print:border-none print:p-0 rounded-lg px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition mb-2 resize-none overflow-hidden leading-tight"
                     />
-                    <div className="text-[10px] text-slate-700 leading-tight space-y-0.5">
+                    <div className="text-[10px] sm:text-[11px] text-slate-700 leading-tight space-y-1">
                       <textarea
                         value={receiptConfig.address}
                         onChange={(e) => setReceiptConfig(prev => ({ ...prev, address: e.target.value }))}
                         className="w-full font-bold resize-none bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-1 -ml-1"
                         rows="2"
                       />
-                      <div className="flex items-center"><span className="font-black w-12">Phone:</span> <input type="text" value={receiptConfig.phone} onChange={e => setReceiptConfig(prev => ({...prev, phone: e.target.value}))} className="flex-1 bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 px-1 ml-1" /></div>
-                      <div className="flex items-center"><span className="font-black w-12">Email:</span> <input type="text" value={receiptConfig.email} onChange={e => setReceiptConfig(prev => ({...prev, email: e.target.value}))} className="flex-1 bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 px-1 ml-1" /></div>
-                      <div className="flex items-center"><span className="font-black w-12">GSTIN:</span> <input type="text" value={receiptConfig.gstin} onChange={e => setReceiptConfig(prev => ({...prev, gstin: e.target.value}))} className="flex-1 bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 px-1 ml-1" /></div>
+                      <div className="flex items-center"><span className="font-black w-14 text-slate-400 uppercase tracking-tighter">Phone:</span> <input type="text" value={receiptConfig.phone} onChange={e => setReceiptConfig(prev => ({...prev, phone: e.target.value}))} className="flex-1 bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 px-1 ml-1" /></div>
+                      <div className="flex items-center"><span className="font-black w-14 text-slate-400 uppercase tracking-tighter">Email:</span> <input type="text" value={receiptConfig.email} onChange={e => setReceiptConfig(prev => ({...prev, email: e.target.value}))} className="flex-1 bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 px-1 ml-1" /></div>
+                      <div className="flex items-center"><span className="font-black w-14 text-slate-400 uppercase tracking-tighter">GSTIN:</span> <input type="text" value={receiptConfig.gstin} onChange={e => setReceiptConfig(prev => ({...prev, gstin: e.target.value}))} className="flex-1 bg-transparent outline-none border border-transparent hover:border-slate-300 print:border-none rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 px-1 ml-1" /></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: Challan Info */}
-                <div className="flex-1 text-right">
-                  <div className="text-xl font-black text-blue-900 tracking-tight">DELIVERY CHALLAN</div>
-                  <table className="mt-4 ml-auto text-sm text-left">
+                <div className="flex-1 text-left lg:text-right w-full lg:w-auto pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                  <div className="text-xl sm:text-2xl font-black text-blue-900 tracking-tight italic">DELIVERY CHALLAN</div>
+                  <table className="mt-4 lg:ml-auto text-sm text-left bg-slate-50 p-4 rounded-2xl border border-slate-100 w-full sm:w-auto">
                     <tbody>
                       <tr>
-                        <td className="font-bold text-slate-700 pr-6 text-left py-1">Challan No:</td>
-                        <td className="font-medium text-slate-600 py-1">{selected.id}</td>
+                        <td className="font-black text-slate-400 uppercase tracking-widest text-[10px] pr-6 py-1">Challan No</td>
+                        <td className="font-bold text-slate-900 py-1">{selected.id}</td>
                       </tr>
                       <tr>
-                        <td className="font-bold text-slate-700 pr-6 text-left py-1">Date:</td>
-                        <td className="font-medium text-slate-600 py-1">{selected.dispatchDate || ''}</td>
+                        <td className="font-black text-slate-400 uppercase tracking-widest text-[10px] pr-6 py-1">Date</td>
+                        <td className="font-bold text-slate-900 py-1">{selected.dispatchDate || ''}</td>
                       </tr>
                       <tr>
-                        <td className="font-bold text-slate-700 pr-6 text-left py-1">Status:</td>
+                        <td className="font-black text-slate-400 uppercase tracking-widest text-[10px] pr-6 py-1">Status</td>
                         <td className="py-1">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${selected.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : selected.status === 'Overdue' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700'}`}>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selected.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : selected.status === 'Overdue' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700'}`}>
                             {selected.status}
                           </span>
                         </td>
@@ -679,41 +681,41 @@ const DeliveryChallan = () => {
               </div>
 
               {/* DETAILS GRID: Clean format */}
-              <div className="grid grid-cols-2 gap-8 py-6 border-y border-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 py-6 border-y border-slate-100">
                 <div className="space-y-3">
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">Client Name</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.client}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Name</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.client}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">Tender / Project</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.project}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tender / Project</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.project}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">Place of Supply</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.placeOfSupply || 'Haryana (06)'}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Place of Supply</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.placeOfSupply || 'Haryana (06)'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">Site Address</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.shippingAddress || ''}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Site Address</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.shippingAddress || 'N/A'}</span>
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">Invoice Ref</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.invoiceRef || 'INV/2025/0456'}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Invoice Ref</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.invoiceRef || 'INV/2025/0456'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">PO / Ref No.</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.poRef || 'PO/2025/01234'}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">PO / Ref No.</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.poRef || 'PO/2025/01234'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">PO Date</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: {selected.poDate || '12/05/2025'}</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">PO Date</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.poDate || '12/05/2025'}</span>
                   </div>
-                  <div className="flex">
-                    <span className="w-32 flex-shrink-0 text-sm text-slate-500 font-medium">Delivery Reason</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1">: Material Supply against PO</span>
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Delivery Reason</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">Material Supply against PO</span>
                   </div>
                 </div>
               </div>
