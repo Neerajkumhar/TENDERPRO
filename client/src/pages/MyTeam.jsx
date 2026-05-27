@@ -36,17 +36,17 @@ const MyTeam = ({ user, members = [] }) => {
   ];
 
   return (
-    <div className="p-8 space-y-10 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       
       {/* Header & Search */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
         <div>
-           <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">MY CORE TEAM</h2>
+           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">MY CORE TEAM</h2>
            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2 italic">Manage and collaborate with your immediate team</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
-          <div className="relative group flex-1 lg:min-w-[350px]">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4 w-full xl:w-auto">
+          <div className="relative group flex-1 xl:min-w-[350px]">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={18} />
             <input 
               type="text" 
@@ -56,78 +56,80 @@ const MyTeam = ({ user, members = [] }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="p-4 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-blue-600 transition-all shadow-sm">
-             <Filter size={20} />
-          </button>
-          <button className="flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
-             <UserPlus size={18} />
-             <span>INVITE MEMBER</span>
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button className="flex-1 sm:flex-none p-4 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-blue-600 transition-all shadow-sm flex items-center justify-center">
+               <Filter size={20} />
+            </button>
+            <button className="flex-[3] sm:flex-none flex items-center justify-center gap-2 px-6 sm:px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95">
+               <UserPlus size={18} />
+               <span>INVITE MEMBER</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Summary Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
+          <div key={i} className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
              <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} group-hover:bg-slate-900 group-hover:text-white transition-all`}>
-                   <stat.icon size={22} />
+                <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl ${stat.bg} ${stat.color} group-hover:bg-slate-900 group-hover:text-white transition-all`}>
+                   <stat.icon size={20} className="sm:w-[22px] sm:h-[22px]" />
                 </div>
-                <MoreVertical size={16} className="text-slate-200" />
+                <MoreVertical size={16} className="text-slate-200 hidden sm:block" />
              </div>
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-             <h3 className="text-2xl font-black text-slate-900 mt-1">{stat.value}</h3>
+             <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
+             <h3 className="text-lg sm:text-2xl font-black text-slate-900 mt-1">{stat.value}</h3>
           </div>
         ))}
       </div>
 
       {/* Team Directory Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-10">
         {myTeamMembers.map((member) => (
-          <div key={member.id} className="bg-white p-8 rounded-[3rem] border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 group overflow-hidden relative">
+          <div key={member.id} className="bg-white p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 group overflow-hidden relative">
              <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-50 group-hover:bg-blue-600 transition-colors"></div>
              
-             <div className="flex justify-between items-start mb-8">
+             <div className="flex justify-between items-start mb-6 sm:mb-8">
                 <div className="relative">
-                   <div className="w-20 h-20 rounded-[2rem] bg-slate-100 border-4 border-white shadow-xl flex items-center justify-center text-2xl font-black text-slate-400 transition-all group-hover:scale-105 group-hover:rotate-3">
+                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[2rem] bg-slate-100 border-4 border-white shadow-xl flex items-center justify-center text-xl sm:text-2xl font-black text-slate-400 transition-all group-hover:scale-105 group-hover:rotate-3">
                       {member.initial}
                    </div>
-                   <div className={`absolute -bottom-1 -right-1 w-6 h-6 border-4 border-white rounded-full
+                   <div className={`absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 border-4 border-white rounded-full
                      ${member.status === 'Online' ? 'bg-emerald-500' : 
                        member.status === 'Busy' ? 'bg-rose-500' : 
                        member.status === 'On Leave' ? 'bg-amber-500' : 'bg-slate-300'}`}>
                    </div>
                 </div>
                 <div className="flex gap-2">
-                   <button className="p-3 bg-slate-50 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all"><MessageSquare size={18} /></button>
-                   <button className="p-3 bg-slate-50 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"><Video size={18} /></button>
+                   <button className="p-2 sm:p-3 bg-slate-50 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl sm:rounded-2xl transition-all"><MessageSquare size={18} /></button>
+                   <button className="p-2 sm:p-3 bg-slate-50 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl sm:rounded-2xl transition-all"><Video size={18} /></button>
                 </div>
              </div>
 
-             <div className="space-y-1 mb-8">
-                <h4 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-tight">{member.name}</h4>
-                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest italic">{member.role}</p>
+             <div className="space-y-1 mb-6 sm:mb-8">
+                <h4 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase leading-tight truncate">{member.name}</h4>
+                <p className="text-[9px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest italic">{member.role}</p>
              </div>
 
-             <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="p-4 bg-slate-50 rounded-3xl border border-slate-50 transition-all group-hover:border-slate-100 group-hover:bg-white">
+             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div className="p-3 sm:p-4 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-50 transition-all group-hover:border-slate-100 group-hover:bg-white">
                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Department</p>
-                   <p className="text-xs font-black text-slate-700 uppercase">{member.dept}</p>
+                   <p className="text-[10px] sm:text-xs font-black text-slate-700 uppercase truncate">{member.dept}</p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-3xl border border-slate-50 transition-all group-hover:border-slate-100 group-hover:bg-white">
+                <div className="p-3 sm:p-4 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-50 transition-all group-hover:border-slate-100 group-hover:bg-white">
                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Projects</p>
-                   <p className="text-xs font-black text-slate-700 uppercase">{member.projects} Active</p>
+                   <p className="text-[10px] sm:text-xs font-black text-slate-700 uppercase">{member.projects} Active</p>
                 </div>
              </div>
 
-             <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                <div className="flex flex-col">
+             <div className="flex items-center justify-between pt-4 sm:pt-6 border-t border-slate-50">
+                <div className="flex flex-col min-w-0">
                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Work Email</p>
-                   <p className="text-[10px] font-bold text-slate-500 lowercase truncate max-w-[150px]">{member.email}</p>
+                   <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 lowercase truncate">{member.email}</p>
                 </div>
-                <button className="p-3 bg-slate-900 text-white rounded-2xl hover:bg-blue-600 transition-all active:scale-90 group/btn">
+                <button className="p-2 sm:p-3 bg-slate-900 text-white rounded-xl sm:rounded-2xl hover:bg-blue-600 transition-all active:scale-90 group/btn shrink-0">
                    <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
              </div>
