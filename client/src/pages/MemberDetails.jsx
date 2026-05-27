@@ -20,8 +20,18 @@ import {
   X,
   Plus,
   Eye,
-  EyeOff
+  EyeOff,
+  TrendingUp,
+  AlertCircle
 } from 'lucide-react';
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  Tooltip,
+  Legend
+} from 'recharts';
 
 const MemberDetails = ({ memberId, onBack, departments }) => {
   const [member, setMember] = useState(null);
@@ -42,6 +52,17 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [updateError, setUpdateError] = useState('');
 
+  // Attendance and Leave state
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [attendanceStats, setAttendanceStats] = useState({
+    present: 0,
+    absent: 0,
+    onLeave: 0,
+    totalWorkingDays: 0,
+    percentage: 0
+  });
+
   const fetchMemberDetails = async () => {
     try {
       const response = await fetch(`/api/members`);
@@ -49,11 +70,83 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
         const data = await response.json();
         const found = data.find(m => m.id === memberId);
         setMember(found);
+        if (found) {
+          fetchAttendanceAndLeaves(found);
+        }
       }
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching member details:', error);
       setIsLoading(false);
+    }
+  };
+
+  const fetchAttendanceAndLeaves = async (memberData) => {
+    try {
+      const [attRes, leaveRes] = await Promise.all([
+        fetch(`/api/auth/attendance/${memberData.id}`),
+        fetch(`/api/leave-requests/user/${memberData.id}`)
+      ]);
+
+      let attData = [];
+      let leaveData = [];
+
+      if (attRes.ok) attData = await attRes.json();
+      if (leaveRes.ok) leaveData = await leaveRes.json();
+
+      setAttendanceRecords(attData);
+      setLeaveRequests(leaveData);
+
+      // Process Stats
+      const joiningDate = new Map();
+      const today = new Date();
+      const start = new Date(memberData.createdAt || '2026-05-01');
+      
+      // Calculate total unique present days
+      const presentDays = new Set(attData.map(r => r.date)).size;
+      
+      // Calculate approved leave days (only counting those in the past or today)
+      let leaveDaysCount = 0;
+      leaveData.filter(l => l.status === 'Approved').forEach(leave => {
+        const lStart = new Date(leave.startDate);
+        const lEnd = new Date(leave.endDate);
+        let curr = new Date(lStart);
+        while (curr <= lEnd && curr <= today) {
+          if (curr >= start) {
+            // Count only weekdays
+            if (curr.getDay() !== 0 && curr.getDay() !== 6) {
+              leaveDaysCount++;
+            }
+          }
+          curr.setDate(curr.getDate() + 1);
+        }
+      });
+
+      // Calculate total possible working days since joining (weekdays only)
+      let totalWorkable = 0;
+      let curr = new Date(start);
+      while (curr <= today) {
+        if (curr.getDay() !== 0 && curr.getDay() !== 6) {
+          totalWorkable++;
+        }
+        curr.setDate(curr.getDate() + 1);
+      }
+
+      // Ensure minimum 1 day to avoid division by zero
+      const effectiveTotal = Math.max(totalWorkable, 1);
+      const absentDays = Math.max(0, effectiveTotal - presentDays - leaveDaysCount);
+      const percentage = Math.round((presentDays / effectiveTotal) * 100);
+
+      setAttendanceStats({
+        present: presentDays,
+        absent: absentDays,
+        onLeave: leaveDaysCount,
+        totalWorkingDays: effectiveTotal,
+        percentage
+      });
+
+    } catch (err) {
+      console.error("Failed to fetch attendance stats:", err);
     }
   };
 
@@ -127,6 +220,12 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
       setUpdateError('Network error occurred during update');
     }
   };
+
+  const pieData = [
+    { name: 'Present', value: attendanceStats.present, color: '#10b981' },
+    { name: 'Absent', value: attendanceStats.absent, color: '#f43f5e' },
+    { name: 'On Leave', value: attendanceStats.onLeave, color: '#f59e0b' }
+  ].filter(d => d.value > 0);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -242,8 +341,93 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
           </div>
         </div>
 
-        {/* Right Content - Activity & Skills */}
+        {/* Right Content - Stats & Activity */}
         <div className="col-span-12 lg:col-span-8 space-y-6 sm:space-y-8">
+          {/* Attendance Overview - NEW SECTION */}
+          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+             <div className="flex items-center gap-4 mb-6 sm:mb-8">
+              <div className="p-2 sm:p-3 bg-blue-50 text-blue-600 rounded-xl sm:rounded-2xl">
+                <TrendingUp size={20} className="sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">Attendance Analytics</h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic">Performance-based attendance logging and ratios.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+              {/* Circular Graph */}
+              <div className="md:col-span-5 flex flex-col items-center">
+                <div className="relative w-full h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        innerRadius={65}
+                        outerRadius={85}
+                        paddingAngle={5}
+                        dataKey="value"
+                        animationDuration={1000}
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}}
+                        itemStyle={{fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'}}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-3xl font-black text-slate-900 leading-none">{attendanceStats.percentage}%</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Attendance</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="md:col-span-7 grid grid-cols-2 gap-4">
+                 <div className="p-5 rounded-3xl bg-emerald-50/50 border border-emerald-100/50 group hover:bg-emerald-50 transition-all">
+                    <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Present</p>
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-2xl font-black text-slate-900">{attendanceStats.present}</span>
+                       <span className="text-[10px] font-bold text-slate-400 uppercase">Days</span>
+                    </div>
+                 </div>
+                 <div className="p-5 rounded-3xl bg-rose-50/50 border border-rose-100/50 group hover:bg-rose-50 transition-all">
+                    <p className="text-[9px] font-black text-rose-600 uppercase tracking-widest mb-1">Absent</p>
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-2xl font-black text-slate-900">{attendanceStats.absent}</span>
+                       <span className="text-[10px] font-bold text-slate-400 uppercase">Days</span>
+                    </div>
+                 </div>
+                 <div className="p-5 rounded-3xl bg-amber-50/50 border border-amber-100/50 group hover:bg-amber-50 transition-all">
+                    <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">On Leave</p>
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-2xl font-black text-slate-900">{attendanceStats.onLeave}</span>
+                       <span className="text-[10px] font-bold text-slate-400 uppercase">Approved</span>
+                    </div>
+                 </div>
+                 <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100 group hover:bg-white transition-all">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Days</p>
+                    <div className="flex items-baseline gap-2">
+                       <span className="text-2xl font-black text-slate-900">{attendanceStats.totalWorkingDays}</span>
+                       <span className="text-[10px] font-bold text-slate-400 uppercase">Workable</span>
+                    </div>
+                 </div>
+              </div>
+            </div>
+            
+            {/* Warning if low attendance */}
+            {attendanceStats.percentage < 85 && (
+              <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3 text-amber-700 animate-pulse">
+                <AlertCircle size={20} className="shrink-0" />
+                <p className="text-[10px] font-black uppercase tracking-widest">Warning: Low attendance ratio detected. Please review system logs.</p>
+              </div>
+            )}
+          </div>
+
           {/* Role Responsibilities */}
           <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex items-center gap-4 mb-6 sm:mb-8">
