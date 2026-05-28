@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
 import { 
   Search, 
   Calendar, 
@@ -155,10 +159,22 @@ const Invoices = ({ onInvoiceClick }) => {
   const [endDateFilter, setEndDateFilter] = useState('');
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showDateFilterDropdown, setShowDateFilterDropdown] = useState(false);
+  const filterRef = useRef(null);
   
   // Toast notification state for a premium UX
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowStatusDropdown(false);
+        setShowDateFilterDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
