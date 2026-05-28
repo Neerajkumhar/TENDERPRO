@@ -1,7 +1,8 @@
 const { Sequelize } = require('sequelize');
 // Explicitly require mysql2 and pass it to Sequelize to bypass Vercel's dynamic import issues
 const mysql2 = require('mysql2');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 // Support for Railway and other environments
 const dbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
