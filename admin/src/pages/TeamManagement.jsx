@@ -41,6 +41,7 @@ const statsData = [
 
 const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
   const [selectedDept, setSelectedDept] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDeptOpen, setIsCreateDeptOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
@@ -133,9 +134,13 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     }
   };
 
-  const filteredMembers = selectedDept === 'All' 
-    ? teamMembers 
-    : teamMembers.filter(m => m.dept === selectedDept);
+  const filteredMembers = teamMembers.filter(m => {
+    const matchesDept = selectedDept === 'All' || getDeptName(m.departmentId) === selectedDept;
+    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         m.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         getDeptName(m.departmentId).toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesDept && matchesSearch;
+  });
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700">

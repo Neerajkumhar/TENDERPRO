@@ -41,6 +41,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
   const [activeView, setActiveView] = useState('overview'); // 'overview' or 'list'
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const datePickerRef = useRef(null);
 
   useEffect(() => {
@@ -57,6 +58,11 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
     const client = clients?.find(c => c.id === id);
     return client ? client.name : 'Unknown Client';
   };
+
+  const filteredTenders = tenders.filter(t => 
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    getClientName(t.clientId).toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Stats for Overview (Matching Image 2)
   const statsData = [
@@ -119,7 +125,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
            </button>
 
            {showDatePicker && (
-              <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2">
+              <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Select Date</label>
                   <input 
@@ -299,9 +305,15 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
           <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 items-center justify-between bg-slate-50/30">
             <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Active Tenders Master List</h3>
             <div className="flex flex-wrap gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-400" />
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
+                <input 
+                  type="text" 
+                  placeholder="Search title or client..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-64 shadow-sm" 
+                />
               </div>
               <button 
                 onClick={onCreate}
@@ -325,7 +337,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {tenders.map((tender, i) => (
+                {filteredTenders.length > 0 ? filteredTenders.map((tender, i) => (
                   <tr key={tender.id || i} className="hover:bg-indigo-50/30 transition-all cursor-pointer group">
                     <td className="px-8 py-5 text-xs font-bold text-slate-400">#{tender.id?.substring(0, 8)}</td>
                     <td className="px-8 py-5 text-sm font-black text-slate-800">{tender.title}</td>
@@ -354,7 +366,11 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
