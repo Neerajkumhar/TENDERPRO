@@ -32,6 +32,7 @@ const menuItems = [
   { icon: DollarSign, label: 'Finance Management', activeTab: 'Financial Management', roles: ['Admin'] },
   { icon: Users2, label: 'Team Management', activeTab: 'Team Management', roles: ['Admin'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Admin'] },
+  { icon: MessageSquare, label: 'Messages', activeTab: 'Messages', roles: ['Admin'] },
   { icon: Settings, label: 'Settings', activeTab: 'Settings', roles: ['Admin'] },
 
   // Tender Manager
@@ -40,6 +41,7 @@ const menuItems = [
   { icon: Briefcase, label: 'Projects', activeTab: 'Projects', roles: ['Tender Manager'] },
   { icon: Users, label: 'Clients', activeTab: 'Client Management', roles: ['Tender Manager'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Tender Manager'] },
+  { icon: MessageSquare, label: 'Messages', activeTab: 'Messages', roles: ['Tender Manager'] },
   { icon: Calendar, label: 'Calendar', activeTab: 'Calendar', roles: ['Tender Manager'] },
 
   // Project Manager
@@ -49,6 +51,7 @@ const menuItems = [
   { icon: Users2, label: 'Team', activeTab: 'Team Management', roles: ['Project Manager'] },
   { icon: Clock, label: 'Team Attendance', activeTab: 'Team Attendance', roles: ['Project Manager'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Project Manager'] },
+  { icon: MessageSquare, label: 'Messages', activeTab: 'Messages', roles: ['Project Manager'] },
 
   // Finance Manager
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Financial Management', roles: ['Finance Manager'] },
@@ -58,6 +61,7 @@ const menuItems = [
   { icon: Truck, label: 'Challan Management', activeTab: 'Challan Management', roles: ['Finance Manager'] },
   { icon: PieChart, label: 'Budget', activeTab: 'Budget', roles: ['Finance Manager'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Finance Manager'] },
+  { icon: MessageSquare, label: 'Messages', activeTab: 'Messages', roles: ['Finance Manager'] },
 
   // Team Member
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Member Dashboard', roles: ['Core Team'] },

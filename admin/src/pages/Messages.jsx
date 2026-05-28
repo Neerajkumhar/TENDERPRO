@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
   MoreVertical, 
@@ -31,6 +31,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   }, [activeChat]);
 
   const [message, setMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentChatMessages, setCurrentChatMessages] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
   const [chatFilter, setChatFilter] = useState('All');
@@ -39,7 +40,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentContent, setDocumentContent] = useState(null);
   const [excelData, setExcelData] = useState(null);
-  const fileInputRef = React.useRef(null);
+  const fileInputRef = useRef(null);
 
   // Filter members based on role access
   const teamMembers = members.filter(m => {
