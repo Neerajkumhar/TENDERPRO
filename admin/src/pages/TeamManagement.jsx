@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, 
   User,
@@ -17,7 +17,8 @@ import {
   AlertCircle,
   Building2,
   Zap,
-  Plus
+  Plus,
+  Check
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -44,8 +45,11 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDeptOpen, setIsCreateDeptOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const filterRef = useRef(null);
+
   const [memberFormData, setMemberFormData] = useState({
     name: '',
     email: '',
@@ -54,6 +58,16 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     departmentId: '',
     phone: ''
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilterPopover(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchMembers = async () => {
     try {
@@ -151,12 +165,14 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
           <p className="text-slate-500 mt-1 font-medium italic">Manage departments, roles, and member performance.</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
             <input
               type="text"
               placeholder="Search team..."
-              className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all w-64 shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all w-64 shadow-sm"
             />
           </div>
           <button 
@@ -198,28 +214,41 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
         <div className="col-span-12 lg:col-span-8 space-y-8">
           <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
             <div className="p-6 border-b border-slate-50 flex flex-wrap justify-between items-center gap-4 bg-slate-50/30">
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-slate-900 text-lg tracking-tight mr-4">Team Directory</h3>
-                <div className="flex gap-1">
-                  {['All', ...departments.map(d => d.name)].map(dept => (
-                    <button
-                      key={dept}
-                      onClick={() => setSelectedDept(dept)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-                        selectedDept === dept 
-                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
-                          : 'bg-white text-slate-500 hover:bg-slate-100'
-                      }`}
-                    >
-                      {dept}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <h3 className="font-black text-slate-900 text-lg tracking-tight">Team Directory</h3>
               <div className="flex items-center gap-3">
-                <button className="p-2 text-slate-400 hover:text-blue-600 transition-all">
-                  <Filter size={18} />
-                </button>
+                <div className="relative" ref={filterRef}>
+                  <button 
+                    onClick={() => setShowFilterPopover(!showFilterPopover)}
+                    className={`p-2 rounded-lg border transition-all shadow-sm active:scale-95 ${
+                      showFilterPopover || selectedDept !== 'All' 
+                        ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                        : 'bg-white border-slate-200 text-slate-400 hover:text-blue-600'
+                    }`}
+                  >
+                    <Filter size={18} />
+                  </button>
+
+                  {showFilterPopover && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2 border-b border-slate-50 mb-1">Filter by Dept.</p>
+                      {['All', ...departments.map(d => d.name)].map((dept) => (
+                        <button
+                          key={dept}
+                          onClick={() => {
+                            setSelectedDept(dept);
+                            setShowFilterPopover(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                            selectedDept === dept ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>{dept}</span>
+                          {selectedDept === dept && <Check size={14} />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -236,9 +265,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {teamMembers
-                    .filter(m => selectedDept === 'All' || getDeptName(m.departmentId) === selectedDept)
-                    .map((member) => (
+                  {filteredMembers.map((member) => (
                     <tr 
                       key={member.id} 
                       onClick={() => onMemberClick(member.id)}
@@ -302,7 +329,8 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button 
-                          onClick={async () => {
+                          onClick={async (e) => {
+                            e.stopPropagation();
                             if(window.confirm('Remove this member?')) {
                               await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
                               fetchMembers();
@@ -316,6 +344,11 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                       </td>
                     </tr>
                   ))}
+                  {filteredMembers.length === 0 && (
+                    <tr>
+                      <td colSpan="7" className="px-6 py-12 text-center text-slate-400 text-xs italic font-bold uppercase tracking-widest">No members matching search or filter.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
