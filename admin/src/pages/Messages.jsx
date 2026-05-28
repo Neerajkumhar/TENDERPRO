@@ -166,8 +166,9 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   }));
 
   const filteredChats = chats.filter(chat => {
-    if (chatFilter === 'Unread') return chat.unread > 0;
-    return true;
+    const matchesSearch = chat.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = chatFilter === 'Unread' ? chat.unread > 0 : true;
+    return matchesSearch && matchesFilter;
   });
 
   // Set the first chat as active by default if none is selected
@@ -294,6 +295,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
             <input 
               type="text" 
               placeholder="Search teammates"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-14 pr-6 py-3 sm:py-4 bg-white border border-slate-100 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm"
             />
           </div>
