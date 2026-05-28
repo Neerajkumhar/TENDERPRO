@@ -16,7 +16,10 @@ import {
   Plus,
   FileCode,
   FileImage,
-  MessageSquare
+  MessageSquare,
+  Users,
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -34,6 +37,7 @@ const progressData = [
 
 const ProjectDetails = ({ projectId, onBack }) => {
   const [project, setProject] = useState(null);
+  const [projectAssignments, setProjectAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -42,10 +46,19 @@ const ProjectDetails = ({ projectId, onBack }) => {
       if (!projectId) return;
       try {
         setLoading(true);
-        const response = await fetch(`/api/tenders/${projectId}`);
-        if (!response.ok) throw new Error('Failed to fetch tender details');
-        const data = await response.json();
-        setProject(data);
+        const [tenderRes, assignmentsRes] = await Promise.all([
+          fetch(`/api/tenders/${projectId}`),
+          fetch('/api/assignments')
+        ]);
+
+        if (!tenderRes.ok) throw new Error('Failed to fetch tender details');
+        const tenderData = await tenderRes.json();
+        setProject(tenderData);
+
+        if (assignmentsRes.ok) {
+          const allAssignments = await assignmentsRes.json();
+          setProjectAssignments(allAssignments.filter(a => String(a.tenderId) === String(projectId)));
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -73,7 +86,7 @@ const ProjectDetails = ({ projectId, onBack }) => {
     </div>
   );
 
-  const team = [
+  const coreTeam = [
     project.teamMembers?.manager && { ...project.teamMembers.manager, role: 'Tender Manager' },
     project.teamMembers?.reviewer && { ...project.teamMembers.reviewer, role: 'Reviewer' },
     project.teamMembers?.approver && { ...project.teamMembers.approver, role: 'Approval Owner' },
@@ -243,9 +256,48 @@ const ProjectDetails = ({ projectId, onBack }) => {
               ))}
             </div>
           </div>
+
+          {/* Recent Documents */}
+          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden rounded-2xl sm:rounded-3xl">
+            <div className="p-4 sm:p-6 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/30 gap-4">
+              <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight uppercase italic">Documents</h3>
+              <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    <th className="px-6 py-4">Name</th>
+                    <th className="px-6 py-4 hidden sm:table-cell">Type</th>
+                    <th className="px-6 py-4">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {documents.length > 0 ? documents.map((doc, i) => (
+                    <tr key={i} className="hover:bg-blue-50/30 transition-all group cursor-pointer">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-1.5 sm:p-2 rounded-lg bg-blue-50 text-blue-600`}>
+                            <FileText size={14} className="sm:w-4 sm:h-4" />
+                          </div>
+                          <span className="text-xs font-black text-blue-600 hover:underline truncate max-w-[120px] sm:max-w-none">{doc.name || `Document ${i+1}`}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-xs font-bold text-slate-500 hidden sm:table-cell uppercase tracking-tight">{doc.type || 'PDF'}</td>
+                      <td className="px-6 py-4 text-[10px] sm:text-xs font-bold text-slate-400 truncate">{doc.date || 'N/A'}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-8 text-center text-xs font-bold text-slate-400 italic">No documents uploaded yet.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        {/* Right Side: Key Dates & Team */}
+        {/* Right Side: Key Dates & Consolidated Team Card */}
         <div className="col-span-12 lg:col-span-4 space-y-6 sm:space-y-8">
           {/* Key Dates */}
           <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
@@ -270,96 +322,73 @@ const ProjectDetails = ({ projectId, onBack }) => {
             </div>
           </div>
 
-          {/* Team Members */}
+          {/* Consolidated Project Team Card */}
           <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
             <div className="flex justify-between items-center mb-6 sm:mb-8">
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Team</h3>
-              <button className="text-blue-600 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
-            </div>
-            <div className="space-y-4 sm:space-y-6">
-              {team.map((member, i) => (
-                <div key={i} className="flex justify-between items-center group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-blue-600 font-black border border-slate-100 overflow-hidden shadow-sm shrink-0">
-                      {member.image ? <img src={member.image} className="w-full h-full object-cover" alt="" /> : member.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-all truncate">{member.name}</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold italic truncate uppercase tracking-tighter">{member.role}</p>
-                    </div>
-                  </div>
-                  <button className="p-1.5 sm:p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all shrink-0">
-                    <Mail size={16} />
-                  </button>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                  <Users size={18} />
                 </div>
-              ))}
+                <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Project Team</h3>
+              </div>
+              <button className="text-blue-600 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:underline">Manage</button>
             </div>
-          </div>
-        </div>
+            
+            <div className="space-y-8">
+              {/* Core Ownership */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Core Ownership</p>
+                {coreTeam.map((member, i) => (
+                  <div key={i} className="flex justify-between items-center group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-blue-600 font-black border border-slate-100 overflow-hidden shadow-sm shrink-0">
+                        {member.image ? <img src={member.image} className="w-full h-full object-cover" alt="" /> : member.name.charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-all truncate">{member.name}</p>
+                        <p className="text-[9px] text-slate-400 font-bold italic truncate uppercase tracking-tighter">{member.role}</p>
+                      </div>
+                    </div>
+                    <button className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                      <Mail size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
 
-        {/* Bottom Row: Documents & Timeline & Team */}
-        <div className="col-span-12 lg:col-span-8">
-           {/* Recent Documents */}
-           <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden rounded-2xl sm:rounded-3xl">
-            <div className="p-4 sm:p-6 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/30 gap-4">
-              <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight uppercase italic">Documents</h3>
-              <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4 hidden sm:table-cell">Type</th>
-                    <th className="px-6 py-4">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {documents.map((doc, i) => (
-                    <tr key={i} className="hover:bg-blue-50/30 transition-all group cursor-pointer">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-1.5 sm:p-2 rounded-lg bg-${doc.color}-50 text-${doc.color}-600`}>
-                            <doc.icon size={14} className="sm:w-4 sm:h-4" />
-                          </div>
-                          <span className="text-xs font-black text-blue-600 hover:underline truncate max-w-[120px] sm:max-w-none">{doc.name}</span>
+              {/* Assigned Departments & Personnel */}
+              {projectAssignments.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Assigned Teams</p>
+                  {projectAssignments.map((assignment, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 group hover:border-blue-200 transition-all">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck size={14} className="text-indigo-500" />
+                          <span className="text-xs font-black text-slate-900 uppercase tracking-tight">{assignment.department?.name}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-xs font-bold text-slate-500 hidden sm:table-cell uppercase tracking-tight">{doc.type}</td>
-                      <td className="px-6 py-4 text-[10px] sm:text-xs font-bold text-slate-400 truncate">{doc.date}</td>
-                    </tr>
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                          assignment.priority === 'High' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
+                        }`}>{assignment.priority}</span>
+                      </div>
+                      {assignment.assignee && (
+                        <div className="flex items-center gap-2 pt-2 border-t border-slate-200/50">
+                          <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
+                            {assignment.assignee.image ? <img src={assignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={12} className="text-slate-400" />}
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-600">{assignment.assignee.name}</span>
+                        </div>
+                      )}
+                      <p className="text-[10px] text-slate-500 font-medium italic line-clamp-2 leading-relaxed">"{assignment.description}"</p>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-span-12 lg:col-span-4 space-y-6 sm:space-y-8">
-          {/* Team Members */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
-            <div className="flex justify-between items-center mb-6 sm:mb-8">
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Team</h3>
-              <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
-            </div>
-            <div className="space-y-4 sm:space-y-6">
-              {team.map((member, i) => (
-                <div key={i} className="flex justify-between items-center group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-blue-600 font-black border border-slate-100 overflow-hidden shadow-sm shrink-0">
-                      {member.image ? <img src={member.image} className="w-full h-full object-cover" alt="" /> : member.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-all truncate">{member.name}</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold italic truncate uppercase tracking-tighter">{member.role}</p>
-                    </div>
-                  </div>
-                  <button className="p-1.5 sm:p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all shrink-0">
-                    <Mail size={16} />
-                  </button>
                 </div>
-              ))}
+              )}
             </div>
+            
+            <button className="mt-8 w-full py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg active:scale-95">
+              Manage Work Assignments
+            </button>
           </div>
 
           {/* Activity Timeline */}
