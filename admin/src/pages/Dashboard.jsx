@@ -87,6 +87,19 @@ const Dashboard = ({ user, members, assignments, onProjectClick }) => {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setShowDatePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchLeaveRequests = async () => {
     setLoadingLeaves(true);
@@ -152,11 +165,33 @@ const Dashboard = ({ user, members, assignments, onProjectClick }) => {
               <span>Leave Requests</span>
             </button>
           )}
-          <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
-            <Calendar size={18} className="text-blue-500" />
-            <span>{new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-            <ChevronDown size={16} />
-          </button>
+          <div className="relative" ref={datePickerRef}>
+            <button 
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95"
+            >
+              <Calendar size={18} className="text-blue-500" />
+              <span>{new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+              <ChevronDown size={16} />
+            </button>
+
+            {showDatePicker && (
+              <div className="absolute right-0 mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Select Date</label>
+                  <input 
+                    type="date" 
+                    value={selectedDate}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                      setShowDatePicker(false);
+                    }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
