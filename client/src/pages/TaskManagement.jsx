@@ -66,9 +66,8 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
   const pmProjects = assignments.filter(a => a.assigneeId === user.id || a.assignee?.email === user.email);
   const activeProjectsList = pmProjects.length > 0 ? pmProjects : assignments;
 
-  // Filter department members for the PM's dropdown list
-  const pmDeptMembers = members.filter(m => m.departmentId === user.departmentId);
-  const assigneeList = pmDeptMembers.length > 0 ? pmDeptMembers : members;
+  // Filter department members for the PM's dropdown list, strictly including only 'Core Team'
+  const assigneeList = members.filter(m => m.departmentId === user.departmentId && m.role === 'Core Team');
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
