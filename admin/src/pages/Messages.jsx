@@ -260,6 +260,18 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     setMessage(prev => prev + emoji);
   };
 
+  const totalUnreadCount = Object.values(unreadCounts).reduce((acc, curr) => acc + curr, 0);
+
+  // Mark active chat as read whenever messages update
+  useEffect(() => {
+    if (activeChat && currentChatMessages.length > 0) {
+      const hasUnread = currentChatMessages.some(m => !m.sent && !m.read);
+      if (hasUnread) {
+        markAsRead(activeChat);
+      }
+    }
+  }, [currentChatMessages, activeChat]);
+
   const activeChatInfo = chats.find(c => c.id === activeChat);
   const activeChatMember = teamMembers.find(m => m.id === activeChat);
 
@@ -271,7 +283,14 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
       <div className={`${showChatList ? 'flex' : 'hidden lg:flex'} w-full lg:w-[320px] xl:w-[380px] border-r border-slate-50 flex flex-col bg-slate-50/20`}>
         <div className="p-5 sm:p-8 space-y-4 sm:space-y-6">
           <div className="flex justify-between items-center">
-             <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">TEAM MESSAGES</h2>
+             <div className="flex items-center gap-3">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">TEAM MESSAGES</h2>
+                {totalUnreadCount > 0 && (
+                  <span className="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-black rounded-lg shadow-lg shadow-blue-100 animate-bounce">
+                    {totalUnreadCount}
+                  </span>
+                )}
+             </div>
              <div className="flex items-center gap-2">
                 <button className="p-2 hover:bg-white rounded-xl text-slate-300 hover:text-slate-600 transition-all shadow-sm">
                    <MoreVertical size={20} />
