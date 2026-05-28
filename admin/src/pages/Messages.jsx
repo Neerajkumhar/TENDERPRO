@@ -12,7 +12,8 @@ import {
   Send,
   User,
   Plus,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
 import * as XLSX from 'xlsx';
@@ -40,23 +41,22 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentContent, setDocumentContent] = useState(null);
   const [excelData, setExcelData] = useState(null);
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 
   // Filter members based on role access
   const teamMembers = members.filter(m => {
     if (m.id === user?.id) return false;
     
-    // Admins can message all Managers and other Admins
     if (user?.role === 'Admin' || user?.role === 'Super Admin') {
       return ['Project Manager', 'Finance Manager', 'Tender Manager', 'Admin', 'Super Admin'].includes(m.role);
     }
     
-    // Managers can message Admins + their department peers
     if (['Project Manager', 'Finance Manager', 'Tender Manager'].includes(user?.role)) {
       return m.departmentId === user?.departmentId || m.role === 'Admin' || m.role === 'Super Admin';
     }
     
-    // Core Team members can only message their department peers
     return m.departmentId === user?.departmentId;
   });
 
@@ -88,6 +88,10 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
           read: msg.read
         }));
         setCurrentChatMessages(formatted);
+        setError(null);
+      } else {
+         const errData = await response.json();
+         console.error('Fetch messages error:', errData);
       }
     } catch (err) {
       console.error('Failed to fetch messages:', err);
@@ -102,14 +106,12 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     } catch (err) {}
   };
 
-  // Polling for unread counts
   useEffect(() => {
     fetchUnreadCounts();
     const interval = setInterval(fetchUnreadCounts, 5000);
     return () => clearInterval(interval);
   }, [user?.id]);
 
-  // Fetch text/excel document contents when selected
   useEffect(() => {
     if (selectedDocument) {
       if (selectedDocument.match(/\.(txt|csv|json|md|js|jsx|html|css|xml)$/i)) {
@@ -142,7 +144,6 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     }
   }, [selectedDocument]);
 
-  // Polling for active chat messages
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat);
@@ -156,14 +157,13 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     }
   }, [activeChat, user?.id]);
 
-  // Initialize chats based on team members
   const chats = teamMembers.map((m) => ({
     id: m.id,
     name: m.name,
     lastMsg: '', 
     time: '',
     unread: unreadCounts[m.id] || 0,
-    online: Math.random() > 0.5 // Mock online status
+    online: Math.random() > 0.5 
   }));
 
   const filteredChats = chats.filter(chat => {
@@ -172,7 +172,6 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     return matchesSearch && matchesFilter;
   });
 
-  // Set the first chat as active by default if none is selected
   useEffect(() => {
     if (filteredChats.length > 0 && !activeChat) {
       setActiveChat(filteredChats[0].id);
@@ -180,23 +179,16 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   }, [filteredChats, activeChat]);
 
   const handleSendMessage = async () => {
-    if (!message.trim() || !activeChat || !user?.id) return;
+    if (!message.trim() || !activeChat || !user?.id || isSending) return;
 
-    const tempMessage = {
-      id: Date.now(),
-      text: message,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sent: true,
-      read: false
-    };
-    setCurrentChatMessages(prev => [...prev, tempMessage]);
-    
+    setIsSending(true);
     const textToSend = message;
     setMessage('');
     setShowEmojiPicker(false);
+    setError(null);
 
     try {
-      await fetch('/api/messages', {
+      const response = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -205,67 +197,68 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
           text: textToSend
         })
       });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Failed to send message');
+      }
+      
+      // Refresh messages immediately after successful send
+      fetchMessages(activeChat);
     } catch (err) {
       console.error('Failed to send message:', err);
+      setError('Message failed to send. Please try again.');
+      setMessage(textToSend); // Restore message
+    } finally {
+      setIsSending(false);
     }
   };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
-    if (!file || !activeChat || !user?.id) return;
+    if (!file || !activeChat || !user?.id || isSending) return;
     
-    // First, upload to the server
+    setIsSending(true);
+    setError(null);
     const formData = new FormData();
     formData.append('file', file);
     
-    let uploadedUrl = null;
     try {
       const uploadRes = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       });
-      if (uploadRes.ok) {
-        const uploadData = await uploadRes.json();
-        uploadedUrl = uploadData.url;
-      } else {
-        throw new Error('Upload failed');
-      }
-    } catch (err) {
-      console.error('Failed to upload file:', err);
-      return;
-    }
 
-    const textToSend = `📎 Attachment: ${file.name}`;
-    const tempMessage = {
-      id: Date.now(),
-      text: textToSend,
-      attachmentUrl: uploadedUrl,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sent: true,
-      read: false
-    };
-    setCurrentChatMessages(prev => [...prev, tempMessage]);
+      if (!uploadRes.ok) throw new Error('File upload failed');
+      
+      const uploadData = await uploadRes.json();
+      const uploadedUrl = uploadData.url;
 
-    try {
-      await fetch('/api/messages', {
+      const msgRes = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           senderId: user.id,
           receiverId: activeChat,
-          text: textToSend,
+          text: `📎 Attachment: ${file.name}`,
           attachmentUrl: uploadedUrl
         })
       });
+
+      if (!msgRes.ok) throw new Error('Failed to send file information');
+      
+      fetchMessages(activeChat);
     } catch (err) {
-      console.error('Failed to send file message:', err);
+      console.error('Failed to upload/send file:', err);
+      setError('File failed to send. Please try again.');
+    } finally {
+      setIsSending(false);
     }
   };
 
   const handleEmojiClick = (emoji) => {
     setMessage(prev => prev + emoji);
   };
-
 
   const activeChatInfo = chats.find(c => c.id === activeChat);
   const activeChatMember = teamMembers.find(m => m.id === activeChat);
@@ -447,6 +440,15 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
                   </div>
                </div>
              ))}
+
+             {error && (
+               <div className="flex justify-center">
+                 <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-bold animate-pulse">
+                   <AlertTriangle size={14} />
+                   {error}
+                 </div>
+               </div>
+             )}
           </div>
 
           {/* Message Input Area */}
@@ -474,7 +476,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
 
                 <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-2.5 sm:p-3.5 hover:bg-slate-50 rounded-xl sm:rounded-2xl text-slate-300 hover:text-blue-600 transition-all"
+                  disabled={isSending}
+                  className="p-2.5 sm:p-3.5 hover:bg-slate-50 rounded-xl sm:rounded-2xl text-slate-300 hover:text-blue-600 transition-all disabled:opacity-50"
                 >
                    <Paperclip size={22} className="sm:w-6 sm:h-6" />
                 </button>
@@ -489,15 +492,17 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
              <div className="flex-1 relative group">
                 <input 
                   type="text" 
-                  placeholder="Type a message"
-                  className="w-full pl-5 sm:pl-8 pr-12 sm:pr-14 py-4 sm:py-6 bg-slate-50 border border-transparent rounded-2xl sm:rounded-[2.5rem] text-sm sm:text-base font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500/30 focus:shadow-xl focus:shadow-blue-500/5 transition-all"
+                  placeholder={isSending ? "Sending..." : "Type a message"}
+                  disabled={isSending}
+                  className="w-full pl-5 sm:pl-8 pr-12 sm:pr-14 py-4 sm:py-6 bg-slate-50 border border-transparent rounded-2xl sm:rounded-[2.5rem] text-sm sm:text-base font-bold text-slate-700 outline-none focus:bg-white focus:border-blue-500/30 focus:shadow-xl focus:shadow-blue-500/5 transition-all disabled:opacity-70"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 />
                 <button 
                   onClick={handleSendMessage}
-                  className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-blue-600 text-white rounded-lg sm:rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-90"
+                  disabled={!message.trim() || isSending}
+                  className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 p-2 sm:p-3 bg-blue-600 text-white rounded-lg sm:rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-90 disabled:bg-slate-300 disabled:shadow-none"
                 >
                    <Send size={18} className="sm:w-5 sm:h-5" />
                 </button>

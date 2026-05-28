@@ -32,12 +32,20 @@ require('./models/LeaveBalance');
 
 // Set up associations
 const User = require('./models/User');
+const Message = require('./models/Message');
 const LeaveRequest = require('./models/LeaveRequest');
 const LeaveBalance = require('./models/LeaveBalance');
+
 User.hasMany(LeaveRequest, { foreignKey: 'userId' });
 LeaveRequest.belongsTo(User, { foreignKey: 'userId' });
 User.hasOne(LeaveBalance, { foreignKey: 'userId' });
 LeaveBalance.belongsTo(User, { foreignKey: 'userId' });
+
+// Message associations
+User.hasMany(Message, { as: 'SentMessages', foreignKey: 'senderId' });
+User.hasMany(Message, { as: 'ReceivedMessages', foreignKey: 'receiverId' });
+Message.belongsTo(User, { as: 'Sender', foreignKey: 'senderId' });
+Message.belongsTo(User, { as: 'Receiver', foreignKey: 'receiverId' });
 
 const app = express();
 

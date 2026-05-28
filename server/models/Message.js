@@ -11,7 +11,7 @@ const Message = sequelize.define('Message', {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-      model: 'Users', // 'Users' is the table name for User model
+      model: 'Users',
       key: 'id'
     }
   },
@@ -25,16 +25,18 @@ const Message = sequelize.define('Message', {
   },
   text: {
     type: DataTypes.TEXT,
-    allowNull: true, // Can be null if it's just an attachment
+    allowNull: true,
   },
   attachmentUrl: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT, // Changed to TEXT to support long URLs
     allowNull: true,
   },
   read: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   }
+}, {
+  timestamps: true
 });
 
 module.exports = Message;
