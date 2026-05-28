@@ -108,6 +108,7 @@ const mockInvoices = [
 const Invoices = ({ onInvoiceClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
@@ -654,7 +655,7 @@ const Invoices = ({ onInvoiceClick }) => {
             </div>
             
             <button 
-              onClick={handleExportCSV}
+              onClick={() => setIsExportModalOpen(true)}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
             >
               <Download size={16} className="text-blue-500" />
