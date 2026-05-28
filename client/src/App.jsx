@@ -636,9 +636,6 @@ function App() {
               fetchAssignments={fetchAssignments}
             />
           )}
-          {activeTab === 'Messages' && (
-            <Messages user={user} members={members} />
-          )}
           {activeTab === 'Settings' && <Settings />}
           {activeTab === 'Profile' && (
             <Profile
@@ -647,7 +644,7 @@ function App() {
               departments={departments}
             />
           )}
-          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Installation Challan', 'Delivery Challan', 'Tender Details', 'Task Details'].includes(activeTab) && (
+          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Finance Reports', 'Installation Challan', 'Delivery Challan', 'Tender Details', 'Task Details'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full text-slate-400">
               <div className="text-center">
                 <h2 className="text-2xl font-bold">{activeTab} Page</h2>
