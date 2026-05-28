@@ -101,7 +101,6 @@ function App() {
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialToken);
   const [user, setUser] = useState(initialUser);
-  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
 
   const [previousTab, setPreviousTab] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -376,7 +375,7 @@ function App() {
           onProfileClick={() => setActiveTab('Profile')}
           user={user}
           onLogout={handleLogout}
-          onOpenMessages={() => setIsMessagesOpen(!isMessagesOpen)}
+          onOpenMessages={() => setActiveTab('Messages')}
         />
 
         <main className="flex-1 overflow-y-auto print:overflow-visible">
@@ -658,15 +657,6 @@ function App() {
           )}
         </main>
       </div>
-
-      {isMessagesOpen && (
-        <Messages
-          user={user}
-          members={members}
-          isPopup={true}
-          onClose={() => setIsMessagesOpen(false)}
-        />
-      )}
     </div>
   )
 }
