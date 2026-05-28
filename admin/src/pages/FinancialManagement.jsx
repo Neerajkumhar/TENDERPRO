@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import ExportModal from '../components/ExportModal';
 import { 
@@ -193,15 +193,25 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       doc.setTextColor(100, 116, 139);
       doc.text(`Period: ${startDate} to ${endDate}`, 14, 30);
       
-      const invoiceData = filteredData.map(inv => [
-        inv.invoiceNumber || inv.id,
-        inv.date ? new Date(inv.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }) : 'N/A',
-        inv.client,
-        `Rs. ${typeof inv.amount === 'number' || !isNaN(inv.amount) ? parseFloat(inv.amount).toLocaleString('en-IN') : inv.amount}`,
-        inv.status
-      ]);
+      const invoiceData = filteredData.map(inv => {
+        let displayDate = 'N/A';
+        if (inv.date) {
+          const d = new Date(inv.date);
+          if (!isNaN(d.getTime())) {
+            displayDate = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+          }
+        }
 
-      doc.autoTable({
+        return [
+          inv.invoiceNumber || inv.id,
+          displayDate,
+          inv.client,
+          `Rs. ${typeof inv.amount === 'number' || !isNaN(inv.amount) ? parseFloat(inv.amount).toLocaleString('en-IN') : inv.amount}`,
+          inv.status
+        ];
+      });
+
+      autoTable(doc, {
         startY: 40,
         head: [["Invoice ID", "Date", "Client", "Amount", "Status"]],
         body: invoiceData,
@@ -580,7 +590,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
                 <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
                   <button 
-                    type="button"
+                    type="button" 
                     onClick={() => setIsModalOpen(false)}
                     className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                   >
