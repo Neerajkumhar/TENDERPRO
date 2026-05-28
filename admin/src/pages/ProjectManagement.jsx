@@ -322,10 +322,10 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
       </div>
 
       <div className="grid grid-cols-12 gap-8">
-        {/* Active Tenders Portfolio */}
+        {/* Active Project Portfolio */}
         <div className="col-span-12 lg:col-span-6 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-slate-50 flex justify-between items-center">
-            <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Tenders Portfolio</h3>
+            <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Project Portfolio</h3>
             <button className="text-xs font-black text-blue-600 hover:underline uppercase tracking-widest">View All Projects</button>
           </div>
           <div className="overflow-x-auto">
