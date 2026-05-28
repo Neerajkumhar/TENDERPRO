@@ -106,6 +106,16 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     } catch (err) {}
   };
 
+  // Mark active chat as read whenever messages update
+  useEffect(() => {
+    if (activeChat && currentChatMessages.length > 0) {
+      const hasUnread = currentChatMessages.some(m => !m.sent && !m.read);
+      if (hasUnread) {
+        markAsRead(activeChat);
+      }
+    }
+  }, [currentChatMessages, activeChat]);
+
   useEffect(() => {
     fetchUnreadCounts();
     const interval = setInterval(fetchUnreadCounts, 5000);
@@ -172,6 +182,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     return matchesSearch && matchesFilter;
   });
 
+  const totalUnreadCount = Object.values(unreadCounts).reduce((acc, curr) => acc + curr, 0);
+
   useEffect(() => {
     if (filteredChats.length > 0 && !activeChat) {
       setActiveChat(filteredChats[0].id);
@@ -203,12 +215,11 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
         throw new Error(errData.message || 'Failed to send message');
       }
       
-      // Refresh messages immediately after successful send
       fetchMessages(activeChat);
     } catch (err) {
       console.error('Failed to send message:', err);
       setError('Message failed to send. Please try again.');
-      setMessage(textToSend); // Restore message
+      setMessage(textToSend); 
     } finally {
       setIsSending(false);
     }
@@ -259,18 +270,6 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const handleEmojiClick = (emoji) => {
     setMessage(prev => prev + emoji);
   };
-
-  const totalUnreadCount = Object.values(unreadCounts).reduce((acc, curr) => acc + curr, 0);
-
-  // Mark active chat as read whenever messages update
-  useEffect(() => {
-    if (activeChat && currentChatMessages.length > 0) {
-      const hasUnread = currentChatMessages.some(m => !m.sent && !m.read);
-      if (hasUnread) {
-        markAsRead(activeChat);
-      }
-    }
-  }, [currentChatMessages, activeChat]);
 
   const activeChatInfo = chats.find(c => c.id === activeChat);
   const activeChatMember = teamMembers.find(m => m.id === activeChat);
@@ -340,22 +339,22 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
               >
                 <div className="flex items-center gap-3 sm:gap-4">
                    <div className="relative">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 border border-white shadow-sm overflow-hidden transition-all group-hover:scale-105">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 border border-white shadow-sm overflow-hidden transition-all group-hover:scale-105 font-bold">
                          {chat.name.charAt(0).toUpperCase()}
                       </div>
                       {chat.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>}
                    </div>
                    <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-0.5 sm:mb-1">
-                         <h4 className="text-xs sm:text-sm font-black text-slate-800 truncate uppercase tracking-tight">{chat.name}</h4>
+                         <h4 className={`text-xs sm:text-sm truncate uppercase tracking-tight ${chat.unread > 0 ? 'font-black text-slate-900' : 'font-bold text-slate-600'}`}>{chat.name}</h4>
                          <span className="text-[9px] sm:text-[10px] font-black text-slate-300">{chat.time}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <p className="text-[11px] sm:text-xs font-bold text-slate-400 truncate tracking-tight italic">
-                           {chat.lastMsg || (chat.unread > 0 ? 'New message' : 'Start chatting')}
+                         <p className={`text-[11px] sm:text-xs truncate tracking-tight italic ${chat.unread > 0 ? 'font-black text-blue-600' : 'font-bold text-slate-400'}`}>
+                           {chat.lastMsg || (chat.unread > 0 ? `${chat.unread} new messages` : 'Start chatting')}
                          </p>
                          {chat.unread > 0 && (
-                           <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-emerald-500 text-white text-[9px] sm:text-[10px] font-black flex items-center justify-center shadow-lg shadow-emerald-100">
+                           <span className="w-5 h-5 rounded-lg bg-blue-600 text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-blue-100 animate-in zoom-in duration-300">
                              {chat.unread}
                            </span>
                          )}
