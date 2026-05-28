@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -19,6 +19,8 @@ import {
   Download,
   Wallet,
   XCircle,
+  Search,
+  Check,
   PieChart as PieChartIcon
 } from 'lucide-react';
 import { 
@@ -85,6 +87,11 @@ const alerts = [
 const FinancialManagement = ({ onInvoiceClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const filterRef = useRef(null);
+
   const [formData, setFormData] = useState({
     client: '',
     amount: '',
@@ -103,6 +110,16 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     paidCount: 113,
     overdueCount: 4
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilterPopover(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchInvoicesAndStats = async () => {
     try {
@@ -254,6 +271,13 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       URL.revokeObjectURL(url);
     }
   };
+
+  const filteredInvoices = invoicesList.filter(inv => {
+    const matchesSearch = inv.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (inv.invoiceNumber || inv.id).toString().toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'All' || inv.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const statsData = [
     { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString('en-IN')}`, trend: '+ 12%', isUp: true, color: 'blue', icon: IndianRupee },
@@ -445,15 +469,57 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
         {/* Invoice Table - Full Width Bottom */}
         <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-          <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+          <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 justify-between items-center bg-slate-50/30">
             <div>
               <h3 className="font-black text-slate-900 text-xl tracking-tight">Invoice Status Table</h3>
               <p className="text-xs text-slate-500 font-medium mt-1">Detailed log of recent financial transactions</p>
             </div>
-            <div className="flex items-center gap-3">
-              <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:border-blue-400 transition-all shadow-sm">
-                <Filter size={18} />
-              </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Search client or ID..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-500 transition-all w-64 shadow-sm" 
+                />
+              </div>
+              
+              <div className="relative" ref={filterRef}>
+                <button 
+                  onClick={() => setShowFilterPopover(!showFilterPopover)}
+                  className={`p-2.5 rounded-xl border transition-all shadow-sm active:scale-95 ${
+                    showFilterPopover || filterStatus !== 'All' 
+                    ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400'
+                  }`}
+                >
+                  <Filter size={18} />
+                </button>
+
+                {showFilterPopover && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">Filter Status</p>
+                    {['All', 'Paid', 'Pending', 'Overdue'].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setFilterStatus(status);
+                          setShowFilterPopover(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                          filterStatus === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{status}</span>
+                        {filterStatus === status && <Check size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button 
                 onClick={() => setIsModalOpen(true)}
                 className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-slate-200 hover:bg-blue-600 transition-all uppercase tracking-widest"
@@ -475,7 +541,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {invoicesList.map((inv, i) => (
+                {filteredInvoices.length > 0 ? filteredInvoices.map((inv, i) => (
                   <tr key={i} className="hover:bg-blue-50/30 transition-all group">
                     <td className="px-8 py-5 text-xs font-bold text-slate-400">{inv.invoiceNumber || inv.id}</td>
                     <td className="px-8 py-5 text-xs font-bold text-slate-600">
@@ -508,7 +574,11 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="6" className="px-8 py-20 text-center text-slate-400 italic font-medium">No invoices found matching your criteria.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
