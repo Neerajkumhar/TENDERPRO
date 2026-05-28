@@ -8,16 +8,18 @@ import {
   Flag, 
   DollarSign, 
   ShieldAlert,
-  MoreHorizontal,
-  ChevronRight,
-  TrendingUp,
-  Search,
-  Filter,
-  Calendar,
-  ChevronLeft,
-  Info,
-  IndianRupee,
-  Trash2
+  MoreHorizontal, 
+  ChevronRight, 
+  TrendingUp, 
+  Search, 
+  Filter, 
+  Calendar, 
+  ChevronLeft, 
+  Info, 
+  IndianRupee, 
+  Trash2,
+  UserPlus,
+  X
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -32,14 +34,11 @@ import {
   CartesianGrid
 } from 'recharts';
 
-
-
-
-
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departments, members, assignments, fetchAssignments }) => {
   const [showProjectModal, setShowProjectModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [timeView, setTimeView] = useState('Month');
   const [assignmentData, setAssignmentData] = useState({
     tenderId: '',
@@ -49,6 +48,17 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
     priority: 'Medium',
     deadline: ''
   });
+
+  const filteredTenders = tenders.filter(t => 
+    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.client?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredAssignments = assignments.filter(a => 
+    a.tender?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    a.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    a.department?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const statsData = [
     { label: 'Total Tenders', value: tenders.length, trend: '100%', isUp: true, color: 'slate', icon: Briefcase },
@@ -141,18 +151,20 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
           <p className="text-slate-500 mt-1 font-medium italic">Track progress, timelines, and team allocation across all active projects.</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
             <input 
               id="project-search"
               type="text" 
               placeholder="Search projects..." 
-              className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all w-64 shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all w-64 shadow-sm focus:ring-4 focus:ring-blue-50"
             />
           </div>
           <button 
             onClick={() => setShowProjectModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg active:scale-95 uppercase tracking-widest"
           >
             <Briefcase size={18} />
             <span>New Project</span>
@@ -328,7 +340,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {tenders.map((tender, i) => (
+                {filteredTenders.length > 0 ? filteredTenders.map((tender, i) => (
                   <tr key={tender.id || i} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -358,7 +370,11 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                       </button>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center text-slate-400 text-xs italic">No matching tenders found.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -369,7 +385,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
           <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
             <h3 className="font-black text-slate-900 text-lg tracking-tight">Assigned Project Work</h3>
             <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-100">
-              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{assignments.length} Tasks</span>
+              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{filteredAssignments.length} Tasks</span>
             </div>
           </div>
           <div className="overflow-x-auto flex-1">
@@ -385,8 +401,8 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {assignments.length > 0 ? (
-                  assignments.slice(0, 8).map((task, i) => (
+                {filteredAssignments.length > 0 ? (
+                  filteredAssignments.slice(0, 8).map((task, i) => (
                     <tr 
                       key={task.id || i} 
                       onClick={() => onProjectClick(task.tenderId || task.tender?.id)}
@@ -434,7 +450,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-8 text-center text-slate-400 text-xs italic">No assignments</td>
+                    <td colSpan="6" className="px-6 py-12 text-center text-slate-400 text-xs italic">No matching assignments found.</td>
                   </tr>
                 )}
               </tbody>
@@ -494,22 +510,6 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                     ))}
                   </select>
                 </div>
-                {/* Member selection hidden as per new logic: Assign to Dept, then Dept PM handles sub-tasks */}
-                {/* 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assign to Member</label>
-                  <select 
-                    value={assignmentData.assigneeId}
-                    onChange={(e) => setAssignmentData({...assignmentData, assigneeId: e.target.value})}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="">Select team member</option>
-                    {members.map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
-                </div> 
-                */}
                 <div className="col-span-2 space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Description <span className="text-rose-500">*</span></label>
                   <textarea 
