@@ -203,10 +203,6 @@ const ClientDetails = ({ clientId, onBack }) => {
               <Edit2 size={18} />
               <span>Edit</span>
             </button>
-            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95">
-              <Plus size={18} />
-              <span>Add Tender</span>
-            </button>
           </div>
         </div>
 
