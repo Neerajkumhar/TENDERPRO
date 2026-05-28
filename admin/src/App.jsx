@@ -517,6 +517,10 @@ function App() {
             <ProjectDetails
               projectId={selectedProjectId}
               onBack={handleBackToProjects}
+              onEdit={(tender) => {
+                setEditTenderData(tender);
+                setActiveTab('Edit Tender');
+              }}
               assignments={assignments}
               fetchAssignments={fetchAssignments}
               user={members.find(m => m.email === user.email) || user}

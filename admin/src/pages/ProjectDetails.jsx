@@ -35,7 +35,7 @@ const progressData = [
   { name: 'Not Started', value: 5, color: '#94a3b8' },
 ];
 
-const ProjectDetails = ({ projectId, onBack }) => {
+const ProjectDetails = ({ projectId, onBack, onEdit }) => {
   const [project, setProject] = useState(null);
   const [projectAssignments, setProjectAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -152,13 +152,12 @@ const ProjectDetails = ({ projectId, onBack }) => {
             </div>
           </div>
           <div className="flex items-center gap-3 w-full xl:w-auto">
-            <button className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-400 transition-all shadow-sm">
+            <button 
+              onClick={() => onEdit(project)}
+              className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm active:scale-95"
+            >
               <Edit2 size={16} />
-              <span>Edit</span>
-            </button>
-            <button className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-              <MoreHorizontal size={16} />
-              <span>Actions</span>
+              <span>Edit Details</span>
             </button>
           </div>
         </div>
@@ -331,7 +330,6 @@ const ProjectDetails = ({ projectId, onBack }) => {
                 </div>
                 <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Project Team</h3>
               </div>
-              <button className="text-blue-600 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:underline">Manage</button>
             </div>
             
             <div className="space-y-8">
