@@ -27,9 +27,18 @@ const mockTransactions = [
 
 const BudgetDetails = ({ category, onBack }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   if (!category) return null;
+
+  const filteredTransactions = mockTransactions.filter(t => {
+    const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          t.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
@@ -218,9 +227,32 @@ const BudgetDetails = ({ category, onBack }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button className="p-2.5 bg-slate-50 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-              <Filter size={18} />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                className={`p-2.5 rounded-xl transition-all ${showFilterDropdown ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-500 hover:text-blue-600 hover:bg-blue-50'}`}
+              >
+                <Filter size={18} />
+              </button>
+
+              {showFilterDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 p-2 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-2 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">Filter by Status</div>
+                  {['ALL', 'Completed', 'Pending', 'Processing'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setStatusFilter(status);
+                        setShowFilterDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${statusFilter === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
@@ -236,7 +268,7 @@ const BudgetDetails = ({ category, onBack }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {mockTransactions.filter(t => t.description.toLowerCase().includes(searchQuery.toLowerCase())).map((trx, idx) => (
+              {filteredTransactions.map((trx, idx) => (
                 <tr key={idx} className="hover:bg-slate-50/50 transition-all">
                   <td className="px-8 py-5 text-xs font-bold text-slate-600">{trx.id}</td>
                   <td className="px-8 py-5 text-xs font-bold text-slate-600">{trx.date}</td>
@@ -254,9 +286,16 @@ const BudgetDetails = ({ category, onBack }) => {
               ))}
             </tbody>
           </table>
+          {filteredTransactions.length === 0 && (
+            <div className="py-20 text-center">
+              <div className="bg-slate-50 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <Search className="text-slate-300" size={24} />
+              </div>
+              <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No transactions found matching your filters</p>
+            </div>
+          )}
         </div>
-      </div>
-      <ExportModal 
+      </div>      <ExportModal 
         isOpen={isExportModalOpen} 
         onClose={() => setIsExportModalOpen(false)} 
         onExport={handleExportReport}
