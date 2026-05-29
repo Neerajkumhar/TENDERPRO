@@ -318,7 +318,6 @@ const MemberDashboard = ({ user }) => {
                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">TODAY'S TASKS</h3>
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Manage your daily deliverables</p>
             </div>
-            <button className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100"><Filter size={18} /></button>
           </div>
 
           <div className="space-y-4">
