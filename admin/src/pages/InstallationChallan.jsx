@@ -882,6 +882,14 @@ const InstallationChallan = () => {
           </div>
         </div>
       )}
+
+      {/* Export Modal */}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Installation Challans"
+      />
     </div>
   );
 };
