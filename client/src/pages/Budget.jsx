@@ -339,7 +339,6 @@ const Budget = () => {
                     onClick={() => {
                       setStatusFilter('ALL');
                       setDepartmentFilter('ALL DEPARTMENTS');
-                      setSelectedFY('FY 2024');
                       setShowGlobalFilter(false);
                       triggerToast('Filters reset to default');
                     }}
@@ -350,25 +349,6 @@ const Budget = () => {
                 </div>
 
                 <div className="space-y-6">
-                  {/* FY Selection */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Calendar size={14} className="text-blue-500" />
-                      <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Fiscal Year</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {['FY 2023', 'FY 2024', 'FY 2025'].map(fy => (
-                        <button
-                          key={fy}
-                          onClick={() => setSelectedFY(fy)}
-                          className={`py-2 rounded-xl text-[8px] sm:text-[9px] font-black transition-all ${selectedFY === fy ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
-                        >
-                          {fy}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Status Filter */}
                   <div>
                     <div className="flex items-center gap-2 mb-3">
@@ -427,7 +407,7 @@ const Budget = () => {
               <stat.icon size={20} className="sm:w-6 sm:h-6" />
             </div>
             <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</span>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1 sm:mb-2">{stat.value}</span>
+            <span className="textxl sm:text-2xl font-black text-slate-900 tracking-tight mb-1 sm:mb-2">{stat.value}</span>
             <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-tight italic">{stat.sub}</span>
           </div>
         ))}

@@ -327,7 +327,6 @@ const Budget = () => {
                   onClick={() => {
                     setStatusFilter('ALL');
                     setDepartmentFilter('ALL DEPARTMENTS');
-                    setSelectedFY('FY 2024');
                     setShowGlobalFilter(false);
                     triggerToast('Filters reset to default');
                   }}
@@ -338,25 +337,6 @@ const Budget = () => {
               </div>
 
               <div className="space-y-6">
-                {/* FY Selection */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar size={14} className="text-blue-500" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fiscal Year</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['FY 2023', 'FY 2024', 'FY 2025'].map(fy => (
-                      <button
-                        key={fy}
-                        onClick={() => setSelectedFY(fy)}
-                        className={`py-2 rounded-xl text-[9px] font-black transition-all ${selectedFY === fy ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
-                      >
-                        {fy}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Status Filter */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
