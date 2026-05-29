@@ -143,16 +143,14 @@ const Invoices = ({ onInvoiceClick }) => {
     dispatchTo: '',
     shippingAddress: '',
     materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }],
-    notes: ''
+    notes: '',
+    status: 'PENDING'
   });
 
   const [clients, setClients] = useState([]);
   const [tenders, setTenders] = useState([]);
 
-  const [invoices, setInvoices] = useState(() => {
-    const saved = localStorage.getItem('tender_invoices');
-    return saved ? JSON.parse(saved) : mockInvoices;
-  });
+  const [invoices, setInvoices] = useState(mockInvoices);
 
   const [editInvoiceId, setEditInvoiceId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -185,36 +183,56 @@ const Invoices = ({ onInvoiceClick }) => {
     }, 4000);
   };
 
-  const updateInvoices = (newInvoices) => {
-    setInvoices(newInvoices);
-    localStorage.setItem('tender_invoices', JSON.stringify(newInvoices));
+  const loadBackendInvoices = async () => {
+    try {
+      const response = await fetch('/api/invoices');
+      if (!response.ok) return;
+      const data = await response.json();
+      const backendData = data.map(inv => ({
+        id: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        client: inv.client || '',
+        project: inv.project || inv.reference || inv.poNumber || 'General Project',
+        issueDate: inv.date ? new Date(inv.date).toISOString().split('T')[0] : inv.issueDate || '',
+        dueDate: inv.dueDate || '',
+        amount: parseFloat(inv.amount ?? 0),
+        status: (inv.status || 'Pending').toUpperCase(),
+        notes: inv.notes || '',
+        amount_due: inv.amount_due,
+        paid_amount: inv.paid_amount,
+        billingAddress: inv.billingAddress,
+        gstDetails: inv.gstDetails,
+        reference: inv.reference,
+        invoiceRef: inv.invoiceRef,
+        poNumber: inv.poNumber,
+        poRef: inv.poRef,
+        poAddress: inv.poAddress,
+        poDate: inv.poDate,
+        ewayBill: inv.ewayBill,
+        dispatchDate: inv.dispatchDate,
+        deliveryDate: inv.deliveryDate,
+        transporter: inv.transporter,
+        vehicleNumber: inv.vehicleNumber,
+        lrNo: inv.lrNo,
+        driverName: inv.driverName,
+        clientGstin: inv.clientGstin,
+        contactPerson: inv.contactPerson,
+        contactPhone: inv.contactPhone,
+        placeOfSupply: inv.placeOfSupply,
+        dispatchFrom: inv.dispatchFrom,
+        dispatchTo: inv.dispatchTo,
+        shippingAddress: inv.shippingAddress,
+        materialRows: inv.materialRows
+      }));
+      if (backendData.length > 0) {
+        setInvoices(backendData);
+      }
+    } catch (error) {
+      console.error('Error fetching backend invoices:', error);
+    }
   };
 
   useEffect(() => {
-    const loadBackendInvoices = async () => {
-      try {
-        const response = await fetch('/api/invoices');
-        if (!response.ok) return;
-        const data = await response.json();
-        const backendData = data.map(inv => ({
-          id: inv.id,
-          invoiceNumber: inv.invoiceNumber,
-          client: inv.client || '',
-          project: inv.project || inv.reference || inv.poNumber || 'General Project',
-          issueDate: inv.date ? new Date(inv.date).toISOString().split('T')[0] : inv.issueDate || '',
-          dueDate: inv.dueDate || '',
-          amount: inv.amount ?? 0,
-          status: inv.status || 'PENDING',
-          notes: inv.notes || ''
-        }));
-        if (backendData.length > 0) {
-          setInvoices(backendData);
-        }
-      } catch (error) {
-        console.error('Error fetching backend invoices:', error);
-      }
-    };
-
     loadBackendInvoices();
     // Load clients and tenders for selects
     const loadClientsAndTenders = async () => {
@@ -280,122 +298,122 @@ const Invoices = ({ onInvoiceClick }) => {
     });
   };
 
-  const handleCreateInvoice = (e) => {
+  const mapStatusToBackend = (s) => {
+    if (s === 'PAID') return 'Paid';
+    if (s === 'PENDING') return 'Pending';
+    if (s === 'OVERDUE') return 'Overdue';
+    return 'Pending';
+  };
+
+  const handleCreateInvoice = async (e) => {
     if (e) e.preventDefault();
     if (!formData.client || !formData.project || !formData.amount) {
       alert('Please fill in client name, project, and amount');
       return;
     }
 
-    if (editInvoiceId) {
-      // Edit mode
-      const updatedInvoices = invoices.map(inv => {
-        if (inv.id === editInvoiceId) {
-          return {
-            ...inv,
-            client: formData.client,
-            project: formData.project,
-            issueDate: formData.issueDate,
-            dueDate: formData.dueDate,
-            amount: parseFloat(formData.amount),
-            amount_due: formData.amount_due !== '' ? parseFloat(formData.amount_due) : parseFloat(formData.amount) || 0,
-            paid_amount: formData.paid_amount !== '' ? parseFloat(formData.paid_amount) : inv.paid_amount || 0,
-            billingAddress: formData.billingAddress,
-            gstDetails: formData.gstDetails,
-            reference: formData.reference,
-            invoiceRef: formData.invoiceRef,
-            poNumber: formData.poNumber,
-            poRef: formData.poRef,
-            poAddress: formData.poAddress,
-            poDate: formData.poDate,
-            ewayBill: formData.ewayBill,
-            dispatchDate: formData.dispatchDate,
-            deliveryDate: formData.deliveryDate,
-            transporter: formData.transporter,
-            vehicleNumber: formData.vehicleNumber,
-            lrNo: formData.lrNo,
-            driverName: formData.driverName,
-            clientGstin: formData.clientGstin,
-            contactPerson: formData.contactPerson,
-            contactPhone: formData.contactPhone,
-            placeOfSupply: formData.placeOfSupply,
-            dispatchFrom: formData.dispatchFrom,
-            dispatchTo: formData.dispatchTo,
-            shippingAddress: formData.shippingAddress,
-            materialRows: formData.materialRows,
-            notes: formData.notes
-          };
-        }
-        return inv;
-      });
-      updateInvoices(updatedInvoices);
-      triggerToast(`Invoice ${editInvoiceId} updated successfully!`);
-      setEditInvoiceId(null);
-    } else {
-      // Creation mode
-      const year = new Date().getFullYear();
-      const count = invoices.length + 1;
-      const paddedCount = String(count).padStart(3, '0');
-      const newId = `INV-${year}-${paddedCount}`;
+    const payload = {
+      client: formData.client,
+      project: formData.project,
+      tenderId: formData.tenderId,
+      date: formData.issueDate,
+      dueDate: formData.dueDate,
+      amount: parseFloat(formData.amount),
+      status: mapStatusToBackend(formData.status),
+      amount_due: formData.amount_due !== '' ? parseFloat(formData.amount_due) : parseFloat(formData.amount) || 0,
+      paid_amount: formData.paid_amount !== '' ? parseFloat(formData.paid_amount) : 0,
+      billingAddress: formData.billingAddress,
+      gstDetails: formData.gstDetails,
+      reference: formData.reference,
+      invoiceRef: formData.invoiceRef,
+      poNumber: formData.poNumber,
+      poRef: formData.poRef,
+      poAddress: formData.poAddress,
+      poDate: formData.poDate,
+      ewayBill: formData.ewayBill,
+      dispatchDate: formData.dispatchDate,
+      deliveryDate: formData.deliveryDate,
+      transporter: formData.transporter,
+      vehicleNumber: formData.vehicleNumber,
+      lrNo: formData.lrNo,
+      driverName: formData.driverName,
+      clientGstin: formData.clientGstin,
+      contactPerson: formData.contactPerson,
+      contactPhone: formData.contactPhone,
+      placeOfSupply: formData.placeOfSupply,
+      dispatchFrom: formData.dispatchFrom,
+      dispatchTo: formData.dispatchTo,
+      shippingAddress: formData.shippingAddress,
+      materialRows: formData.materialRows,
+      notes: formData.notes
+    };
 
-      const newInvoice = {
-        id: newId,
-        client: formData.client,
-        project: formData.project,
-        issueDate: formData.issueDate || new Date().toISOString().split('T')[0],
-        dueDate: formData.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        amount: parseFloat(formData.amount),
-        amount_due: formData.amount_due !== '' ? parseFloat(formData.amount_due) : parseFloat(formData.amount) || 0,
-        paid_amount: formData.paid_amount !== '' ? parseFloat(formData.paid_amount) : 0,
-        billingAddress: formData.billingAddress,
-        gstDetails: formData.gstDetails,
-        reference: formData.reference,
-        invoiceRef: formData.invoiceRef,
-        poNumber: formData.poNumber,
-        poRef: formData.poRef,
-        poAddress: formData.poAddress,
-        poDate: formData.poDate,
-        ewayBill: formData.ewayBill,
-        dispatchDate: formData.dispatchDate,
-        deliveryDate: formData.deliveryDate,
-        transporter: formData.transporter,
-        vehicleNumber: formData.vehicleNumber,
-        lrNo: formData.lrNo,
-        driverName: formData.driverName,
-        clientGstin: formData.clientGstin,
-        contactPerson: formData.contactPerson,
-        contactPhone: formData.contactPhone,
-        placeOfSupply: formData.placeOfSupply,
-        dispatchFrom: formData.dispatchFrom,
-        dispatchTo: formData.dispatchTo,
-        shippingAddress: formData.shippingAddress,
-        materialRows: formData.materialRows,
-        notes: formData.notes,
-        status: 'PENDING'
-      };
+    try {
+      let response;
+      if (editInvoiceId) {
+        response = await fetch(`/api/invoices/${editInvoiceId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        response = await fetch('/api/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
 
-      updateInvoices([newInvoice, ...invoices]);
-      triggerToast(`Invoice ${newId} generated successfully!`);
+      if (response.ok) {
+        const result = await response.json();
+        triggerToast(editInvoiceId ? `Invoice updated successfully!` : `Invoice generated successfully!`);
+        loadBackendInvoices();
+        setIsModalOpen(false);
+        setEditInvoiceId(null);
+        setFormData({
+          client: '',
+          project: '',
+          tenderId: '',
+          issueDate: new Date().toISOString().split('T')[0],
+          dueDate: '',
+          amount: '',
+          amount_due: '',
+          paid_amount: '',
+          billingAddress: '',
+          gstDetails: '',
+          reference: '',
+          invoiceRef: '',
+          poNumber: '',
+          poRef: '',
+          poAddress: '',
+          poDate: '',
+          ewayBill: '',
+          dispatchDate: '',
+          deliveryDate: '',
+          transporter: '',
+          vehicleNumber: '',
+          lrNo: '',
+          driverName: '',
+          clientGstin: '',
+          contactPerson: '',
+          contactPhone: '',
+          placeOfSupply: '',
+          dispatchFrom: '',
+          dispatchTo: '',
+          shippingAddress: '',
+          materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }],
+          notes: '',
+          status: 'PENDING'
+        });
+        setFiles([]);
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error saving invoice:', error);
+      alert('Failed to save invoice. Please try again.');
     }
-
-    setFormData({
-      client: '',
-      project: '',
-      tenderId: '',
-      issueDate: new Date().toISOString().split('T')[0],
-      dueDate: '',
-      amount: '',
-      amount_due: '',
-      paid_amount: '',
-      billingAddress: '',
-      gstDetails: '',
-      reference: '',
-      poNumber: '',
-      poAddress: '',
-      notes: ''
-    });
-    setFiles([]);
-    setIsModalOpen(false);
   };
 
   const handleEditClick = (invoice) => {
@@ -407,6 +425,7 @@ const Invoices = ({ onInvoiceClick }) => {
       issueDate: invoice.issueDate,
       dueDate: invoice.dueDate,
       amount: String(invoice.amount),
+      status: invoice.status,
       amount_due: invoice.amount_due != null ? String(invoice.amount_due) : String(invoice.amount || ''),
       paid_amount: invoice.paid_amount != null ? String(invoice.paid_amount) : '',
       billingAddress: invoice.billingAddress || '',
@@ -437,10 +456,21 @@ const Invoices = ({ onInvoiceClick }) => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteInvoice = (id) => {
-    if (window.confirm(`Are you sure you want to delete invoice ${id}?`)) {
-      updateInvoices(invoices.filter(inv => inv.id !== id));
-      triggerToast(`Invoice ${id} deleted successfully!`);
+  const handleDeleteInvoice = async (id) => {
+    if (window.confirm(`Are you sure you want to delete this invoice?`)) {
+      try {
+        const response = await fetch(`/api/invoices/${id}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          triggerToast(`Invoice deleted successfully!`);
+          loadBackendInvoices();
+        } else {
+          alert('Failed to delete invoice');
+        }
+      } catch (error) {
+        console.error('Error deleting invoice:', error);
+      }
     }
   };
 
@@ -1004,17 +1034,32 @@ const Invoices = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (USD)</label>
-                  <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">$</span>
-                    <input 
-                      type="number"
-                      placeholder="0.00"
-                      className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (USD)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">$</span>
+                      <input 
+                        type="number"
+                        placeholder="0.00"
+                        className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Invoice Status</label>
+                    <select
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold appearance-none cursor-pointer focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    >
+                      <option value="PENDING">PENDING</option>
+                      <option value="PAID">PAID</option>
+                      <option value="OVERDUE">OVERDUE</option>
+                      <option value="DRAFT">DRAFT</option>
+                    </select>
                   </div>
                 </div>
 

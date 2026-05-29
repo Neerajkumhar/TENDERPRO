@@ -314,3 +314,18 @@ exports.updateInvoice = async (req, res) => {
     res.status(500).json({ message: 'Error updating invoice', error: error.message });
   }
 };
+
+exports.deleteInvoice = async (req, res) => {
+  try {
+    let invoice = await Invoice.findByPk(req.params.id);
+    if (!invoice) {
+      invoice = await Invoice.findOne({ where: { invoiceNumber: req.params.id } });
+    }
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
+
+    await invoice.destroy();
+    res.json({ message: 'Invoice deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting invoice', error: error.message });
+  }
+};
