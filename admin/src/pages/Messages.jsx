@@ -45,7 +45,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 
- Filter members based on role access
+  // Filter members based on role access
   const teamMembers = members.filter(m => m.id !== user?.id);
 
   const fetchUnreadCounts = async () => {
@@ -94,7 +94,7 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     } catch (err) {}
   };
 
- Mark active chat as read whenever messages update
+ // Mark active chat as read whenever messages update
   useEffect(() => {
     if (activeChat && currentChatMessages.length > 0) {
       const hasUnread = currentChatMessages.some(m => !m.sent && !m.read);
