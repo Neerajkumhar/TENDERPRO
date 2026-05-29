@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
 import { 
   Search, 
   Calendar, 
@@ -14,7 +18,8 @@ import {
   ExternalLink,
   ChevronRight,
   TrendingUp,
-  User
+  User,
+  X
 } from 'lucide-react';
 
 const mockTransactions = [];
@@ -23,6 +28,7 @@ const mockAlerts = [];
 const Payments = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     client: '',
     invoice: '',
@@ -132,38 +138,89 @@ const Payments = () => {
     setIsRecordModalOpen(false);
   };
 
-  const handleExportCSV = () => {
-    if (filteredTransactions.length === 0) {
-      triggerToast('No transactions to export');
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = filteredTransactions.filter(tx => {
+      const txDate = new Date(tx.date);
+      return txDate >= start && txDate <= end;
+    });
+
+    if (exportData.length === 0) {
+      triggerToast('No transactions matched the selected time period.');
       return;
     }
 
-    const headers = ['Payment ID', 'Client', 'Invoice No.', 'Date', 'Method', 'Amount', 'Status'];
-    const rows = filteredTransactions.map(tx => [
-      tx.id,
-      tx.client,
-      tx.invoice,
-      tx.date,
-      tx.method,
-      tx.amount.toFixed(2),
-      tx.status
-    ]);
+    const filename = `Payments_Export_${startDate}_to_${endDate}`;
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    if (format === 'xlsx') {
+      const exportRows = exportData.map(tx => ({
+        "Payment ID": tx.id,
+        "Client": tx.client,
+        "Invoice No.": tx.invoice,
+        "Date": tx.date,
+        "Method": tx.method,
+        "Amount": tx.amount,
+        "Status": tx.status
+      }));
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `payments_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+      triggerToast("Excel report downloaded!");
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("TenderPro Payments Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(tx => [
+        tx.id, 
+        tx.client, 
+        tx.invoice, 
+        tx.date, 
+        tx.amount.toLocaleString(), 
+        tx.status
+      ]);
+      
+      autoTable(doc, {
+        startY: 35,
+        head: [["Payment ID", "Client", "Invoice No.", "Date", "Amount", "Status"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+      triggerToast("PDF report downloaded!");
+    } else if (format === 'csv') {
+      const headers = ['Payment ID', 'Client', 'Invoice No.', 'Date', 'Method', 'Amount', 'Status'];
+      const rows = exportData.map(tx => [
+        tx.id,
+        tx.client,
+        tx.invoice,
+        tx.date,
+        tx.method,
+        tx.amount.toFixed(2),
+        tx.status
+      ]);
 
-    triggerToast('CSV export downloaded successfully!');
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      triggerToast('CSV export downloaded!');
+    }
   };
 
   // Filter transactions based on search query, date filter, and quick filter status
@@ -242,7 +299,7 @@ const Payments = () => {
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <button 
-            onClick={handleExportCSV}
+            onClick={() => setIsExportModalOpen(true)}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
           >
             <Download size={18} className="text-blue-500" />
@@ -598,6 +655,15 @@ const Payments = () => {
           </div>
         </div>
       )}
+
+      {/* Export Modal */}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Payments Report"
+      />
+
       {/* Toast Notification Banner */}
       {showToast && (
         <div className="fixed bottom-6 right-6 z-[200] bg-slate-900/90 text-white backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-800 animate-in slide-in-from-bottom-5 duration-300">
