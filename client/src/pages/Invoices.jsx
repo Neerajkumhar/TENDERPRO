@@ -444,49 +444,103 @@ const Invoices = ({ onInvoiceClick }) => {
     }
   };
 
-  const handleExportCSV = () => {
-    if (filteredInvoices.length === 0) {
-      triggerToast('No invoices available to export');
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = filteredInvoices.filter(inv => {
+      if (!inv.issueDate) return false;
+      const invDate = new Date(inv.issueDate);
+      return invDate >= start && invDate <= end;
+    });
+
+    if (exportData.length === 0) {
+      triggerToast('No invoices matched the selected time period.');
       return;
     }
 
-    const headers = ['Invoice No.', 'Client', 'Project', 'Issue Date', 'Due Date', 'Amount', 'Amount Due', 'Paid Amount', 'Transporter', 'Dispatch Date', 'Delivery Date', 'Invoice Ref', 'PO Ref', 'PO Number', 'PO Address', 'Shipping Address', 'GST/Tax Details', 'Status'];
-    const rows = filteredInvoices.map(inv => [
-      inv.invoiceNumber || inv.id,
-      inv.client,
-      inv.project,
-      inv.issueDate,
-      inv.dueDate,
-      inv.amount.toFixed(2),
-      (inv.amount_due != null ? Number(inv.amount_due).toFixed(2) : ''),
-      (inv.paid_amount != null ? Number(inv.paid_amount).toFixed(2) : ''),
-      inv.transporter || '',
-      inv.dispatchDate || '',
-      inv.deliveryDate || '',
-      inv.invoiceRef || '',
-      inv.poRef || '',
-      inv.poNumber || '',
-      inv.poAddress || '',
-      inv.shippingAddress || '',
-      inv.gstDetails || '',
-      inv.status
-    ]);
+    const filename = `Invoices_Export_${startDate}_to_${endDate}`;
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    if (format === 'xlsx') {
+      const exportRows = exportData.map(inv => ({
+        "Invoice No.": inv.invoiceNumber || inv.id,
+        "Client": inv.client,
+        "Project": inv.project,
+        "Issue Date": inv.issueDate,
+        "Due Date": inv.dueDate,
+        "Amount": inv.amount,
+        "Amount Due": inv.amount_due,
+        "Paid Amount": inv.paid_amount,
+        "Transporter": inv.transporter,
+        "Dispatch Date": inv.dispatchDate,
+        "Delivery Date": inv.deliveryDate,
+        "Invoice Ref": inv.invoiceRef,
+        "PO Ref": inv.poRef,
+        "PO Number": inv.poNumber,
+        "PO Address": inv.poAddress,
+        "Shipping Address": inv.shippingAddress,
+        "GST/Tax Details": inv.gstDetails,
+        "Status": inv.status
+      }));
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `invoices_export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    triggerToast('CSV export downloaded successfully!');
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Invoices");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+      triggerToast("Excel report downloaded!");
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("TenderPro Invoices Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(inv => [
+        inv.invoiceNumber || inv.id, 
+        inv.client, 
+        inv.issueDate, 
+        inv.dueDate, 
+        inv.amount.toLocaleString(), 
+        inv.status
+      ]);
+      
+      autoTable(doc, {
+        startY: 35,
+        head: [["Invoice No.", "Client", "Issue Date", "Due Date", "Amount", "Status"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+      triggerToast("PDF report downloaded!");
+    } else if (format === 'csv') {
+      const headers = ['Invoice No.', 'Client', 'Project', 'Issue Date', 'Due Date', 'Amount', 'Amount Due', 'Paid Amount', 'Status'];
+      const rows = exportData.map(inv => [
+        inv.invoiceNumber || inv.id,
+        inv.client,
+        inv.project,
+        inv.issueDate,
+        inv.dueDate,
+        inv.amount.toFixed(2),
+        (inv.amount_due != null ? Number(inv.amount_due).toFixed(2) : ''),
+        (inv.paid_amount != null ? Number(inv.paid_amount).toFixed(2) : ''),
+        inv.status
+      ]);
+
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      triggerToast('CSV export downloaded!');
+    }
   };
 
   // Filter invoices based on search, status filter, and date filters
@@ -561,7 +615,7 @@ const Invoices = ({ onInvoiceClick }) => {
             />
           </div>
           
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto" ref={filterRef}>
             <div className="relative flex-1 sm:flex-none">
               <button 
                 onClick={() => {
@@ -1331,6 +1385,14 @@ const Invoices = ({ onInvoiceClick }) => {
           </div>
         </div>
       )}
+
+      {/* Export Modal */}
+      <ExportModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
+        onExport={handleExportReport}
+        title="Export Invoices Report"
+      />
 
       {/* Toast Notification Banner */}
       {showToast && (
