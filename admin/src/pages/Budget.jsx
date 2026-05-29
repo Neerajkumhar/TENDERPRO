@@ -99,13 +99,9 @@ const Budget = () => {
   });
 
   const [selectedFY, setSelectedFY] = useState('FY 2024');
-  const [showFYDropdown, setShowFYDropdown] = useState(false);
-  
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  
   const [departmentFilter, setDepartmentFilter] = useState('ALL DEPARTMENTS');
-  const [showDeptDropdown, setShowDeptDropdown] = useState(false);
+  const [showGlobalFilter, setShowGlobalFilter] = useState(false);
 
   const [activeDepartmentView, setActiveDepartmentView] = useState(null);
 
@@ -316,99 +312,94 @@ const Budget = () => {
 
         <div className="relative">
           <button 
-            onClick={() => {
-              setShowFYDropdown(!showFYDropdown);
-              setShowFilterDropdown(false);
-              setShowDeptDropdown(false);
-            }}
-            className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+            onClick={() => setShowGlobalFilter(!showGlobalFilter)}
+            className={`flex items-center gap-2 px-6 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border ${showGlobalFilter ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'}`}
           >
-            <Calendar size={18} className="text-blue-500" />
-            <span>{selectedFY}</span>
+            <Filter size={18} />
+            <span>{(statusFilter !== 'ALL' || departmentFilter !== 'ALL DEPARTMENTS' || selectedFY !== 'FY 2024') ? 'Filters Active' : 'Filters'}</span>
           </button>
 
-          {showFYDropdown && (
-            <div className="absolute left-0 mt-2 w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="space-y-1">
-                {['FY 2023', 'FY 2024', 'FY 2025'].map(fy => (
-                  <button
-                    key={fy}
-                    onClick={() => {
-                      setSelectedFY(fy);
-                      setShowFYDropdown(false);
-                      triggerToast(`Switched calendar view to ${fy}`);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${selectedFY === fy ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50'}`}
-                  >
-                    {fy}
-                  </button>
-                ))}
+          {showGlobalFilter && (
+            <div className="absolute right-0 mt-3 w-[320px] bg-white border border-slate-100 shadow-2xl rounded-[2rem] p-6 z-[100] animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex justify-between items-center mb-6">
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Active Filters</h4>
+                <button 
+                  onClick={() => {
+                    setStatusFilter('ALL');
+                    setDepartmentFilter('ALL DEPARTMENTS');
+                    setSelectedFY('FY 2024');
+                    setShowGlobalFilter(false);
+                    triggerToast('Filters reset to default');
+                  }}
+                  className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                >
+                  Reset All
+                </button>
               </div>
-            </div>
-          )}
-        </div>
 
-        <div className="relative">
-          <button 
-            onClick={() => {
-              setShowFilterDropdown(!showFilterDropdown);
-              setShowFYDropdown(false);
-              setShowDeptDropdown(false);
-            }}
-            className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Filter size={18} className="text-blue-500" />
-            <span>{statusFilter === 'ALL' ? 'Filter Status' : statusFilter}</span>
-          </button>
+              <div className="space-y-6">
+                {/* FY Selection */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar size={14} className="text-blue-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fiscal Year</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {['FY 2023', 'FY 2024', 'FY 2025'].map(fy => (
+                      <button
+                        key={fy}
+                        onClick={() => setSelectedFY(fy)}
+                        className={`py-2 rounded-xl text-[9px] font-black transition-all ${selectedFY === fy ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                      >
+                        {fy}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          {showFilterDropdown && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="space-y-1">
-                {['ALL', 'ON TRACK', 'OVER BUDGET', 'UNDER BUDGET'].map(status => (
-                  <button
-                    key={status}
-                    onClick={() => {
-                      setStatusFilter(status);
-                      setShowFilterDropdown(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${statusFilter === status ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50'}`}
+                {/* Status Filter */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Target size={14} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Budget Status</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['ALL', 'ON TRACK', 'OVER BUDGET', 'UNDER BUDGET'].map(status => (
+                      <button
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        className={`py-2 px-2 rounded-xl text-[9px] font-black transition-all ${statusFilter === status ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Department Filter */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Layers size={14} className="text-purple-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</span>
+                  </div>
+                  <select 
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-blue-500/20"
+                    value={departmentFilter}
+                    onChange={(e) => setDepartmentFilter(e.target.value)}
                   >
-                    {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+                    <option value="ALL DEPARTMENTS">ALL DEPARTMENTS</option>
+                    {categories.map(dept => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
 
-        <div className="relative">
-          <button 
-            onClick={() => {
-              setShowDeptDropdown(!showDeptDropdown);
-              setShowFilterDropdown(false);
-              setShowFYDropdown(false);
-            }}
-            className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Layers size={18} className="text-blue-500" />
-            <span>{departmentFilter}</span>
-          </button>
-
-          {showDeptDropdown && (
-            <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
-                {['ALL DEPARTMENTS', ...categories].map(dept => (
-                  <button
-                    key={dept}
-                    onClick={() => {
-                      setDepartmentFilter(dept);
-                      setShowDeptDropdown(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${departmentFilter === dept ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50'}`}
-                  >
-                    {dept}
-                  </button>
-                ))}
+                <button 
+                  onClick={() => setShowGlobalFilter(false)}
+                  className="w-full py-3.5 bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
+                >
+                  Apply Filters
+                </button>
               </div>
             </div>
           )}
