@@ -285,7 +285,7 @@ const Budget = () => {
         </div>
       </div>
 
-      {/* Search & Period Toggle - Matching Reference Image */}
+      {/* Search & Global Filters */}
       <div className="flex flex-wrap items-center gap-4 mb-10">
         <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -298,18 +298,6 @@ const Budget = () => {
           />
         </div>
         
-        <div className="flex bg-white p-1.5 border border-slate-100 rounded-2xl shadow-sm">
-          {periods.map((p) => (
-            <button 
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${period === p ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
-
         <div className="relative">
           <button 
             onClick={() => setShowGlobalFilter(!showGlobalFilter)}
