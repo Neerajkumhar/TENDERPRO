@@ -300,7 +300,9 @@ const InstallationChallan = () => {
           <div className="bg-white w-full max-w-3xl max-h-[90vh] flex flex-col rounded-[1.5rem] shadow-2xl z-70">
             <div className="flex justify-between items-center p-6 border-b border-slate-100 flex-shrink-0">
               <h3 className="text-xl font-black text-slate-900">{isEditing ? 'Edit Challan' : 'Challan Details'}</h3>
-              <button onClick={() => setModalOpen(false)} className="text-slate-400 font-bold hover:text-slate-600 transition">Close</button>
+              <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 transition">
+                <X size={20} />
+              </button>
             </div>
 
             <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
