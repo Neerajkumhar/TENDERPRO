@@ -218,13 +218,6 @@ const Payments = () => {
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <button 
-            onClick={handleExportCSV}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Download size={16} />
-            <span>Export</span>
-          </button>
-          <button 
             onClick={() => setIsRecordModalOpen(true)}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
           >
@@ -236,7 +229,7 @@ const Payments = () => {
 
       {/* Search & Main Filters - Matching Reference Image */}
       <div className="flex flex-col md:flex-row gap-4 mb-8 sm:mb-10">
-        <div className="relative flex-1">
+        <div className="relative w-full md:w-80">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
@@ -248,6 +241,14 @@ const Payments = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <button 
+            onClick={handleExportCSV}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <Download size={18} className="text-blue-500" />
+            <span>Export</span>
+          </button>
+
           <div className="relative flex-1 md:flex-none">
             <button 
               onClick={() => {
