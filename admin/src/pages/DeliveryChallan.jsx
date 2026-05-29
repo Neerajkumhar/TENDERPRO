@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X } from 'lucide-react';
 
 const mockChallans = [
   { id: 'DEL-2026-001', client: 'Acme Corp.', project: 'Solar Substation', transporter: 'Shree Transports', lrGatePass: 'LR12345 / GP678', dispatchDate: '2026-05-22', materialValue: 18800, eWayBill: 'EWB-998877', shipVia: 'Road', itemsQty: 32, estWeight: '1.8T', signedCopy: 'Uploaded', status: 'DELIVERED' },
@@ -40,6 +44,7 @@ const defaultDeliveryForm = {
 
 const DeliveryChallan = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [challans, setChallans] = useState(() => {
     const saved = localStorage.getItem('delivery_challans');
     return saved ? JSON.parse(saved) : mockChallans;
@@ -71,22 +76,77 @@ const DeliveryChallan = () => {
   const pendingCount = challans.filter(c => c.status === 'PENDING').length;
   const totalItems = challans.reduce((sum, c) => sum + (c.itemsQty || 0), 0);
 
-  const handleExportCSV = () => {
-    if (filteredChallans.length === 0) {
-      alert('No challans to export');
+  const handleExportReport = ({ format, startDate, endDate }) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const exportData = filteredChallans.filter(challan => {
+      const date = new Date(challan.dispatchDate);
+      return date >= start && date <= end;
+    });
+
+    if (exportData.length === 0) {
+      alert('No challans matched the selected time period.');
       return;
     }
-    const headers = ['Challan No.', 'Client / Project', 'Dispatch', 'Received', 'Ship Via', 'Items Qty', 'Est. Weight', 'Signed Copy', 'Status'];
-    const rows = filteredChallans.map(c => [c.id, `${c.client} / ${c.project}`, c.dispatchDate, c.receivedDate, c.shipVia, c.itemsQty, c.estWeight, c.signedCopy, c.status]);
-    const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `delivery_challans_${new Date().toISOString().split('T')[0]}.csv`;
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+    const filename = `Delivery_Challans_${startDate}_to_${endDate}`;
+
+    if (format === 'xlsx') {
+      const exportRows = exportData.map(c => ({
+        "Challan No.": c.id,
+        "Client": c.client,
+        "Project": c.project,
+        "Dispatch Date": c.dispatchDate,
+        "Transporter": c.transporter,
+        "E-Way Bill": c.eWayBill,
+        "Items Qty": c.itemsQty,
+        "Value": c.materialValue,
+        "Status": c.status
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Challans");
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Delivery Challans Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      
+      const rows = exportData.map(c => [
+        c.id, 
+        `${c.client} / ${c.project}`, 
+        c.dispatchDate, 
+        c.transporter, 
+        c.itemsQty, 
+        `₹${c.materialValue.toLocaleString()}`, 
+        c.status
+      ]);
+      
+      autoTable(doc, {
+        startY: 35,
+        head: [["Challan No.", "Client / Project", "Date", "Transporter", "Qty", "Value", "Status"]],
+        body: rows,
+      });
+      doc.save(`${filename}.pdf`);
+    } else if (format === 'csv') {
+      const headers = ['Challan No.', 'Client / Project', 'Dispatch Date', 'Transporter', 'Items Qty', 'Material Value', 'Status'];
+      const rows = exportData.map(c => [c.id, `${c.client} / ${c.project}`, c.dispatchDate, c.transporter, c.itemsQty, c.materialValue, c.status]);
+      const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename}.csv`;
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    setIsExportModalOpen(false);
   };
 
   const handleCreateFileSelect = (e) => {
@@ -204,9 +264,9 @@ const DeliveryChallan = () => {
               <Filter size={16} />
               Filters
             </button>
-            <button onClick={handleExportCSV} className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition">
+            <button onClick={() => setIsExportModalOpen(true)} className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition">
               <Download size={16} />
-              Export CSV
+              Export Report
             </button>
             <button onClick={() => {
               setCreateForm({ ...defaultDeliveryForm });
