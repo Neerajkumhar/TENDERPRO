@@ -17,7 +17,8 @@ import {
   Briefcase,
   Trophy,
   Star,
-  X
+  X,
+  Check
 } from 'lucide-react';
 
 const ClientManagement = ({ clients = [], setClients, onView }) => {
@@ -93,53 +94,62 @@ const ClientManagement = ({ clients = [], setClients, onView }) => {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] pb-12">
       {/* Header Area */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">Client Directory</h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">Client Directory</h1>
+          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1 italic">Manage your corporate relationships and pipelines.</p>
+        </div>
+
         <div className="flex flex-col xs:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-          <div className="relative group flex-1 sm:flex-none">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search clients..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64 pl-12 pr-6 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-blue-400 transition-all" 
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:flex-none">
-              <button 
-                onClick={() => setShowFilter(!showFilter)}
-                className={`w-full flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-white border ${filterType !== 'All' ? 'border-blue-400 text-blue-600' : 'border-slate-200 text-slate-600'} rounded-xl text-xs font-black hover:bg-slate-50 transition-all shadow-sm`}
-              >
-                <Filter size={16} />
-                <span className="truncate">{filterType === 'All' ? 'Filter' : filterType}</span>
-                <ChevronRight size={14} className={`shrink-0 transition-transform duration-300 ${showFilter ? '-rotate-90' : 'rotate-90'}`} />
-              </button>
-              {showFilter && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-in slide-in-from-top-2">
-                  {['All', 'Private', 'Govt'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        setFilterType(type);
-                        setShowFilter(false);
-                      }}
-                      className={`w-full text-left px-5 py-2.5 text-xs font-bold transition-colors ${filterType === type ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:bg-slate-50'}`}
-                    >
-                      {type === 'All' ? 'All Firm Types' : `${type} Firms`}
-                    </button>
-                  ))}
-                </div>
-              )}
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            {/* Search Bar - Grouped near Filter */}
+            <div className="relative group w-full sm:w-80 order-2 sm:order-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search name or industry..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-6 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400 transition-all shadow-sm" 
+              />
             </div>
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap"
-            >
-              <Plus size={16} />
-              <span className="hidden xs:inline">Add Client</span>
-              <span className="xs:hidden">Add</span>
-            </button>
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
+              <div className="relative flex-1 sm:flex-none">
+                <button 
+                  onClick={() => setShowFilter(!showFilter)}
+                  className={`w-full flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-white border ${filterType !== 'All' ? 'border-blue-400 text-blue-600' : 'border-slate-200 text-slate-600'} rounded-xl text-xs font-black hover:bg-slate-50 transition-all shadow-sm`}
+                >
+                  <Filter size={16} />
+                  <span className="truncate">{filterType === 'All' ? 'Filter' : filterType}</span>
+                  <ChevronRight size={14} className={`shrink-0 transition-transform duration-300 ${showFilter ? '-rotate-90' : 'rotate-90'}`} />
+                </button>
+                {showFilter && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-in slide-in-from-top-2 text-left">
+                    {['All', 'Private', 'Govt'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setFilterType(type);
+                          setShowFilter(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-5 py-2.5 text-xs font-bold transition-all ${filterType === type ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:bg-slate-50'}`}
+                      >
+                        <span>{type === 'All' ? 'All Firm Types' : `${type} Firms`}</span>
+                        {filterType === type && <Check size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap"
+              >
+                <Plus size={16} />
+                <span className="hidden xs:inline">Add Client</span>
+                <span className="xs:hidden">Add</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

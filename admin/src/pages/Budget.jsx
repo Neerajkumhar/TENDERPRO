@@ -624,33 +624,17 @@ const Budget = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Allocation Period</label>
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
-                      {periods.map(p => (
-                        <button 
-                          key={p}
-                          onClick={() => setFormData({...formData, period: p})}
-                          className={`flex-1 py-2 rounded-lg text-[9px] font-black transition-all ${formData.period === p ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-rose-500">Alert Threshold (%)</label>
-                    <div className="relative">
-                      <Percent size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input 
-                        type="number"
-                        placeholder="80"
-                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-rose-500/5 transition-all"
-                        value={formData.threshold}
-                        onChange={(e) => setFormData({...formData, threshold: e.target.value})}
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 text-rose-500">Alert Threshold (%)</label>
+                  <div className="relative">
+                    <Percent size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input 
+                      type="number"
+                      placeholder="80"
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-rose-500/5 transition-all"
+                      value={formData.threshold}
+                      onChange={(e) => setFormData({...formData, threshold: e.target.value})}
+                    />
                   </div>
                 </div>
 

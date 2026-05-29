@@ -113,66 +113,68 @@ const ClientManagement = ({ clients = [], setClients, onView }) => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-          {/* Search Bar */}
-          <div className="relative group flex-1 lg:flex-none sm:min-w-[320px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search clients by name or industry..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm shadow-slate-100" 
-            />
-          </div>
-
-          <div className="flex items-center gap-3 h-full">
-            {/* Filter Button */}
-            <div className="relative flex-1 sm:flex-none" ref={filterRef}>
-              <button 
-                onClick={() => setShowFilter(!showFilter)}
-                className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-black transition-all border shadow-sm ${
-                  showFilter || filterType !== 'All' 
-                    ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <Filter size={16} />
-                <span>{filterType === 'All' ? 'Filter' : filterType}</span>
-                <ChevronDown size={14} className={`transition-transform duration-300 ${showFilter ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Filter Dropdown */}
-              {showFilter && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">Firm Type</p>
-                  {['All', 'Private', 'Govt'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        setFilterType(type);
-                        setShowFilter(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                        filterType === type ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span>{type === 'Govt' ? 'Government' : type}</span>
-                      {filterType === type && <Check size={14} />}
-                    </button>
-                  ))}
-                </div>
-              )}
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            {/* Search Bar - Grouped next to Filter */}
+            <div className="relative group w-full sm:w-80 order-2 sm:order-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search name or industry..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-6 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm" 
+              />
             </div>
 
-            {/* Add Button */}
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap"
-            >
-              <Plus size={18} />
-              <span className="hidden xs:inline">Add Client</span>
-              <span className="xs:inline sm:hidden">Add</span>
-            </button>
+            <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
+              {/* Filter Button */}
+              <div className="relative flex-1 sm:flex-none" ref={filterRef}>
+                <button 
+                  onClick={() => setShowFilter(!showFilter)}
+                  className={`w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all border shadow-sm ${
+                    showFilter || filterType !== 'All' 
+                      ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Filter size={16} />
+                  <span>{filterType === 'All' ? 'Filter' : filterType}</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${showFilter ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Filter Dropdown */}
+                {showFilter && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">Firm Type</p>
+                    {['All', 'Private', 'Govt'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setFilterType(type);
+                          setShowFilter(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                          filterType === type ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>{type === 'Govt' ? 'Government' : type}</span>
+                        {filterType === type && <Check size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Add Button */}
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap"
+              >
+                <Plus size={18} />
+                <span className="hidden xs:inline">Add Client</span>
+                <span className="xs:inline sm:hidden">Add</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
