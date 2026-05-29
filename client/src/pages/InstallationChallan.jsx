@@ -36,6 +36,8 @@ const defaultInstallationForm = {
 
 const InstallationChallan = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [challans, setChallans] = useState(() => {
     const saved = localStorage.getItem('installation_challans');
@@ -59,8 +61,12 @@ const InstallationChallan = () => {
 
   const filteredChallans = challans.filter(challan => {
     const query = searchQuery.toLowerCase();
-    return [challan.id, challan.client, challan.project, challan.siteEngineer, challan.billingStatus]
+    const matchesSearch = [challan.id, challan.client, challan.project, challan.siteEngineer, challan.billingStatus]
       .some(field => String(field).toLowerCase().includes(query));
+    
+    const matchesStatus = statusFilter === 'ALL' || challan.billingStatus === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
   const totalChallans = challans.length;
@@ -243,10 +249,36 @@ const InstallationChallan = () => {
                 className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition"
               />
             </div>
-            <button className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition">
-              <Filter size={16} />
-              Filters
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition"
+              >
+                <Filter size={16} />
+                <span>{statusFilter === 'ALL' ? 'Filters' : statusFilter}</span>
+              </button>
+
+              {showFilterDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl p-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                  {['ALL', 'Draft', 'Pending Billing', 'Invoiced'].map(status => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setStatusFilter(status);
+                        setShowFilterDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                        statusFilter === status 
+                          ? 'bg-blue-50 text-blue-600' 
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button onClick={() => setIsExportModalOpen(true)} className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition">
               <Download size={16} />
               Export Report
