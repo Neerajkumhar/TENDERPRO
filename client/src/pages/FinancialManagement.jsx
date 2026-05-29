@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import ExportModal from '../components/ExportModal';
 import { 
@@ -242,7 +242,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
         inv.status
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: 45,
         head: [["Invoice ID", "Date", "Client", "Amount", "Status"]],
         body: invoiceData,

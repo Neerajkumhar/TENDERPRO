@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import ExportModal from '../components/ExportModal';
 import { 
@@ -359,7 +359,7 @@ const TeamAttendance = ({ user }) => {
       doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
       
       const rows = exportData.map(r => [r.name, r.date, r.in, r.out, r.status]);
-      doc.autoTable({
+      autoTable(doc, {
         startY: 35,
         head: [["Name", "Date", "In", "Out", "Status"]],
         body: rows,
