@@ -44,6 +44,7 @@ import {
 
 const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients, user }) => {
   const [activeView, setActiveView] = useState('overview'); // 'overview' or 'list'
+  const [searchQuery, setSearchQuery] = useState('');
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
@@ -89,6 +90,11 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
     const client = clients?.find(c => c.id === id);
     return client ? client.name : 'Unknown Client';
   };
+
+  const filteredTenders = tenders.filter(t => 
+    t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    getClientName(t.clientId)?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Stats for Overview (Matching Image 2)
   const statsData = [
@@ -453,9 +459,15 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
           <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 items-center justify-between bg-slate-50/30">
             <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Tenders Master List</h3>
             <div className="flex flex-wrap gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-400" />
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
+                <input 
+                  type="text" 
+                  placeholder="Search title or client..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-64 shadow-sm" 
+                />
               </div>
               <button 
                 onClick={onCreate}
@@ -479,7 +491,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {tenders.map((tender, i) => (
+                {filteredTenders.length > 0 ? filteredTenders.map((tender, i) => (
                   <tr key={tender.id || i} className="hover:bg-indigo-50/30 transition-all group" onClick={() => onView(tender.id)}>
                     <td className="px-8 py-5 text-xs font-bold text-slate-400">#{tender.id?.substring(0, 8)}</td>
                     <td className="px-8 py-5">
@@ -518,7 +530,11 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
