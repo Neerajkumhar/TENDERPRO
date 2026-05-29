@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X } from 'lucide-react';
 
 const mockChallans = [
   { id: 'INST-2026-001', client: 'Acme Corp.', project: 'Solar Substation', siteEngineer: 'Rajesh Sharma', installationDate: '2026-05-02', itemsQty: 43, estValuation: 12850, signedCopy: 'Uploaded', billingStatus: 'Pending Billing' },
@@ -32,6 +36,7 @@ const defaultInstallationForm = {
 
 const InstallationChallan = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [challans, setChallans] = useState(() => {
     const saved = localStorage.getItem('installation_challans');
     return saved ? JSON.parse(saved) : mockChallans;
@@ -676,7 +681,7 @@ const InstallationChallan = () => {
                       </tr>
                       <tr>
                         <td className="font-black text-slate-400 uppercase tracking-widest text-[10px] pr-6 py-1">Reference</td>
-                        <td className="font-bold text-slate-900 py-1">{selected.poRef || ''}</td>
+                        <td className="font-bold text-slate-900 py-1">{selected.poRef || 'N/A'}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -688,49 +693,45 @@ const InstallationChallan = () => {
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Name</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.client}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.client}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tender / Project</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.project}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.project}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Place of Supply</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.placeOfSupply || 'Haryana (06)'}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.placeOfSupply || 'Haryana (06)'}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Site Address</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.siteAddress || ''}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.siteAddress || 'N/A'}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Person</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.contactPerson || ''}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.contactPerson || 'N/A'}</span>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Site Engineer</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.siteEngineer}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.siteEngineer}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Project Manager</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: {selected.supervisorName || ''}</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">{selected.supervisorName || 'N/A'}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Time</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: 09:30 AM</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">09:30 AM</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">End Time</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: 04:45 PM</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row">
-                    <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</span>
-                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">: Conference Room & Terrace</span>
+                    <span className="text-sm font-bold text-slate-800 flex-1 sm:border-l sm:pl-4 border-slate-100">04:45 PM</span>
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
-                    <span className="text-sm font-bold text-emerald-600 flex-1 sm:border-l sm:pl-4 border-slate-100">: Completed</span>
+                    <span className="text-sm font-bold text-emerald-600 flex-1 sm:border-l sm:pl-4 border-slate-100">Completed</span>
                   </div>
                 </div>
               </div>

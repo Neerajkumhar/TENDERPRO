@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExportModal from '../components/ExportModal';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X } from 'lucide-react';
 
 const mockChallans = [
   { id: 'INST-2026-001', client: 'Acme Corp.', project: 'Solar Substation', siteEngineer: 'Rajesh Sharma', installationDate: '2026-05-02', itemsQty: 43, estValuation: 12850, signedCopy: 'Uploaded', billingStatus: 'Pending Billing' },
@@ -32,6 +36,7 @@ const defaultInstallationForm = {
 
 const InstallationChallan = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [challans, setChallans] = useState(() => {
     const saved = localStorage.getItem('installation_challans');
     return saved ? JSON.parse(saved) : mockChallans;
