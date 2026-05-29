@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FileText,
   HelpCircle,
@@ -45,9 +45,22 @@ import {
 const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients, user }) => {
   const [activeView, setActiveView] = useState('overview'); // 'overview' or 'list'
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
+  const datePickerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setShowDatePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchLeaveRequests = async () => {
     if (!user?.departmentId) return;
@@ -282,7 +295,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
             Tenders Master List
           </button>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 relative" ref={datePickerRef}>
            <button 
             onClick={() => setShowLeaveModal(true)}
             className="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
@@ -290,10 +303,31 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
             <Coffee size={18} />
             <span>Leave Requests</span>
           </button>
-           <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest">
+           <button 
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
+           >
               <Calendar size={14} className="text-indigo-600" />
-              May 2024
+              <span>{new Date(selectedDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
+              <ChevronDown size={12} className={`transition-transform duration-300 ${showDatePicker ? 'rotate-180' : ''}`} />
            </button>
+
+           {showDatePicker && (
+              <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Select Date</label>
+                  <input 
+                    type="date" 
+                    value={selectedDate}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                      setShowDatePicker(false);
+                    }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400"
+                  />
+                </div>
+              </div>
+            )}
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FileText,
   HelpCircle,
@@ -40,6 +40,19 @@ import {
 const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients }) => {
   const [activeView, setActiveView] = useState('overview'); // 'overview' or 'list'
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setShowDatePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getClientName = (id) => {
     const client = clients?.find(c => c.id === id);
@@ -101,11 +114,32 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
             Tenders Master List
           </button>
         </div>
-        <div className="flex gap-3">
-           <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest">
+        <div className="flex gap-3 relative" ref={datePickerRef}>
+           <button 
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
+           >
               <Calendar size={14} className="text-indigo-600" />
-              May 2024
+              <span>{new Date(selectedDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
+              <ChevronDown size={12} className={`transition-transform duration-300 ${showDatePicker ? 'rotate-180' : ''}`} />
            </button>
+
+           {showDatePicker && (
+              <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="space-y-3 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Select Date</label>
+                  <input 
+                    type="date" 
+                    value={selectedDate}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                      setShowDatePicker(false);
+                    }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400"
+                  />
+                </div>
+              </div>
+            )}
         </div>
       </div>
 
@@ -322,7 +356,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                     <td className="px-8 py-5">
                       <div className="flex items-center justify-center gap-2">
                         <button onClick={() => onView(tender.id)} className="p-1.5 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors"><Eye size={16} /></button>
-                        <button onClick={() => onEdit(tender)} className="p-1.5 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors"><Edit2 size={16} /></button>
+                        <button onClick={() => onEdit(tender)} className="p-1.5 hover:bg-slate-600/10 text-slate-600 rounded-lg transition-colors hover:text-indigo-600"><Edit2 size={16} /></button>
                         <button onClick={() => {
                           if(window.confirm('Delete this tender?')) {
                             fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
