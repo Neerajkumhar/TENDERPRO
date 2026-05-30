@@ -84,8 +84,35 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     }
   };
 
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [sentUnreadCounts, setSentUnreadCounts] = useState({});
+
+  const fetchUnreadCounts = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.id) return;
+      // Received
+      const resReceived = await fetch(`/api/messages/${user.id}/unread`);
+      if (resReceived.ok) {
+        const data = await resReceived.json();
+        setUnreadCounts(data);
+      }
+      // Sent
+      const resSent = await fetch(`/api/messages/${user.id}/sent-unread`);
+      if (resSent.ok) {
+        const data = await resSent.json();
+        setSentUnreadCounts(data);
+      }
+    } catch (error) {
+      console.error('Error fetching unread counts:', error);
+    }
+  };
+
   useEffect(() => {
     fetchMembers();
+    fetchUnreadCounts();
+    const interval = setInterval(fetchUnreadCounts, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleAddMember = async (e) => {
@@ -273,13 +300,29 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          {member.image ? (
-                            <img src={member.image || null} className="w-10 h-10 rounded-xl border-2 border-white shadow-sm object-cover" alt="" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-slate-400">
-                              <User size={20} />
+                          <div className="relative">
+                            {member.image ? (
+                              <img src={member.image || null} className="w-10 h-10 rounded-xl border-2 border-white shadow-sm object-cover" alt="" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-xl bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-slate-400">
+                                <User size={20} />
+                              </div>
+                            )}
+                            
+                            {/* Dual Unread Badges */}
+                            <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
+                              {unreadCounts[member.id] > 0 && (
+                                <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                                  {unreadCounts[member.id]}
+                                </div>
+                              )}
+                              {sentUnreadCounts[member.id] > 0 && (
+                                <div className="min-w-[18px] h-[18px] px-1 bg-amber-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg" title="Your sent messages (unread by them)">
+                                  {sentUnreadCounts[member.id]}
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                           <div>
                             <p className="text-sm font-black text-slate-800">{member.name}</p>
                             <p className="text-[10px] text-slate-400 font-bold">{member.role}</p>
@@ -500,7 +543,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
       {isCreateDeptOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsCreateDeptOpen(false)}></div>
-          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl text-white shadow-lg bg-indigo-600 shadow-indigo-100">

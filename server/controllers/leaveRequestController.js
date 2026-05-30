@@ -56,6 +56,41 @@ exports.createLeaveRequest = async (req, res) => {
     }
 
     const leaveRequest = await LeaveRequest.create(req.body);
+
+    try {
+      const requester = await User.findByPk(userId);
+      if (requester) {
+        let whereClause = {};
+        if (['Tender Manager', 'Project Manager', 'Finance Manager'].includes(requester.role)) {
+          whereClause.role = 'Admin';
+        } else {
+          whereClause = {
+            [Op.or]: [
+              { role: 'Admin' },
+              {
+                role: { [Op.in]: ['Tender Manager', 'Project Manager', 'Finance Manager'] },
+                departmentId: requester.departmentId || null
+              }
+            ]
+          };
+        }
+
+        const targetUsers = await User.findAll({
+          where: whereClause
+        });
+
+        for (const u of targetUsers) {
+          await require('../models/Notification').create({
+            message: `New leave request from ${requester.name}`,
+            type: 'LEAVE_REQUESTED',
+            targetPanel: 'both',
+            userId: u.id,
+            actionUrl: 'Team Attendance'
+          });
+        }
+      }
+    } catch(e) { console.error('Notification error:', e); }
+
     res.status(201).json(leaveRequest);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -93,6 +128,56 @@ exports.updateLeaveRequestStatus = async (req, res) => {
     leaveRequest.managerComment = managerComment;
     await leaveRequest.save();
     
+    try {
+      const requester = await User.findByPk(leaveRequest.userId);
+      
+      if (requester) {
+        // 1. Notify the team member who requested the leave
+        await require('../models/Notification').create({
+          message: `Your leave request was ${status}`,
+          type: 'LEAVE_UPDATED',
+          targetPanel: 'both',
+          userId: leaveRequest.userId,
+          actionUrl: 'Attendance'
+        });
+
+        // 2. Notify Managers and Admins on other panels about the status update
+        let whereClause = {};
+        if (['Tender Manager', 'Project Manager', 'Finance Manager'].includes(requester.role)) {
+          // If a manager's leave was updated, let Admins know
+          whereClause.role = 'Admin';
+        } else {
+          // If a core team member's leave was updated, let their specific department manager AND Admin know
+          whereClause = {
+            [Op.or]: [
+              { role: 'Admin' },
+              {
+                role: { [Op.in]: ['Tender Manager', 'Project Manager', 'Finance Manager'] },
+                departmentId: requester.departmentId || null
+              }
+            ]
+          };
+        }
+
+        const targetUsers = await User.findAll({
+          where: whereClause
+        });
+
+        for (const u of targetUsers) {
+          // Don't send the manager notification to the person who requested it (if a manager requested it)
+          if (u.id !== leaveRequest.userId) {
+            await require('../models/Notification').create({
+              message: `Leave request for ${requester.name} was ${status}`,
+              type: 'LEAVE_UPDATED',
+              targetPanel: 'both',
+              userId: u.id,
+              actionUrl: 'Team Attendance'
+            });
+          }
+        }
+      }
+    } catch(e) { console.error('Notification error:', e); }
+
     res.json(leaveRequest);
   } catch (error) {
     res.status(500).json({ error: error.message });

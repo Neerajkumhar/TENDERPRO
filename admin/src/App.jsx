@@ -36,6 +36,7 @@ import TenderDetails from './pages/TenderDetails'
 import TaskDetails from './pages/TaskDetails'
 import InvoiceDetails from './pages/InvoiceDetails'
 import ExpenseDetails from './pages/ExpenseDetails'
+import Approvals from './pages/Approvals'
 
 function App() {
   const checkUrlAuth = () => {
@@ -355,12 +356,20 @@ function App() {
 
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={(tab) => { setActiveTab(tab); setIsMobileMenuOpen(false); }}
+        setActiveTab={(tab) => { 
+          if (tab === 'Messages') {
+            setIsMessagesOpen(true);
+          } else {
+            setActiveTab(tab); 
+          }
+          setIsMobileMenuOpen(false); 
+        }}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
         isOpen={isMobileMenuOpen}
         setIsOpen={setIsMobileMenuOpen}
         userRole={user.role}
+        user={user}
       />
 
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 w-full h-full overflow-hidden print:overflow-visible">
@@ -377,6 +386,7 @@ function App() {
           user={user}
           onLogout={handleLogout}
           onOpenMessages={() => setIsMessagesOpen(!isMessagesOpen)}
+          onNotificationClick={(url) => setActiveTab(url)}
         />
 
         <main className="flex-1 overflow-y-auto print:overflow-visible">
@@ -627,6 +637,9 @@ function App() {
           {activeTab === 'Team Attendance' && (
             <TeamAttendance user={user} />
           )}
+          {activeTab === 'Approvals' && (
+            <Approvals user={user} />
+          )}
 
           {activeTab === 'Projects' && (
             <ProjectPage
@@ -646,7 +659,7 @@ function App() {
               departments={departments}
             />
           )}
-          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Challan Management', 'Tender Details', 'Task Details'].includes(activeTab) && (
+          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Challan Management', 'Tender Details', 'Task Details', 'Approvals'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full text-slate-400">
               <div className="text-center">
                 <h2 className="text-2xl font-bold">{activeTab} Page</h2>

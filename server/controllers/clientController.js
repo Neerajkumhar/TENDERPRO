@@ -22,6 +22,27 @@ exports.createClient = async (req, res) => {
       date: new Date()
     });
 
+    try {
+      await require('../models/Notification').create({
+        message: `New client added: ${newClient.name}`,
+        type: 'CLIENT_CREATED',
+        targetPanel: 'admin',
+        userId: null
+      });
+
+      // Notify all Tender Managers
+      const User = require('../models/User');
+      const tenderManagers = await User.findAll({ where: { role: 'Tender Manager' } });
+      for (const tm of tenderManagers) {
+        await require('../models/Notification').create({
+          message: `New client added: ${newClient.name}`,
+          type: 'CLIENT_CREATED',
+          targetPanel: 'client',
+          userId: tm.id
+        });
+      }
+    } catch(e) { console.error('Notification error on client creation:', e); }
+
     res.status(201).json(newClient);
   } catch (error) {
     res.status(500).json({ message: error.message });

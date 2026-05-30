@@ -68,6 +68,15 @@ exports.createTender = async (req, res) => {
     if (tenderData.clientId === '') tenderData.clientId = null;
 
     const newTender = await Tender.create(tenderData);
+    
+    try {
+      await require('../models/Notification').create({
+        message: `New tender created: ${newTender.title || newTender.id}`,
+        type: 'TENDER_CREATED',
+        targetPanel: 'both'
+      });
+    } catch(e) { console.error('Notification error:', e); }
+
     res.status(201).json(newTender);
   } catch (error) {
     console.error('Error creating tender:', error);
@@ -82,7 +91,32 @@ exports.updateTender = async (req, res) => {
     const tender = await Tender.findByPk(id);
     if (!tender) return res.status(404).json({ message: 'Tender not found' });
     
+    const previousStatus = tender.status;
     await tender.update(req.body);
+    
+    try {
+      if (req.body.status && req.body.status !== previousStatus) {
+        await require('../models/Notification').create({
+          message: `Tender status updated to ${req.body.status}: ${tender.title || tender.id}`,
+          type: 'TENDER_UPDATED',
+          targetPanel: 'admin',
+          userId: null
+        });
+
+        // Notify all Tender Managers
+        const User = require('../models/User');
+        const tenderManagers = await User.findAll({ where: { role: 'Tender Manager' } });
+        for (const tm of tenderManagers) {
+          await require('../models/Notification').create({
+            message: `Tender status updated to ${req.body.status}: ${tender.title || tender.id}`,
+            type: 'TENDER_UPDATED',
+            targetPanel: 'client',
+            userId: tm.id
+          });
+        }
+      }
+    } catch(e) { console.error('Notification error on tender update:', e); }
+
     res.json(tender);
   } catch (error) {
     res.status(500).json({ message: 'Error updating tender entry', error: error.message });

@@ -140,6 +140,14 @@ exports.createInvoice = async (req, res) => {
       attachments: typeof attachments === 'string' ? JSON.parse(attachments) : attachments
     });
     
+    try {
+      await require('../models/Notification').create({
+        message: `New invoice generated: ${invoice.invoiceNumber}`,
+        type: 'INVOICE_CREATED',
+        targetPanel: 'both'
+      });
+    } catch(e) { console.error('Notification error:', e); }
+
     res.status(201).json(invoice);
   } catch (error) {
     res.status(500).json({ message: 'Error creating invoice', error: error.message });

@@ -19,12 +19,11 @@ import EmojiPicker from 'emoji-picker-react';
 import * as XLSX from 'xlsx';
 
 const Messages = ({ user, members = [], isPopup, onClose }) => {
-  const [activeChat, setActiveChat] = useState(() => localStorage.getItem('activeChat') || null);
+  const [activeChat, setActiveChat] = useState(null);
   const [showChatList, setShowChatList] = useState(true);
 
   useEffect(() => {
     if (activeChat) {
-      localStorage.setItem('activeChat', activeChat);
       if (window.innerWidth < 1024) {
         setShowChatList(false);
       }
@@ -35,6 +34,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentChatMessages, setCurrentChatMessages] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [sentUnreadCounts, setSentUnreadCounts] = useState({});
+  const [lastMessages, setLastMessages] = useState({});
   const [chatFilter, setChatFilter] = useState('All');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showProfileDetails, setShowProfileDetails] = useState(false);
@@ -58,6 +59,32 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
       }
     } catch (err) {
       console.error('Failed to fetch unread counts:', err);
+    }
+  };
+
+  const fetchSentUnreadCounts = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`/api/messages/${user.id}/sent-unread`);
+      if (response.ok) {
+        const data = await response.json();
+        setSentUnreadCounts(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch sent unread counts:', err);
+    }
+  };
+
+  const fetchLastMessages = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`/api/messages/${user.id}/last-messages`);
+      if (response.ok) {
+        const data = await response.json();
+        setLastMessages(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch last messages:', err);
     }
   };
 
@@ -91,6 +118,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     try {
       await fetch(`/api/messages/${chatId}/${user.id}/read`, { method: 'PUT' });
       fetchUnreadCounts();
+      fetchSentUnreadCounts();
+      fetchLastMessages();
     } catch (err) {}
   };
 
@@ -104,9 +133,16 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     }
   }, [currentChatMessages, activeChat]);
 
+  // Auto-refresh unread counts and last messages every 3 seconds
   useEffect(() => {
     fetchUnreadCounts();
-    const interval = setInterval(fetchUnreadCounts, 5000);
+    fetchSentUnreadCounts();
+    fetchLastMessages();
+    const interval = setInterval(() => {
+      fetchUnreadCounts();
+      fetchSentUnreadCounts();
+      fetchLastMessages();
+    }, 3000);
     return () => clearInterval(interval);
   }, [user?.id]);
 
@@ -142,27 +178,44 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
     }
   }, [selectedDocument]);
 
+  // Auto-refresh active chat every 2 seconds for real-time feel
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat);
       markAsRead(activeChat);
       const interval = setInterval(() => {
         fetchMessages(activeChat);
-      }, 3000);
+        fetchSentUnreadCounts(); // Also refresh sent unread status
+      }, 2000);
       return () => clearInterval(interval);
     } else {
       setCurrentChatMessages([]);
     }
   }, [activeChat, user?.id]);
 
-  const chats = teamMembers.map((m) => ({
-    id: m.id,
-    name: m.name,
-    lastMsg: '', 
-    time: '',
-    unread: unreadCounts[m.id] || 0,
-    online: Math.random() > 0.5 
-  }));
+  const chats = teamMembers.map((m) => {
+    const lastMsgInfo = lastMessages[m.id];
+    let timeStr = '';
+    if (lastMsgInfo?.time) {
+      const date = new Date(lastMsgInfo.time);
+      const now = new Date();
+      if (date.toDateString() === now.toDateString()) {
+        timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else {
+        timeStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      }
+    }
+
+    return {
+      id: m.id,
+      name: m.name,
+      lastMsg: lastMsgInfo ? (lastMsgInfo.attachment ? '📎 Attachment' : lastMsgInfo.text) : '', 
+      time: timeStr,
+      unread: unreadCounts[m.id] || 0,
+      sentUnread: sentUnreadCounts[m.id] || 0,
+      online: m.status === 'Active' 
+    };
+  });
 
   const filteredChats = chats.filter(chat => {
     const matchesSearch = chat.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -171,12 +224,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
   });
 
   const totalUnreadCount = Object.values(unreadCounts).reduce((acc, curr) => acc + curr, 0);
-
-  useEffect(() => {
-    if (filteredChats.length > 0 && !activeChat) {
-      setActiveChat(filteredChats[0].id);
-    }
-  }, [filteredChats, activeChat]);
+  const totalSentUnreadCount = Object.values(sentUnreadCounts).reduce((acc, curr) => acc + curr, 0);
+  const displayTotal = totalUnreadCount;
 
   const handleSendMessage = async () => {
     if (!message.trim() || !activeChat || !user?.id || isSending) return;
@@ -204,6 +253,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
       }
       
       fetchMessages(activeChat);
+      fetchLastMessages();
+      fetchSentUnreadCounts(); // Update sent unread counts immediately
     } catch (err) {
       console.error('Failed to send message:', err);
       setError('Message failed to send. Please try again.');
@@ -247,6 +298,8 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
       if (!msgRes.ok) throw new Error('Failed to send file information');
       
       fetchMessages(activeChat);
+      fetchLastMessages();
+      fetchSentUnreadCounts();
     } catch (err) {
       console.error('Failed to upload/send file:', err);
       setError('File failed to send. Please try again.');
@@ -272,9 +325,13 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
           <div className="flex justify-between items-center">
              <div className="flex items-center gap-3">
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">TEAM MESSAGES</h2>
-                {totalUnreadCount > 0 && (
-                  <span className="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-black rounded-lg shadow-lg shadow-blue-100 animate-bounce">
-                    {totalUnreadCount}
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 shadow-sm animate-pulse">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Live</span>
+                </div>
+                {displayTotal > 0 && (
+                  <span className={`px-2 py-0.5 text-white text-[10px] font-black rounded-lg shadow-lg animate-bounce ${totalUnreadCount > 0 ? 'bg-emerald-500 shadow-emerald-100' : 'bg-amber-500 shadow-amber-100'}`}>
+                    {displayTotal}
                   </span>
                 )}
              </div>
@@ -341,11 +398,18 @@ const Messages = ({ user, members = [], isPopup, onClose }) => {
                          <p className={`text-[11px] sm:text-xs truncate tracking-tight italic ${chat.unread > 0 ? 'font-black text-blue-600' : 'font-bold text-slate-400'}`}>
                            {chat.lastMsg || (chat.unread > 0 ? `${chat.unread} new messages` : 'Start chatting')}
                          </p>
-                         {chat.unread > 0 && (
-                           <span className="w-5 h-5 rounded-lg bg-blue-600 text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-blue-100 animate-in zoom-in duration-300">
-                             {chat.unread}
-                           </span>
-                         )}
+                         <div className="flex items-center gap-1.5">
+                            {chat.sentUnread > 0 && (
+                              <span className="px-2 py-0.5 rounded-lg bg-amber-500 text-white text-[8px] font-black flex items-center justify-center shadow-lg shadow-amber-100 animate-in zoom-in duration-300" title="Messages you sent that are unread">
+                                {chat.sentUnread} Sent
+                              </span>
+                            )}
+                            {chat.unread > 0 && (
+                              <span className="min-w-[20px] h-5 px-1 rounded-full bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-emerald-100 animate-in zoom-in duration-300">
+                                {chat.unread}
+                              </span>
+                            )}
+                         </div>
                       </div>
                    </div>
                 </div>

@@ -102,3 +102,67 @@ exports.getUnreadCounts = async (req, res) => {
     res.status(500).json({ message: 'Error fetching unread counts', error: error.message });
   }
 };
+
+exports.getSentUnreadCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const sentUnreadCounts = await Message.findAll({
+      where: {
+        senderId: userId,
+        read: false
+      },
+      attributes: ['receiverId', [Message.sequelize.fn('COUNT', 'id'), 'count']],
+      group: ['receiverId']
+    });
+    
+    const result = {};
+    sentUnreadCounts.forEach(item => {
+      result[item.receiverId] = parseInt(item.getDataValue('count'), 10);
+    });
+    
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error fetching sent unread counts:', error);
+    res.status(500).json({ message: 'Error fetching sent unread counts', error: error.message });
+  }
+};
+
+exports.getLastMessages = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const messages = await Message.findAll({
+      where: {
+        [Op.or]: [
+          { senderId: userId },
+          { receiverId: userId }
+        ]
+      },
+      order: [['createdAt', 'DESC']]
+    });
+    
+    const lastMessages = {};
+    messages.forEach(msg => {
+      const otherId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      if (!lastMessages[otherId]) {
+        lastMessages[otherId] = {
+          text: msg.text,
+          time: msg.createdAt,
+          senderId: msg.senderId,
+          attachment: !!msg.attachmentUrl
+        };
+      }
+    });
+    
+    res.status(200).json(lastMessages);
+  } catch (error) {
+    console.error('Error fetching last messages:', error);
+    res.status(500).json({ message: 'Error fetching last messages', error: error.message });
+  }
+};
+

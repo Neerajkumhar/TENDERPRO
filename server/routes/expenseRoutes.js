@@ -45,6 +45,13 @@ router.post('/', async (req, res) => {
       await existing.update({
         category, vendor, date, description, amount, status, document
       });
+      try {
+        await require('../models/Notification').create({
+          message: `Expense ${existing.id} updated`,
+          type: 'EXPENSE_UPDATED',
+          targetPanel: 'both'
+        });
+      } catch (e) {}
       return res.status(200).json(existing);
     }
 
@@ -58,6 +65,14 @@ router.post('/', async (req, res) => {
       status: status || 'PENDING',
       document
     });
+
+    try {
+      await require('../models/Notification').create({
+        message: `New expense added: ${newExpense.id}`,
+        type: 'EXPENSE_CREATED',
+        targetPanel: 'both'
+      });
+    } catch (e) {}
 
     res.status(201).json(newExpense);
   } catch (error) {

@@ -1,26 +1,98 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, Plus, ChevronDown, Command, Menu, LogOut, User, MessageSquare } from 'lucide-react';
 
-const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogout, onOpenMessages }) => {
+const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogout, onOpenMessages, onNotificationClick }) => {
   const [showDropdownMenu, setShowDropdownMenu] = useState(false);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [totalSentUnread, setTotalSentUnread] = useState(0);
+  const [lastTotalUnread, setLastTotalUnread] = useState(0);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     const fetchUnread = async () => {
       if (!user?.id) return;
       try {
-        const response = await fetch(`/api/messages/${user.id}/unread`);
-        if (response.ok) {
-          const data = await response.json();
-          const total = Object.values(data).reduce((acc, curr) => acc + curr, 0);
-          setTotalUnread(total);
+        // Fetch received unread
+        const resReceived = await fetch('/api/messages/' + user.id + '/unread');
+        let receivedTotal = 0;
+        if (resReceived.ok) {
+          const data = await resReceived.json();
+          receivedTotal = Object.values(data).reduce((acc, curr) => acc + curr, 0);
+          
+          if (receivedTotal > lastTotalUnread && lastTotalUnread !== 0) {
+            setToastMessage('You have ' + (receivedTotal - lastTotalUnread) + ' new message(s)');
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 5000);
+          }
+          
+          setTotalUnread(receivedTotal);
+          setLastTotalUnread(receivedTotal);
         }
-      } catch (err) {}
+
+        // Fetch sent unread
+        const resSent = await fetch('/api/messages/' + user.id + '/sent-unread');
+        if (resSent.ok) {
+          const data = await resSent.json();
+          const sentTotal = Object.values(data).reduce((acc, curr) => acc + curr, 0);
+          setTotalSentUnread(sentTotal);
+        }
+
+        if (receivedTotal > 0) {
+          document.title = '(' + receivedTotal + ') Messages - TenderPro';
+        } else {
+          document.title = 'TenderPro';
+        }
+      } catch (err) {
+        console.error('Error fetching unread counts in header:', err);
+      }
     };
+    
+    const fetchNotifications = async () => {
+      if (!user?.id) return;
+      try {
+        const res = await fetch(`/api/notifications/${user.id}?panel=admin`);
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data);
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      }
+    };
+
     fetchUnread();
-    const interval = setInterval(fetchUnread, 5000);
+    fetchNotifications();
+    const interval = setInterval(() => {
+      fetchUnread();
+      fetchNotifications();
+    }, 5000);
     return () => clearInterval(interval);
-  }, [user?.id]);
+  }, [user?.id, lastTotalUnread]);
+
+  const markNotificationAsRead = async (notif) => {
+    try {
+      await fetch(`/api/notifications/${notif.id}/read`, { 
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+      
+      if (notif.actionUrl && onNotificationClick) {
+        onNotificationClick(notif.actionUrl);
+        setShowNotificationsDropdown(false);
+      }
+    } catch (error) {
+      console.error('Error marking notification read', error);
+    }
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+
+  const displayTotal = totalUnread;
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-[40]">
@@ -49,17 +121,58 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           className="relative p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
         >
           <MessageSquare size={20} />
-          {totalUnread > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-blue-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">
-              {totalUnread > 99 ? '99+' : totalUnread}
+          {displayTotal > 0 && (
+            <span className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce ${totalUnread > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+              {displayTotal > 99 ? '99+' : displayTotal}
             </span>
           )}
         </button>
 
-        <button className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all">
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">5</span>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => { setShowNotificationsDropdown(!showNotificationsDropdown); setShowDropdownMenu(false); }}
+            className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all"
+          >
+            <Bell size={20} />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">
+                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+
+          {showNotificationsDropdown && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowNotificationsDropdown(false)}></div>
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
+                  {unreadNotificationsCount > 0 && (
+                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{unreadNotificationsCount} new</span>
+                  )}
+                </div>
+                <div className="max-h-[300px] overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-slate-500">No notifications</div>
+                  ) : (
+                    notifications.map(notif => (
+                      <div 
+                        key={notif.id} 
+                        onClick={() => markNotificationAsRead(notif)}
+                        className={`px-4 py-3 border-b border-slate-50 cursor-pointer transition-colors hover:bg-slate-50 ${notif.isRead ? 'opacity-60' : 'bg-blue-50/30'}`}
+                      >
+                        <p className="text-sm text-slate-700 font-medium mb-1 line-clamp-2">{notif.message}</p>
+                        <p className="text-xs text-slate-400 font-mono">
+                          {new Date(notif.createdAt).toLocaleDateString()} {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
 
         <div className="h-8 w-px bg-slate-200 mx-2"></div>
 
@@ -72,23 +185,22 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-slate-800 leading-tight">{user?.name || 'Admin'}</p>
               <p className="text-[11px] text-slate-500 uppercase tracking-widest font-black line-clamp-1 max-w-[120px]">
-                {user?.role || 'Admin'} {user?.department ? `• ${user.department}` : ''}
+                {user?.role || 'Admin'} {user?.department ? ' • ' + user.department : ''}
               </p>
             </div>
             <div className="relative">
               <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm text-indigo-700 font-bold">
-                {user?.name?.[0] || 'A'}
+                {(user?.name ? user.name[0] : 'A')}
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
             </div>
-            <ChevronDown size={16} className={`text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ${showDropdownMenu ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={'text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ' + (showDropdownMenu ? 'rotate-180' : '')} />
           </button>
 
           {showDropdownMenu && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowDropdownMenu(false)}></div>
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 p-8 z-50 animate-in fade-in zoom-in-95 duration-200">
-                {/* Profile Link */}
                 <button 
                   onClick={() => { onProfileClick(); setShowDropdownMenu(false); }}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 rounded-2xl transition-all text-left"
@@ -111,6 +223,23 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           )}
         </div>
       </div>
+
+      {showToast && (
+        <div className="fixed top-20 right-8 z-[100] animate-in slide-in-from-right duration-500">
+          <div className="flex items-center gap-4 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-800 backdrop-blur-xl bg-opacity-95">
+             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <MessageSquare size={20} />
+             </div>
+             <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-0.5">New Message</p>
+                <p className="text-sm font-bold tracking-tight">{toastMessage}</p>
+             </div>
+             <button onClick={() => setShowToast(false)} className="ml-4 p-1 hover:bg-white/10 rounded-lg transition-all">
+                <Plus className="rotate-45" size={18} />
+             </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

@@ -11,6 +11,34 @@ import {
 
 const Team = ({ user, members = [], departments = [], onMemberClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [sentUnreadCounts, setSentUnreadCounts] = useState({});
+
+  const fetchUnreadCounts = async () => {
+    if (!user?.id) return;
+    try {
+      // Received
+      const resReceived = await fetch(`/api/messages/${user.id}/unread`);
+      if (resReceived.ok) {
+        const data = await resReceived.json();
+        setUnreadCounts(data);
+      }
+      // Sent
+      const resSent = await fetch(`/api/messages/${user.id}/sent-unread`);
+      if (resSent.ok) {
+        const data = await resSent.json();
+        setSentUnreadCounts(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread counts:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCounts();
+    const interval = setInterval(fetchUnreadCounts, 3000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
   
   // Filter members by the project manager's department
   const departmentMembers = members.filter(member => 
@@ -80,6 +108,20 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                           </div>
                         )}
                         <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white rounded-full ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                        
+                        {/* Dual Unread Badges */}
+                        <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
+                          {member.id && unreadCounts[member.id] > 0 && (
+                            <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                              {unreadCounts[member.id]}
+                            </div>
+                          )}
+                          {member.id && sentUnreadCounts[member.id] > 0 && (
+                            <div className="min-w-[18px] h-[18px] px-1 bg-amber-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg" title="Your sent messages (unread by them)">
+                              {sentUnreadCounts[member.id]}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <span className="text-sm font-black text-slate-800">{member.name}</span>
                     </div>

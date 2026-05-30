@@ -22,6 +22,33 @@ exports.createAssignment = async (req, res) => {
       deadline: deadline || null
     });
 
+    try {
+      const tender = await Tender.findByPk(tenderId);
+      const department = await Department.findByPk(departmentId);
+      await require('../models/Notification').create({
+        message: `Tender ${tender?.title || tenderId} assigned to department: ${department?.name || departmentId}`,
+        type: 'TENDER_ASSIGNED',
+        targetPanel: 'admin',
+        userId: null
+      });
+
+      // Notify Project and Tender Managers of the assigned department
+      const managers = await User.findAll({
+        where: { 
+          role: { [require('sequelize').Op.in]: ['Project Manager', 'Tender Manager'] },
+          departmentId: departmentId 
+        }
+      });
+      for (const m of managers) {
+        await require('../models/Notification').create({
+          message: `New tender assigned to your department: ${tender?.title || tenderId}`,
+          type: 'TENDER_ASSIGNED',
+          targetPanel: 'client',
+          userId: m.id
+        });
+      }
+    } catch(e) { console.error('Notification error on assignment:', e); }
+
     res.status(201).json(assignment);
   } catch (error) {
     res.status(500).json({ message: 'Error creating assignment', error: error.message });

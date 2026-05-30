@@ -52,6 +52,28 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [sentUnreadCounts, setSentUnreadCounts] = useState({});
+
+  const fetchUnreadCounts = async () => {
+    if (!user?.id) return;
+    try {
+      // Received
+      const resReceived = await fetch(`/api/messages/${user.id}/unread`);
+      if (resReceived.ok) {
+        const data = await resReceived.json();
+        setUnreadCounts(data);
+      }
+      // Sent
+      const resSent = await fetch(`/api/messages/${user.id}/sent-unread`);
+      if (resSent.ok) {
+        const data = await resSent.json();
+        setSentUnreadCounts(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread counts:', err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -108,7 +130,10 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
   useEffect(() => {
     fetchData();
-  }, []);
+    fetchUnreadCounts();
+    const interval = setInterval(fetchUnreadCounts, 3000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   useEffect(() => {
     if (showLeaveModal) {
@@ -465,11 +490,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
     { label: 'High Priority', value: tasks.filter(t => t.priority === 'High' || t.priority === 'Critical').length, subtext: 'Critical', color: 'rose', hasAlert: true },
   ];
 
-  const workloadData = members.filter(m => m.departmentId === user.departmentId).slice(0, 6).map(m => ({
-    name: m.name.split(' ')[0],
-    active: tasks.filter(t => t.assigneeId === m.id && t.status !== 'Completed').length,
-    done: tasks.filter(t => t.assigneeId === m.id && t.status === 'Completed').length
-  }));
+  const departmentMembers = members.filter(m => m.departmentId === user.departmentId);
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
@@ -571,59 +592,57 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-10">
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full lg:max-h-[520px]">
+          <div className="flex justify-between items-center mb-8 pb-4 border-b border-slate-50">
             <div>
-              <h3 className="font-black text-slate-900 text-lg tracking-tight">Team Workload</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Operational Capacity Overview</p>
+              <h3 className="font-black text-slate-900 text-lg tracking-tight uppercase tracking-wider">Team Workload</h3>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Capacity tracking</p>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 rounded-xl">
-                 <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active</span>
-                 </div>
-                 <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Done</span>
-                 </div>
-              </div>
-            </div>
+            <MoreHorizontal className="text-slate-400 cursor-pointer" size={18} />
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-              <BarChart data={workloadData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} />
-                <Tooltip 
-                  cursor={{fill: '#f8fafc'}} 
-                  contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-white p-4 rounded-2xl shadow-2xl border border-slate-100">
-                          <p className="text-xs font-black text-slate-900 mb-2 uppercase tracking-widest">{payload[0].payload.name}'s Tasks</p>
-                          <div className="space-y-1">
-                            <div className="flex justify-between gap-4">
-                              <span className="text-[10px] font-bold text-slate-500">Active Tasks:</span>
-                              <span className="text-[10px] font-black text-blue-600">{payload[0].value}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                              <span className="text-[10px] font-bold text-slate-500">Completed:</span>
-                              <span className="text-[10px] font-black text-emerald-600">{payload[1].value}</span>
-                            </div>
-                          </div>
+          <div className="space-y-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+            {departmentMembers.length > 0 ? departmentMembers.map((member, i) => {
+              const memberTasks = tasks.filter(t => t.assigneeId === member.id);
+              const activeCount = memberTasks.filter(t => t.status !== 'Completed').length;
+              const workload = memberTasks.length > 0 ? Math.min(Math.round((activeCount / 10) * 100), 100) : 0;
+              
+              return (
+                <div key={i} className="group cursor-pointer p-4 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="relative shrink-0">
+                      {member.image ? (
+                        <img src={member.image} className="w-11 h-11 rounded-2xl border-2 border-white shadow-sm group-hover:scale-105 transition-transform object-cover" alt={member.name} />
+                      ) : (
+                        <div className="w-11 h-11 rounded-2xl bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-slate-400 font-black">
+                          {member.name[0]}
                         </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="active" name="Active Tasks" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-                <Bar dataKey="done" name="Completed Tasks" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
-              </BarChart>
-            </ResponsiveContainer>
+                      )}
+                      <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full shadow-sm ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                      
+                      {unreadCounts[member.id] > 0 && (
+                        <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce z-10">
+                          {unreadCounts[member.id]}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-black text-slate-800 text-sm tracking-tight truncate uppercase">{member.name}</h4>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{activeCount} Active Tasks</p>
+                    </div>
+                    <span className={`text-xs font-black italic ${workload > 75 ? 'text-rose-500' : 'text-slate-900'}`}>{workload}%</span>
+                  </div>
+                  
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-1000 ease-out ${workload > 75 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : workload > 50 ? 'bg-blue-600' : 'bg-emerald-500'}`} 
+                      style={{width: `${workload}%`}}
+                    ></div>
+                  </div>
+                </div>
+              );
+            }) : (
+              <div className="flex flex-col items-center justify-center h-40 text-slate-400 italic text-sm">No members in your department</div>
+            )}
           </div>
         </div>
 

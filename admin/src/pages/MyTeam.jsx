@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Users, 
@@ -17,23 +17,48 @@ import {
 
 const MyTeam = ({ user, members = [] }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [sentUnreadCounts, setSentUnreadCounts] = useState({});
+
+  const fetchUnreadCounts = async () => {
+    if (!user?.id) return;
+    try {
+      // Received
+      const resReceived = await fetch(`/api/messages/${user.id}/unread`);
+      if (resReceived.ok) {
+        const data = await resReceived.json();
+        setUnreadCounts(data);
+      }
+      // Sent
+      const resSent = await fetch(`/api/messages/${user.id}/sent-unread`);
+      if (resSent.ok) {
+        const data = await resSent.json();
+        setSentUnreadCounts(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread counts in myteam:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCounts();
+    const interval = setInterval(fetchUnreadCounts, 3000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   const stats = [
-    { label: 'TOTAL MEMBERS', value: '12', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'ACTIVE NOW', value: '08', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'ON LEAVE', value: '02', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'NEW REQUESTS', value: '04', icon: UserPlus, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'TOTAL MEMBERS', value: members.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'ACTIVE NOW', value: members.filter(m => m.status === 'Active').length, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'ON LEAVE', value: members.filter(m => m.status === 'On Leave').length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'NEW REQUESTS', value: '0', icon: UserPlus, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
-  // Mock team members for high-fidelity UI
-  const myTeamMembers = [
-    { id: 1, name: 'Sarah Jensen', role: 'Lead UI Designer', status: 'Online', dept: 'Design', email: 'sarah.j@tenderpro.com', projects: 4, initial: 'SJ' },
-    { id: 2, name: 'Jana Cone', role: 'Senior Developer', status: 'Busy', dept: 'Engineering', email: 'jana.c@tenderpro.com', projects: 6, initial: 'JC' },
-    { id: 3, name: 'Mark Kreeks', role: 'Project Manager', status: 'Offline', dept: 'Management', email: 'mark.k@tenderpro.com', projects: 3, initial: 'MK' },
-    { id: 4, name: 'Alex Rivera', role: 'Backend Engineer', status: 'Online', dept: 'Engineering', email: 'alex.r@tenderpro.com', projects: 5, initial: 'AR' },
-    { id: 5, name: 'Elena Vance', role: 'Marketing Lead', status: 'On Leave', dept: 'Marketing', email: 'elena.v@tenderpro.com', projects: 2, initial: 'EV' },
-    { id: 6, name: 'David Chen', role: 'Security Expert', status: 'Online', dept: 'IT Ops', email: 'david.c@tenderpro.com', projects: 4, initial: 'DC' },
-  ];
+  // Filter members based on search
+  const filteredMembers = members.filter(m => 
+    m.id !== user?.id &&
+    (m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     m.role.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <div className="p-8 space-y-10 animate-in fade-in duration-700">
@@ -85,23 +110,41 @@ const MyTeam = ({ user, members = [] }) => {
 
       {/* Team Directory Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
-        {myTeamMembers.map((member) => (
+        {filteredMembers.map((member) => (
           <div key={member.id} className="bg-white p-8 rounded-[3rem] border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 group overflow-hidden relative">
              <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-50 group-hover:bg-blue-600 transition-colors"></div>
              
              <div className="flex justify-between items-start mb-8">
                 <div className="relative">
-                   <div className="w-20 h-20 rounded-[2rem] bg-slate-100 border-4 border-white shadow-xl flex items-center justify-center text-2xl font-black text-slate-400 transition-all group-hover:scale-105 group-hover:rotate-3">
-                      {member.initial}
+                   <div className="w-20 h-20 rounded-[2rem] bg-slate-100 border-4 border-white shadow-xl flex items-center justify-center text-2xl font-black text-slate-400 transition-all group-hover:scale-105 group-hover:rotate-3 overflow-hidden">
+                      {member.image ? <img src={member.image} className="w-full h-full object-cover" alt="" /> : member.name.charAt(0).toUpperCase()}
                    </div>
                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 border-4 border-white rounded-full
-                     ${member.status === 'Online' ? 'bg-emerald-500' : 
+                     ${member.status === 'Active' ? 'bg-emerald-500' : 
                        member.status === 'Busy' ? 'bg-rose-500' : 
                        member.status === 'On Leave' ? 'bg-amber-500' : 'bg-slate-300'}`}>
                    </div>
                 </div>
                 <div className="flex gap-2">
-                   <button className="p-3 bg-slate-50 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all"><MessageSquare size={18} /></button>
+                   <div className="relative">
+                      <button className="p-3 bg-slate-50 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all">
+                        <MessageSquare size={18} />
+                      </button>
+                      
+                      {/* Dual Unread Badges */}
+                      <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
+                        {unreadCounts[member.id] > 0 && (
+                          <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                            {unreadCounts[member.id]}
+                          </div>
+                        )}
+                        {sentUnreadCounts[member.id] > 0 && (
+                          <div className="min-w-[18px] h-[18px] px-1 bg-amber-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg" title="Your sent messages (unread by them)">
+                            {sentUnreadCounts[member.id]}
+                          </div>
+                        )}
+                      </div>
+                   </div>
                    <button className="p-3 bg-slate-50 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"><Video size={18} /></button>
                 </div>
              </div>
@@ -114,11 +157,11 @@ const MyTeam = ({ user, members = [] }) => {
              <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="p-4 bg-slate-50 rounded-3xl border border-slate-50 transition-all group-hover:border-slate-100 group-hover:bg-white">
                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Department</p>
-                   <p className="text-xs font-black text-slate-700 uppercase">{member.dept}</p>
+                   <p className="text-xs font-black text-slate-700 uppercase line-clamp-1">{member.departmentId ? 'Team Dept' : 'Unassigned'}</p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-3xl border border-slate-50 transition-all group-hover:border-slate-100 group-hover:bg-white">
+                <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100 transition-all group-hover:border-slate-100 group-hover:bg-white">
                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Projects</p>
-                   <p className="text-xs font-black text-slate-700 uppercase">{member.projects} Active</p>
+                   <p className="text-xs font-black text-slate-700 uppercase">4 Active</p>
                 </div>
              </div>
 

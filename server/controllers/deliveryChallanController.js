@@ -132,6 +132,14 @@ exports.createChallan = async (req, res) => {
       documents: documents || []
     });
 
+    try {
+      await require('../models/Notification').create({
+        message: `Delivery challan created: ${challan.challanNumber}`,
+        type: 'DELIVERY_CHALLAN_CREATED',
+        targetPanel: 'both'
+      });
+    } catch(e) { console.error('Notification error:', e); }
+
     res.status(201).json(challan);
   } catch (error) {
     res.status(500).json({ message: 'Error creating delivery challan', error: error.message });
