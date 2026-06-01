@@ -4,6 +4,7 @@ const tenderController = require('../controllers/tenderController');
 
 router.get('/', tenderController.getTenders);
 router.get('/reports', tenderController.getReports);
+router.get('/stats', tenderController.getTenderStats);
 router.get('/:id', tenderController.getTenderById);
 router.post('/', tenderController.createTender);
 router.put('/:id', tenderController.updateTender);

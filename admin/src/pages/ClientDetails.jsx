@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   Edit2, 
+  Trash2,
   MoreHorizontal, 
   User, 
   Mail, 
@@ -27,6 +28,7 @@ const ClientDetails = ({ clientId, onBack }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [clientFormData, setClientFormData] = useState({
     name: '',
+    manager: '',
     industry: '',
     status: '',
     firmType: '',
@@ -88,9 +90,27 @@ const ClientDetails = ({ clientId, onBack }) => {
     }
   };
 
+  const handleDeleteClient = async () => {
+    if (window.confirm('Are you sure you want to delete this client? All associated data will be removed.')) {
+      try {
+        const response = await fetch(`/api/clients/${clientId}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          onBack();
+        } else {
+          alert('Failed to delete client.');
+        }
+      } catch (error) {
+        console.error('Error deleting client:', error);
+      }
+    }
+  };
+
   const openEditClient = () => {
     setClientFormData({
       name: client.name || '',
+      manager: client.manager || '',
       industry: client.industry || '',
       status: client.status || 'Active',
       firmType: client.firmType || 'Private',
@@ -198,10 +218,17 @@ const ClientDetails = ({ clientId, onBack }) => {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
               onClick={openEditClient}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:border-blue-400 transition-all shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:border-amber-400 hover:text-amber-600 transition-all shadow-sm"
             >
               <Edit2 size={18} />
               <span>Edit</span>
+            </button>
+            <button 
+              onClick={handleDeleteClient}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:border-rose-400 hover:text-rose-600 transition-all shadow-sm"
+            >
+              <Trash2 size={18} />
+              <span>Delete</span>
             </button>
           </div>
         </div>
@@ -335,17 +362,26 @@ const ClientDetails = ({ clientId, onBack }) => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={clientFormData.name}
                       onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm" 
-                      required 
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name (Contact)</label>
+                    <input
+                      type="text"
+                      value={clientFormData.manager || ''}
+                      onChange={(e) => setClientFormData({...clientFormData, manager: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm"
+                      placeholder="e.g. John Doe"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Industry</label>
-                    <input 
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Industry</label>                    <input 
                       type="text" 
                       value={clientFormData.industry}
                       onChange={(e) => setClientFormData({...clientFormData, industry: e.target.value})}

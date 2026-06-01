@@ -12,6 +12,10 @@ const Invoice = sequelize.define('Invoice', {
     allowNull: false,
     unique: true,
   },
+  tenderId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
   date: {
     type: DataTypes.DATEONLY,
     allowNull: false,

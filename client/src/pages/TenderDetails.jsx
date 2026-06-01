@@ -78,12 +78,17 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
   }
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'Won': return 'bg-emerald-600 text-white shadow-lg shadow-emerald-100';
-      case 'Lost': return 'bg-rose-600 text-white shadow-lg shadow-rose-100';
-      case 'Active': return 'bg-blue-600 text-white shadow-lg shadow-blue-100';
-      case 'Registered': return 'bg-indigo-600 text-white shadow-lg shadow-indigo-100';
-      case 'Draft': return 'bg-slate-500 text-white shadow-lg shadow-slate-100';
+    const s = status?.toLowerCase();
+    switch (s) {
+      case 'won':
+      case 'completed': 
+        return 'bg-emerald-600 text-white shadow-lg shadow-emerald-100';
+      case 'paid': 
+        return 'bg-emerald-500 text-white shadow-lg shadow-emerald-50';
+      case 'lost': return 'bg-rose-600 text-white shadow-lg shadow-rose-100';
+      case 'active': return 'bg-blue-600 text-white shadow-lg shadow-blue-100';
+      case 'registered': return 'bg-indigo-600 text-white shadow-lg shadow-indigo-100';
+      case 'draft': return 'bg-slate-500 text-white shadow-lg shadow-slate-100';
       default: return 'bg-slate-500 text-white';
     }
   };
@@ -133,6 +138,15 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
               title="Edit Opportunity"
             >
               <Edit3 size={18} />
+            </button>
+          )}
+          {onDelete && (
+            <button 
+              onClick={() => onDelete(tender.id)}
+              className="p-3 bg-white border border-slate-200 hover:border-rose-300 text-slate-500 hover:text-rose-600 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center"
+              title="Delete Opportunity"
+            >
+              <Trash2 size={18} />
             </button>
           )}
         </div>
@@ -264,7 +278,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
                 <FileText size={16} className="text-blue-500" />
                 <span>Uploaded Documents & Files</span>
               </h3>
-              {tender.documents && tender.documents.length > 0 ? (
+              {Array.isArray(tender.documents) && tender.documents.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {tender.documents.map((doc, idx) => (
                     <div key={idx} className="flex justify-between items-center p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">

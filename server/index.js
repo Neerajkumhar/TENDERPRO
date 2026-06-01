@@ -18,6 +18,7 @@ const installationChallanRoutes = require('./routes/installationChallanRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Load models to ensure they are registered with Sequelize
 require('./models/User');
@@ -31,12 +32,15 @@ require('./models/Message');
 require('./models/LeaveRequest');
 require('./models/LeaveBalance');
 require('./models/Notification');
+require('./models/Payment');
 
 // Set up associations
 const User = require('./models/User');
 const Message = require('./models/Message');
 const LeaveRequest = require('./models/LeaveRequest');
 const LeaveBalance = require('./models/LeaveBalance');
+const Invoice = require('./models/Invoice');
+const Payment = require('./models/Payment');
 
 User.hasMany(LeaveRequest, { foreignKey: 'userId' });
 LeaveRequest.belongsTo(User, { foreignKey: 'userId' });
@@ -48,6 +52,10 @@ User.hasMany(Message, { as: 'SentMessages', foreignKey: 'senderId' });
 User.hasMany(Message, { as: 'ReceivedMessages', foreignKey: 'receiverId' });
 Message.belongsTo(User, { as: 'Sender', foreignKey: 'senderId' });
 Message.belongsTo(User, { as: 'Receiver', foreignKey: 'receiverId' });
+
+// Payment associations
+Invoice.hasMany(Payment, { foreignKey: 'invoiceId' });
+Payment.belongsTo(Invoice, { foreignKey: 'invoiceId' });
 
 const app = express();
 
@@ -113,6 +121,7 @@ app.use('/api/installation-challans', installationChallanRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/leave-requests', require('./routes/leaveRequestRoutes'));
 
 app.get('/', (req, res) => {

@@ -54,6 +54,16 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   const [loadingLeaves, setLoadingLeaves] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState({});
   const [sentUnreadCounts, setSentUnreadCounts] = useState({});
+  const [financialStats, setFinancialStats] = useState({
+    totalRevenue: 0,
+    totalExpenses: 0,
+    netProfit: 0,
+    cashFlow: 0,
+    outstandingDues: 0,
+    pendingCount: 0,
+    paidCount: 0,
+    overdueCount: 0
+  });
 
   const fetchUnreadCounts = async () => {
     if (!user?.id) return;

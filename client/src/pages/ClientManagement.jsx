@@ -196,6 +196,7 @@ const ClientManagement = ({ clients = [], setClients, onView }) => {
                       </div>
                       <div className="min-w-0">
                          <h4 className="text-sm sm:text-base font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">{client.name}</h4>
+                         {client.manager && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{client.manager}</p>}
                          <p className="text-[10px] sm:text-xs font-bold text-slate-400 truncate">{client.industry || 'General'}</p>
                       </div>
                    </div>
@@ -283,7 +284,7 @@ const ClientManagement = ({ clients = [], setClients, onView }) => {
             
             <form onSubmit={handleAddClient} className="p-6 sm:p-10 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div className="sm:col-span-2 space-y-1">
+                <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
                   <input 
                     required
@@ -291,6 +292,16 @@ const ClientManagement = ({ clients = [], setClients, onView }) => {
                     placeholder="e.g. Acme Corp"
                     value={newClient.name}
                     onChange={(e) => setNewClient({...newClient, name: e.target.value})}
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name (Contact)</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. John Doe"
+                    value={newClient.manager}
+                    onChange={(e) => setNewClient({...newClient, manager: e.target.value})}
                     className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>

@@ -66,6 +66,9 @@ exports.createTender = async (req, res) => {
     if (tenderData.budget === '') tenderData.budget = null;
     if (tenderData.submissionDate === '') tenderData.submissionDate = null;
     if (tenderData.clientId === '') tenderData.clientId = null;
+    
+    // Ensure id is not passed as null/empty to allow auto-generation
+    if (!tenderData.id) delete tenderData.id;
 
     const newTender = await Tender.create(tenderData);
     
@@ -88,38 +91,54 @@ exports.createTender = async (req, res) => {
 exports.updateTender = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(`Incoming update request for tender ID: ${id}`);
+    console.log('Update payload:', JSON.stringify(req.body, null, 2));
+
     const tender = await Tender.findByPk(id);
     if (!tender) return res.status(404).json({ message: 'Tender not found' });
     
+    const updateData = req.body;
+    
+    // Clean up empty strings for numeric/date fields to prevent Sequelize validation errors
+    if (updateData.budget === '') updateData.budget = null;
+    if (updateData.submissionDate === '') updateData.submissionDate = null;
+    if (updateData.clientId === '') updateData.clientId = null;
+
+    // Ensure JSON fields are parsed if they come as strings
+    if (typeof updateData.documents === 'string') {
+      try { updateData.documents = JSON.parse(updateData.documents); } catch(e) {}
+    }
+    if (typeof updateData.teamAssignments === 'string') {
+      try { updateData.teamAssignments = JSON.parse(updateData.teamAssignments); } catch(e) {}
+    }
+    
+    // Don't allow updating the ID
+    delete updateData.id;
+
     const previousStatus = tender.status;
-    await tender.update(req.body);
+    await tender.update(updateData);
+    
+    console.log(`Tender ${id} updated successfully in database.`);
     
     try {
-      if (req.body.status && req.body.status !== previousStatus) {
+      if (updateData.status && updateData.status !== previousStatus) {
+        console.log('Status changed, creating notifications...');
         await require('../models/Notification').create({
-          message: `Tender status updated to ${req.body.status}: ${tender.title || tender.id}`,
+          message: `Tender status updated to ${updateData.status}: ${tender.title || tender.id}`,
           type: 'TENDER_UPDATED',
-          targetPanel: 'admin',
-          userId: null
+          targetPanel: 'both' // Simplified notification logic
         });
-
-        // Notify all Tender Managers
-        const User = require('../models/User');
-        const tenderManagers = await User.findAll({ where: { role: 'Tender Manager' } });
-        for (const tm of tenderManagers) {
-          await require('../models/Notification').create({
-            message: `Tender status updated to ${req.body.status}: ${tender.title || tender.id}`,
-            type: 'TENDER_UPDATED',
-            targetPanel: 'client',
-            userId: tm.id
-          });
-        }
       }
     } catch(e) { console.error('Notification error on tender update:', e); }
 
     res.json(tender);
   } catch (error) {
-    res.status(500).json({ message: 'Error updating tender entry', error: error.message });
+    console.error('Update Error Details:', error);
+    res.status(500).json({ 
+      message: 'Error updating tender entry', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
@@ -276,5 +295,49 @@ exports.getReports = async (req, res) => {
   } catch (error) {
     console.error('Error compiling reports data:', error);
     res.status(500).json({ message: 'Error compiling reports data', error: error.message });
+  }
+};
+
+// Get monthly stats for the dashboard graph
+exports.getTenderStats = async (req, res) => {
+  try {
+    const tenders = await Tender.findAll({
+      attributes: ['status', 'createdAt', 'updatedAt']
+    });
+
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      months.push({
+        name: d.toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+        month: d.getMonth(),
+        year: d.getFullYear(),
+        created: 0,
+        won: 0,
+        lost: 0
+      });
+    }
+
+    tenders.forEach(t => {
+      const createdDate = new Date(t.createdAt);
+      const updatedDate = new Date(t.updatedAt);
+      
+      months.forEach(m => {
+        if (createdDate.getMonth() === m.month && createdDate.getFullYear() === m.year) {
+          m.created++;
+        }
+        if (t.status === 'Won' && updatedDate.getMonth() === m.month && updatedDate.getFullYear() === m.year) {
+          m.won++;
+        }
+        if (t.status === 'Lost' && updatedDate.getMonth() === m.month && updatedDate.getFullYear() === m.year) {
+          m.lost++;
+        }
+      });
+    });
+
+    res.json(months);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching tender stats', error: error.message });
   }
 };

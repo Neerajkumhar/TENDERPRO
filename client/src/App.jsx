@@ -106,13 +106,13 @@ function App() {
   const [previousTab, setPreviousTab] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [selectedClientId, setSelectedClientId] = useState(null)
-  const [selectedMemberId, setSelectedMemberId] = useState(null)
-  const [selectedProjectId, setSelectedProjectId] = useState(null)
-  const [selectedTenderId, setSelectedTenderId] = useState(null)
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState(null)
-  const [selectedTaskId, setSelectedTaskId] = useState(null)
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null)
+  const [selectedClientId, setSelectedClientId] = useState(() => localStorage.getItem('selectedClientId') || null)
+  const [selectedMemberId, setSelectedMemberId] = useState(() => localStorage.getItem('selectedMemberId') || null)
+  const [selectedProjectId, setSelectedProjectId] = useState(() => localStorage.getItem('selectedProjectId') || null)
+  const [selectedTenderId, setSelectedTenderId] = useState(() => localStorage.getItem('selectedTenderId') || null)
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState(() => localStorage.getItem('selectedAssignmentId') || null)
+  const [selectedTaskId, setSelectedTaskId] = useState(() => localStorage.getItem('selectedTaskId') || null)
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(() => localStorage.getItem('selectedInvoiceId') || null)
   const [selectedExpenseId, setSelectedExpenseId] = useState(() => localStorage.getItem('selectedExpenseId') || null)
   const [tenders, setTenders] = useState([])
   const [clients, setClients] = useState([])
@@ -135,6 +135,17 @@ function App() {
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedClientId) localStorage.setItem('selectedClientId', selectedClientId); else localStorage.removeItem('selectedClientId');
+    if (selectedMemberId) localStorage.setItem('selectedMemberId', selectedMemberId); else localStorage.removeItem('selectedMemberId');
+    if (selectedProjectId) localStorage.setItem('selectedProjectId', selectedProjectId); else localStorage.removeItem('selectedProjectId');
+    if (selectedTenderId) localStorage.setItem('selectedTenderId', selectedTenderId); else localStorage.removeItem('selectedTenderId');
+    if (selectedAssignmentId) localStorage.setItem('selectedAssignmentId', selectedAssignmentId); else localStorage.removeItem('selectedAssignmentId');
+    if (selectedTaskId) localStorage.setItem('selectedTaskId', selectedTaskId); else localStorage.removeItem('selectedTaskId');
+    if (selectedInvoiceId) localStorage.setItem('selectedInvoiceId', selectedInvoiceId); else localStorage.removeItem('selectedInvoiceId');
+    if (selectedExpenseId) localStorage.setItem('selectedExpenseId', selectedExpenseId); else localStorage.removeItem('selectedExpenseId');
+  }, [selectedClientId, selectedMemberId, selectedProjectId, selectedTenderId, selectedAssignmentId, selectedTaskId, selectedInvoiceId, selectedExpenseId]);
 
   const fetchDepartments = async () => {
     try {
@@ -218,8 +229,20 @@ function App() {
       });
 
       if (response.ok) {
+        const updatedTender = await response.json();
+        
+        // Update local state immediately
+        if (tenderData.id) {
+          setTenders(prev => prev.map(t => t.id === updatedTender.id ? updatedTender : t));
+        } else {
+          setTenders(prev => [updatedTender, ...prev]);
+        }
+        
         fetchTenders();
         handleBackToTenders();
+      } else {
+        const error = await response.json();
+        alert(`Error saving tender: ${error.message}`);
       }
     } catch (error) {
       console.error('Error saving tender:', error);

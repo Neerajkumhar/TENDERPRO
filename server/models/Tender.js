@@ -60,7 +60,7 @@ const Tender = sequelize.define('Tender', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('Draft', 'Registered', 'Active', 'Won', 'Lost', 'Archived'),
+    type: DataTypes.ENUM('Draft', 'Registered', 'Active', 'Won', 'Lost', 'Archived', 'Completed'),
     defaultValue: 'Registered',
   },
   documents: {
@@ -70,6 +70,15 @@ const Tender = sequelize.define('Tender', {
   teamAssignments: {
     type: DataTypes.JSON,
     defaultValue: [],
+  },
+  submissionMode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: 'Online Portal',
+  },
+  submissionURL: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   }
 }, {
   timestamps: true,

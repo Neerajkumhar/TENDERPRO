@@ -1,4 +1,8 @@
 const Invoice = require('../models/Invoice');
+const Tender = require('../models/Tender');
+const Expense = require('../models/Expense');
+const Payment = require('../models/Payment');
+const { Op } = require('sequelize');
 
 const initialInvoices = [
   { invoiceNumber: 'INV-001', date: '2022-05-20', client: 'Acme Corp', amount: 2500.00, status: 'Paid' },
@@ -21,13 +25,23 @@ const seedInvoices = async () => {
 
 exports.getInvoices = async (req, res) => {
   try {
-    await seedInvoices();
     const invoices = await Invoice.findAll({
       order: [['createdAt', 'DESC']]
     });
     res.json(invoices);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching invoices', error: error.message });
+  }
+};
+
+const updateTenderStatusIfPaid = async (invoice) => {
+  if (invoice.status === 'Paid' && invoice.tenderId) {
+    try {
+      await Tender.update({ status: 'Completed' }, { where: { id: invoice.tenderId } });
+      console.log(`Tender ${invoice.tenderId} marked as Completed due to Paid invoice ${invoice.invoiceNumber}`);
+    } catch (err) {
+      console.error('Error updating tender status:', err);
+    }
   }
 };
 
@@ -81,24 +95,24 @@ exports.createInvoice = async (req, res) => {
       dispatchFrom,
       dispatchTo,
       shippingAddress,
-      notes
+      notes,
+      tenderId
     } = req.body;
     
-    // Auto-generate unique invoice number
     const count = await Invoice.count();
     const invoiceNumber = `INV-${String(count + 1).padStart(3, '0')}`;
     
     const invoice = await Invoice.create({
       invoiceNumber,
       client,
-      amount: parseFloat(amount),
+      amount: parseFloat(amount || 0),
       date: date || new Date().toISOString().split('T')[0],
       status: status || 'Pending',
       billingAddress,
       reference,
       poNumber,
       dueDate: dueDate || null,
-      amount_due: amount_due !== undefined ? parseFloat(amount_due) : 0,
+      amount_due: amount_due !== undefined ? parseFloat(amount_due) : parseFloat(amount) || 0,
       paid_amount: paid_amount !== undefined ? parseFloat(paid_amount) : 0,
       bankName,
       accountNumber,
@@ -136,10 +150,13 @@ exports.createInvoice = async (req, res) => {
       dispatchTo,
       shippingAddress,
       notes,
-      items: typeof items === 'string' ? JSON.parse(items) : items,
-      attachments: typeof attachments === 'string' ? JSON.parse(attachments) : attachments
+      tenderId,
+      items: typeof items === 'string' ? JSON.parse(items) : (items || []),
+      attachments: typeof attachments === 'string' ? JSON.parse(attachments) : (attachments || [])
     });
     
+    await updateTenderStatusIfPaid(invoice);
+
     try {
       await require('../models/Notification').create({
         message: `New invoice generated: ${invoice.invoiceNumber}`,
@@ -156,42 +173,102 @@ exports.createInvoice = async (req, res) => {
 
 exports.getStats = async (req, res) => {
   try {
-    await seedInvoices();
     const invoices = await Invoice.findAll();
+    const expenses = await Expense.findAll({
+      where: { status: 'APPROVED' }
+    });
+    const payments = await Payment.findAll({
+      where: { status: 'RECEIVED' }
+    });
     
-    let paidSum = 0;
+    const totalRevenue = payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+    
     let pendingSum = 0;
     let overdueSum = 0;
     
     invoices.forEach(inv => {
-      const amt = parseFloat(inv.amount);
-      if (inv.status === 'Paid') {
-        paidSum += amt;
-      } else if (inv.status === 'Pending') {
-        pendingSum += amt;
+      const remaining = parseFloat(inv.amount_due || inv.amount || 0);
+      if (inv.status === 'Pending') {
+        pendingSum += remaining;
       } else if (inv.status === 'Overdue') {
-        overdueSum += amt;
+        overdueSum += remaining;
       }
     });
 
-    const totalRevenue = 1250000 + paidSum; 
-    const totalExpenses = 850000;
-    const netProfit = totalRevenue - totalExpenses;
-    const cashFlow = 600000 + paidSum;
-    const outstandingDues = 120000 + overdueSum + pendingSum;
-
     res.json({
       totalRevenue,
-      totalExpenses,
-      netProfit,
-      cashFlow,
-      outstandingDues,
+      totalExpenses, 
+      netProfit: totalRevenue - totalExpenses,
+      cashFlow: totalRevenue,
+      outstandingDues: overdueSum + pendingSum,
       pendingCount: invoices.filter(i => i.status === 'Pending').length,
       paidCount: invoices.filter(i => i.status === 'Paid').length,
       overdueCount: invoices.filter(i => i.status === 'Overdue').length
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching financial stats', error: error.message });
+  }
+};
+
+exports.getFinancialChartData = async (req, res) => {
+  try {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentYear = new Date().getFullYear();
+    
+    // 1. Total Billed (Revenue) from all non-cancelled invoices
+    const invoices = await Invoice.findAll({
+      where: {
+        date: {
+          [Op.between]: [`${currentYear}-01-01`, `${currentYear}-12-31`]
+        }
+      }
+    });
+
+    // 2. Actual Cash Received from Payments
+    const payments = await Payment.findAll({
+      where: {
+        status: 'RECEIVED',
+        date: {
+          [Op.between]: [`${currentYear}-01-01`, `${currentYear}-12-31`]
+        }
+      }
+    });
+
+    // 3. Approved Expenses
+    const expenses = await Expense.findAll({
+      where: {
+        status: 'APPROVED',
+        date: {
+          [Op.between]: [`${currentYear}-01-01`, `${currentYear}-12-31`]
+        }
+      }
+    });
+
+    const chartData = months.map((month, index) => {
+      const monthlyBilled = invoices
+        .filter(inv => new Date(inv.date).getMonth() === index)
+        .reduce((sum, inv) => sum + parseFloat(inv.amount || 0), 0);
+
+      const monthlyPayment = payments
+        .filter(p => new Date(p.date).getMonth() === index)
+        .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+      
+      const monthlyExpense = expenses
+        .filter(exp => new Date(exp.date).getMonth() === index)
+        .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+
+      return {
+        name: month,
+        revenue: monthlyBilled,  // Billed amount
+        payment: monthlyPayment, // Collected amount
+        expense: monthlyExpense  // Spent amount
+      };
+    });
+
+    res.json(chartData);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching chart data', error: error.message });
   }
 };
 
@@ -264,7 +341,8 @@ exports.updateInvoice = async (req, res) => {
       dispatchFrom,
       dispatchTo,
       shippingAddress,
-      notes
+      notes,
+      tenderId
     } = req.body;
     await invoice.update({
       client: client ?? invoice.client,
@@ -313,9 +391,12 @@ exports.updateInvoice = async (req, res) => {
       dispatchTo: dispatchTo ?? invoice.dispatchTo,
       shippingAddress: shippingAddress ?? invoice.shippingAddress,
       notes: notes ?? invoice.notes,
+      tenderId: tenderId ?? invoice.tenderId,
       items: (typeof items === 'string' ? JSON.parse(items) : items) || invoice.items,
       attachments: (typeof attachments === 'string' ? JSON.parse(attachments) : attachments) || invoice.attachments
     });
+
+    await updateTenderStatusIfPaid(invoice);
 
     res.json(invoice);
   } catch (error) {

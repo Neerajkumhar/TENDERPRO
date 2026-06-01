@@ -6,6 +6,10 @@ const Expense = sequelize.define('Expense', {
     type: DataTypes.STRING,
     primaryKey: true,
   },
+  department: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   category: {
     type: DataTypes.STRING,
     allowNull: false,
