@@ -3,13 +3,29 @@ const Client = require('../models/Client');
 const User = require('../models/User');
 const TenderAssignment = require('../models/TenderAssignment');
 
-// Get all tenders
+// Get all tenders (supports optional ?assignedTo=userId filter)
 exports.getTenders = async (req, res) => {
   try {
-    const tenders = await Tender.findAll({
+    const { assignedTo } = req.query;
+
+    let tenders = await Tender.findAll({
       include: [{ model: Client, as: 'client', attributes: ['name', 'email'] }],
       order: [['createdAt', 'DESC']]
     });
+
+    // If assignedTo query param is provided, filter tenders where the user
+    // appears as managerId, reviewerId, or approverId in teamAssignments
+    if (assignedTo) {
+      tenders = tenders.filter(t => {
+        const ta = t.teamAssignments || {};
+        return (
+          ta.managerId === assignedTo ||
+          ta.reviewerId === assignedTo ||
+          ta.approverId === assignedTo
+        );
+      });
+    }
+
     res.json(tenders);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching tenders', error: error.message });

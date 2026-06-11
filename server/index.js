@@ -84,10 +84,9 @@ async function initializeDatabase() {
     await sequelize.authenticate();
     console.log('Database connection authenticated successfully.');
     
-    // Sync models - using alter: false for production performance
-    // If you need to update schema, run a migration script instead
-    await sequelize.sync(); 
-    console.log('Database connected and synced');
+    // Skip sync to avoid conflicts with existing tables and foreign keys
+    // Tables already exist in the database, no need to sync
+    console.log('Database ready for operations');
     
     isDbInitialized = true;
   } catch (err) {

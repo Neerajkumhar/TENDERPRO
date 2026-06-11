@@ -33,7 +33,7 @@ const menuItems = [
   { icon: Briefcase, label: 'Project Management', activeTab: 'Project Management', roles: ['Admin'] },
   { icon: DollarSign, label: 'Finance Management', activeTab: 'Financial Management', roles: ['Admin'] },
   { icon: Users2, label: 'Team Management', activeTab: 'Team Management', roles: ['Admin'] },
-  { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Admin'] },
+
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Admin'] },
   { icon: Settings, label: 'Settings', activeTab: 'Settings', roles: ['Admin'] },
 
@@ -43,7 +43,7 @@ const menuItems = [
   { icon: FileText, label: 'Tenders', activeTab: 'Tender Management', roles: ['Tender Manager'] },
   { icon: Briefcase, label: 'Projects', activeTab: 'Projects', roles: ['Tender Manager'] },
   { icon: Users, label: 'Clients', activeTab: 'Client Management', roles: ['Tender Manager'] },
-  { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Tender Manager'] },
+
   { icon: Calendar, label: 'Calendar', activeTab: 'Calendar', roles: ['Tender Manager'] },
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Tender Manager'] },
 
@@ -54,7 +54,7 @@ const menuItems = [
   { icon: ClipboardList, label: 'Tasks', activeTab: 'Tasks', roles: ['Project Manager'] },
   { icon: Users2, label: 'Team', activeTab: 'Team Management', roles: ['Project Manager'] },
   { icon: Clock, label: 'Team Attendance', activeTab: 'Team Attendance', roles: ['Project Manager'] },
-  { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Project Manager'] },
+
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Project Manager'] },
 
   // Finance Manager
@@ -66,7 +66,7 @@ const menuItems = [
   { icon: Truck, label: 'Installation Challan', activeTab: 'Installation Challan', roles: ['Finance Manager'] },
   { icon: Truck, label: 'Delivery Challan', activeTab: 'Delivery Challan', roles: ['Finance Manager'] },
   { icon: PieChart, label: 'Budget', activeTab: 'Budget', roles: ['Finance Manager'] },
-  { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Finance Manager'] },
+
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Finance Manager'] },
 
   // Team Member

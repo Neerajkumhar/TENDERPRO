@@ -16,7 +16,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients = [] }) => {
+const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients = [], user }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
@@ -63,13 +63,15 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
           <h1 className="text-3xl font-black text-[#1e293b] tracking-tight">Tenders Management</h1>
           <p className="text-slate-500 mt-1 font-semibold">Register and manage won or upcoming client tenders in real-time</p>
         </div>
-        <button 
-          onClick={onCreate}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
-        >
-          <Plus size={16} />
-          <span>Register New Tender</span>
-        </button>
+        {user?.role !== 'Tender Manager' && (
+          <button 
+            onClick={onCreate}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
+          >
+            <Plus size={16} />
+            <span>Register New Tender</span>
+          </button>
+        )}
       </div>
 
 

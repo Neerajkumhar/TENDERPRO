@@ -22,9 +22,20 @@ import {
 const TeamAttendance = ({ user }) => {
   const [view, setView] = useState('MONTH');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
-  const [startDate, setStartDate] = useState('2026-05-01');
-  const [endDate, setEndDate] = useState('2026-05-31');
+  
+  const now = new Date();
+  const [currentYear, setCurrentYear] = useState(now.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth()); // 0-indexed
+
+  const getFormattedDate = (date) => {
+    const offset = date.getTimezoneOffset();
+    const local = new Date(date.getTime() - (offset * 60 * 1000));
+    return local.toISOString().split('T')[0];
+  };
+
+  const [selectedDay, setSelectedDay] = useState(now.getDate());
+  const [startDate, setStartDate] = useState(() => getFormattedDate(new Date(now.getFullYear(), now.getMonth(), 1)));
+  const [endDate, setEndDate] = useState(() => getFormattedDate(new Date(now.getFullYear(), now.getMonth() + 1, 0)));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const datePickerRef = useRef(null);
@@ -51,6 +62,8 @@ const TeamAttendance = ({ user }) => {
 
   const [rawRecords, setRawRecords] = useState([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
+  const [deptMemberCount, setDeptMemberCount] = useState(0);
+  const [pendingLeavesCount, setPendingLeavesCount] = useState(0);
 
   // Close date picker popover on outside click
   useEffect(() => {
@@ -94,7 +107,7 @@ const TeamAttendance = ({ user }) => {
             name: item.User?.name || 'Unknown Member',
             email: item.User?.email || '',
             role: item.User?.role || 'Core Team',
-            joiningDate: item.User?.createdAt || '2026-05-14',
+            joiningDate: item.User?.createdAt || new Date().toISOString().split('T')[0],
             date: dateStr,
             session: idx + 1,
             in: inTimeStr,
@@ -116,8 +129,40 @@ const TeamAttendance = ({ user }) => {
     }
   };
 
+  const fetchDepartmentStats = async () => {
+    try {
+      const membersRes = await fetch('/api/members');
+      if (membersRes.ok) {
+        const membersData = await membersRes.json();
+        const deptId = user?.departmentId;
+        const filtered = deptId 
+          ? membersData.filter(m => m.departmentId === deptId) 
+          : membersData;
+        setDeptMemberCount(filtered.length);
+      }
+    } catch (err) {
+      console.error("Error loading department members count:", err);
+    }
+
+    try {
+      const deptId = user?.departmentId;
+      const url = deptId 
+        ? `/api/leave-requests/department/${deptId}`
+        : '/api/leave-requests';
+      const leavesRes = await fetch(url);
+      if (leavesRes.ok) {
+        const leavesData = await leavesRes.json();
+        const pendingCount = leavesData.filter(l => l.status === 'Pending').length;
+        setPendingLeavesCount(pendingCount);
+      }
+    } catch (err) {
+      console.error("Error loading pending leaves count:", err);
+    }
+  };
+
   useEffect(() => {
     fetchDepartmentAttendance();
+    fetchDepartmentStats();
   }, [user?.departmentId]);
 
   // Compute daily stats summary for the selected/today's date
@@ -141,16 +186,13 @@ const TeamAttendance = ({ user }) => {
       ? Math.round(((totalPresent - totalLate) / totalPresent) * 100)
       : 100;
 
-    // 5. Leave applications (mock count for department)
-    const pendingLeaves = 3;
-
     return [
       { label: "PRESENT TODAY", value: `${totalPresent} Members`, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
       { label: "ACTIVE ONLINE", value: `${activeOnlineCount} Online`, icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "LATE TODAY", value: `${totalLate} Late`, icon: AlertCircle, color: "text-rose-500", bg: "bg-rose-50" },
       { label: "ON-TIME RATE", value: `${onTimeRate}%`, icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
-      { label: "PENDING LEAVES", value: `${pendingLeaves} Requests`, icon: Coffee, color: "text-amber-500", bg: "bg-amber-50" },
-      { label: "DEPT MEMBERS", value: "8 Teammates", icon: User, color: "text-indigo-500", bg: "bg-indigo-50" },
+      { label: "PENDING LEAVES", value: `${pendingLeavesCount} ${pendingLeavesCount === 1 ? 'Request' : 'Requests'}`, icon: Coffee, color: "text-amber-500", bg: "bg-amber-50" },
+      { label: "DEPT MEMBERS", value: `${deptMemberCount} ${deptMemberCount === 1 ? 'Teammate' : 'Teammates'}`, icon: User, color: "text-indigo-500", bg: "bg-indigo-50" },
     ];
   };
 
@@ -165,7 +207,7 @@ const TeamAttendance = ({ user }) => {
 
   // Helper to get daily session summaries for calendar display (showing count of present members)
   const getDayPresenceCount = (dayNum) => {
-    const targetDate = `2026-05-${String(dayNum).padStart(2, '0')}`;
+    const targetDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
     const dayRecords = rawRecords.filter(r => r.date === targetDate);
     const uniqueUserIds = new Set(dayRecords.map(r => r.userId));
     return uniqueUserIds.size;
@@ -185,7 +227,7 @@ const TeamAttendance = ({ user }) => {
 
     let rangeFiltered = filtered;
     if (view === 'DAY') {
-      const targetDate = `2026-05-${String(selectedDay).padStart(2, '0')}`;
+      const targetDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
       rangeFiltered = filtered.filter(r => r.date === targetDate);
     } else if (view === 'WEEK') {
       rangeFiltered = filtered.filter(r => {
@@ -375,6 +417,24 @@ const TeamAttendance = ({ user }) => {
     return `${sStr} - ${eStr}`.toUpperCase();
   };
 
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(prev => prev - 1);
+    } else {
+      setCurrentMonth(prev => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(prev => prev + 1);
+    } else {
+      setCurrentMonth(prev => prev + 1);
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       
@@ -453,8 +513,10 @@ const TeamAttendance = ({ user }) => {
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-50">
                   <button 
                     onClick={() => {
-                      setStartDate('2026-05-14');
-                      setEndDate('2026-05-19');
+                      const d7 = new Date();
+                      d7.setDate(d7.getDate() - 7);
+                      setStartDate(getFormattedDate(d7));
+                      setEndDate(getFormattedDate(new Date()));
                       setShowDatePicker(false);
                     }}
                     className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
@@ -463,8 +525,8 @@ const TeamAttendance = ({ user }) => {
                   </button>
                   <button 
                     onClick={() => {
-                      setStartDate('2026-05-01');
-                      setEndDate('2026-05-31');
+                      setStartDate(getFormattedDate(new Date(currentYear, currentMonth, 1)));
+                      setEndDate(getFormattedDate(new Date(currentYear, currentMonth + 1, 0)));
                       setShowDatePicker(false);
                     }}
                     className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
@@ -681,9 +743,11 @@ const TeamAttendance = ({ user }) => {
         <div className="lg:col-span-4 space-y-8">
             <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm flex flex-col items-center">
                <div className="flex justify-between items-center w-full mb-10 px-2">
-                  <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronLeft size={20} /></button>
-                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">MAY 2026</span>
-                  <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronRight size={20} /></button>
+                  <button onClick={handlePrevMonth} className="p-2 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"><ChevronLeft size={20} /></button>
+                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">
+                    {new Date(currentYear, currentMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onClick={handleNextMonth} className="p-2 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"><ChevronRight size={20} /></button>
                </div>
 
                <div className="grid grid-cols-7 gap-y-8 w-full">
@@ -691,7 +755,7 @@ const TeamAttendance = ({ user }) => {
                     <span key={d} className="text-center text-[9px] font-black text-slate-300 uppercase tracking-widest">{d}</span>
                   ))}
                   
-                  {Array.from({ length: 31 }).map((_, i) => {
+                  {Array.from({ length: new Date(currentYear, currentMonth + 1, 0).getDate() }).map((_, i) => {
                     const dayNum = i + 1;
                     const isSelected = dayNum === selectedDay;
                     const presenceCount = getDayPresenceCount(dayNum);
@@ -702,8 +766,10 @@ const TeamAttendance = ({ user }) => {
                         onClick={() => {
                           setSelectedDay(dayNum);
                           const padDay = String(dayNum).padStart(2, '0');
-                          setStartDate(`2026-05-${padDay}`);
-                          setEndDate(`2026-05-${padDay}`);
+                          const padMonth = String(currentMonth + 1).padStart(2, '0');
+                          const newD = `${currentYear}-${padMonth}-${padDay}`;
+                          setStartDate(newD);
+                          setEndDate(newD);
                         }}
                         className={`flex flex-col items-center p-2 rounded-2xl group cursor-pointer border transition-all ${
                           isSelected 

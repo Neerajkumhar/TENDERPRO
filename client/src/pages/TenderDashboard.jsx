@@ -527,7 +527,13 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                     </tr>
                   )) : (
                     <tr>
-                       <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
+                       <td colSpan="5" className="px-8 py-20 text-center">
+                         <p className="text-slate-400 italic font-medium">
+                           {user?.role === 'Tender Manager'
+                             ? 'No tenders assigned to you yet. Ask your administrator to assign you as a manager on a tender.'
+                             : 'No recent tenders found.'}
+                         </p>
+                       </td>
                     </tr>
                   )}
                 </tbody>
@@ -551,12 +557,14 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                   className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-64 shadow-sm" 
                 />
               </div>
-              <button 
-                onClick={onCreate}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95"
-              >
-                Add New Tender
-              </button>
+              {user?.role !== 'Tender Manager' && (
+                <button 
+                  onClick={onCreate}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95"
+                >
+                  Add New Tender
+                </button>
+              )}
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -620,7 +628,13 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
+                    <td colSpan="7" className="px-8 py-20 text-center">
+                      <p className="text-slate-400 italic font-medium">
+                        {user?.role === 'Tender Manager'
+                          ? 'No tenders are assigned to you. Contact your admin to be assigned as a tender manager.'
+                          : 'No tenders found matching your search.'}
+                      </p>
+                    </td>
                   </tr>
                 )}
               </tbody>

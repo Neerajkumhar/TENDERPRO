@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   Clock, 
-  Calendar, 
   IndianRupee, 
   Briefcase, 
   Users, 
@@ -11,7 +10,6 @@ import {
   ExternalLink, 
   ShieldCheck, 
   Target, 
-  Award, 
   DollarSign, 
   Edit3, 
   Trash2,
@@ -20,7 +18,13 @@ import {
   AlertCircle,
   Activity,
   XCircle,
-  Loader2
+  Loader2,
+  Building2,
+  Phone,
+  Mail,
+  Globe,
+  MapPin,
+  Tag
 } from 'lucide-react';
 import { 
   RadialBarChart, 
@@ -40,6 +44,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
   const [previewPdf, setPreviewPdf] = useState(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [relatedProjects, setRelatedProjects] = useState([]);
+  const [tenderTasks, setTenderTasks] = useState([]);
   const [verifying, setVerifying] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [rejectRemark, setRejectRemark] = useState('');
@@ -80,6 +85,16 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         }
       } catch (err) {
         console.error('Error fetching assignments:', err);
+      }
+
+      try {
+        const tasksRes = await fetch(`/api/tasks?tenderId=${tenderId}`);
+        if (tasksRes.ok) {
+          const tasksData = await tasksRes.json();
+          setTenderTasks(tasksData);
+        }
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
       }
 
     } catch (err) {
@@ -163,11 +178,62 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
     { title: 'Financial Details Verified', checked: true },
     { title: 'Internal Review Completed', checked: !!tender.teamAssignments?.reviewerId },
     { title: 'Approval Obtained', checked: !!tender.teamAssignments?.approverId },
-    { title: 'Completion Docs Submitted', checked: tender.completionStatus === 'Submitted' || tender.completionStatus === 'Approved' },
-    { title: 'Final Completion Approved', checked: tender.completionStatus === 'Approved' },
   ];
+
+  const hasCompletionStage = ['won', 'completed', 'paid'].includes(tender.status?.toLowerCase()) || !!tender.completionStatus;
+
+  if (hasCompletionStage) {
+    checklists.push(
+      { title: 'Completion Docs Submitted', checked: tender.completionStatus === 'Submitted' || tender.completionStatus === 'Approved' },
+      { title: 'Final Completion Approved', checked: tender.completionStatus === 'Approved' }
+    );
+  }
   
-  const readinessScore = Math.round((checklists.filter(c => c.checked).length / checklists.length) * 100);
+  let displayChecklist = [];
+  const isRegisteredOrDraft = ['registered', 'draft'].includes(tender.status?.toLowerCase());
+  const hasExecutionState = ['won', 'completed', 'paid'].includes(tender.status?.toLowerCase());
+  const totalTasks = tenderTasks.length;
+  const totalProjects = relatedProjects.length;
+
+  let readinessScore = 0;
+
+  if (isRegisteredOrDraft) {
+    readinessScore = 0;
+    displayChecklist = [...checklists];
+  } else if (hasExecutionState || totalTasks > 0 || totalProjects > 0) {
+    relatedProjects.forEach(project => {
+      displayChecklist.push({
+        title: `Project: ${project.title || 'Assigned Project'}`,
+        checked: project.status?.toLowerCase() === 'completed'
+      });
+    });
+    tenderTasks.forEach(task => {
+      displayChecklist.push({
+        title: `Task: ${task.title}`,
+        checked: ['completed', 'done'].includes(task.status?.toLowerCase())
+      });
+    });
+
+    if (displayChecklist.length === 0) {
+      displayChecklist.push({
+        title: 'Pending project execution initialization',
+        checked: false
+      });
+    }
+
+    const completedTasks = tenderTasks.filter(t => ['completed', 'done'].includes(t.status?.toLowerCase())).length;
+    const completedProjects = relatedProjects.filter(p => p.status?.toLowerCase() === 'completed').length;
+    
+    const totalItems = totalTasks + totalProjects;
+    if (totalItems > 0) {
+      readinessScore = Math.round(((completedTasks + completedProjects) / totalItems) * 100);
+    } else {
+      readinessScore = 0;
+    }
+  } else {
+    displayChecklist = [...checklists];
+    readinessScore = Math.round((checklists.filter(c => c.checked).length / checklists.length) * 100);
+  }
 
   const radialData = [{ name: 'Readiness', uv: readinessScore, fill: readinessScore === 100 ? '#10b981' : '#3b82f6' }];
 
@@ -207,7 +273,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
   };
 
   return (
-    <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-8">
+    <div className="p-4 md:p-8 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-8 overflow-x-hidden">
       {/* Header breadcrumb & Navigation */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-6">
@@ -263,34 +329,101 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         </div>
       </div>
 
-      {/* Main Parameters Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {[
-          { label: 'Client / Sponsor', value: tender.client?.name || 'Unassigned Client', icon: Users, color: 'blue' },
-          { label: 'Tender Budget (INR)', value: formatCurrency(tender.budget), icon: IndianRupee, color: 'emerald' },
-          { 
-            label: 'Submission Deadline', 
-            value: tender.submissionDate 
-              ? new Date(tender.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) 
-              : 'Not Set', 
-            icon: Clock, 
-            color: 'rose' 
-          },
-          { label: 'Tender Category', value: tender.category || 'Private Firm', icon: Briefcase, color: 'amber' },
-          { label: 'Bid Type', value: tender.bidType || 'Private', icon: FileText, color: 'indigo' },
-        ].map((stat, i) => (
-          <div key={i} className="card p-6 bg-white border-none shadow-xl shadow-slate-200/30 hover:scale-[1.02] transition-all group">
-            <div className="flex items-center gap-4">
-              <div className={`p-4 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all`}>
-                <stat.icon size={24} />
+      {/* Parameter Cards - Client card + 4 stat cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
+
+        {/* Client / Sponsor Full Card */}
+        <div className="lg:col-span-2 min-w-0 bg-white rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 p-6 flex flex-col gap-4 overflow-hidden">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shrink-0">
+              <Building2 size={20} />
+            </div>
+            <div className="min-w-0 overflow-hidden flex-1">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client / Sponsor</p>
+              <p className="text-xl font-black text-slate-900 mt-0.5 leading-tight truncate">
+                {tender.client?.name || 'Unassigned Client'}
+              </p>
+            </div>
+            {tender.client?.status && (
+              <span className={`ml-auto px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${
+                tender.client.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
+                tender.client.status === 'Lead'   ? 'bg-blue-100 text-blue-700' :
+                tender.client.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
+                'bg-slate-100 text-slate-500'
+              }`}>
+                {tender.client.status}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { icon: Tag,    label: 'Industry',  value: tender.client?.industry },
+              { icon: Tag,    label: 'Firm Type',  value: tender.client?.firmType },
+              { icon: MapPin, label: 'Location',   value: tender.client?.location },
+              { icon: Phone,  label: 'Phone',      value: tender.client?.phone },
+              { icon: Mail,   label: 'Email',      value: tender.client?.email },
+              { icon: Globe,  label: 'Website',    value: tender.client?.website },
+            ].map(({ icon: Icon, label, value }) =>
+              value ? (
+                <div key={label} className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                  <div className="p-2 bg-white rounded-xl text-blue-500 shadow-sm shrink-0">
+                    <Icon size={14} />
+                  </div>
+                  <div className="min-w-0 overflow-hidden flex-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
+                    <p className="text-xs font-bold text-slate-700 truncate">{value}</p>
+                  </div>
+                </div>
+              ) : null
+            )}
+          </div>
+
+          {tender.client?.manager && (
+            <div className="flex items-center gap-3 pt-4 border-t border-slate-100 overflow-hidden">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 overflow-hidden shrink-0 flex items-center justify-center">
+                {tender.client?.managerPhoto
+                  ? <img src={tender.client.managerPhoto} alt="" className="w-full h-full object-cover" />
+                  : <Users size={16} className="text-blue-500" />}
               </div>
-              <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <p className="text-lg font-black text-slate-900 mt-1 truncate max-w-[150px]">{stat.value}</p>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Manager</p>
+                <p className="text-sm font-black text-slate-800 truncate">{tender.client.manager}</p>
+                {tender.client?.managerEmail && (
+                  <p className="text-[10px] font-bold text-slate-400 truncate">{tender.client.managerEmail}</p>
+                )}
+                {tender.client?.managerPhone && (
+                  <p className="text-[10px] font-bold text-slate-500 truncate">{tender.client.managerPhone}</p>
+                )}
               </div>
             </div>
-          </div>
-        ))}
+          )}
+        </div>
+
+        {/* 4 Stat Cards stacked on right */}
+        <div className="lg:col-span-2 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            { label: 'Tender Budget (INR)', value: formatCurrency(tender.budget), icon: IndianRupee, color: 'emerald' },
+            { label: 'Submission Deadline',
+              value: tender.submissionDate
+                ? new Date(tender.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                : 'Not Set',
+              icon: Clock, color: 'rose' },
+            { label: 'Tender Category', value: tender.category || 'Private Firm', icon: Briefcase, color: 'amber' },
+            { label: 'Bid Type', value: tender.bidType || 'Private', icon: FileText, color: 'indigo' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white p-5 rounded-[1.5rem] shadow-xl shadow-slate-200/30 border border-slate-100 hover:scale-[1.02] transition-all group flex items-center gap-4 overflow-hidden min-w-0">
+              <div className={`p-4 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all shrink-0`}>
+                <stat.icon size={22} />
+              </div>
+              <div className="min-w-0 overflow-hidden flex-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{stat.label}</p>
+                <p className="text-base font-black text-slate-900 mt-0.5 truncate">{stat.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto pt-6">
@@ -627,7 +760,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
             <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Checklist</h2>
           </div>
           <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
-            {checklists.map((item, idx) => (
+            {displayChecklist.map((item, idx) => (
               <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border ${
                 item.checked ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'
               }`}>

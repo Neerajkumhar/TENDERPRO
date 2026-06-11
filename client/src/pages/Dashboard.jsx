@@ -673,7 +673,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="h-[250px] w-full md:w-1/2">
+            <div className="h-[250px] w-full md:w-1/2 relative flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <PieChart>
                   <Pie
@@ -698,6 +698,10 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                   />
                 </PieChart>
               </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-3xl font-black text-slate-900 tracking-tighter">{departmentProjects.length}</span>
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{departmentProjects.length === 1 ? 'Project' : 'Projects'}</span>
+              </div>
             </div>
             <div className="w-full md:w-1/2 space-y-4">
                {[

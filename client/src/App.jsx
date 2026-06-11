@@ -161,7 +161,12 @@ function App() {
 
   const fetchTenders = async () => {
     try {
-      const response = await fetch('/api/tenders');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const assignedToParam =
+        currentUser.role === 'Tender Manager' && currentUser.id
+          ? `?assignedTo=${currentUser.id}`
+          : '';
+      const response = await fetch(`/api/tenders${assignedToParam}`);
       if (response.ok) {
         const data = await response.json();
         setTenders(data);
@@ -427,7 +432,18 @@ function App() {
           {activeTab === 'Calendar' && <CalendarPage />}
            {activeTab === 'Tender Dashboard' && (
             <TenderDashboard 
-              tenders={tenders}
+              tenders={
+                user.role === 'Tender Manager'
+                  ? tenders.filter(t => {
+                      const ta = t.teamAssignments || {};
+                      return (
+                        ta.managerId === user.id ||
+                        ta.reviewerId === user.id ||
+                        ta.approverId === user.id
+                      );
+                    })
+                  : tenders
+              }
               assignments={assignments}
               setTenders={setTenders}
               clients={clients}
@@ -449,6 +465,7 @@ function App() {
               assignments={assignments}
               setTenders={setTenders}
               clients={clients}
+              user={user}
               onView={handleTenderClick}
               onEdit={(tender) => {
                 setEditTenderData(tender);

@@ -10,18 +10,10 @@ const Message = sequelize.define('Message', {
   senderId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
   },
   receiverId: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
   },
   text: {
     type: DataTypes.TEXT,

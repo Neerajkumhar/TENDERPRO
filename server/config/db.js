@@ -23,6 +23,10 @@ if (dbUrl) {
         rejectUnauthorized: false // Often needed for remote DBs
       }
     },
+    // Remove STRICT_TRANS_TABLES to allow zero dates
+    sessionVariables: {
+      sql_mode: 'ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'
+    },
     pool: {
       max: isProduction ? 1 : 5, // Serverless should have small pools
       min: 0,
@@ -46,6 +50,9 @@ if (dbUrl) {
         ssl: {
           rejectUnauthorized: false
         }
+      },
+      sessionVariables: {
+        sql_mode: 'ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'
       },
       pool: {
         max: isProduction ? 1 : 5,

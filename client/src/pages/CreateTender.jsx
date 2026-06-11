@@ -112,21 +112,77 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
     fetchMembers();
   }, []);
 
-  const handleFinalSubmit = async () => {
-    if (!formData.title || !formData.clientId) {
-      alert('Please complete the Opportunity Overview (Step 1) with at least a Title and Client.');
-      setActiveStep(1);
-      return;
+  const validateStep = (stepId) => {
+    switch (stepId) {
+      case 1:
+        if (!formData.title?.trim()) return 'Tender Title is required in Opportunity Overview (Step 1).';
+        if (!formData.clientId) return 'Client Name is required in Opportunity Overview (Step 1).';
+        if (!formData.reference?.trim()) return 'Tender Reference ID is required in Opportunity Overview (Step 1).';
+        if (!formData.category) return 'Company Type is required in Opportunity Overview (Step 1).';
+        if (!formData.bidType) return 'Bid Type is required in Opportunity Overview (Step 1).';
+        if (!formData.submissionDate) return 'Submission Deadline is required in Opportunity Overview (Step 1).';
+        break;
+      case 2:
+        if (!formData.scope?.trim()) return 'Project Description is required in Scope & Requirements (Step 2).';
+        if (!formData.milestones?.trim()) return 'Milestones are required in Scope & Requirements (Step 2).';
+        break;
+      case 3:
+        if (!formData.techCriteria?.trim()) return 'Technical Criteria is required in Eligibility & Conditions (Step 3).';
+        if (!formData.certifications?.trim()) return 'Required Certifications are required in Eligibility & Conditions (Step 3).';
+        if (!formData.terms?.trim()) return 'Terms & Conditions are required in Eligibility & Conditions (Step 3).';
+        break;
+      case 4:
+        if (formData.budget === undefined || formData.budget === null || formData.budget === '') return 'Total Budget is required in Financial Details (Step 4).';
+        if (formData.tax === undefined || formData.tax === null || formData.tax === '') return 'Tax (%) is required in Financial Details (Step 4).';
+        if (!formData.paymentTerms) return 'Payment Terms are required in Financial Details (Step 4).';
+        break;
+      case 5:
+        const missingDocs = documentSlots
+          .filter(slot => slot.isFixed && !slot.url)
+          .map(slot => slot.label);
+        if (missingDocs.length > 0) {
+          return `Please upload the following required documents in Documents Upload (Step 5): ${missingDocs.join(', ')}`;
+        }
+        break;
+      case 6:
+        if (!formData.teamAssignments?.managerId) return 'Tender Manager assignment is required in Internal Team Assignment (Step 6).';
+        if (!formData.teamAssignments?.reviewerId) return 'Reviewer assignment is required in Internal Team Assignment (Step 6).';
+        if (!formData.teamAssignments?.approverId) return 'Approval Owner assignment is required in Internal Team Assignment (Step 6).';
+        break;
+      case 7:
+        if (!formData.submissionMode) return 'Submission Mode is required in Entry Completion (Step 7).';
+        if (!formData.submissionURL?.trim()) return 'Submission Address/URL is required in Entry Completion (Step 7).';
+        break;
+      default:
+        break;
     }
-    
-    const missingDocs = documentSlots
-      .filter(slot => slot.isFixed && !slot.url)
-      .map(slot => slot.label);
+    return null;
+  };
 
-    if (missingDocs.length > 0) {
-      alert(`Please upload the following required documents: ${missingDocs.join(', ')}`);
-      setActiveStep(5);
-      return;
+  const handleStepNavigation = (targetStepId) => {
+    if (targetStepId > activeStep) {
+      for (let s = activeStep; s < targetStepId; s++) {
+        const error = validateStep(s);
+        if (error) {
+          alert(error);
+          setActiveStep(s);
+          return false;
+        }
+      }
+    }
+    setActiveStep(targetStepId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return true;
+  };
+
+  const handleFinalSubmit = async () => {
+    for (let s = 1; s <= 7; s++) {
+      const error = validateStep(s);
+      if (error) {
+        alert(error);
+        setActiveStep(s);
+        return;
+      }
     }
 
     // Sync document slots to formData.documents before submitting
@@ -279,21 +335,7 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   ];
 
   const handleNext = () => {
-    if (activeStep === 5) {
-      const missingDocs = documentSlots
-        .filter(slot => slot.isFixed && !slot.url)
-        .map(slot => slot.label);
-
-      if (missingDocs.length > 0) {
-        alert(`Please upload the following required documents before proceeding: ${missingDocs.join(', ')}`);
-        return;
-      }
-    }
-
-    if (activeStep < sections.length) {
-      setActiveStep(activeStep + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    handleStepNavigation(activeStep + 1);
   };
 
   const handleBack = () => {
@@ -334,7 +376,7 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
               {sections.map((step) => (
                 <button
                   key={step.id}
-                  onClick={() => setActiveStep(step.id)}
+                  onClick={() => handleStepNavigation(step.id)}
                   className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all text-left group ${activeStep === step.id
                     ? 'bg-white shadow-xl shadow-blue-100/50 ring-1 ring-blue-100'
                     : 'hover:bg-white hover:shadow-md'

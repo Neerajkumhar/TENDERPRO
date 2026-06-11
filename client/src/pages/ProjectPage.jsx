@@ -172,13 +172,15 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
           <h1 className="text-2xl sm:text-3xl font-black text-[#1e293b] tracking-tight">Projects</h1>
           <p className="text-slate-500 mt-1 text-sm sm:text-base font-semibold">Manage and track all your active projects</p>
         </div>
-        <button 
-          onClick={onCreateProject}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#1e293b] text-white rounded-xl text-sm font-black transition-all hover:bg-slate-800 shadow-lg shadow-slate-200 active:scale-95"
-        >
-          <Plus size={20} />
-          <span>Create Project</span>
-        </button>
+        {user?.role !== 'Project Manager' && (
+          <button 
+            onClick={onCreateProject}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#1e293b] text-white rounded-xl text-sm font-black transition-all hover:bg-slate-800 shadow-lg shadow-slate-200 active:scale-95"
+          >
+            <Plus size={20} />
+            <span>Create Project</span>
+          </button>
+        )}
       </div>
 
       {/* Tabs & Search Bar - Matching Image */}
