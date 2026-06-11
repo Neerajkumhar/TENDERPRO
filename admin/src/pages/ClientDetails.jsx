@@ -20,7 +20,7 @@ import {
   X
 } from 'lucide-react';
 
-const ClientDetails = ({ clientId, onBack }) => {
+const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
   const [client, setClient] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditClientOpen, setIsEditClientOpen] = useState(false);
@@ -97,7 +97,9 @@ const ClientDetails = ({ clientId, onBack }) => {
           method: 'DELETE'
         });
         if (response.ok) {
-          onBack();
+          if (typeof onBack === 'function') {
+            onBack(clientId, 'deleted');
+          }
         } else {
           alert('Failed to delete client.');
         }
@@ -621,7 +623,11 @@ const ClientDetails = ({ clientId, onBack }) => {
                 <tbody className="divide-y divide-slate-50">
                   {associatedTenders.length > 0 ? (
                     associatedTenders.map((tender, i) => (
-                      <tr key={i} className="hover:bg-blue-50/30 transition-all group cursor-pointer">
+                      <tr 
+                        key={i} 
+                        onClick={() => onTenderClick && onTenderClick(tender.id)}
+                        className="hover:bg-blue-50/30 transition-all group cursor-pointer"
+                      >
                         <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.reference || tender.id.slice(0, 8)}</td>
                         <td className="px-8 py-5">
                           <p className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors">{tender.title}</p>

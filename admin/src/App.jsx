@@ -37,6 +37,7 @@ import TaskDetails from './pages/TaskDetails'
 import InvoiceDetails from './pages/InvoiceDetails'
 import ExpenseDetails from './pages/ExpenseDetails'
 import Approvals from './pages/Approvals'
+import CompletedTenders from './pages/CompletedTenders'
 
 function App() {
   const checkUrlAuth = () => {
@@ -445,6 +446,7 @@ function App() {
           {activeTab === 'Tender Management' && (
             <TenderManagement
               tenders={tenders}
+              assignments={assignments}
               setTenders={setTenders}
               clients={clients}
               onView={handleTenderClick}
@@ -458,9 +460,17 @@ function App() {
               }}
             />
           )}
+          {activeTab === 'Completed Tenders' && (
+            <CompletedTenders
+              tenders={tenders}
+              clients={clients}
+              onView={handleTenderClick}
+            />
+          )}
           {activeTab === 'Client Management' && ['Admin', 'Tender Manager'].includes(user.role) && (
             <ClientManagement
               clients={clients}
+              tenders={tenders}
               setClients={setClients}
               onView={(id) => {
                 setSelectedClientId(id);
@@ -471,10 +481,14 @@ function App() {
           {activeTab === 'Client Details' && ['Admin', 'Tender Manager'].includes(user.role) && (
             <ClientDetails
               clientId={selectedClientId}
-              onBack={() => {
+              onBack={(deletedId, action) => {
+                if (action === 'deleted') {
+                  setClients(prev => prev.filter(c => c.id !== deletedId));
+                }
                 setActiveTab('Client Management');
                 setSelectedClientId(null);
               }}
+              onTenderClick={handleTenderClick}
             />
           )}
           {activeTab === 'Project Management' && (
@@ -569,8 +583,23 @@ function App() {
                 setEditTenderData(tender);
                 setActiveTab('Edit Tender');
               }}
+              onDelete={async (id) => {
+                if (window.confirm('Delete this tender?')) {
+                  const res = await fetch(`/api/tenders/${id}`, { method: 'DELETE' });
+                  if (res.ok) {
+                    setTenders(prev => prev.filter(t => t.id !== id));
+                    handleBackToTendersDetail();
+                  } else {
+                    alert('Failed to delete tender. It may be linked to other records.');
+                  }
+                }
+              }}
               user={members.find(m => m.email === user.email) || user}
               members={members}
+              onProjectClick={(projectId) => {
+                setSelectedProjectId(projectId);
+                setActiveTab('Project Details');
+              }}
             />
           )}
           {activeTab === 'Assignment Details' && (
@@ -683,7 +712,7 @@ function App() {
               departments={departments}
             />
           )}
-          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Challan Management', 'Tender Details', 'Task Details', 'Approvals'].includes(activeTab) && (
+          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Completed Tenders', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Challan Management', 'Tender Details', 'Task Details', 'Approvals'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full text-slate-400">
               <div className="text-center">
                 <h2 className="text-2xl font-bold">{activeTab} Page</h2>

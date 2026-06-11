@@ -20,13 +20,41 @@ import {
 const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   const [activeStep, setActiveStep] = useState(1);
   const [members, setMembers] = useState([]);
+
+  const getRequiredDocuments = (type) => {
+    switch (type) {
+      case 'Bid':
+        return [
+          { label: 'RFP', format: 'PDF, DOCX (Max. 20MB)' },
+          { label: 'P.O.', format: 'PDF, DOCX (Max. 20MB)' }
+        ];
+      case 'E-Bazar':
+        return [
+          { label: 'BOQ', format: 'XLSX, PDF (Max. 20MB)' },
+          { label: 'W.O/P.O.', format: 'PDF, DOCX (Max. 20MB)' }
+        ];
+      case 'Private':
+        return [
+          { label: 'P.O.', format: 'PDF, DOCX (Max. 20MB)' }
+        ];
+      default:
+        return [
+          { label: 'Tender Notice File', format: 'PDF, DOCX (Max. 20MB)' },
+          { label: 'Pricing Sheet', format: 'XLSX, PDF (Max. 20MB)' },
+          { label: 'Certifications', format: 'PDF, JPG (Max. 20MB)' }
+        ];
+    }
+  };
   
   const defaultFormData = {
     id: null,
     title: '',
     clientId: '',
     reference: '',
+    poNumber: '',
+    woNumber: '',
     category: 'Private',
+    bidType: 'Private',
     submissionDate: '',
     scope: '',
     milestones: '',
@@ -91,9 +119,33 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
       return;
     }
     
+    const missingDocs = documentSlots
+      .filter(slot => slot.isFixed && !slot.url)
+      .map(slot => slot.label);
+
+    if (missingDocs.length > 0) {
+      alert(`Please upload the following required documents: ${missingDocs.join(', ')}`);
+      setActiveStep(5);
+      return;
+    }
+
+    // Sync document slots to formData.documents before submitting
+    const finalDocuments = documentSlots
+      .filter(slot => slot.url)
+      .map(slot => ({
+        label: slot.label,
+        url: slot.url,
+        fileName: slot.fileName
+      }));
+
+    const finalPayload = {
+      ...formData,
+      documents: finalDocuments
+    };
+
     setIsSubmitting(true);
     try {
-      await onSave(formData);
+      await onSave(finalPayload);
     } catch (error) {
       console.error('Submit error:', error);
       alert('An error occurred while saving the tender.');
@@ -103,11 +155,15 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   };
 
   const [documentSlots, setDocumentSlots] = useState(() => {
-    const defaultSlots = [
-      { id: 1, label: 'Tender Notice File', format: 'PDF, DOCX (Max. 20MB)', isFixed: true },
-      { id: 2, label: 'Pricing Sheet', format: 'XLSX, PDF (Max. 20MB)', isFixed: true },
-      { id: 3, label: 'Certifications', format: 'PDF, JPG (Max. 20MB)', isFixed: true },
-    ];
+    const currentBidType = initialData?.bidType || 'Private';
+    const requiredDocs = getRequiredDocuments(currentBidType);
+    
+    const defaultSlots = requiredDocs.map((doc, index) => ({
+      id: index + 1,
+      label: doc.label,
+      format: doc.format,
+      isFixed: true
+    }));
     
     if (initialData && initialData.documents) {
       let docs = initialData.documents;
@@ -115,7 +171,7 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
         try { docs = JSON.parse(docs); } catch(e) { docs = []; }
       }
       if (Array.isArray(docs) && docs.length > 0) {
-        let currentId = 4;
+        let currentId = defaultSlots.length + 1;
         const newSlots = [...defaultSlots];
         docs.forEach(doc => {
           const existingSlot = newSlots.find(s => s.label === doc.label);
@@ -138,6 +194,33 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
     }
     return defaultSlots;
   });
+
+  const handleBidTypeChange = (value) => {
+    setFormData(prev => ({ ...prev, bidType: value }));
+    
+    const requiredDocs = getRequiredDocuments(value);
+    
+    setDocumentSlots(prev => {
+      // Keep custom slots (not fixed)
+      const customSlots = prev.filter(slot => !slot.isFixed);
+      
+      // Create new fixed slots based on the new requirements
+      const newFixedSlots = requiredDocs.map((doc, index) => {
+        // Try to find if this label was already there (to preserve file)
+        const existing = prev.find(s => s.label === doc.label);
+        return {
+          id: index + 1,
+          label: doc.label,
+          format: doc.format,
+          isFixed: true,
+          url: existing?.url || '',
+          fileName: existing?.fileName || ''
+        };
+      });
+      
+      return [...newFixedSlots, ...customSlots];
+    });
+  };
 
   const addDocumentSlot = () => {
     const newId = Date.now();
@@ -196,6 +279,17 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   ];
 
   const handleNext = () => {
+    if (activeStep === 5) {
+      const missingDocs = documentSlots
+        .filter(slot => slot.isFixed && !slot.url)
+        .map(slot => slot.label);
+
+      if (missingDocs.length > 0) {
+        alert(`Please upload the following required documents before proceeding: ${missingDocs.join(', ')}`);
+        return;
+      }
+    }
+
     if (activeStep < sections.length) {
       setActiveStep(activeStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -297,6 +391,22 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Type <span className="text-rose-500">*</span></label>
                     <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
                       <option value="Private">Private Firm</option><option value="Government">Govt. Firm</option><option value="PSU">PSU</option><option value="Non-Profit">Non-Profit</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">P.O. Number</label>
+                    <input type="text" placeholder="e.g. PO/2024/001" value={formData.poNumber} onChange={(e) => setFormData({...formData, poNumber: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                  </div>
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">W.O. Number</label>
+                    <input type="text" placeholder="e.g. WO/2024/001" value={formData.woNumber} onChange={(e) => setFormData({...formData, woNumber: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                  </div>
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bid Type <span className="text-rose-500">*</span></label>
+                    <select value={formData.bidType} onChange={(e) => handleBidTypeChange(e.target.value)} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
+                      <option value="Private">Private</option>
+                      <option value="E-Bazar">E-Bazar</option>
+                      <option value="Bid">Bid</option>
                     </select>
                   </div>
                   <div className="space-y-2 text-left">

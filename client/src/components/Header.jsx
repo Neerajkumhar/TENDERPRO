@@ -56,7 +56,8 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
         const res = await fetch(`/api/notifications/${user.id}?panel=client`);
         if (res.ok) {
           const data = await res.json();
-          setNotifications(data);
+          // Filter out read notifications so they don't reappear on refresh
+          setNotifications(data.filter(n => !n.isRead));
         }
       } catch (err) {
         console.error('Error fetching notifications:', err);
@@ -79,14 +80,40 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id })
       });
-      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+      // Remove the notification entirely from the list once clicked
+      setNotifications(prev => prev.filter(n => n.id !== notif.id));
       
-      if (notif.actionUrl && onNotificationClick) {
-        onNotificationClick(notif.actionUrl);
+      let redirectUrl = notif.actionUrl;
+      
+      if (!redirectUrl && notif.type) {
+        if (notif.type.includes('LEAVE') || notif.type.includes('TENDER_COMPLETION_SUBMITTED')) redirectUrl = 'Approvals';
+        else if (notif.type.includes('TENDER_ASSIGNED')) redirectUrl = 'Project Management';
+        else if (notif.type.includes('TENDER')) redirectUrl = 'Tender Management';
+        else if (notif.type.includes('TASK')) redirectUrl = 'Tasks';
+        else if (notif.type.includes('INVOICE') || notif.type.includes('EXPENSE')) redirectUrl = 'Financial Management';
+        else if (notif.type.includes('CLIENT')) redirectUrl = 'Client Management';
+        else if (notif.type.includes('CHALLAN')) redirectUrl = 'Challan Management';
+      }
+
+      if (redirectUrl && onNotificationClick) {
+        onNotificationClick(redirectUrl);
         setShowNotificationsDropdown(false);
       }
     } catch (error) {
       console.error('Error marking notification read', error);
+    }
+  };
+
+  const clearAllNotifications = async () => {
+    try {
+      await fetch('/api/notifications/read-all', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      setNotifications([]);
+    } catch (error) {
+      console.error('Error clearing all notifications', error);
     }
   };
 
@@ -148,9 +175,19 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
               <div className="fixed inset-0 z-40" onClick={() => setShowNotificationsDropdown(false)}></div>
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
-                  {unreadNotificationsCount > 0 && (
-                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{unreadNotificationsCount} new</span>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
+                    {unreadNotificationsCount > 0 && (
+                      <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{unreadNotificationsCount} new</span>
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <button 
+                      onClick={clearAllNotifications}
+                      className="text-[10px] font-black text-blue-600 hover:text-blue-800 uppercase tracking-widest transition-colors"
+                    >
+                      Clear All
+                    </button>
                   )}
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">

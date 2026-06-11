@@ -3,6 +3,54 @@ const User = require('../models/User');
 const Tender = require('../models/Tender');
 const TenderAssignment = require('../models/TenderAssignment');
 
+// Helper to auto-update statuses based on task progress
+const syncProjectStatuses = async (assignmentId, tenderId) => {
+  try {
+    if (assignmentId) {
+      const allAssignmentTasks = await Task.findAll({ where: { assignmentId } });
+      const assignment = await TenderAssignment.findByPk(assignmentId);
+      if (assignment) {
+        let newStatus = 'Pending';
+        if (allAssignmentTasks.length > 0) {
+          const allCompleted = allAssignmentTasks.every(t => ['Completed', 'Done'].includes(t.status));
+          const hasStarted = allAssignmentTasks.some(t => ['In Progress', 'Review', 'Completed', 'Done'].includes(t.status));
+          if (allCompleted) newStatus = 'Completed';
+          else if (hasStarted) newStatus = 'In Progress';
+        }
+        if (assignment.status !== newStatus) {
+          await assignment.update({ status: newStatus });
+        }
+      }
+    }
+
+    if (tenderId) {
+      const allTenderTasks = await Task.findAll({ where: { tenderId } });
+      const tender = await Tender.findByPk(tenderId);
+      if (tender) {
+        let newStatus = tender.status;
+        if (allTenderTasks.length > 0) {
+          const allCompleted = allTenderTasks.every(t => ['Completed', 'Done'].includes(t.status));
+          const hasStarted = allTenderTasks.some(t => ['In Progress', 'Review', 'Completed', 'Done'].includes(t.status));
+          if (allCompleted) {
+            if (tender.status === 'Draft' || tender.status === 'Registered') newStatus = 'Active';
+          } else if (hasStarted) {
+            if (tender.status === 'Draft' || tender.status === 'Registered' || tender.status === 'Completed') newStatus = 'Active';
+          } else {
+            if (tender.status === 'Completed') newStatus = 'Active';
+          }
+        } else {
+          if (tender.status === 'Completed') newStatus = 'Active';
+        }
+        if (tender.status !== newStatus) {
+          await tender.update({ status: newStatus });
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error syncing project statuses:', e);
+  }
+};
+
 // Create a new task
 exports.createTask = async (req, res) => {
   try {
@@ -56,6 +104,8 @@ exports.createTask = async (req, res) => {
         }
       }
     } catch(e) { console.error('Notification error:', e); }
+
+    await syncProjectStatuses(task.assignmentId, task.tenderId);
 
     res.status(201).json(task);
   } catch (error) {
@@ -147,6 +197,8 @@ exports.updateTask = async (req, res) => {
       }
     } catch(e) { console.error('Notification error on task update:', e); }
 
+    await syncProjectStatuses(task.assignmentId, task.tenderId);
+
     res.json(task);
   } catch (error) {
     res.status(500).json({ message: 'Error updating task', error: error.message });
@@ -160,7 +212,12 @@ exports.deleteTask = async (req, res) => {
     const task = await Task.findByPk(id);
     if (!task) return res.status(404).json({ message: 'Task not found' });
     
+    const assignmentId = task.assignmentId;
+    const tenderId = task.tenderId;
     await task.destroy();
+
+    await syncProjectStatuses(assignmentId, tenderId);
+
     res.json({ message: 'Task deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting task', error: error.message });

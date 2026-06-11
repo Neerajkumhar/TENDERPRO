@@ -40,6 +40,35 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
   const [projectAssignments, setProjectAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [processingDocs, setProcessingDocs] = useState(false);
+
+  const handleApproveDocs = async () => {
+    try {
+      setProcessingDocs(true);
+      const res = await fetch(`/api/tenders/${projectId}/approve-completion`, { method: 'PUT' });
+      if (!res.ok) throw new Error('Failed to approve');
+      const projectRes = await fetch(`/api/tenders/${projectId}`);
+      if (projectRes.ok) setProject(await projectRes.json());
+    } catch (err) {
+      alert('Error approving documents');
+    } finally {
+      setProcessingDocs(false);
+    }
+  };
+
+  const handleRejectDocs = async () => {
+    try {
+      setProcessingDocs(true);
+      const res = await fetch(`/api/tenders/${projectId}/reject-completion`, { method: 'PUT' });
+      if (!res.ok) throw new Error('Failed to reject');
+      const projectRes = await fetch(`/api/tenders/${projectId}`);
+      if (projectRes.ok) setProject(await projectRes.json());
+    } catch (err) {
+      alert('Error rejecting documents');
+    } finally {
+      setProcessingDocs(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTenderDetails = async () => {
@@ -161,23 +190,11 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
             </button>
           </div>
         </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1.5 sm:gap-2 p-1.5 sm:p-2 bg-slate-100/50 rounded-2xl w-full sm:w-fit backdrop-blur-sm overflow-x-auto no-scrollbar">
-          {['Overview', 'Tasks', 'Team', 'Financials', 'Documents', 'Timeline', 'Reports'].map((tab, i) => (
-            <button 
-              key={tab}
-              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                i === 0 ? 'bg-slate-900 text-white shadow-xl shadow-slate-400/20' : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6 sm:gap-8">
+      <div className="space-y-16 sm:space-y-24">
+        {/* Section 1: Overview */}
+        <div className="grid grid-cols-12 gap-6 sm:gap-8">
         {/* Left Side: Summary & Financials */}
         <div className="col-span-12 lg:col-span-8 space-y-6 sm:space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
@@ -188,6 +205,10 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
                 {project.scope || 'No scope description provided for this tender.'}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6">
+                <div className="sm:col-span-2">
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tender Name</p>
+                  <p className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{project.title}</p>
+                </div>
                 <div>
                   <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Category</p>
                   <p className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{project.category}</p>
@@ -234,69 +255,72 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
                   </div>
                   <span className="text-[10px] sm:text-xs font-black text-blue-600 uppercase">High</span>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Financial Summary */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
-            <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight mb-6 sm:mb-8 uppercase italic">Financial Summary</h3>
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {[
-                { label: 'Contract Value', value: `₹${parseFloat(project.budget || 0).toLocaleString()}`, color: 'blue' },
-                { label: 'Tax (GST)', value: `${project.tax || 18}%`, color: 'indigo' },
-                { label: 'Payment Terms', value: project.paymentTerms || 'Milestone', color: 'emerald' },
-                { label: 'Tender Category', value: project.category || 'N/A', color: 'rose' },
-              ].map((item, i) => (
-                <div key={i} className="p-4 sm:p-6 rounded-2xl bg-slate-50 border border-slate-100">
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 sm:mb-2">{item.label}</p>
-                  <h4 className="text-sm sm:text-base font-black text-slate-900 truncate">{item.value}</h4>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Documents */}
-          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden rounded-2xl sm:rounded-3xl">
-            <div className="p-4 sm:p-6 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/30 gap-4">
-              <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight uppercase italic">Documents</h3>
-              <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4 hidden sm:table-cell">Type</th>
-                    <th className="px-6 py-4">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {documents.length > 0 ? documents.map((doc, i) => (
-                    <tr key={i} className="hover:bg-blue-50/30 transition-all group cursor-pointer">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-1.5 sm:p-2 rounded-lg bg-blue-50 text-blue-600`}>
-                            <FileText size={14} className="sm:w-4 sm:h-4" />
-                          </div>
-                          <span className="text-xs font-black text-blue-600 hover:underline truncate max-w-[120px] sm:max-w-none">{doc.name || `Document ${i+1}`}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-xs font-bold text-slate-500 hidden sm:table-cell uppercase tracking-tight">{doc.type || 'PDF'}</td>
-                      <td className="px-6 py-4 text-[10px] sm:text-xs font-bold text-slate-400 truncate">{doc.date || 'N/A'}</td>
-                    </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan="3" className="px-6 py-8 text-center text-xs font-bold text-slate-400 italic">No documents uploaded yet.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Key Dates & Consolidated Team Card */}
+        {/* Completion Review UI */}
+        {project.completionStatus && project.completionStatus !== 'Pending' && (
+          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Completion Review</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Review mandatory handover documents</p>
+              </div>
+              <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                project.completionStatus === 'Submitted' ? 'bg-amber-100 text-amber-600' :
+                project.completionStatus === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
+                'bg-rose-100 text-rose-600'
+              }`}>
+                {project.completionStatus}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {['deliveryChallan', 'ewayBill', 'invoice', 'installationChallan', 'noc'].map(docKey => (
+                <div key={docKey} className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between group hover:border-blue-200 transition-all">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
+                      <FileText size={14} className="text-slate-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest truncate">{docKey.replace(/([A-Z])/g, ' $1').trim()}</p>
+                      <p className="text-[9px] text-slate-400 truncate italic mt-0.5">{project.completionDocuments?.[docKey] || 'No file'}</p>
+                    </div>
+                  </div>
+                  {project.completionDocuments?.[docKey] && (
+                    <a href={project.completionDocuments[docKey]} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all shrink-0">
+                      <Download size={14} />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {project.completionStatus === 'Submitted' && (
+              <div className="flex items-center justify-end gap-4 pt-6 border-t border-slate-100">
+                <button 
+                  onClick={handleRejectDocs}
+                  disabled={processingDocs}
+                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-50"
+                >
+                  Reject & Request Changes
+                </button>
+                <button 
+                  onClick={handleApproveDocs}
+                  disabled={processingDocs}
+                  className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <CheckCircle2 size={16} />
+                  Approve Handover
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Right Side: Key Dates & Consolidated Team Card */}
         <div className="col-span-12 lg:col-span-4 space-y-6 sm:space-y-8">
           {/* Key Dates */}
           <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
@@ -412,6 +436,7 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
               ))}
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

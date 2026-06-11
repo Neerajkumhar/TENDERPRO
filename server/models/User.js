@@ -43,6 +43,26 @@ const User = sequelize.define('User', {
   image: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  panDoc: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  cvDoc: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  adharDoc: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  bankFrontDoc: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  cancelCheckDoc: {
+    type: DataTypes.STRING,
+    allowNull: true,
   }
 }, {
   hooks: {

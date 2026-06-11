@@ -21,7 +21,8 @@ import {
   Users,
   Briefcase,
   ListTodo,
-  X
+  X,
+  ShieldAlert
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -44,6 +45,14 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
   const [tasks, setTasks] = useState([]);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [taskLoading, setTaskLoading] = useState(false);
+  const [handoverDocs, setHandoverDocs] = useState({
+    deliveryChallan: '',
+    ewayBill: '',
+    invoice: '',
+    installationChallan: '',
+    noc: ''
+  });
+  const [submittingDocs, setSubmittingDocs] = useState(false);
   const [taskData, setTaskData] = useState({
     title: '',
     description: '',
@@ -87,11 +96,14 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
     ));
 
     try {
-      await fetch(`/api/tasks/${taskId}`, {
+      const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: targetStatus })
       });
+      if (response.ok && fetchAssignments) {
+         fetchAssignments();
+      }
     } catch (err) {
       console.error('Error updating status:', err);
     }
@@ -130,6 +142,27 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
     };
     fetchTasks();
   }, [projectId, showTaskModal]);
+
+  const handleSubmitHandover = async () => {
+    try {
+      setSubmittingDocs(true);
+      const res = await fetch(`/api/tenders/${projectId}/submit-completion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documents: handoverDocs })
+      });
+      if (!res.ok) throw new Error('Failed to submit handover documents');
+      const projectRes = await fetch(`/api/tenders/${projectId}`);
+      if (projectRes.ok) {
+        setProject(await projectRes.json());
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error submitting handover documents');
+    } finally {
+      setSubmittingDocs(false);
+    }
+  };
 
   const handleTaskSubmit = async (e) => {
     e.preventDefault();
@@ -308,25 +341,11 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
             </div>
           ))}
         </div>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-1.5 sm:gap-3 p-1.5 sm:p-2 bg-slate-100/50 rounded-2xl sm:rounded-[2rem] w-full sm:w-fit backdrop-blur-sm overflow-x-auto no-scrollbar">
-          {['Overview', 'Tasks', 'Financials', 'Documents'].map((tab) => (
-            <button 
-              key={tab}
-              onClick={() => setActiveSubTab(tab)}
-              className={`flex-1 sm:flex-none px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                activeSubTab === tab ? 'bg-slate-900 text-white shadow-xl shadow-slate-400/20' : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {activeSubTab === 'Overview' && (
-      <div className="grid grid-cols-12 gap-6 sm:gap-8">
+      <div className="space-y-16 sm:space-y-24">
+        {/* Section 1: Overview */}
+        <div className="grid grid-cols-12 gap-6 sm:gap-8">
         {/* Main Content Area */}
         <div className="col-span-12 lg:col-span-8 space-y-6 sm:space-y-8">
           <div className="card p-6 sm:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 relative overflow-hidden group rounded-[2rem] sm:rounded-[3rem]">
@@ -347,6 +366,10 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10 mt-8 sm:mt-12">
+              <div className="sm:col-span-3">
+                <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 sm:mb-2">Tender Name</p>
+                <p className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{project.title}</p>
+              </div>
               <div>
                 <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 sm:mb-2">Category</p>
                 <p className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{project.category}</p>
@@ -372,8 +395,8 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
                 <PieChart>
                   <Pie 
                     data={[
-                      { name: 'Completed', value: tasks.filter(t => t.status === 'Completed').length, color: '#10b981' },
-                      { name: 'Remaining', value: tasks.length - tasks.filter(t => t.status === 'Completed').length || 1, color: '#f1f5f9' }
+                      { name: 'Completed', value: tasks.length === 0 ? 0 : tasks.filter(t => t.status === 'Completed').length, color: '#10b981' },
+                      { name: 'Remaining', value: tasks.length === 0 ? 1 : tasks.length - tasks.filter(t => t.status === 'Completed').length, color: '#f1f5f9' }
                     ]} 
                     innerRadius={60} 
                     outerRadius={80}
@@ -405,10 +428,9 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
           </div>
         </div>
       </div>
-      )}
 
-      {activeSubTab === 'Tasks' && (
-        <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+      {/* Section 2: Kanban Board */}
+      <div className="space-y-6 sm:space-y-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase italic">PROJECT KANBAN</h2>
@@ -509,9 +531,8 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Create Task Modal */}
       {showTaskModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowTaskModal(false)}></div>

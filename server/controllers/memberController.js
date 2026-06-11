@@ -59,7 +59,7 @@ exports.getMemberById = async (req, res) => {
 // Create a new member
 exports.createMember = async (req, res) => {
   try {
-    const { name, email, password, role, departmentId, phone } = req.body;
+    const { name, email, password, role, departmentId, phone, panDoc, cvDoc, adharDoc, bankFrontDoc, cancelCheckDoc } = req.body;
     
     // Check if user exists
     const existingUser = await User.findOne({ where: { email } });
@@ -74,7 +74,12 @@ exports.createMember = async (req, res) => {
       role,
       departmentId,
       phone,
-      status: 'Active'
+      status: 'Active',
+      panDoc,
+      cvDoc,
+      adharDoc,
+      bankFrontDoc,
+      cancelCheckDoc
     });
 
     // Update department member count if departmentId is provided
@@ -99,7 +104,7 @@ exports.createMember = async (req, res) => {
 exports.updateMember = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, role, departmentId, phone, image, status, password } = req.body;
+    const { name, email, role, departmentId, phone, image, status, password, panDoc, cvDoc, adharDoc, bankFrontDoc, cancelCheckDoc } = req.body;
     
     const user = await User.findByPk(id);
     if (!user) return res.status(404).json({ message: 'Member not found' });
@@ -134,7 +139,12 @@ exports.updateMember = async (req, res) => {
       departmentId: newDeptId,
       phone,
       image,
-      status
+      status,
+      panDoc,
+      cvDoc,
+      adharDoc,
+      bankFrontDoc,
+      cancelCheckDoc
     };
 
     if (password && password.trim() !== '') {

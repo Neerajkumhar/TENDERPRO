@@ -17,14 +17,87 @@ import {
   Trash2,
   ChevronRight,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  Activity,
+  Upload,
+  Loader2
 } from 'lucide-react';
+import { 
+  RadialBarChart, 
+  RadialBar, 
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+import CsvPreviewModal from '../components/CsvPreviewModal';
+import PdfPreviewModal from '../components/PdfPreviewModal';
 
-const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members = [] }) => {
+const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, user = {}, members = [] }) => {
   const [tender, setTender] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeSubTab, setActiveSubTab] = useState('Overview');
+  const [docRequests, setDocRequests] = useState([]);
+  const [previewCsv, setPreviewCsv] = useState(null);
+  const [previewPdf, setPreviewPdf] = useState(null);
+  const [relatedProjects, setRelatedProjects] = useState([]);
+  
+  // Completion Documents State
+  const [files, setFiles] = useState({
+    deliveryChallan: null, ewayBill: null, invoice: null, installationChallan: null, noc: null
+  });
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+
+  const documentLabels = {
+    deliveryChallan: 'Delivery Challan',
+    ewayBill: 'E-way Bill',
+    invoice: 'Invoice',
+    installationChallan: 'Installation Challan',
+    noc: 'NOC (No Objection Certificate)'
+  };
+
+  const handleFileChange = (e, key) => {
+    const file = e.target.files[0];
+    if (file) setFiles(prev => ({ ...prev, [key]: file }));
+  };
+
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/upload', { method: 'POST', body: formData });
+    if (!response.ok) throw new Error(`Failed to upload ${file.name}`);
+    const data = await response.json();
+    return data.url;
+  };
+
+  const handleSubmitCompletion = async () => {
+    const missing = Object.keys(documentLabels).filter(key => !files[key] && !tender.completionDocuments?.[key]);
+    if (missing.length > 0) {
+      setUploadError(`Please upload missing documents: ${missing.map(m => documentLabels[m]).join(', ')}`);
+      return;
+    }
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const urls = { ...tender.completionDocuments };
+      for (const key of Object.keys(files)) {
+        if (files[key]) urls[key] = await uploadFile(files[key]);
+      }
+      const response = await fetch(`/api/tenders/${tender.id}/submit-completion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documents: urls })
+      });
+      if (!response.ok) throw new Error('Failed to submit completion documents');
+      alert('Documents submitted successfully for Admin review!');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTenderDetails = async () => {
@@ -35,7 +108,36 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
           throw new Error('Failed to fetch tender details.');
         }
         const data = await response.json();
+        
+        // Parse JSON string fields if they are returned as strings by the DB
+        if (typeof data.documents === 'string') {
+          try { data.documents = JSON.parse(data.documents); } catch(e) { data.documents = []; }
+        }
+        if (typeof data.completionDocuments === 'string') {
+          try { 
+            let parsed = JSON.parse(data.completionDocuments); 
+            if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+            data.completionDocuments = parsed; 
+          } catch(e) { 
+            data.completionDocuments = {}; 
+          }
+        }
+        if (typeof data.teamAssignments === 'string') {
+          try { data.teamAssignments = JSON.parse(data.teamAssignments); } catch(e) { data.teamAssignments = {}; }
+        }
+
         setTender(data);
+
+        try {
+          const assigRes = await fetch('/api/assignments');
+          if(assigRes.ok) {
+            const assigData = await assigRes.json();
+            setRelatedProjects(assigData.filter(a => a.tenderId === tenderId));
+          }
+        } catch (err) {
+          console.error('Error fetching assignments:', err);
+        }
+
       } catch (err) {
         console.error('Error fetching tender:', err);
         setError(err.message);
@@ -44,10 +146,59 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
       }
     };
 
+    const fetchDocRequests = async () => {
+      try {
+        if (!user?.id) return;
+        const res = await fetch(`/api/doc-requests/user/${user.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDocRequests(data);
+        }
+      } catch (err) {
+        console.error('Error fetching doc requests:', err);
+      }
+    };
+
     if (tenderId) {
       fetchTenderDetails();
+      fetchDocRequests();
+
+      // Auto-refresh polling every 5 seconds
+      const intervalId = setInterval(() => {
+        fetchDocRequests();
+      }, 5000);
+
+      return () => clearInterval(intervalId);
     }
-  }, [tenderId]);
+  }, [tenderId, user?.id]);
+
+  const handleRequestAccess = async (doc) => {
+    try {
+      const res = await fetch('/api/doc-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenderId: tender.id,
+          documentName: doc.fileName || doc.label,
+          userId: user.id
+        })
+      });
+      if (res.ok) {
+        const newReq = await res.json();
+        setDocRequests(prev => {
+          const idx = prev.findIndex(r => r.id === newReq.id);
+          if (idx >= 0) {
+            const copy = [...prev];
+            copy[idx] = newReq;
+            return copy;
+          }
+          return [...prev, newReq];
+        });
+      }
+    } catch (err) {
+      console.error('Failed to request access:', err);
+    }
+  };
 
   if (loading) {
     return (
@@ -103,6 +254,19 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
     const match = members.find(m => String(m.id) === String(id));
     return match ? `${match.name} (${match.role})` : 'Unassigned';
   };
+
+  const checklists = [
+    { title: 'Tender Notice Read & Understood', checked: true },
+    { title: 'All Documents Attached', checked: !!tender.documents?.length },
+    { title: 'Eligibility Criteria Met', checked: true },
+    { title: 'Financial Details Verified', checked: true },
+    { title: 'Internal Review Completed', checked: !!tender.teamAssignments?.reviewerId },
+    { title: 'Approval Obtained', checked: !!tender.teamAssignments?.approverId },
+  ];
+  
+  const readinessScore = Math.round((checklists.filter(c => c.checked).length / checklists.length) * 100);
+
+  const radialData = [{ name: 'Readiness', uv: readinessScore, fill: readinessScore === 100 ? '#10b981' : '#3b82f6' }];
 
   return (
     <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-8">
@@ -181,194 +345,387 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, user = {}, members 
         ))}
       </div>
 
-      {/* Sub Tabs Toggle Toolbar */}
-      <div className="flex border-b border-slate-200 gap-8 pb-1">
-        {['Overview', 'Eligibility & Technical', 'Internal Assignment', 'Reference Docs'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveSubTab(tab)}
-            className={`pb-4 text-xs font-black uppercase tracking-widest transition-all ${
-              activeSubTab === tab 
-                ? 'text-blue-600 border-b-2 border-blue-600 -mb-[2px]' 
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Sub Tabs Contents */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto pt-6">
         
-        {/* Left Columns - Detailed Info Cards */}
-        <div className="lg:col-span-2 space-y-6">
-          {activeSubTab === 'Overview' && (
-            <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/20 space-y-6">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                  <Target size={16} className="text-blue-500" />
-                  <span>Opportunity Description & Scope</span>
-                </h3>
-                <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100">
-                  {tender.scope || 'No detailed scope of work has been written for this opportunity yet.'}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                  <Award size={16} className="text-emerald-500" />
-                  <span>Key Milestones & Deliverables</span>
-                </h3>
-                <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100">
-                  {tender.milestones || 'Milestone boundaries are yet to be finalized.'}
-                </p>
-              </div>
+        {/* --- ROW 1 --- */}
+        {/* Scope & Milestones (Span 2) */}
+        <div className="lg:col-span-2 flex flex-col space-y-6 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <Target size={20} className="text-blue-500" />
+            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Scope & Milestones</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Opportunity Description</h3>
+              <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line">
+                {tender.scope || 'No detailed scope of work has been written for this opportunity yet.'}
+              </p>
             </div>
-          )}
-
-          {activeSubTab === 'Eligibility & Technical' && (
-            <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/20 space-y-6">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-indigo-500" />
-                  <span>Technical Evaluation Criteria</span>
-                </h3>
-                <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100">
-                  {tender.techCriteria || 'No technical assessment boundaries have been documented.'}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                  <Award size={16} className="text-amber-500" />
-                  <span>Required Certifications</span>
-                </h3>
-                <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100">
-                  {tender.certifications || 'No specific certifications requested.'}
-                </p>
-              </div>
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Key Deliverables</h3>
+              <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line">
+                {tender.milestones || 'Milestone boundaries are yet to be finalized.'}
+              </p>
             </div>
-          )}
+          </div>
+        </div>
 
-          {activeSubTab === 'Internal Assignment' && (
-            <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/20">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
-                <Users size={16} className="text-indigo-500" />
-                <span>Internal Opportunity Stakeholders</span>
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { title: 'Tender Manager', name: getMemberName(tender.teamAssignments?.managerId) },
-                  { title: 'Technical Reviewer', name: getMemberName(tender.teamAssignments?.reviewerId) },
-                  { title: 'Approval Owner', name: getMemberName(tender.teamAssignments?.approverId) }
-                ].map((member, idx) => (
-                  <div key={idx} className="p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100 flex flex-col justify-between">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{member.title}</p>
-                    <p className="text-sm font-black text-slate-800 mt-2">{member.name}</p>
+        {/* Readiness Gauge (Span 1) */}
+        <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col items-center relative">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2 w-full">
+            <ShieldCheck size={16} className="text-emerald-500" />
+            <span>Compliance Score</span>
+          </h3>
+          <div className="w-full flex-1 min-h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadialBarChart 
+                cx="50%" cy="50%" innerRadius="80%" outerRadius="100%" barSize={16} 
+                data={radialData} startAngle={180} endAngle={0}
+              >
+                <RadialBar minAngle={15} background={{ fill: '#f1f5f9' }} clockWise dataKey="uv" cornerRadius={10} />
+              </RadialBarChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-8">
+              <span className="text-4xl font-black text-slate-800 tracking-tighter">{readinessScore}%</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ready</span>
+            </div>
+          </div>
+        </div>
+
+        {/* --- ROW 2 --- */}
+        {/* Technical Evaluation (Span 2) */}
+        <div className="lg:col-span-2 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <ShieldCheck size={20} className="text-indigo-500" />
+            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Technical Parameters</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Evaluation Criteria</h3>
+              <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line bg-slate-50 p-6 rounded-2xl">
+                {tender.techCriteria || 'No technical assessment boundaries have been documented.'}
+              </p>
+            </div>
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Required Certifications</h3>
+              <p className="text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line bg-slate-50 p-6 rounded-2xl">
+                {tender.certifications || 'No specific certifications requested.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Projects (Span 1) */}
+        <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2 w-full">
+            <Briefcase size={16} className="text-blue-500" />
+            <span>Related Projects</span>
+          </h3>
+          <div className="flex-1 overflow-y-auto space-y-3 max-h-[300px] pr-2">
+            {relatedProjects.length > 0 ? (
+              relatedProjects.map((project, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => onProjectClick && onProjectClick(project.tenderId || tender.id)}
+                  className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-3 hover:border-blue-200 transition-colors cursor-pointer"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col pr-2">
+                      <span className="text-sm font-bold text-slate-800 leading-tight">
+                        {project.title || project.department?.name || 'Assigned Project'}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400 line-clamp-2 mt-1 italic">
+                        "{project.description || 'No specific description provided'}"
+                      </span>
+                    </div>
+                    <span className={`shrink-0 px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-md ${
+                      project.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 
+                      project.status === 'In Progress' ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-600'
+                    }`}>
+                      {project.status}
+                    </span>
+                  </div>
+                  
+                  <div className="pt-2 border-t border-slate-200/60 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</span>
+                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
+                        {project.department?.name || 'General'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigned Manager</span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                          {(project.department?.manager?.image || project.assignee?.image) ? (
+                            <img src={project.department?.manager?.image || project.assignee?.image} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Users size={10} className="text-slate-400" />
+                          )}
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-700">
+                          {project.department?.manager?.name || project.assignee?.name || 'Unassigned'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-100 rounded-2xl min-h-[220px]">
+                <Briefcase size={24} className="text-slate-300 mb-2" />
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No active projects</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* --- ROW 3 --- */}
+        {/* Financial Rules (Span 1) */}
+        <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <DollarSign size={20} className="text-emerald-500" />
+            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Financial Rules</h2>
+          </div>
+          <div className="space-y-4 flex-1">
+            <div className="flex justify-between items-center py-3 border-b border-slate-50">
+              <span className="text-xs font-bold text-slate-400">Payment Terms</span>
+              <span className="text-xs font-black text-slate-700">{tender.paymentTerms || 'Milestone Based'}</span>
+            </div>
+            <div className="flex justify-between items-center py-3 border-b border-slate-50">
+              <span className="text-xs font-bold text-slate-400">Applicable Goods Tax</span>
+              <span className="text-xs font-black text-slate-700">{tender.tax || 18}% GST</span>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Special Billing Terms</span>
+              <p className="text-xs font-semibold text-slate-500 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 whitespace-pre-line">
+                {tender.terms || 'Standard contract term definitions apply.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Internal Stakeholders (Span 2) */}
+        <div className="lg:col-span-2 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <Users size={20} className="text-amber-500" />
+            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Internal Stakeholders</h2>
+          </div>
+          <div className="flex flex-wrap gap-4 sm:gap-6 flex-1 items-center">
+            {[
+              { title: 'Tender Manager', name: getMemberName(tender.teamAssignments?.managerId) },
+              { title: 'Technical Reviewer', name: getMemberName(tender.teamAssignments?.reviewerId) },
+              { title: 'Approval Owner', name: getMemberName(tender.teamAssignments?.approverId) }
+            ].map((member, idx) => (
+              <div key={idx} className="flex-1 min-w-[180px] p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{member.title}</p>
+                <p className="text-sm font-bold text-slate-800 mt-2">{member.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- ROW 4 --- */}
+        {/* Documentation Vault (Span 2) */}
+        <div className="lg:col-span-2 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <FileText size={20} className="text-blue-500" />
+            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Documentation Vault</h2>
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Reference Documents</h3>
+            {Array.isArray(tender.documents) && tender.documents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tender.documents.map((doc, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-blue-300 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <FileText size={16} className="text-slate-400 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-700 truncate">{doc.label}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button 
+                        onClick={(e) => {
+                          const fileName = doc.fileName?.toLowerCase() || '';
+                          const docUrl = doc.url?.toLowerCase() || '';
+                          if (fileName.endsWith('.csv') || docUrl.endsWith('.csv')) { e.preventDefault(); setPreviewCsv(doc); } 
+                          else if (fileName.endsWith('.pdf') || docUrl.endsWith('.pdf')) { e.preventDefault(); setPreviewPdf(doc); } 
+                          else { window.open(doc.url, '_blank'); }
+                        }}
+                        className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                      >
+                        <ExternalLink size={14} />
+                      </button>
+                      {(() => {
+                        const fileName = doc.fileName || doc.label;
+                        if (user?.role !== 'Tender Manager') {
+                          return (
+                            <a href={doc.url} download={fileName} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+                              <Download size={14} />
+                            </a>
+                          );
+                        }
+                        const reqStatus = docRequests.find(r => r.tenderId === tender.id && r.documentName === fileName)?.status;
+                        if (reqStatus === 'Approved') {
+                          return (
+                            <a href={doc.url} download={fileName} target="_blank" rel="noreferrer" className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors">
+                              <Download size={14} />
+                            </a>
+                          );
+                        } else if (reqStatus === 'Pending') {
+                          return (
+                            <button disabled className="px-2 py-1 bg-amber-50 text-[10px] font-black text-amber-500 uppercase rounded-md flex items-center gap-1">
+                              <Clock size={12} /> Pending
+                            </button>
+                          );
+                        } else {
+                          return (
+                            <button onClick={() => handleRequestAccess(doc)} className="px-2 py-1 bg-slate-100 text-[10px] font-black text-slate-500 hover:text-blue-600 uppercase rounded-md flex items-center gap-1">
+                              <Lock size={12} /> Request
+                            </button>
+                          );
+                        }
+                      })()}
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {activeSubTab === 'Reference Docs' && (
-            <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/20">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
-                <FileText size={16} className="text-blue-500" />
-                <span>Uploaded Documents & Files</span>
+            ) : (
+              <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col items-center justify-center text-center">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No reference documentation attached.</p>
+              </div>
+            )}
+            
+            <div className="mt-8 pt-6 border-t border-slate-100">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center justify-between">
+                <span>Completion Documents</span>
+                {tender.completionStatus === 'Approved' && (
+                  <span className="px-2 py-1 bg-emerald-100 text-emerald-600 rounded-md">Verified</span>
+                )}
+                {tender.completionStatus === 'Submitted' && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-md">Under Review</span>
+                )}
+                {tender.completionStatus === 'Rejected' && (
+                  <span className="px-2 py-1 bg-rose-100 text-rose-600 rounded-md">Rejected</span>
+                )}
               </h3>
-              {Array.isArray(tender.documents) && tender.documents.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {tender.documents.map((doc, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
+              
+              {tender.completionStatus === 'Rejected' && tender.completionRemark && (
+                <div className="mb-4 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3">
+                  <AlertCircle size={16} className="text-rose-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-black text-rose-700 uppercase tracking-widest mb-1">Admin Remark</h4>
+                    <p className="text-xs font-semibold text-rose-600 leading-relaxed whitespace-pre-wrap">{tender.completionRemark}</p>
+                  </div>
+                </div>
+              )}
+              
+              {uploadError && (
+                <div className="mb-4 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-sm font-bold">
+                  <AlertCircle size={16} />
+                  {uploadError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {Object.keys(documentLabels).map((key) => {
+                  const existingDocUrl = tender.completionDocuments?.[key];
+                  const hasFile = files[key] || existingDocUrl;
+                  
+                  return (
+                    <div key={key} className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${
+                      hasFile ? 'bg-emerald-50/30 border-emerald-100' : 'bg-slate-50 border-dashed border-slate-200'
+                    }`}>
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-2 bg-white rounded-lg text-slate-400 flex items-center justify-center shadow-sm">
-                          <FileText size={16} />
+                        <div className={`p-2 rounded-xl shrink-0 ${hasFile ? 'bg-emerald-100 text-emerald-500' : 'bg-white shadow-sm text-slate-400'}`}>
+                          {hasFile ? <CheckCircle2 size={16} /> : <FileText size={16} />}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-black text-slate-800 truncate">{doc.label}</p>
-                          <p className="text-[9px] font-semibold text-slate-400 truncate">{doc.fileName || 'document.pdf'}</p>
+                          <p className="text-xs font-bold text-slate-800 truncate">{documentLabels[key]}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">
+                            {files[key] ? files[key].name : (existingDocUrl ? 'Uploaded' : 'Required')}
+                          </p>
                         </div>
                       </div>
-                      <a 
-                        href={doc.url} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 transition-colors shadow-sm"
-                        title="Download Reference"
-                      >
-                        <Download size={14} />
-                      </a>
+
+                      <div className="flex gap-2 shrink-0">
+                        {existingDocUrl && !files[key] && (
+                          <a href={existingDocUrl} target="_blank" rel="noreferrer" className="px-3 py-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 bg-white border border-blue-200 hover:bg-blue-50 rounded-lg transition-colors shrink-0" title="View Document">
+                            <ExternalLink size={14} />
+                            View
+                          </a>
+                        )}
+                        {tender.completionStatus !== 'Approved' && user?.role === 'Tender Manager' && (
+                          <label className="cursor-pointer p-2 bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 rounded-lg transition-all shadow-sm">
+                            <Upload size={14} />
+                            <input type="file" className="hidden" onChange={(e) => handleFileChange(e, key)} accept=".pdf,image/*" />
+                          </label>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-slate-50/50 rounded-[1.5rem] border border-slate-100 flex flex-col items-center gap-2">
-                  <FileText size={32} className="text-slate-300" />
-                  <p className="text-slate-400 text-xs font-bold">No documentation attached to this tender opportunity.</p>
+                  );
+                })}
+              </div>
+              
+              {tender.completionStatus !== 'Approved' && user?.role === 'Tender Manager' && (
+                <div className="flex justify-end">
+                  <button 
+                    disabled={uploading || tender.completionStatus === 'Submitted'}
+                    onClick={handleSubmitCompletion}
+                    className="px-6 py-3 bg-[#1e293b] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-lg shadow-slate-200 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                    {tender.completionStatus === 'Submitted' ? 'Update Documents' : 'Submit for Review'}
+                  </button>
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Right Side Column - Terms, Tax & Checklist */}
-        <div className="space-y-6">
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/20 space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <DollarSign size={16} className="text-blue-500" />
-              <span>Financial & Billing Rules</span>
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                <span className="text-xs font-bold text-slate-400">Payment Terms</span>
-                <span className="text-xs font-black text-slate-700">{tender.paymentTerms || 'Milestone Based'}</span>
-              </div>
-              <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                <span className="text-xs font-bold text-slate-400">Applicable Goods Tax</span>
-                <span className="text-xs font-black text-slate-700">{tender.tax || 18}% GST</span>
-              </div>
-              <div className="flex flex-col gap-2 pt-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Special Billing Terms</span>
-                <p className="text-xs font-semibold text-slate-500 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 whitespace-pre-line">
-                  {tender.terms || 'Standard contract term definitions apply.'}
-                </p>
-              </div>
-            </div>
+        {/* Assurance Checklist (Span 1) */}
+        <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+            <CheckCircle2 size={20} className="text-emerald-500" />
+            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Checklist</h2>
           </div>
-
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/20 space-y-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-500" />
-              <span>Assurance Checklists</span>
-            </h3>
-            <div className="space-y-3.5">
-              {[
-                { title: 'Tender Notice Read & Understood', checked: true },
-                { title: 'All Documents Attached', checked: !!tender.documents?.length },
-                { title: 'Eligibility Criteria Met', checked: true },
-                { title: 'Financial Details Verified', checked: true },
-                { title: 'Internal Review Completed', checked: !!tender.teamAssignments?.reviewerId },
-                { title: 'Approval Obtained', checked: !!tender.teamAssignments?.approverId },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center text-white ${
-                    item.checked ? 'bg-emerald-500' : 'bg-slate-200'
-                  }`}>
-                    <CheckCircle2 size={14} />
-                  </div>
-                  <span className={`text-xs font-bold ${
-                    item.checked ? 'text-slate-600 font-extrabold' : 'text-slate-400'
-                  }`}>{item.title}</span>
+          <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
+            {checklists.map((item, idx) => (
+              <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border ${
+                item.checked ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'
+              }`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                  item.checked ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
+                }`}>
+                  <CheckCircle2 size={12} />
                 </div>
-              ))}
-            </div>
+                <span className={`text-[11px] font-bold leading-tight ${item.checked ? 'text-slate-800' : 'text-slate-400'}`}>
+                  {item.title}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
       </div>
+
+      {previewCsv && (
+        <CsvPreviewModal 
+          url={previewCsv.url}
+          fileName={previewCsv.fileName || previewCsv.label}
+          onClose={() => setPreviewCsv(null)}
+        />
+      )}
+
+      {previewPdf && (
+        <PdfPreviewModal 
+          url={previewPdf.url}
+          fileName={previewPdf.fileName || previewPdf.label}
+          onClose={() => setPreviewPdf(null)}
+        />
+      )}
     </div>
   );
 };

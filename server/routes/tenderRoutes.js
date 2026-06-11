@@ -10,4 +10,9 @@ router.post('/', tenderController.createTender);
 router.put('/:id', tenderController.updateTender);
 router.delete('/:id', tenderController.deleteTender);
 
+// Completion flow
+router.post('/:id/submit-completion', tenderController.submitCompletion);
+router.put('/:id/approve-completion', tenderController.approveCompletion);
+router.put('/:id/reject-completion', tenderController.rejectCompletion);
+
 module.exports = router;

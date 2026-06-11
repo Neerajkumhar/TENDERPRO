@@ -20,15 +20,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  // Live Stats for Tenders Management (dynamically derived from tenders array)
-  const statsData = [
-    { label: 'TOTAL TENDERS', value: tenders.length, color: 'slate', icon: Briefcase },
-    { label: 'REGISTERED', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo', icon: Clock },
-    { label: 'ACTIVE', value: tenders.filter(t => t.status === 'Active').length, color: 'blue', icon: TrendingUp },
-    { label: 'WON TENDERS', value: tenders.filter(t => t.status === 'Won').length, color: 'emerald', icon: CheckCircle2 },
-    { label: 'LOST TENDERS', value: tenders.filter(t => t.status === 'Lost').length, color: 'rose', icon: XCircle },
-    { label: 'DRAFTS', value: tenders.filter(t => t.status === 'Draft').length, color: 'slate', icon: FileText },
-  ];
+
 
   // Filtering logic
   const filteredTenders = tenders.filter(tender => {
@@ -80,18 +72,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
         </button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        {statsData.map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl shadow-xl shadow-slate-200/20 border border-slate-100/60 flex flex-col items-start group hover:scale-[1.03] transition-all duration-300 cursor-pointer">
-            <div className="flex justify-between items-center w-full mb-3">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight">{stat.label}</span>
-              <stat.icon size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
-            </div>
-            <h3 className="text-3xl font-black text-slate-800 tracking-tight leading-none mt-1">{stat.value}</h3>
-          </div>
-        ))}
-      </div>
+
 
       {/* Filters & Tenders Table Container */}
       <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">

@@ -205,12 +205,17 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
     return tasks.filter(t => t.status === status || (status === 'To Do' && t.status === 'Pending') || (status === 'Completed' && t.status === 'Done') || (status === 'Review' && t.status === 'In Review'));
   };
 
+  const getTasksDueToday = () => {
+    const today = new Date().toDateString();
+    return tasks.filter(t => t.deadline && new Date(t.deadline).toDateString() === today).length;
+  };
+
   const totalTasks = tasks.length || 1;
   const stats = [
     { label: 'TO DO', value: getTasksByStatus('To Do').length, percent: `${Math.round((getTasksByStatus('To Do').length / totalTasks) * 100)}% OF TOTAL`, icon: null, color: 'bg-blue-600', light: 'bg-blue-50' },
     { label: 'IN PROGRESS', value: getTasksByStatus('In Progress').length, percent: `${Math.round((getTasksByStatus('In Progress').length / totalTasks) * 100)}% OF TOTAL`, icon: Clock, color: 'bg-emerald-500', light: 'bg-emerald-50' },
     { label: 'REVIEW', value: getTasksByStatus('Review').length, percent: `${Math.round((getTasksByStatus('Review').length / totalTasks) * 100)}% OF TOTAL`, icon: Eye, color: 'bg-purple-600', light: 'bg-purple-50' },
-    { label: 'DUE TODAY', value: 3, percent: '12% OF TOTAL', icon: Calendar, color: 'bg-orange-500', light: 'bg-orange-50' },
+    { label: 'DUE TODAY', value: getTasksDueToday(), percent: `${Math.round((getTasksDueToday() / totalTasks) * 100)}% OF TOTAL`, icon: Calendar, color: 'bg-orange-500', light: 'bg-orange-50' },
     { label: 'COMPLETED', value: getTasksByStatus('Completed').length, percent: `${Math.round((getTasksByStatus('Completed').length / totalTasks) * 100)}% OF TOTAL`, icon: CheckCircle2, color: 'bg-emerald-500', light: 'bg-emerald-50' },
   ];
 

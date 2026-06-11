@@ -274,6 +274,32 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     { label: 'Paid Invoices', value: String(stats.paidCount), trend: 'Real', isUp: true, color: 'blue', icon: CheckCircle2 },
     { label: 'Outstanding Dues', value: `₹${stats.outstandingDues.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'rose', icon: AlertCircle },
   ];
+
+  const dynamicAlerts = [...invoicesList]
+    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+    .slice(0, 4)
+    .map(inv => {
+      let color = 'blue';
+      let type = 'Pending Action';
+      let message = `New pending invoice generated for ${inv.client}.`;
+      
+      if (inv.status === 'Overdue') {
+        color = 'rose';
+        type = 'Financial Warning';
+        message = `Invoice for ${inv.client} is Overdue!`;
+      } else if (inv.status === 'Paid') {
+        color = 'emerald';
+        type = 'Approval';
+        message = `Payment of ₹${parseFloat(inv.amount || 0).toLocaleString('en-IN')} received from ${inv.client}.`;
+      }
+
+      const dateStr = inv.date ? new Date(inv.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent';
+
+      return { type, message, time: dateStr, color };
+    });
+
+  const displayAlerts = dynamicAlerts.length > 0 ? dynamicAlerts : alerts;
+
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700 text-left">
       <div className="flex justify-between items-center text-left">
@@ -402,7 +428,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
             <button className="p-2 hover:bg-slate-50 rounded-xl transition-all"><MoreHorizontal size={20} className="text-slate-400" /></button>
           </div>
           <div className="space-y-4">
-            {alerts.map((alert, i) => (
+            {displayAlerts.map((alert, i) => (
               <div key={i} className={`flex items-start gap-4 p-4 rounded-2xl bg-${alert.color}-50 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
                 <div className={`p-2 rounded-xl bg-white text-${alert.color}-600 shadow-sm shadow-${alert.color}-100 group-hover:scale-110 transition-transform`}>
                   <AlertCircle size={18} />

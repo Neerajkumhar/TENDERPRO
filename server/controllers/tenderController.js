@@ -146,9 +146,20 @@ exports.updateTender = async (req, res) => {
 exports.deleteTender = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 1. Delete associated tasks first (they depend on TenderAssignments)
+    const Task = require('../models/Task');
+    await Task.destroy({ where: { tenderId: id } });
+
+    // 2. Delete associated assignments (they depend on Tenders)
+    const TenderAssignment = require('../models/TenderAssignment');
+    await TenderAssignment.destroy({ where: { tenderId: id } });
+
+    // 3. Delete the Tender itself
     await Tender.destroy({ where: { id } });
     res.json({ message: 'Tender entry deleted successfully' });
   } catch (error) {
+    console.error('Delete Tender Error:', error);
     res.status(500).json({ message: 'Error deleting tender entry', error: error.message });
   }
 };
@@ -339,5 +350,90 @@ exports.getTenderStats = async (req, res) => {
     res.json(months);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching tender stats', error: error.message });
+  }
+};
+
+// Submit tender for completion review
+exports.submitCompletion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { documents } = req.body; // Expecting { deliveryChallan: 'url', ... }
+
+    const tender = await Tender.findByPk(id);
+    if (!tender) return res.status(404).json({ message: 'Tender not found' });
+
+    await tender.update({
+      completionDocuments: documents,
+      completionStatus: 'Submitted',
+      status: 'Under Review'
+    });
+
+    try {
+      await require('../models/Notification').create({
+        message: `Tender completion submitted for review: ${tender.title || tender.id}`,
+        type: 'TENDER_COMPLETION_SUBMITTED',
+        targetPanel: 'admin'
+      });
+    } catch(e) { console.error('Notification error:', e); }
+
+    res.json({ message: 'Tender submitted for completion review', tender });
+  } catch (error) {
+    res.status(500).json({ message: 'Error submitting completion', error: error.message });
+  }
+};
+
+// Admin approves tender completion
+exports.approveCompletion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const tender = await Tender.findByPk(id);
+    if (!tender) return res.status(404).json({ message: 'Tender not found' });
+
+    await tender.update({
+      completionStatus: 'Approved',
+      status: 'Completed'
+    });
+
+    try {
+      await require('../models/Notification').create({
+        message: `Tender completion approved: ${tender.title || tender.id}`,
+        type: 'TENDER_COMPLETION_APPROVED',
+        targetPanel: 'both'
+      });
+    } catch(e) { console.error('Notification error:', e); }
+
+    res.json({ message: 'Tender completion approved', tender });
+  } catch (error) {
+    res.status(500).json({ message: 'Error approving completion', error: error.message });
+  }
+};
+
+// Admin rejects tender completion
+exports.rejectCompletion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const tender = await Tender.findByPk(id);
+    if (!tender) return res.status(404).json({ message: 'Tender not found' });
+
+    await tender.update({
+      completionStatus: 'Rejected',
+      completionRemark: reason || null,
+      status: 'Won' // Reset to Won if rejected
+    });
+
+    try {
+      await require('../models/Notification').create({
+        message: `Tender completion rejected: ${tender.title || tender.id}. Reason: ${reason || 'N/A'}`,
+        type: 'TENDER_COMPLETION_REJECTED',
+        targetPanel: 'both'
+      });
+    } catch(e) { console.error('Notification error:', e); }
+
+    res.json({ message: 'Tender completion rejected', tender });
+  } catch (error) {
+    res.status(500).json({ message: 'Error rejecting completion', error: error.message });
   }
 };

@@ -45,6 +45,7 @@ const statsData = [
 
 const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
   const [selectedDept, setSelectedDept] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isCreateDeptOpen, setIsCreateDeptOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
@@ -166,9 +167,13 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     }
   };
 
-  const filteredMembers = selectedDept === 'All' 
-    ? teamMembers 
-    : teamMembers.filter(m => getDeptName(m.departmentId) === selectedDept);
+  const filteredMembers = teamMembers.filter(m => {
+    const matchesDept = selectedDept === 'All' || getDeptName(m.departmentId) === selectedDept;
+    const matchesSearch = m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          m.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          getDeptName(m.departmentId).toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesDept && matchesSearch;
+  });
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
@@ -184,6 +189,8 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
             <input
               type="text"
               placeholder="Search team..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-all shadow-sm"
             />
           </div>

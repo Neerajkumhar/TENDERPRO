@@ -86,3 +86,33 @@ exports.markAsRead = async (req, res) => {
     res.status(500).json({ message: 'Error updating notification', error: error.message });
   }
 };
+
+exports.markAllAsRead = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ message: 'userId is required' });
+    }
+
+    const notifications = await Notification.findAll();
+    const updatePromises = notifications.map(async (notification) => {
+      let readArray = [];
+      try {
+        readArray = JSON.parse(notification.readBy || '[]');
+      } catch(e) {
+        readArray = [];
+      }
+      if (!readArray.includes(userId)) {
+        readArray.push(userId);
+        notification.readBy = JSON.stringify(readArray);
+        return notification.save();
+      }
+    });
+
+    await Promise.all(updatePromises);
+    res.status(200).json({ message: 'All notifications marked as read' });
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    res.status(500).json({ message: 'Error updating notifications', error: error.message });
+  }
+};

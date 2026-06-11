@@ -168,15 +168,6 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-100 bg-slate-50/50 min-w-[256px]">
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-blue-600 rounded-xl transition-all"
-        >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          <span className="text-sm font-bold">Collapse Sidebar</span>
-        </button>
-      </div>
     </aside>
   );
 };

@@ -27,6 +27,14 @@ const Client = sequelize.define('Client', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  gstAddress: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   industry: {
     type: DataTypes.STRING,
     allowNull: true,

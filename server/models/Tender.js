@@ -23,6 +23,18 @@ const Tender = sequelize.define('Tender', {
     type: DataTypes.ENUM('Government', 'Private', 'PSU', 'Non-Profit'),
     defaultValue: 'Private',
   },
+  poNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  woNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  bidType: {
+    type: DataTypes.ENUM('Private', 'E-Bazar', 'Bid'),
+    defaultValue: 'Private',
+  },
   submissionDate: {
     type: DataTypes.DATE,
     allowNull: true,
@@ -60,12 +72,30 @@ const Tender = sequelize.define('Tender', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('Draft', 'Registered', 'Active', 'Won', 'Lost', 'Archived', 'Completed'),
+    type: DataTypes.ENUM('Draft', 'Registered', 'Active', 'Won', 'Lost', 'Archived', 'Under Review', 'Completed'),
     defaultValue: 'Registered',
   },
   documents: {
     type: DataTypes.JSON,
     defaultValue: [],
+  },
+  completionDocuments: {
+    type: DataTypes.JSON,
+    defaultValue: {
+      deliveryChallan: null,
+      ewayBill: null,
+      invoice: null,
+      installationChallan: null,
+      noc: null
+    },
+  },
+  completionStatus: {
+    type: DataTypes.ENUM('Pending', 'Submitted', 'Approved', 'Rejected'),
+    defaultValue: 'Pending',
+  },
+  completionRemark: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   teamAssignments: {
     type: DataTypes.JSON,

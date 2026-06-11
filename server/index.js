@@ -33,6 +33,7 @@ require('./models/LeaveRequest');
 require('./models/LeaveBalance');
 require('./models/Notification');
 require('./models/Payment');
+require('./models/DocumentRequest');
 
 // Set up associations
 const User = require('./models/User');
@@ -56,6 +57,15 @@ Message.belongsTo(User, { as: 'Receiver', foreignKey: 'receiverId' });
 // Payment associations
 Invoice.hasMany(Payment, { foreignKey: 'invoiceId' });
 Payment.belongsTo(Invoice, { foreignKey: 'invoiceId' });
+
+// DocumentRequest associations
+const DocumentRequest = require('./models/DocumentRequest');
+const Tender = require('./models/Tender');
+
+User.hasMany(DocumentRequest, { foreignKey: 'userId' });
+DocumentRequest.belongsTo(User, { foreignKey: 'userId' });
+Tender.hasMany(DocumentRequest, { foreignKey: 'tenderId' });
+DocumentRequest.belongsTo(Tender, { foreignKey: 'tenderId' });
 
 const app = express();
 
@@ -123,6 +133,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/leave-requests', require('./routes/leaveRequestRoutes'));
+app.use('/api/doc-requests', require('./routes/docRequestRoutes'));
 
 app.get('/', (req, res) => {
   res.json({ 

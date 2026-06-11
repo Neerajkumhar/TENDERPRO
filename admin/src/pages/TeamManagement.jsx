@@ -56,8 +56,14 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     password: '',
     role: 'Core Team',
     departmentId: '',
-    phone: ''
+    phone: '',
+    panDoc: '',
+    cvDoc: '',
+    adharDoc: '',
+    bankFrontDoc: '',
+    cancelCheckDoc: ''
   });
+  const [uploadingDoc, setUploadingDoc] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -134,7 +140,12 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
           password: '',
           role: 'Core Team',
           departmentId: '',
-          phone: ''
+          phone: '',
+          panDoc: '',
+          cvDoc: '',
+          adharDoc: '',
+          bankFrontDoc: '',
+          cancelCheckDoc: ''
         });
       } else {
         const err = await response.json();
@@ -142,6 +153,28 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
       }
     } catch (error) {
       console.error('Error creating member:', error);
+    }
+  };
+
+  const handleDocumentUpload = async (field, file) => {
+    if (!file) return;
+    setUploadingDoc(field);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMemberFormData(prev => ({ ...prev, [field]: data.url }));
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setUploadingDoc(null);
     }
   };
 
@@ -468,33 +501,40 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
           {/* Department Distribution */}
           <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40">
             <h3 className="font-black text-slate-900 text-lg tracking-tight mb-6">Dept. Distribution</h3>
-            <div className="h-[250px]">
+            <div className="h-[250px] relative">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-4xl font-black text-slate-900 tracking-tighter">{teamMembers.length}</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Members</span>
+              </div>
               <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <PieChart>
                   <Pie
                     data={departments}
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
+                    innerRadius={75}
+                    outerRadius={100}
+                    paddingAngle={4}
                     dataKey="memberCount"
+                    stroke="none"
                   >
                     {departments.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-6 space-y-3">
+            <div className="mt-8 space-y-2">
               {departments.map((dept, i) => (
-                <div key={i} className="flex items-center justify-between">
+                <div key={i} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 group">
                   <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dept.color }}></div>
-                    <span className="text-xs font-bold text-slate-600">{dept.name}</span>
+                    <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: dept.color }}></div>
+                    <span className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">{dept.name}</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-black text-slate-400 uppercase">{dept.memberCount || 0} Members</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-slate-400 bg-white shadow-sm border border-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{dept.memberCount || 0} Members</span>
                   </div>
                 </div>
               ))}
@@ -703,6 +743,41 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                 </div>
               </div>
 
+              {/* Document Uploads */}
+              <div className="pt-4 border-t border-slate-100">
+                <h3 className="text-sm font-black text-slate-800 tracking-tight mb-4">Required Documents</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {[
+                    { key: 'panDoc', label: 'PAN Card' },
+                    { key: 'cvDoc', label: 'CV / Resume' },
+                    { key: 'adharDoc', label: 'Aadhar Card' },
+                    { key: 'bankFrontDoc', label: 'Bank Front Page' },
+                    { key: 'cancelCheckDoc', label: 'Cancel Check' }
+                  ].map(doc => (
+                    <div key={doc.key} className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{doc.label}</label>
+                      <div className="relative">
+                        <input 
+                          type="file" 
+                          onChange={(e) => handleDocumentUpload(doc.key, e.target.files[0])}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <div className={`w-full px-4 py-3 bg-slate-50 border ${memberFormData[doc.key] ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500'} rounded-2xl text-[11px] font-bold outline-none flex items-center justify-between transition-all shadow-sm`}>
+                          <span className="truncate mr-2">
+                            {uploadingDoc === doc.key ? 'Uploading...' : memberFormData[doc.key] ? 'Uploaded' : 'Select File'}
+                          </span>
+                          {memberFormData[doc.key] ? (
+                            <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
+                          ) : (
+                            <Plus size={16} className="text-slate-400 flex-shrink-0" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex gap-4 pt-4">
                 <button 
                   type="button" 
@@ -713,9 +788,10 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest"
+                  disabled={uploadingDoc !== null}
+                  className="flex-1 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-widest disabled:opacity-50"
                 >
-                  Create Member
+                  {uploadingDoc !== null ? 'Uploading Document...' : 'Create Member'}
                 </button>
               </div>
             </form>

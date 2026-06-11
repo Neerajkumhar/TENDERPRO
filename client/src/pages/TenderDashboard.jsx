@@ -27,8 +27,8 @@ import {
   User as UserIcon
 } from 'lucide-react';
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -42,7 +42,7 @@ import {
   Pie
 } from 'recharts';
 
-const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients, user }) => {
+const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments = [], setTenders, clients, user }) => {
   const [activeView, setActiveView] = useState('overview'); // 'overview' or 'list'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -109,29 +109,56 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
     getClientName(t.clientId)?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Stats for Overview (Matching Image 2)
   const statsData = [
-    { label: 'Total Tenders', value: tenders.length || '1,245', color: 'slate' },
-    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length || '312', color: 'blue' },
-    { label: 'Submitted', value: tenders.filter(t => t.status === 'Submitted').length || '458', color: 'indigo' },
-    { label: 'Won', value: tenders.filter(t => t.status === 'Won').length || '289', color: 'emerald' },
-    { label: 'Lost', value: tenders.filter(t => t.status === 'Lost').length || '163', color: 'rose' },
-    { label: 'Approval Pending', value: '23', color: 'amber' },
+    { label: 'Total Tenders', value: tenders.length, color: 'slate' },
+    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
+    { label: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo' },
+    { label: 'Total Projects', value: assignments?.length || 0, color: 'emerald' },
+    { label: 'Completed Projects', value: assignments?.filter(a => a.status === 'Completed').length || 0, color: 'teal' },
+    { label: 'Completed Tenders', value: tenders.filter(t => t.status === 'Completed').length, color: 'amber' },
   ];
 
-  const pipelineData = [
-    { name: 'Stage', value: 1000 },
-    { name: 'Submit', value: tenders.filter(t => t.status === 'Submitted').length || 312 },
-    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length || 450 },
-    { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').length || 50 },
-  ];
+  // 1. Tender Outcomes Over Time (Last 6 Months)
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const outcomesData = [];
+  const currentDate = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+    const month = d.getMonth();
+    const year = d.getFullYear();
+    
+    const monthTenders = tenders.filter(t => {
+      const tDate = new Date(t.createdAt);
+      return tDate.getMonth() === month && tDate.getFullYear() === year;
+    });
 
-  const categoryData = [
-    { name: 'IT services', value: 45, color: '#a855f7' },
-    { name: 'Construction', value: 35, color: '#8b5cf6' },
-    { name: 'Cleaning', value: 25, color: '#6366f1' },
-    { name: 'Infrastructure', value: 15, color: '#3b82f6' },
-  ];
+    outcomesData.push({
+      name: `${monthNames[month]}`,
+      Won: monthTenders.filter(t => t.status === 'Won').length,
+      Lost: monthTenders.filter(t => t.status === 'Lost').length,
+      Active: monthTenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).length,
+    });
+  }
+
+  // 2. Budget Distribution by Status
+  const budgetByStatus = [
+    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#10b981' }, // emerald-500
+    { name: 'In Pipeline (Active)', value: tenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#6366f1' }, // indigo-500
+    { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#f43f5e' }, // rose-500
+    { name: 'Drafts', value: tenders.filter(t => t.status === 'Draft').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#94a3b8' } // slate-400
+  ].filter(item => item.value > 0);
+
+  if (budgetByStatus.length === 0) {
+    budgetByStatus.push({ name: 'No Data', value: 1, color: '#f1f5f9' });
+  }
+
+  const formatCurrency = (val) => {
+    if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)}Cr`;
+    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+    return `₹${val.toLocaleString()}`;
+  };
+
+  const totalBudgetValue = budgetByStatus.reduce((acc, item) => item.name !== 'No Data' ? acc + item.value : acc, 0);
 
   const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
@@ -348,25 +375,39 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
             <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Pipeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Distribution across stages</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bid outcomes over last 6 months</p>
                 </div>
                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                  <Target size={20} />
+                  <TrendingUp size={20} />
                 </div>
               </div>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                  <BarChart data={pipelineData}>
+                  <AreaChart data={outcomesData}>
+                    <defs>
+                      <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dy={10} />
-                    <Tooltip cursor={{fill: '#f8fafc'}} />
-                    <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={40}>
-                      {pipelineData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#8b5cf6' : '#a78bfa'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dx={-10} allowDecimals={false} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      itemStyle={{ fontSize: '12px', fontWeight: 800 }}
+                      labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
+                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#10b981" fill="url(#colorWon)" strokeWidth={3} />
+                    <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={3} />
+                    <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="5 5" />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -374,22 +415,23 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
             <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Value by Category</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Categorical breakdown</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total budget distribution by status</p>
                 </div>
-                <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
                   <BarChart3 size={20} />
                 </div>
               </div>
               <div className="flex items-center h-[300px] gap-8">
                  <div className="flex-1 space-y-4">
-                    {categoryData.map((cat, i) => (
+                    {budgetByStatus.map((cat, i) => (
                       <div key={i} className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest" style={{ color: cat.color }}>
                           <span>{cat.name}</span>
+                          <span className="text-slate-800">{cat.name === 'No Data' ? '-' : formatCurrency(cat.value)}</span>
                         </div>
                         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                           <div className="h-full bg-indigo-500 rounded-full" style={{width: `${cat.value * 2}%`}}></div>
+                           <div className="h-full rounded-full transition-all duration-1000" style={{width: `${totalBudgetValue > 0 ? (cat.value / totalBudgetValue) * 100 : 0}%`, backgroundColor: cat.color}}></div>
                         </div>
                       </div>
                     ))}
@@ -398,21 +440,27 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
-                          data={categoryData}
-                          innerRadius={60}
-                          outerRadius={85}
-                          paddingAngle={8}
+                          data={budgetByStatus}
+                          innerRadius={65}
+                          outerRadius={90}
+                          paddingAngle={5}
                           dataKey="value"
+                          stroke="none"
                         >
-                          {categoryData.map((entry, index) => (
+                          {budgetByStatus.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
+                        <Tooltip 
+                          formatter={(value) => formatCurrency(value)}
+                          contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          itemStyle={{ fontSize: '12px', fontWeight: 800 }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-3xl font-black text-slate-900 tracking-tighter">1.2k</span>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total</span>
+                      <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">{totalBudgetValue > 0 ? formatCurrency(totalBudgetValue) : '₹0'}</span>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Value</span>
                     </div>
                  </div>
               </div>
@@ -558,7 +606,13 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                         <button onClick={() => {
                           if(window.confirm('Delete this tender?')) {
                             fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
-                              .then(() => setTenders(prev => prev.filter(t => t.id !== tender.id)));
+                              .then(res => {
+                                if (res.ok) {
+                                  setTenders(prev => prev.filter(t => t.id !== tender.id));
+                                } else {
+                                  alert('Failed to delete tender. It may be linked to other records.');
+                                }
+                              });
                           }
                         }} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"><Trash2 size={16} /></button>
                       </div>

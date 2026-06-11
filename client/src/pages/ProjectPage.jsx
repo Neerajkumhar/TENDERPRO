@@ -183,7 +183,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
 
       {/* Tabs & Search Bar - Matching Image */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 border-b border-slate-200">
-        <div className="flex w-full md:w-auto overflow-x-auto custom-scrollbar">
+        <div className="flex w-full md:w-auto">
            <button className="px-4 py-4 text-[11px] font-black uppercase tracking-widest text-[#1e293b] border-b-2 border-[#1e293b] -mb-[2px] whitespace-nowrap">
              All Projects
            </button>

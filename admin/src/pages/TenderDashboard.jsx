@@ -360,7 +360,13 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                         <button onClick={() => {
                           if(window.confirm('Delete this tender?')) {
                             fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
-                              .then(() => setTenders(prev => prev.filter(t => t.id !== tender.id)));
+                              .then(res => {
+                                if (res.ok) {
+                                  setTenders(prev => prev.filter(t => t.id !== tender.id));
+                                } else {
+                                  alert('Failed to delete tender. It may be linked to other records.');
+                                }
+                              });
                           }
                         }} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"><Trash2 size={16} /></button>
                       </div>

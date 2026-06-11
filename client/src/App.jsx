@@ -428,6 +428,7 @@ function App() {
            {activeTab === 'Tender Dashboard' && (
             <TenderDashboard 
               tenders={tenders}
+              assignments={assignments}
               setTenders={setTenders}
               clients={clients}
               user={user}
@@ -445,6 +446,7 @@ function App() {
           {activeTab === 'Tender Management' && (
             <TenderManagement
               tenders={tenders}
+              assignments={assignments}
               setTenders={setTenders}
               clients={clients}
               onView={handleTenderClick}
@@ -461,6 +463,7 @@ function App() {
           {activeTab === 'Client Management' && ['Admin', 'Tender Manager'].includes(user.role) && (
             <ClientManagement
               clients={clients}
+              tenders={tenders}
               setClients={setClients}
               onView={(id) => {
                 setSelectedClientId(id);
@@ -471,10 +474,14 @@ function App() {
           {activeTab === 'Client Details' && ['Admin', 'Tender Manager'].includes(user.role) && (
             <ClientDetails
               clientId={selectedClientId}
-              onBack={() => {
+              onBack={(deletedId, action) => {
+                if (action === 'deleted') {
+                  setClients(prev => prev.filter(c => c.id !== deletedId));
+                }
                 setActiveTab('Client Management');
                 setSelectedClientId(null);
               }}
+              onTenderClick={handleTenderClick}
             />
           )}
           {activeTab === 'Project Management' && (
@@ -565,8 +572,23 @@ function App() {
                 setEditTenderData(tender);
                 setActiveTab('Edit Tender');
               }}
+              onDelete={async (id) => {
+                if (window.confirm('Delete this tender?')) {
+                  const res = await fetch(`/api/tenders/${id}`, { method: 'DELETE' });
+                  if (res.ok) {
+                    setTenders(prev => prev.filter(t => t.id !== id));
+                    handleBackToTendersDetail();
+                  } else {
+                    alert('Failed to delete tender. It may be linked to other records.');
+                  }
+                }
+              }}
               user={members.find(m => m.email === user.email) || user}
               members={members}
+              onProjectClick={(projectId) => {
+                setSelectedProjectId(projectId);
+                setActiveTab('Project Details');
+              }}
             />
           )}
           {activeTab === 'Assignment Details' && (

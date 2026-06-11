@@ -104,7 +104,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
           <div>
             <h2 className="text-2xl font-black tracking-tight text-slate-900 uppercase italic">Invoice Details</h2>
             <div className="mt-1 flex items-center gap-3">
-              <span className="text-sm font-bold text-slate-400 tracking-widest">{invoice.invoiceNumber || invoice.id.slice(0,8)}</span>
+              <span className="text-sm font-bold text-slate-400 tracking-widest">{invoice.invoiceNumber || invoice.id.slice(0, 8)}</span>
               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
                 {invoice.status}
               </span>
@@ -164,7 +164,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
               <h2 className="text-4xl font-black text-blue-900 tracking-tighter italic uppercase">INVOICE</h2>
               <div className="mt-6 space-y-1.5">
                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Invoice Number</p>
-                <p className="text-lg font-black text-slate-800">{invoice.invoiceNumber || invoice.id.slice(0,8)}</p>
+                <p className="text-lg font-black text-slate-800">{invoice.invoiceNumber || invoice.id.slice(0, 8)}</p>
                 <div className="pt-2 flex flex-col items-end gap-1">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
                   <span className={`px-4 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{invoice.status}</span>
@@ -259,19 +259,19 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="w-full sm:w-80 space-y-4">
               <div className="flex justify-between items-center px-4">
                 <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Subtotal</span>
                 <span className="text-sm font-black text-slate-700">₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between items-center px-4">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Tax ({((taxAmount/subtotal)*100).toFixed(0)}%)</span>
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Tax ({((taxAmount / subtotal) * 100).toFixed(0)}%)</span>
                 <span className="text-sm font-black text-slate-700">₹{taxAmount.toLocaleString('en-IN')}</span>
               </div>
               <div className="bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200 flex justify-between items-center group overflow-hidden relative">
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-                   <IndianRupee size={60} className="text-white" />
+                  <IndianRupee size={60} className="text-white" />
                 </div>
                 <span className="text-[11px] font-black text-blue-400 uppercase tracking-[0.2em] relative z-10">Total Amount</span>
                 <span className="text-2xl font-black text-white italic relative z-10">₹{total.toLocaleString('en-IN')}</span>
@@ -287,11 +287,11 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
             </div>
             <div className="flex flex-col items-center sm:items-end">
               <div className="w-40 border-b-2 border-slate-200 pb-2 flex justify-center">
-                 {invoice.authorizedSignature ? (
-                   <img src={invoice.authorizedSignature} className="h-12 object-contain" alt="Signature" />
-                 ) : (
-                   <div className="h-12 w-full"></div>
-                 )}
+                {invoice.authorizedSignature ? (
+                  <img src={invoice.authorizedSignature} className="h-12 object-contain" alt="Signature" />
+                ) : (
+                  <div className="h-12 w-full"></div>
+                )}
               </div>
               <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mt-2 italic">Authorized Signatory</p>
             </div>
@@ -301,46 +301,46 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
 
       {isEditing && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center px-4 p-6 overflow-y-auto text-left">
-           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={() => setIsEditing(false)}></div>
-           <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col my-auto max-h-[95vh]">
-              <div className="p-8 sm:p-10 overflow-y-auto custom-scrollbar">
-                 <div className="flex justify-between items-center mb-8">
-                    <div>
-                       <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Edit Invoice</h2>
-                       <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Audit billing details</p>
-                    </div>
-                    <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><X size={24} /></button>
-                 </div>
-                 <form onSubmit={handleEditSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name</label>
-                          <input className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={editForm.client} onChange={e => setEditForm({...editForm, client: e.target.value})} />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
-                          <select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold appearance-none" value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})}>
-                             <option>Pending</option><option>Paid</option><option>Overdue</option>
-                          </select>
-                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Amount Paid (₹)</label>
-                          <input type="number" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={editForm.paid_amount} onChange={e => setEditForm({...editForm, paid_amount: e.target.value})} />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Balance Due (₹)</label>
-                          <input type="number" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={editForm.amount_due} onChange={e => setEditForm({...editForm, amount_due: e.target.value})} />
-                       </div>
-                    </div>
-                    <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
-                       <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
-                       <button type="submit" className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200">Save Changes</button>
-                    </div>
-                 </form>
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={() => setIsEditing(false)}></div>
+          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col my-auto max-h-[95vh]">
+            <div className="p-8 sm:p-10 overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Edit Invoice</h2>
+                  <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Audit billing details</p>
+                </div>
+                <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><X size={24} /></button>
               </div>
-           </div>
+              <form onSubmit={handleEditSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name</label>
+                    <input className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={editForm.client} onChange={e => setEditForm({ ...editForm, client: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
+                    <select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold appearance-none" value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
+                      <option>Pending</option><option>Paid</option><option>Overdue</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Amount Paid (₹)</label>
+                    <input type="number" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={editForm.paid_amount} onChange={e => setEditForm({ ...editForm, paid_amount: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Balance Due (₹)</label>
+                    <input type="number" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={editForm.amount_due} onChange={e => setEditForm({ ...editForm, amount_due: e.target.value })} />
+                  </div>
+                </div>
+                <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2">
+                  <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
+                  <button type="submit" className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>

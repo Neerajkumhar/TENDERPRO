@@ -7,7 +7,6 @@ import {
   DollarSign, 
   Users2, 
   BarChart3, 
-  Settings,
   ChevronLeft,
   ChevronRight,
   Target,
@@ -21,7 +20,8 @@ import {
   Clock,
   Truck,
   X,
-  ClipboardCheck
+  ClipboardCheck,
+  CheckCircle2
 } from 'lucide-react';
 
 const menuItems = [
@@ -29,13 +29,14 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Dashboard', roles: ['Admin'] },
 
   { icon: FileText, label: 'Tender Management', activeTab: 'Tender Management', roles: ['Admin'] },
+  { icon: CheckCircle2, label: 'Completed Tenders', activeTab: 'Completed Tenders', roles: ['Admin'] },
   { icon: Users, label: 'Client Management', activeTab: 'Client Management', roles: ['Admin'] },
   { icon: Briefcase, label: 'Project Management', activeTab: 'Project Management', roles: ['Admin'] },
   { icon: DollarSign, label: 'Finance Management', activeTab: 'Financial Management', roles: ['Admin'] },
   { icon: Users2, label: 'Team Management', activeTab: 'Team Management', roles: ['Admin'] },
   { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Admin'] },
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Admin'] },
-  { icon: Settings, label: 'Settings', activeTab: 'Settings', roles: ['Admin'] },
+  
 
   // Tender Manager
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Tender Dashboard', roles: ['Tender Manager'] },
@@ -167,15 +168,6 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-100 bg-slate-50/50 min-w-[256px]">
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-blue-600 rounded-xl transition-all"
-        >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          <span className="text-sm font-bold">Collapse Sidebar</span>
-        </button>
-      </div>
     </aside>
   );
 };
