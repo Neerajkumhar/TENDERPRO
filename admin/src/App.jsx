@@ -252,9 +252,10 @@ function App() {
     }
   };
 
-  const handleProjectClick = (id) => {
+  const handleProjectClick = (id, assignmentId = null) => {
     setPreviousTab(activeTab);
     setSelectedProjectId(id);
+    if (assignmentId) setSelectedAssignmentId(assignmentId);
     setActiveTab('Project Details');
   };
 
@@ -421,6 +422,7 @@ function App() {
               assignments={assignments}
               members={members}
               onProjectClick={handleProjectClick}
+              onViewAllTenders={() => setActiveTab('Tender Management')}
             />
           )}
           {activeTab === 'Member Dashboard' && (
@@ -564,6 +566,7 @@ function App() {
           {activeTab === 'Project Details' && (
             <ProjectDetails
               projectId={selectedProjectId}
+              assignmentId={selectedAssignmentId}
               onBack={handleBackToProjects}
               onEdit={(tender) => {
                 setEditTenderData(tender);
@@ -700,6 +703,7 @@ function App() {
               assignments={assignments}
               user={members.find(m => m.email === user.email) || user}
               members={members}
+              tenders={tenders}
               onCreateProject={() => setActiveTab('Create Project')}
               fetchAssignments={fetchAssignments}
             />

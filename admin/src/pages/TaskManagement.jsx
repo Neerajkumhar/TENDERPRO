@@ -25,6 +25,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
   const [viewType, setViewType] = useState('grid');
   const [draggedTaskId, setDraggedTaskId] = useState(null);
   const [activityFilter, setActivityFilter] = useState('ALL');
+  const [selectedProjectFilter, setSelectedProjectFilter] = useState('ALL');
 
   // Modal State for Project Manager Task Creation
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -201,16 +202,25 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
     { id: 'Completed', label: 'DONE', color: 'emerald' },
   ];
 
+  const getFilteredTasks = () => {
+    let filtered = tasks;
+    if (selectedProjectFilter !== 'ALL') {
+      filtered = filtered.filter(t => String(t.assignmentId) === String(selectedProjectFilter));
+    }
+    return filtered;
+  };
+
   const getTasksByStatus = (status) => {
-    return tasks.filter(t => t.status === status || (status === 'To Do' && t.status === 'Pending') || (status === 'Completed' && t.status === 'Done') || (status === 'Review' && t.status === 'In Review'));
+    const filteredTasks = getFilteredTasks();
+    return filteredTasks.filter(t => t.status === status || (status === 'To Do' && t.status === 'Pending') || (status === 'Completed' && t.status === 'Done') || (status === 'Review' && t.status === 'In Review'));
   };
 
   const getTasksDueToday = () => {
     const today = new Date().toDateString();
-    return tasks.filter(t => t.deadline && new Date(t.deadline).toDateString() === today).length;
+    return getFilteredTasks().filter(t => t.deadline && new Date(t.deadline).toDateString() === today).length;
   };
 
-  const totalTasks = tasks.length || 1;
+  const totalTasks = getFilteredTasks().length || 1;
   const stats = [
     { label: 'TO DO', value: getTasksByStatus('To Do').length, percent: `${Math.round((getTasksByStatus('To Do').length / totalTasks) * 100)}% OF TOTAL`, icon: null, color: 'bg-blue-600', light: 'bg-blue-50' },
     { label: 'IN PROGRESS', value: getTasksByStatus('In Progress').length, percent: `${Math.round((getTasksByStatus('In Progress').length / totalTasks) * 100)}% OF TOTAL`, icon: Clock, color: 'bg-emerald-500', light: 'bg-emerald-50' },
@@ -248,6 +258,19 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         </h2>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          {user.role === 'Project Manager' && (
+            <select
+              value={selectedProjectFilter}
+              onChange={(e) => setSelectedProjectFilter(e.target.value)}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl sm:rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest outline-none focus:border-blue-500 transition-all shadow-sm cursor-pointer"
+            >
+              <option value="ALL">ALL PROJECTS</option>
+              {activeProjectsList.map(proj => (
+                <option key={proj.id} value={proj.id}>{proj.title || 'UNTITLED ASSIGNMENT'}</option>
+              ))}
+            </select>
+          )}
+
           {/* CREATE TASK BUTTON FOR PROJECT MANAGERS */}
           {user.role === 'Project Manager' && (
             <button 
@@ -378,7 +401,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
                <div className="mt-6 space-y-4 flex-1">
                  {(() => {
-                   let filtered = tasks;
+                   let filtered = getFilteredTasks();
                    if (activityFilter === 'TODAY') {
                      const today = new Date().toDateString();
                      filtered = filtered.filter(t => t.deadline && new Date(t.deadline).toDateString() === today);

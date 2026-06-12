@@ -64,29 +64,34 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
     getClientName(t.clientId)?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Stats for Overview (Matching Image 2)
+  // Stats for Overview
   const statsData = [
-    { label: 'Total Tenders', value: tenders.length || '1,245', color: 'slate' },
-    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length || '312', color: 'blue' },
-    { label: 'Submitted', value: tenders.filter(t => t.status === 'Submitted').length || '458', color: 'indigo' },
-    { label: 'Won', value: tenders.filter(t => t.status === 'Won').length || '289', color: 'emerald' },
-    { label: 'Lost', value: tenders.filter(t => t.status === 'Lost').length || '163', color: 'rose' },
-    { label: 'Approval Pending', value: '23', color: 'amber' },
+    { label: 'Total Tenders', value: tenders.length, color: 'slate' },
+    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
+    { label: 'Submitted', value: tenders.filter(t => t.status === 'Submitted').length, color: 'indigo' },
+    { label: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: 'emerald' },
+    { label: 'Lost', value: tenders.filter(t => t.status === 'Lost').length, color: 'rose' },
+    { label: 'Approval Pending', value: tenders.filter(t => t.status === 'Pending').length, color: 'amber' },
   ];
 
   const pipelineData = [
-    { name: 'Stage', value: 1000 },
-    { name: 'Submit', value: tenders.filter(t => t.status === 'Submitted').length || 312 },
-    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length || 450 },
-    { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').length || 50 },
+    { name: 'Active', value: tenders.filter(t => t.status === 'Active').length },
+    { name: 'Pending', value: tenders.filter(t => t.status === 'Pending').length },
+    { name: 'Completed', value: tenders.filter(t => t.status === 'Completed').length },
   ];
 
-  const categoryData = [
-    { name: 'IT services', value: 45, color: '#a855f7' },
-    { name: 'Construction', value: 35, color: '#8b5cf6' },
-    { name: 'Cleaning', value: 25, color: '#6366f1' },
-    { name: 'Infrastructure', value: 15, color: '#3b82f6' },
-  ];
+  const categoryCounts = tenders.reduce((acc, t) => {
+    const cat = t.category || 'Uncategorized';
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {});
+
+  const colors = ['#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#14b8a6', '#f59e0b', '#ec4899'];
+  const categoryData = Object.entries(categoryCounts).map(([name, value], index) => ({
+    name,
+    value,
+    color: colors[index % colors.length]
+  }));
 
   const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
@@ -160,7 +165,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
             <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Pipeline</h3>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Distribution across stages</p>
                 </div>
                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">

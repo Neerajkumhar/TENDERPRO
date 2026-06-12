@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = [], onCreateProject, fetchAssignments }) => {
+const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = [], tenders = [], onCreateProject, fetchAssignments }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
@@ -274,6 +274,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
               <tr className="bg-white text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
                 <th className="px-6 sm:px-8 py-6">Project Name</th>
                 <th className="px-6 sm:px-8 py-6">Tender</th>
+                <th className="px-6 sm:px-8 py-6">Tender Manager</th>
                 <th className="px-6 sm:px-8 py-6">Client</th>
                 <th className="px-6 sm:px-8 py-6">Start Date</th>
                 <th className="px-6 sm:px-8 py-6">End Date</th>
@@ -286,7 +287,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
               {myProjects.length > 0 ? myProjects.map((item) => (
                 <tr 
                   key={item.id} 
-                  onClick={() => onProjectClick(item.tenderId)}
+                  onClick={() => onProjectClick(item.tenderId, item.id)}
                   className="hover:bg-slate-50/50 transition-all cursor-pointer group"
                 >
                   <td className="px-6 sm:px-8 py-6">
@@ -300,6 +301,9 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                     </div>
                   </td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.tender?.title || 'N/A'}</td>
+                  <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">
+                    {tenders?.find(t => t.id === item.tenderId)?.teamMembers?.manager?.name || 'Unassigned'}
+                  </td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.tender?.client?.name || 'N/A'}</td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}</td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.deadline ? new Date(item.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</td>

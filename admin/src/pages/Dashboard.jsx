@@ -35,7 +35,7 @@ import {
   Area
 } from 'recharts';
 
-const Dashboard = ({ user, members = [], assignments = [], onProjectClick }) => {
+const Dashboard = ({ user, members = [], assignments = [], onProjectClick, onViewAllTenders }) => {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
@@ -251,7 +251,7 @@ const Dashboard = ({ user, members = [], assignments = [], onProjectClick }) => 
         <div className="card col-span-1 xl:col-span-2 overflow-hidden bg-white border-none shadow-xl shadow-slate-200/40">
           <div className="p-6 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/20 text-left">
             <div><h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase tracking-wider italic">Recent Tenders</h3><p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Application monitoring log</p></div>
-            <button className="w-full sm:w-auto bg-white text-blue-600 px-6 py-2.5 rounded-xl text-[10px] font-black shadow-sm border border-slate-100 hover:border-blue-200 transition-all uppercase tracking-widest active:scale-95">View all</button>
+            <button onClick={onViewAllTenders} className="w-full sm:w-auto bg-white text-blue-600 px-6 py-2.5 rounded-xl text-[10px] font-black shadow-sm border border-slate-100 hover:border-blue-200 transition-all uppercase tracking-widest active:scale-95">View all</button>
           </div>
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-left min-w-[700px]">

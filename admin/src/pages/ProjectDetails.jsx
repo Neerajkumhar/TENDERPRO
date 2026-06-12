@@ -19,7 +19,9 @@ import {
   MessageSquare,
   Users,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Briefcase,
+  X
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -35,12 +37,21 @@ const progressData = [
   { name: 'Not Started', value: 5, color: '#94a3b8' },
 ];
 
-const ProjectDetails = ({ projectId, onBack, onEdit }) => {
+const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetchAssignments }) => {
   const [project, setProject] = useState(null);
   const [projectAssignments, setProjectAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processingDocs, setProcessingDocs] = useState(false);
+
+  // Edit Assignment States
+  const [editingProject, setEditingProject] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editManager, setEditManager] = useState('');
+  const [editStatus, setEditStatus] = useState('Pending');
+  const [editPriority, setEditPriority] = useState('Medium');
+  const [editDeadline, setEditDeadline] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const handleApproveDocs = async () => {
     try {
@@ -67,6 +78,48 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
       alert('Error rejecting documents');
     } finally {
       setProcessingDocs(false);
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editDescription) {
+      alert('Description is required.');
+      return;
+    }
+    try {
+      const payload = {
+        title: editTitle || null,
+        tenderId: editingProject.tenderId,
+        departmentId: editingProject.departmentId,
+        assigneeId: editManager || null,
+        description: editDescription,
+        priority: editPriority,
+        deadline: editDeadline || null,
+        status: editStatus
+      };
+      
+      const response = await fetch(`/api/assignments/${editingProject.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (response.ok) {
+        const assignmentsRes = await fetch('/api/assignments');
+        if (assignmentsRes.ok) {
+          const allAssignments = await assignmentsRes.json();
+          setProjectAssignments(allAssignments.filter(a => String(a.tenderId) === String(projectId)));
+        }
+        setEditingProject(null);
+        alert('Project updated successfully!');
+      } else {
+        const err = await response.json();
+        alert(`Failed to update project: ${err.message}`);
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+      alert('Network error occurred while updating the project.');
     }
   };
 
@@ -128,6 +181,31 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
     { text: `Last modified`, user: 'Admin User', date: new Date(project.updatedAt).toLocaleString(), color: 'blue' },
   ];
 
+  const targetAssignment = assignmentId && projectAssignments.length > 0
+    ? projectAssignments.find(a => String(a.id) === String(assignmentId))
+    : null;
+
+  const getTenderManager = () => {
+    if (project.teamMembers?.manager) return project.teamMembers.manager;
+    let managerId = null;
+    if (project.teamAssignments) {
+      if (typeof project.teamAssignments === 'string') {
+        try {
+          const parsed = JSON.parse(project.teamAssignments);
+          managerId = parsed.managerId;
+        } catch (e) {}
+      } else if (typeof project.teamAssignments === 'object') {
+        managerId = project.teamAssignments.managerId;
+      }
+    }
+    if (managerId && members) {
+      return members.find(m => m.id === managerId);
+    }
+    return null;
+  };
+
+  const tenderManager = getTenderManager();
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       {/* Header Area */}
@@ -142,16 +220,18 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
             </button>
             <div className="min-w-0 flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight truncate">{project.title}</h1>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight truncate">
+                  {targetAssignment ? targetAssignment.title || project.title : project.title}
+                </h1>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest
-                    ${project.status === 'Active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 
-                      project.status === 'Won' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
-                    {project.status}
+                    ${(targetAssignment ? targetAssignment.status : project.status) === 'Active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 
+                      (targetAssignment ? targetAssignment.status : project.status) === 'Won' || (targetAssignment ? targetAssignment.status : project.status) === 'Completed' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
+                    {targetAssignment ? targetAssignment.status : project.status}
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-8">
                 <div>
                   <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Reference No.</p>
                   <p className="text-xs font-black text-slate-900 mt-1 truncate">{project.reference || 'N/A'}</p>
@@ -164,14 +244,31 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
                   <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Tender Manager</p>
                   <div className="flex items-center gap-2 mt-1 min-w-0">
                     <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-[8px] text-white overflow-hidden shrink-0">
-                      {project.teamMembers?.manager?.image ? <img src={project.teamMembers.manager.image} className="w-full h-full object-cover" alt="" /> : <User size={10} />}
+                      {tenderManager?.image ? <img src={tenderManager.image} className="w-full h-full object-cover" alt="" /> : <User size={10} />}
                     </div>
-                    <span className="text-xs font-black text-slate-900 truncate">{project.teamMembers?.manager?.name || 'Not Assigned'}</span>
+                    <span className="text-xs font-black text-slate-900 truncate">{tenderManager?.name || 'Not Assigned'}</span>
                   </div>
                 </div>
+                {targetAssignment && (
+                  <>
+                    <div>
+                      <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Assigned To</p>
+                      <div className="flex items-center gap-2 mt-1 min-w-0">
+                        <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-[8px] text-white overflow-hidden shrink-0">
+                          {targetAssignment.assignee?.image ? <img src={targetAssignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={10} />}
+                        </div>
+                        <span className="text-xs font-black text-slate-900 truncate">{targetAssignment.assignee?.name || 'Unassigned'}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Department</p>
+                      <p className="text-xs font-black text-slate-900 mt-1 truncate">{targetAssignment.department?.name || 'N/A'}</p>
+                    </div>
+                  </>
+                )}
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Submission Date</p>
-                  <p className="text-xs font-black text-slate-900 mt-1 truncate">{project.submissionDate ? new Date(project.submissionDate).toLocaleDateString() : 'No Date'}</p>
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Deadline</p>
+                  <p className="text-xs font-black text-slate-900 mt-1 truncate">{targetAssignment?.deadline ? new Date(targetAssignment.deadline).toLocaleDateString() : project.submissionDate ? new Date(project.submissionDate).toLocaleDateString() : 'No Date'}</p>
                 </div>
                 <div>
                   <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Budget</p>
@@ -182,11 +279,23 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
           </div>
           <div className="flex items-center gap-3 w-full xl:w-auto">
             <button 
-              onClick={() => onEdit(project)}
+              onClick={() => {
+                if (targetAssignment) {
+                  setEditingProject(targetAssignment);
+                  setEditTitle(targetAssignment.title || '');
+                  setEditManager(targetAssignment.assigneeId || '');
+                  setEditStatus(targetAssignment.status || 'Pending');
+                  setEditPriority(targetAssignment.priority || 'Medium');
+                  setEditDeadline(targetAssignment.deadline ? targetAssignment.deadline.split('T')[0] : '');
+                  setEditDescription(targetAssignment.description || '');
+                } else {
+                  onEdit(project);
+                }
+              }}
               className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm active:scale-95"
             >
               <Edit2 size={16} />
-              <span>Edit Details</span>
+              <span>{assignmentId ? 'Edit Project Details' : 'Edit Details'}</span>
             </button>
           </div>
         </div>
@@ -387,7 +496,10 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                           <ShieldCheck size={14} className="text-indigo-500" />
-                          <span className="text-xs font-black text-slate-900 uppercase tracking-tight">{assignment.department?.name}</span>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-black text-slate-900">{assignment.title || 'Untitled Project'}</span>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{assignment.department?.name}</span>
+                          </div>
                         </div>
                         <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
                           assignment.priority === 'High' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
@@ -439,6 +551,127 @@ const ProjectDetails = ({ projectId, onBack, onEdit }) => {
         </div>
         </div>
       </div>
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <Briefcase size={20} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Edit Project</h2>
+                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Modify project parameters</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setEditingProject(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Title</label>
+                <input 
+                  type="text" 
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="e.g. Smart Transit System Upgrade"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Manager</label>
+                  <select 
+                    value={editManager}
+                    onChange={(e) => setEditManager(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  >
+                    <option value="">Select Manager</option>
+                    {members?.filter(m => m.role === 'Project Manager').map(m => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Deadline</label>
+                  <input 
+                    type="date" 
+                    value={editDeadline}
+                    onChange={(e) => setEditDeadline(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Status</label>
+                  <select 
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Priority</label>
+                  <select 
+                    value={editPriority}
+                    onChange={(e) => setEditPriority(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Description</label>
+                <textarea 
+                  rows="3"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Describe project details, scope, or requirements..."
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm resize-none"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4 border-t border-slate-100 pt-5">
+                <button 
+                  type="button"
+                  onClick={() => setEditingProject(null)}
+                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

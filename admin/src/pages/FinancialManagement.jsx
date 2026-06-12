@@ -68,6 +68,9 @@ const FinancialManagement = ({ onInvoiceClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const [isAlertsCleared, setIsAlertsCleared] = useState(() => {
+    return localStorage.getItem('financeAlertsCleared') === 'true';
+  });
   const filterRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -298,7 +301,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       return { type, message, time: dateStr, color };
     });
 
-  const displayAlerts = dynamicAlerts.length > 0 ? dynamicAlerts : alerts;
+  const displayAlerts = isAlertsCleared ? [] : (dynamicAlerts.length > 0 ? dynamicAlerts : alerts);
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700 text-left">
@@ -428,22 +431,36 @@ const FinancialManagement = ({ onInvoiceClick }) => {
             <button className="p-2 hover:bg-slate-50 rounded-xl transition-all"><MoreHorizontal size={20} className="text-slate-400" /></button>
           </div>
           <div className="space-y-4">
-            {displayAlerts.map((alert, i) => (
-              <div key={i} className={`flex items-start gap-4 p-4 rounded-2xl bg-${alert.color}-50 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
-                <div className={`p-2 rounded-xl bg-white text-${alert.color}-600 shadow-sm shadow-${alert.color}-100 group-hover:scale-110 transition-transform`}>
-                  <AlertCircle size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-2">
-                    <p className={`text-[10px] font-black text-${alert.color}-600 uppercase tracking-widest`}>{alert.type}</p>
-                    <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">{alert.time}</span>
+            {displayAlerts.length > 0 ? (
+              displayAlerts.map((alert, i) => (
+                <div key={i} className={`flex items-start gap-4 p-4 rounded-2xl bg-${alert.color}-50 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
+                  <div className={`p-2 rounded-xl bg-white text-${alert.color}-600 shadow-sm shadow-${alert.color}-100 group-hover:scale-110 transition-transform`}>
+                    <AlertCircle size={18} />
                   </div>
-                  <p className="text-xs font-bold text-slate-700 mt-0.5 line-clamp-1">{alert.message}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <p className={`text-[10px] font-black text-${alert.color}-600 uppercase tracking-widest`}>{alert.type}</p>
+                      <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">{alert.time}</span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-700 mt-0.5 line-clamp-1">{alert.message}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="py-8 text-center text-slate-400 text-xs italic font-medium">No recent alerts.</div>
+            )}
           </div>
-          <button className="w-full mt-6 py-4 border-2 border-slate-100 border-dashed rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-blue-200 hover:text-blue-500 transition-all">View All Activity</button>
+          {displayAlerts.length > 0 && (
+            <button 
+              onClick={() => {
+                setIsAlertsCleared(true);
+                localStorage.setItem('financeAlertsCleared', 'true');
+              }}
+              className="w-full mt-6 py-4 border-2 border-slate-100 border-dashed rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-blue-200 hover:text-blue-500 transition-all"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">

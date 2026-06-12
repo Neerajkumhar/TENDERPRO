@@ -41,12 +41,14 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
   const [searchTerm, setSearchTerm] = useState('');
   const [timeView, setTimeView] = useState('Month');
   const [assignmentData, setAssignmentData] = useState({
+    title: '',
     tenderId: '',
     departmentId: '',
     assigneeId: '',
     description: '',
     priority: 'Medium',
-    deadline: ''
+    deadline: '',
+    status: 'Pending'
   });
 
   const filteredTenders = tenders.filter(t =>
@@ -55,6 +57,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
   );
 
   const filteredAssignments = assignments.filter(a =>
+    a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.tender?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.department?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -125,12 +128,14 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
         setShowProjectModal(false);
         fetchAssignments(); // Refresh the list
         setAssignmentData({
+          title: '',
           tenderId: '',
           departmentId: '',
           assigneeId: '',
           description: '',
           priority: 'Medium',
-          deadline: ''
+          deadline: '',
+          status: 'Pending'
         });
       } else {
         const err = await response.json();
@@ -207,6 +212,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
               <thead>
                 <tr className="bg-slate-50/50">
                   <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Project Name</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Tender Manager</th>
                   <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
                   <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Budget</th>
                   <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
@@ -214,29 +220,37 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredTenders.length > 0 ? filteredTenders.map((tender, i) => (
-                  <tr key={tender.id || i} className="hover:bg-slate-50/50 transition-colors group">
+                {filteredAssignments.length > 0 ? filteredAssignments.map((assignment, i) => (
+                  <tr key={assignment.id || i} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => onProjectClick(assignment.tenderId || assignment.tender?.id, assignment.id)}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs">
-                          {tender.title.charAt(0)}
+                          {(assignment.title || 'U').charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{tender.title}</span>
+                        <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{assignment.title || 'Untitled Project'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs font-bold text-slate-500">{tender.client?.name || 'Unknown'}</span>
+                      <span className="text-xs font-bold text-slate-500">
+                        {tenders.find(t => t.id === (assignment.tenderId || assignment.tender?.id))?.teamMembers?.manager?.name || 'Unassigned'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 font-mono text-sm font-bold text-slate-700">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${tender.status === 'Won' || tender.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                      <span className="text-xs font-bold text-slate-500">{assignment.tender?.client?.name || 'Unknown'}</span>
+                    </td>
+                    <td className="px-6 py-4 font-mono text-sm font-bold text-slate-700">₹{parseFloat(assignment.tender?.budget || 0).toLocaleString()}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${assignment.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
                         }`}>
-                        {tender.status}
+                        {assignment.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button
-                        onClick={() => onProjectClick(tender.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onProjectClick(assignment.tenderId || assignment.tender?.id, assignment.id);
+                        }}
                         className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-blue-600 shadow-sm border border-transparent hover:border-slate-100"
                       >
                         <ChevronRight size={16} />
@@ -245,7 +259,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-slate-400 text-xs italic">No matching tenders found.</td>
+                    <td colSpan="5" className="px-6 py-12 text-center text-slate-400 text-xs italic">No matching projects found.</td>
                   </tr>
                 )}
               </tbody>
@@ -278,13 +292,13 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                   filteredAssignments.slice(0, 8).map((task, i) => (
                     <tr
                       key={task.id || i}
-                      onClick={() => onProjectClick(task.tenderId || task.tender?.id)}
+                      onClick={() => onProjectClick(task.tenderId || task.tender?.id, task.id)}
                       className="group hover:bg-blue-50/30 transition-all cursor-pointer"
                     >
                       <td className="px-6 py-4">
                         <div className="max-w-[150px]">
-                          <p className="text-xs font-black text-slate-900 truncate">{task.tender?.title || 'Unknown'}</p>
-                          <p className="text-[9px] font-bold text-slate-400 mt-0.5 line-clamp-1 italic">"{task.description}"</p>
+                          <p className="text-xs font-black text-slate-900 truncate">{task.title || 'Untitled Project'}</p>
+                          <p className="text-[9px] font-bold text-slate-400 mt-0.5 line-clamp-1 italic">"{task.tender?.title || 'Unknown'}"</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -310,12 +324,25 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={(e) => handleAssignmentDelete(e, task.id)}
-                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onProjectClick(task.tenderId || task.tender?.id, task.id);
+                            }}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                            title="View Project Details"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => handleAssignmentDelete(e, task.id)}
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                            title="Delete Assignment"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -332,107 +359,148 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
 
       {/* New Project / Assign Work Modal */}
       {showProjectModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowProjectModal(false)}></div>
-          <div className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-100">
-                  <UserPlus size={24} />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <Briefcase size={20} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Assigned Project Work</h2>
-                  <p className="text-xs text-slate-500 font-medium">Distribute tender preparation tasks to specific teams.</p>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Create New Project</h2>
+                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Initialize a new project assignment</p>
                 </div>
               </div>
-              <button
+              <button 
                 onClick={() => setShowProjectModal(false)}
-                className="p-3 hover:bg-white rounded-2xl text-slate-400 hover:text-slate-600 transition-all shadow-sm border border-transparent hover:border-slate-100"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-10 space-y-8">
-              <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Tender <span className="text-rose-500">*</span></label>
-                  <select
-                    value={assignmentData.tenderId}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, tenderId: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="">Select active tender</option>
-                    {tenders.map(t => (
-                      <option key={t.id} value={t.id}>{t.title}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assign to Team <span className="text-rose-500">*</span></label>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Title</label>
+                <input 
+                  type="text" 
+                  value={assignmentData.title}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, title: e.target.value })}
+                  placeholder="e.g. Smart Transit System Upgrade"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Linked Tender <span className="text-rose-500">*</span></label>
+                <select
+                  value={assignmentData.tenderId}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, tenderId: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                >
+                  <option value="">Select Tender</option>
+                  {tenders.map(t => (
+                    <option key={t.id} value={t.id}>{t.title}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Department <span className="text-rose-500">*</span></label>
                   <select
                     value={assignmentData.departmentId}
                     onChange={(e) => setAssignmentData({ ...assignmentData, departmentId: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
                   >
-                    <option value="">Select department</option>
-                    {departments.map(d => (
+                    <option value="">Select Department</option>
+                    {departments?.map(d => (
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
                 </div>
-                <div className="col-span-2 space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Description <span className="text-rose-500">*</span></label>
-                  <textarea
-                    value={assignmentData.description}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, description: e.target.value })}
-                    placeholder="Outline the specific tasks for this assignment..."
-                    rows={4}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all resize-none shadow-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority Level <span className="text-rose-500">*</span></label>
-                  <div className="flex gap-2">
-                    {['Low', 'Medium', 'High'].map(p => (
-                      <button
-                        key={p}
-                        onClick={() => setAssignmentData({ ...assignmentData, priority: p })}
-                        className={`flex-1 py-3 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${assignmentData.priority === p
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
-                            : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50'
-                          }`}
-                      >
-                        {p}
-                      </button>
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Manager</label>
+                  <select 
+                    value={assignmentData.assigneeId}
+                    onChange={(e) => setAssignmentData({ ...assignmentData, assigneeId: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  >
+                    <option value="">Select Manager</option>
+                    {members?.filter(m => m.role === 'Project Manager').map(m => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
-                  </div>
+                  </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Internal Deadline <span className="text-rose-500">*</span></label>
-                  <input
-                    type="date"
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Status</label>
+                  <select 
+                    value={assignmentData.status}
+                    onChange={(e) => setAssignmentData({ ...assignmentData, status: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Priority</label>
+                  <select 
+                    value={assignmentData.priority}
+                    onChange={(e) => setAssignmentData({ ...assignmentData, priority: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Deadline</label>
+                  <input 
+                    type="date" 
                     value={assignmentData.deadline}
                     onChange={(e) => setAssignmentData({ ...assignmentData, deadline: e.target.value })}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="p-8 bg-slate-50/80 flex justify-end gap-4 border-t border-slate-100">
-              <button
-                onClick={() => setShowProjectModal(false)}
-                className="px-8 py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:text-slate-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAssignmentSubmit}
-                className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black shadow-xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-95 uppercase tracking-widest"
-              >
-                Confirm Assignment
-              </button>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Description <span className="text-rose-500">*</span></label>
+                <textarea 
+                  rows="3"
+                  value={assignmentData.description}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, description: e.target.value })}
+                  placeholder="Describe project details, scope, or requirements..."
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm resize-none"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4 border-t border-slate-100 pt-5">
+                <button 
+                  type="button"
+                  onClick={() => setShowProjectModal(false)}
+                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleAssignmentSubmit}
+                  className="px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200"
+                >
+                  Save Changes
+                </button>
+              </div>
             </div>
           </div>
         </div>

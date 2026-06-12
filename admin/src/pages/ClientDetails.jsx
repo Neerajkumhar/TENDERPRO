@@ -607,7 +607,6 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                 <h3 className="font-black text-slate-900 text-xl tracking-tight">Associated Tenders</h3>
                 <p className="text-xs text-slate-500 font-medium mt-1">Track all tenders linked to this client</p>
               </div>
-              <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
@@ -684,9 +683,6 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                 </div>
               ))}
             </div>
-            <button className="mt-8 w-full py-3 border border-dashed border-slate-200 rounded-2xl text-xs font-black text-slate-400 uppercase tracking-widest hover:border-blue-300 hover:text-blue-600 transition-all">
-              Load More History
-            </button>
           </div>
         </div>
       </div>
