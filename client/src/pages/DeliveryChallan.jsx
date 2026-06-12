@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ExportModal from '../components/ExportModal';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X } from 'lucide-react';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X, BarChart3, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
 
 const mockChallans = [
   { id: 'DEL-2026-001', client: 'Acme Corp.', project: 'Solar Substation', transporter: 'Shree Transports', lrGatePass: 'LR12345 / GP678', dispatchDate: '2026-05-22', materialValue: 18800, eWayBill: 'EWB-998877', shipVia: 'Road', itemsQty: 32, estWeight: '1.8T', signedCopy: 'Uploaded', status: 'DELIVERED' },
@@ -249,75 +249,63 @@ const DeliveryChallan = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 min-h-screen bg-[#f8fafc]">
-      <div className="bg-white p-4 sm:px-8 sm:py-6 rounded-2xl sm:rounded-[2rem] shadow-2xl shadow-slate-200/30 border border-slate-100 mb-6 sm:mb-8">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400 mb-2">Dispatch & Delivery</p>
-            <h1 className="text-3xl sm:text-4xl xl:text-5xl font-black uppercase tracking-tight text-slate-900">Delivery Challans</h1>
-          </div>
-          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-[300px] xl:w-[420px]">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search challans..."
-                className="w-full pl-12 pr-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition"
-              />
-            </div>
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
-              <div className="relative">
-                <button 
-                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  className="w-full flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-xl sm:rounded-2xl bg-slate-900 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest sm:tracking-[0.2em] hover:bg-slate-800 transition"
-                >
-                  <Filter size={16} />
-                  <span className="hidden xs:inline">Filters</span>
-                  <span className="xs:hidden">Filter</span>
-                </button>
-
-                {showFilterDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[100] p-4 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Filter by Status</p>
-                        <div className="space-y-2">
-                          {['ALL', 'PENDING', 'IN TRANSIT', 'DELIVERED', 'CANCELLED'].map((status) => (
-                            <button
-                              key={status}
-                              onClick={() => {
-                                setStatusFilter(status);
-                                setShowFilterDropdown(false);
-                              }}
-                              className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                statusFilter === status 
-                                  ? 'bg-slate-900 text-white shadow-lg' 
-                                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                              }`}
-                            >
-                              {status}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <button onClick={() => setIsExportModalOpen(true)} className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-xl sm:rounded-2xl bg-white border border-slate-200 text-slate-700 text-[10px] sm:text-[11px] font-black uppercase tracking-widest sm:tracking-[0.2em] hover:bg-slate-50 transition">
-                <Download size={16} />
-                <span>Export Report</span>
-              </button>
-            </div>
-            <button onClick={() => {
+    <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] min-h-screen text-left">
+      <div className="flex flex-col sm:flex-row justify-between items-start mb-5 gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">DELIVERY CHALLANS</h1>
+          <p className="text-[9px] font-black text-slate-400 tracking-[0.2em] mt-0.5">DISPATCH & DELIVERY MANAGEMENT</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button 
+            onClick={() => {
               setCreateForm({ ...defaultDeliveryForm });
               setCreateOpen(true);
               setModalOpen(false);
-            }} className="flex items-center justify-center gap-2 px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-blue-600 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest sm:tracking-[0.2em] hover:bg-blue-700 transition shadow-lg shadow-blue-200 active:scale-95">
-              <Plus size={18} />
-              <span>New Challan</span>
+            }}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md active:scale-95"
+          >
+            <Plus size={16} />
+            <span>New Challan</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <input 
+            type="text" 
+            placeholder="Search challans..." 
+            className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all shadow-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <button 
+            onClick={() => setIsExportModalOpen(true)}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <Download size={16} className="text-blue-500" />
+            <span>Export Report</span>
+          </button>
+          <div className="relative flex-1 md:flex-none">
+            <button 
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <Filter size={16} className="text-blue-500" />
+              <span>Status: {statusFilter}</span>
             </button>
+            {showFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-150 shadow-xl rounded-xl p-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {['ALL', 'PENDING', 'IN TRANSIT', 'DELIVERED', 'CANCELLED'].map(status => (
+                  <button key={status} onClick={() => { setStatusFilter(status); setShowFilterDropdown(false); }} className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                    {status}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -921,74 +909,73 @@ const DeliveryChallan = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-5 mb-6 sm:mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {[
-          { label: 'TOTAL CHALLANS', value: totalChallans, highlight: 'text-slate-900' },
-          { label: 'DELIVERED', value: deliveredCount, highlight: 'text-emerald-600' },
-          { label: 'IN TRANSIT', value: transitCount, highlight: 'text-blue-600' },
-          { label: 'PENDING', value: pendingCount, highlight: 'text-amber-600' },
-          { label: 'ITEMS DISPATCHED', value: totalItems, highlight: 'text-slate-900' }
+          { label: 'TOTAL CHALLANS', value: totalChallans, sub: 'ALL CONSIGNMENTS', icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'DELIVERED', value: deliveredCount, sub: 'COMPLETED TRANSITS', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+          { label: 'IN TRANSIT', value: transitCount, sub: 'ACTIVE ON ROAD', icon: Truck, color: 'text-blue-500', bg: 'bg-blue-50' },
+          { label: 'PENDING', value: pendingCount, sub: 'AWAITING DISPATCH', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'ITEMS DISPATCHED', value: totalItems, sub: 'UNIT COUNT TOTAL', icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-50' }
         ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-2xl sm:rounded-[2rem] border border-slate-100 p-4 sm:p-6 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest sm:tracking-[0.35em] text-slate-400 group-hover:text-blue-500 transition-colors">{stat.label}</span>
-            <div className={`mt-3 sm:mt-4 text-2xl sm:text-3xl font-black ${stat.highlight} tracking-tighter`}>{stat.value}</div>
+          <div key={index} className="bg-white p-4.5 sm:p-5 rounded-2xl border border-slate-100 flex flex-col items-start group hover:shadow-md transition-all duration-300">
+            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} mb-3 transition-transform group-hover:scale-105`}>
+              <stat.icon size={18} />
+            </div>
+            <div className="min-w-0 text-left">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">{stat.label}</span>
+              <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight block leading-none">{stat.value}</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight block mt-1 leading-none">{stat.sub}</span>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-2xl shadow-slate-200/30 overflow-hidden">
-        <div className="p-5 sm:px-8 sm:py-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tight italic">Delivery Ledger</h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">Monitor active dispatches and signed proof of delivery.</p>
-          </div>
-          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-4 py-2 rounded-full border border-slate-100 w-fit">Showing {filteredChallans.length} records</div>
+      <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+        <div className="p-5 sm:p-6 border-b border-slate-50 flex justify-between items-center bg-white">
+          <h2 className="text-sm sm:text-base font-black text-slate-800 tracking-tight uppercase">Delivery Ledger</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest sm:tracking-[0.35em] text-slate-400 border-b border-slate-100">
-              <tr>
-                <th className="px-6 py-5">Reference</th>
-                <th className="px-6 py-5">Client / Project</th>
-                <th className="px-6 py-5">Transporter</th>
-                <th className="px-6 py-5 hidden md:table-cell">LR &amp; Gate Pass</th>
-                <th className="px-6 py-5">Date</th>
-                <th className="px-6 py-5 text-right">Value (₹)</th>
-                <th className="px-6 py-5 text-center">Status</th>
-                <th className="px-6 py-5 text-right">Action</th>
+            <thead>
+              <tr className="text-[8.5px] sm:text-[9.5px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                <th className="px-5 sm:px-8 py-3.5">Reference</th>
+                <th className="px-5 sm:px-8 py-3.5">Client / Project</th>
+                <th className="px-5 sm:px-8 py-3.5">Transporter</th>
+                <th className="px-5 sm:px-8 py-3.5 hidden md:table-cell">LR &amp; Gate Pass</th>
+                <th className="px-5 sm:px-8 py-3.5">Date</th>
+                <th className="px-5 sm:px-8 py-3.5 text-right">Value (₹)</th>
+                <th className="px-5 sm:px-8 py-3.5 text-center">Status</th>
+                <th className="px-5 sm:px-8 py-3.5 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-50">
               {filteredChallans.length > 0 ? filteredChallans.map((challan) => (
-                <tr key={challan.id} className="hover:bg-blue-50/30 transition-colors group cursor-pointer">
-                  <td className="px-6 py-5 font-black text-slate-900 text-xs sm:text-sm">{challan.id}</td>
-                  <td className="px-6 py-5">
+                <tr key={challan.id} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
+                  <td className="px-5 sm:px-8 py-4 font-black text-slate-900 text-xs sm:text-sm">{challan.id}</td>
+                  <td className="px-5 sm:px-8 py-4">
                     <div className="font-black text-slate-800 uppercase tracking-tight text-xs sm:text-sm">{challan.client}</div>
                     <div className="text-[10px] font-bold text-slate-400 mt-0.5 truncate max-w-[200px]">{challan.project}</div>
                   </td>
-                  <td className="px-6 py-5 text-slate-700 font-bold text-xs">{challan.transporter}</td>
-                  <td className="px-6 py-5 text-slate-500 font-medium text-xs hidden md:table-cell italic">{challan.lrGatePass}</td>
-                  <td className="px-6 py-5 text-slate-600 font-bold text-xs">{challan.dispatchDate}</td>
-                  <td className="px-6 py-5 font-black text-slate-900 text-xs sm:text-sm text-right">₹{challan.materialValue.toLocaleString()}</td>
-                  <td className="px-6 py-5 text-center">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm ${statusClasses[challan.status] || 'bg-slate-400 text-white'}`}>
+                  <td className="px-5 sm:px-8 py-4 text-slate-700 font-bold text-xs">{challan.transporter}</td>
+                  <td className="px-5 sm:px-8 py-4 text-slate-500 font-medium text-xs hidden md:table-cell italic">{challan.lrGatePass}</td>
+                  <td className="px-5 sm:px-8 py-4 text-slate-600 font-bold text-xs">{challan.dispatchDate}</td>
+                  <td className="px-5 sm:px-8 py-4 font-black text-slate-900 text-xs sm:text-sm text-right">₹{challan.materialValue.toLocaleString()}</td>
+                  <td className="px-5 sm:px-8 py-4 text-center">
+                    <span className={`px-3 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider ${statusClasses[challan.status] || 'bg-slate-400 text-white'}`}>
                       {challan.status}
                     </span>
                   </td>
-                  <td className="px-6 py-5 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleDetails(challan)} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 transition shadow-sm" title="Details"><Search size={16} /></button>
-                          <button onClick={() => handlePrintOpen(challan)} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-900 hover:border-slate-900 transition shadow-sm" title="Print Receipt"><Printer size={16} /></button>
-                          <button onClick={() => handleEdit(challan)} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-300 transition shadow-sm" title="Edit Record"><Edit size={16} /></button>
-                        </div>
-                        <div className="group-hover:hidden">
-                           <Truck size={18} className="text-slate-200 ml-auto" />
-                        </div>
+                  <td className="px-5 sm:px-8 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button onClick={() => handleDetails(challan)} className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-all" title="Details"><Search size={15} /></button>
+                      <button onClick={() => handlePrintOpen(challan)} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-lg transition-all" title="Print Receipt"><Printer size={15} /></button>
+                      <button onClick={() => handleEdit(challan)} className="p-1.5 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-lg transition-all" title="Edit Record"><Edit size={15} /></button>
+                    </div>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="8" className="px-6 py-12 text-center text-slate-400 font-black italic uppercase tracking-widest text-[10px]">No consignment records located</td>
+                  <td colSpan="8" className="px-5 sm:px-8 py-12 text-center text-slate-400 font-bold italic">No consignment records located</td>
                 </tr>
               )}
             </tbody>

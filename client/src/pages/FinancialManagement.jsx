@@ -295,21 +295,21 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700 text-left">
+    <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] text-left space-y-6 sm:space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">Financial Overview</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium italic uppercase tracking-widest">Track revenue, expenses, and overall financial health.</p>
+          <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">Financial Overview</h1>
+          <p className="text-[9px] sm:text-[10px] text-slate-500 mt-1 font-medium italic uppercase tracking-widest">Track revenue, expenses, and overall financial health.</p>
         </div>
         <div className="flex items-center gap-4 w-full sm:w-auto">
           {(user?.role === 'Admin' || user?.role?.includes('Manager')) && (
-            <button onClick={() => setShowLeaveModal(true)} className="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95">
-              <Coffee size={18} />
+            <button onClick={() => setShowLeaveModal(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95">
+              <Coffee size={16} />
               <span>Leave Requests</span>
             </button>
           )}
-          <button onClick={() => setIsExportModalOpen(true)} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
-            <Download size={18} />
+          <button onClick={() => setIsExportModalOpen(true)} className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
+              <Download size={14} />
             <span>Export</span>
           </button>
         </div>
@@ -317,16 +317,16 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
         {statsData.map((stat, i) => (
-          <div key={i} className="card p-3 sm:p-4 bg-white border-none shadow-lg shadow-slate-200/50 hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer overflow-hidden relative">
+          <div key={i} className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
             <div className={`absolute top-0 left-0 w-full h-1 bg-${stat.color}-500`}></div>
             <div className="flex justify-between items-start mb-2">
-              <div className={`p-1.5 sm:p-2 rounded-lg bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all`}>
+              <div className={`p-2.5 rounded-xl bg-${stat.color}-50/50 text-${stat.color}-600 mb-3`}>
                 <stat.icon size={16} />
               </div>
-              <div className={`text-[8px] sm:text-[10px] font-black ${stat.isUp ? 'text-emerald-600' : 'text-rose-600'}`}>{stat.trend}</div>
+              <div className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{stat.trend}</div>
             </div>
-            <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
-            <h3 className="text-base sm:text-xl font-black text-slate-900 mt-1 tracking-tight truncate">{stat.value}</h3>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">{stat.label}</p>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 leading-none">{stat.value}</h3>
           </div>
         ))}
       </div>

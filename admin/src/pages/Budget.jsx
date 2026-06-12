@@ -260,130 +260,129 @@ const Budget = () => {
   }
 
   return (
-    <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen relative">
-      {/* Header - Matching Reference Image */}
-      <div className="flex justify-between items-start mb-6">
+    <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] min-h-screen text-left relative">
+      <div className="flex flex-col sm:flex-row justify-between items-start mb-5 gap-3">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">BUDGET PLANNING</h1>
-          <p className="text-[10px] font-black text-slate-400 tracking-[0.2em] mt-1 uppercase">RESOURCE ALLOCATION & EXPENSE TRACKING</p>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">BUDGET PLANNING</h1>
+          <p className="text-[9px] font-black text-slate-400 tracking-[0.2em] mt-0.5">RESOURCE ALLOCATION & EXPENSE TRACKING</p>
         </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => setIsExportModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Download size={16} />
-            <span>Export Report</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md active:scale-95"
           >
-            <Plus size={18} />
+            <Plus size={16} />
             <span>Add New Budget</span>
           </button>
         </div>
       </div>
 
-      {/* Search & Global Filters */}
-      <div className="flex flex-wrap items-center gap-4 mb-10">
-        <div className="relative flex-1 min-w-[300px]">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+      <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input 
             type="text" 
-            placeholder="Search budgets, departments, or categories..." 
-            className="w-full pl-16 pr-6 py-4 bg-white border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+            placeholder="Search budgets..." 
+            className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
-        <div className="relative">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <button 
-            onClick={() => setShowGlobalFilter(!showGlobalFilter)}
-            className={`flex items-center gap-2 px-6 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border ${showGlobalFilter ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'}`}
+            onClick={() => setIsExportModalOpen(true)}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
           >
-            <Filter size={18} />
-            <span>{(statusFilter !== 'ALL' || departmentFilter !== 'ALL DEPARTMENTS' || selectedFY !== 'FY 2024') ? 'Filters Active' : 'Filters'}</span>
+            <Download size={16} className="text-blue-500" />
+            <span>Export Report</span>
           </button>
 
-          {showGlobalFilter && (
-            <div className="absolute right-0 mt-3 w-[320px] bg-white border border-slate-100 shadow-2xl rounded-[2rem] p-6 z-[100] animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Active Filters</h4>
-                <button 
-                  onClick={() => {
-                    setStatusFilter('ALL');
-                    setDepartmentFilter('ALL DEPARTMENTS');
-                    setShowGlobalFilter(false);
-                    triggerToast('Filters reset to default');
-                  }}
-                  className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline"
-                >
-                  Reset All
-                </button>
-              </div>
+          <div className="relative flex-1 md:flex-none">
+            <button 
+              onClick={() => setShowGlobalFilter(!showGlobalFilter)}
+              className={`w-full flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white border border-slate-105 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider transition-all shadow-sm border ${showGlobalFilter ? 'bg-slate-100 text-slate-805' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <Filter size={16} className="text-blue-500" />
+              <span>{(statusFilter !== 'ALL' || departmentFilter !== 'ALL DEPARTMENTS' || selectedFY !== 'FY 2024') ? 'Filters Active' : 'Filters'}</span>
+            </button>
 
-              <div className="space-y-6">
-                {/* Status Filter */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Target size={14} className="text-emerald-500" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Budget Status</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['ALL', 'ON TRACK', 'OVER BUDGET', 'UNDER BUDGET'].map(status => (
-                      <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        className={`py-2 px-2 rounded-xl text-[9px] font-black transition-all ${statusFilter === status ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
-                      >
-                        {status}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Department Filter */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Layers size={14} className="text-purple-500" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</span>
-                  </div>
-                  <select 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-blue-500/20"
-                    value={departmentFilter}
-                    onChange={(e) => setDepartmentFilter(e.target.value)}
+            {showGlobalFilter && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-150 shadow-xl rounded-xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Active Filters</h4>
+                  <button 
+                    onClick={() => {
+                      setStatusFilter('ALL');
+                      setDepartmentFilter('ALL DEPARTMENTS');
+                      setShowGlobalFilter(false);
+                      triggerToast('Filters reset to default');
+                    }}
+                    className="text-[9px] font-black text-blue-600 uppercase tracking-wider hover:underline"
                   >
-                    <option value="ALL DEPARTMENTS">ALL DEPARTMENTS</option>
-                    {categories.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                  </select>
+                    Reset All
+                  </button>
                 </div>
 
-                <button 
-                  onClick={() => setShowGlobalFilter(false)}
-                  className="w-full py-3.5 bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
-                >
-                  Apply Filters
-                </button>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target size={14} className="text-emerald-500" />
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Budget Status</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {['ALL', 'ON TRACK', 'OVER BUDGET', 'UNDER BUDGET'].map(status => (
+                        <button
+                          key={status}
+                          onClick={() => setStatusFilter(status)}
+                          className={`py-1.5 rounded-lg text-[8px] sm:text-[9px] font-bold transition-all ${statusFilter === status ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Layers size={14} className="text-purple-500" />
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Department</span>
+                    </div>
+                    <select 
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-[9px] sm:text-[10px] font-bold outline-none"
+                      value={departmentFilter}
+                      onChange={(e) => setDepartmentFilter(e.target.value)}
+                    >
+                      <option value="ALL DEPARTMENTS">ALL DEPARTMENTS</option>
+                      {categories.map(dept => (
+                        <option key={dept} value={dept}>{dept}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button 
+                    onClick={() => setShowGlobalFilter(false)}
+                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Stats Cards - Matching Reference Image */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-50 flex flex-col items-start group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} mb-6 transition-transform group-hover:scale-110`}>
-              <stat.icon size={24} />
+          <div key={index} className="bg-white p-4.5 sm:p-5 rounded-2xl border border-slate-100 flex flex-col items-start group hover:shadow-md transition-all duration-300">
+            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} mb-3 transition-transform group-hover:scale-105`}>
+              <stat.icon size={18} />
             </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</span>
-            <span className="text-2xl font-black text-slate-900 tracking-tight mb-2">{stat.value}</span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight italic">{stat.sub}</span>
+            <div className="min-w-0 text-left">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">{stat.label}</span>
+              <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight block leading-none">{stat.value}</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight block mt-1 leading-none">{stat.sub}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -391,61 +390,60 @@ const Budget = () => {
       {/* Main Content Area */}
       {!activeDepartmentView ? (
         <>
-          <div className="mb-10 flex justify-between items-end">
+          <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 text-left">
             <div>
-              <h2 className="text-lg font-black text-slate-800 tracking-tight italic uppercase">Departments</h2>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.2em] mt-1 uppercase">DEPARTMENT BUDGET AGGREGATION</p>
+              <h2 className="text-sm sm:text-base font-black text-slate-800 tracking-tight uppercase">Departments</h2>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {departmentStats.length > 0 ? (
               departmentStats.map((stat, index) => (
                 <div 
                   key={index} 
                   onClick={() => setActiveDepartmentView(stat.dept)}
-                  className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative overflow-hidden cursor-pointer"
+                  className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group relative overflow-hidden cursor-pointer text-left"
                 >
-                  <div className={`absolute top-0 left-0 w-full h-1.5 ${
+                  <div className={`absolute top-0 left-0 w-full h-1 ${
                     stat.status === 'ON TRACK' ? 'bg-blue-600' : 
                     stat.status === 'OVER BUDGET' ? 'bg-rose-500' : 
                     'bg-emerald-500'
                   }`}></div>
                   
-                  <div className="flex justify-between items-start mb-6 pt-2">
+                  <div className="flex justify-between items-start mb-4 pt-1">
                     <div>
-                      <span className={`inline-block px-3 py-1 mb-3 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                      <span className={`inline-block px-2.5 py-0.5 mb-2 rounded-full text-[8.5px] font-black uppercase tracking-wide ${
                         stat.status === 'ON TRACK' ? 'bg-blue-50 text-blue-600' : 
                         stat.status === 'OVER BUDGET' ? 'bg-rose-50 text-rose-600' : 
                         'bg-emerald-50 text-emerald-600'
                       }`}>
                         {stat.status}
                       </span>
-                      <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase line-clamp-1" title={stat.dept}>{stat.dept}</h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.activeCount} Active {stat.activeCount === 1 ? 'Budget' : 'Budgets'}</p>
+                      <h3 className="text-sm sm:text-base font-black text-slate-800 tracking-tight uppercase line-clamp-1" title={stat.dept}>{stat.dept}</h3>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{stat.activeCount} Active {stat.activeCount === 1 ? 'Budget' : 'Budgets'}</p>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                      <ChevronRight size={20} />
+                    <div className="p-2 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <ChevronRight size={16} />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-slate-50 rounded-2xl p-4">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Allocated</span>
-                      <span className="text-lg font-black text-slate-900 tracking-tight">${stat.allocated.toLocaleString()}</span>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-slate-50/50 rounded-xl p-3">
+                      <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Allocated</span>
+                      <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">${stat.allocated.toLocaleString()}</span>
                     </div>
-                    <div className="bg-slate-50 rounded-2xl p-4">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total Spent</span>
-                      <span className="text-lg font-black text-slate-900 tracking-tight">${stat.spent.toLocaleString()}</span>
+                    <div className="bg-slate-50/50 rounded-xl p-3">
+                      <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Spent</span>
+                      <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">${stat.spent.toLocaleString()}</span>
                     </div>
                   </div>
 
                   <div className="mt-auto">
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Overall Utilization</span>
-                      <span className={`text-sm font-black ${stat.utilization > 100 ? 'text-rose-500' : 'text-slate-800'}`}>{stat.utilization}%</span>
+                    <div className="flex justify-between items-end mb-1">
+                      <span className="text-[8.5px] sm:text-[9.5px] font-black text-slate-505 uppercase tracking-widest">Overall Utilization</span>
+                      <span className={`text-xs font-black ${stat.utilization > 100 ? 'text-rose-500' : 'text-slate-800'}`}>{stat.utilization}%</span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1">
                       <div 
                         className={`h-full ${stat.utilization > 100 ? 'bg-rose-500' : 'bg-blue-600'} transition-all duration-1000`} 
                         style={{ width: `${Math.min(stat.utilization, 100)}%` }}
@@ -455,97 +453,93 @@ const Budget = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-full py-20 text-center bg-white rounded-[2rem] border border-slate-100 border-dashed">
-                <Layers size={48} className="mx-auto text-slate-200 mb-4" />
-                <h3 className="text-lg font-black text-slate-800 uppercase italic">No Departments Found</h3>
-                <p className="text-sm font-bold text-slate-400 mt-2">No departments match the selected filters.</p>
+              <div className="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-100 border-dashed">
+                <Layers size={36} className="mx-auto text-slate-200 mb-2" />
+                <h3 className="text-sm font-bold text-slate-800 uppercase italic">No Departments Found</h3>
+                <p className="text-xs text-slate-400 mt-1">No departments match the selected filters.</p>
               </div>
             )}
           </div>
         </>
       ) : (
         <>
-          <div className="mb-10 flex justify-between items-end">
+          <div className="mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 text-left">
             <div>
               <button 
                 onClick={() => setActiveDepartmentView(null)}
-                className="flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest mb-4 transition-colors"
+                className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest mb-2 transition-all"
               >
-                <ArrowLeft size={14} className="inline" />
-                Back to Departments
+                <ArrowLeft size={12} />
+                <span>Back to Departments</span>
               </button>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">{activeDepartmentView} Budgets</h2>
-              <p className="text-[10px] font-black text-slate-400 tracking-[0.2em] mt-1 uppercase">DETAILED TABULAR VIEW</p>
+              <h2 className="text-sm sm:text-base font-black text-slate-800 tracking-tight uppercase">{activeDepartmentView} Budgets</h2>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[9px] font-black uppercase tracking-wider">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></div>
                 <span>Live Tracking Active</span>
               </div>
-              <button className="text-slate-300 hover:text-slate-500 transition-colors">
-                <MoreHorizontal size={24} />
-              </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-right-8 duration-500">
+          <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 border-b border-slate-50">
-                    <th className="px-10 py-6">Budget Category</th>
-                    <th className="px-10 py-6">Status</th>
-                    <th className="px-10 py-6">Allocated</th>
-                    <th className="px-10 py-6">Expenditure</th>
-                    <th className="px-10 py-6">Utilization Progress</th>
-                    <th className="px-10 py-6">Trend</th>
-                    <th className="px-10 py-6 text-right">Action</th>
+                  <tr className="text-[8.5px] sm:text-[9.5px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                    <th className="px-5 sm:px-8 py-3.5">Budget Category</th>
+                    <th className="px-5 sm:px-8 py-3.5">Status</th>
+                    <th className="px-5 sm:px-8 py-3.5">Allocated</th>
+                    <th className="px-5 sm:px-8 py-3.5">Expenditure</th>
+                    <th className="px-5 sm:px-8 py-3.5">Utilization Progress</th>
+                    <th className="px-5 sm:px-8 py-3.5">Trend</th>
+                    <th className="px-5 sm:px-8 py-3.5 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {tabularBudgets.length > 0 ? (
                     tabularBudgets.map((cat, index) => (
-                      <tr key={cat.id || index} className="hover:bg-slate-50/50 transition-all group">
-                        <td className="px-10 py-8">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-1.5 h-10 rounded-full ${cat.color || 'bg-slate-400'}`}></div>
+                      <tr key={cat.id || index} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
+                        <td className="px-5 sm:px-8 py-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-1 h-8 rounded-full ${cat.color || 'bg-slate-400'}`}></div>
                             <div>
-                              <span className="text-sm font-black text-slate-800 tracking-tight uppercase block">{cat.name}</span>
-                              <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">{cat.department || 'OPERATIONS'}</span>
+                              <span className="text-xs sm:text-sm font-black text-slate-800 tracking-tight uppercase block">{cat.name}</span>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase">{cat.department || 'OPERATIONS'}</span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-10 py-8">
-                          <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all
-                            ${cat.status === 'ON TRACK' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 
-                              cat.status === 'OVER BUDGET' ? 'bg-rose-500 text-white shadow-lg shadow-rose-100' : 
-                              'bg-emerald-50 text-white shadow-lg shadow-emerald-100'}`}>
+                        <td className="px-5 sm:px-8 py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider transition-all
+                            ${cat.status === 'ON TRACK' ? 'bg-blue-600 text-white' : 
+                              cat.status === 'OVER BUDGET' ? 'bg-rose-500 text-white' : 
+                              'bg-emerald-500 text-white'}`}>
                             {cat.status}
                           </span>
                         </td>
-                        <td className="px-10 py-8 text-sm font-black text-slate-800 tracking-tight">${cat.allocated.toLocaleString()}</td>
-                        <td className="px-10 py-8 text-sm font-black text-slate-800 tracking-tight">${cat.spent.toLocaleString()}</td>
-                        <td className="px-10 py-8 min-w-[200px]">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 tracking-tight">${cat.allocated.toLocaleString()}</td>
+                        <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 tracking-tight">${cat.spent.toLocaleString()}</td>
+                        <td className="px-5 sm:px-8 py-4 min-w-[140px]">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                               <div 
-                                className={`h-full ${cat.utilization > 100 ? 'bg-rose-500' : 'bg-blue-600'} transition-all duration-1000`} 
+                                className={`h-full ${cat.utilization > 100 ? 'bg-rose-500' : 'bg-blue-600'} transition-all`} 
                                 style={{ width: `${Math.min(cat.utilization, 100)}%` }}
                               ></div>
                             </div>
-                            <span className="text-[10px] font-black text-slate-800 italic">{cat.utilization}%</span>
+                            <span className="text-[9px] font-black text-slate-800 italic">{cat.utilization}%</span>
                           </div>
                         </td>
-                        <td className="px-10 py-8">
-                          <div className={`flex items-center gap-1 text-[10px] font-black ${cat.trend.startsWith('+') ? 'text-rose-500' : 'text-emerald-500'}`}>
-                            <ArrowUpRight size={14} className={cat.trend.startsWith('-') ? 'rotate-90' : ''} />
+                        <td className="px-5 sm:px-8 py-4">
+                          <div className={`flex items-center gap-1 text-[9px] font-bold ${cat.trend.startsWith('+') ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            <ArrowUpRight size={12} className={cat.trend.startsWith('-') ? 'rotate-90' : ''} />
                             {cat.trend}
                           </div>
                         </td>
-                        <td className="px-10 py-8 text-right">
+                        <td className="px-5 sm:px-8 py-4 text-center">
                           <button 
                             onClick={() => setSelectedCategoryDetails(cat)}
-                            className="px-4 py-2 bg-slate-50 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                            className="px-3 py-1 bg-slate-50 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-wider hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                           >
                             View
                           </button>
@@ -554,7 +548,7 @@ const Budget = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-10 py-10 text-center text-slate-400 font-bold italic">
+                      <td colSpan="7" className="px-5 sm:px-8 py-12 text-center text-slate-400 font-bold italic">
                         No budget allocations for this department.
                       </td>
                     </tr>
