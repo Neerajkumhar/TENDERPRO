@@ -87,9 +87,10 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
   const fetchData = async () => {
     try {
+      const assignedToParam = user?.role === 'Tender Manager' && user?.id ? `?assignedTo=${user.id}` : '';
       const [tasksRes, tendersRes] = await Promise.all([
         fetch('/api/tasks'),
-        fetch('/api/tenders')
+        fetch(`/api/tenders${assignedToParam}`)
       ]);
       
       if (tasksRes.ok) {
@@ -293,24 +294,30 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
       { label: 'TOTAL TENDERS', value: tenders.length, color: 'slate' },
       { label: 'ACTIVE BIDS', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
       { label: 'SUBMITTED', value: tenders.filter(t => t.status === 'Submitted').length, color: 'indigo' },
-      { label: 'WON', value: tenders.filter(t => t.status === 'Won').length, color: 'emerald' },
-      { label: 'LOST', value: tenders.filter(t => t.status === 'Lost').length, color: 'rose' },
-      { label: 'APPROVAL PENDING', value: '23', color: 'amber' },
+      { label: 'WON', value: tenders.filter(t => t.status === 'Won' || t.status === 'Completed').length, color: 'emerald' },
+      { label: 'LOST', value: tenders.filter(t => t.status === 'Lost' || t.status === 'Due').length, color: 'rose' },
+      { label: 'APPROVAL PENDING', value: tenders.filter(t => t.status === 'Review' || t.status === 'Draft' || !t.status).length, color: 'amber' },
     ];
 
     const pipelineData = [
-      { name: 'Stage', value: 1000 },
-      { name: 'Submit', value: tenders.filter(t => t.status === 'Submitted').length || 312 },
-      { name: 'Won', value: tenders.filter(t => t.status === 'Won').length || 450 },
-      { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').length || 50 },
+      { name: 'Stage', value: tenders.length },
+      { name: 'Submit', value: tenders.filter(t => t.status === 'Submitted').length },
+      { name: 'Won', value: tenders.filter(t => t.status === 'Won' || t.status === 'Completed').length },
+      { name: 'Lost', value: tenders.filter(t => t.status === 'Lost' || t.status === 'Due').length },
     ];
 
-    const categoryData = [
-      { name: 'IT services', value: 45, color: '#a855f7' },
-      { name: 'Construction', value: 35, color: '#8b5cf6' },
-      { name: 'Cleaning', value: 25, color: '#6366f1' },
-      { name: 'Infrastructure', value: 15, color: '#3b82f6' },
-    ];
+    const categoryCounts = {};
+    tenders.forEach(t => {
+      const cat = t.sector || t.category || 'General';
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    });
+    
+    const colors = ['#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#14b8a6', '#f59e0b'];
+    const categoryData = Object.keys(categoryCounts).map((cat, idx) => ({
+      name: cat.length > 15 ? cat.substring(0, 15) + '...' : cat,
+      value: categoryCounts[cat],
+      color: colors[idx % colors.length]
+    })).sort((a,b) => b.value - a.value).slice(0, 4);
 
     const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
 
@@ -413,7 +420,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-3xl font-black text-slate-900 tracking-tighter">1.2k</span>
+                    <span className="text-3xl font-black text-slate-900 tracking-tighter">{tenders.length}</span>
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total</span>
                   </div>
                </div>
@@ -443,10 +450,10 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                 {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
                   <tr key={tender.id || i} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
                     <td className="px-8 py-6 text-[11px] font-bold text-slate-500">
-                      {tender.id?.substring(0, 8).toUpperCase() || '310700' + (i+1)}
+                      {tender.tenderNumber || tender.id?.substring(0, 8).toUpperCase() || '310700' + (i+1)}
                     </td>
                     <td className="px-8 py-6 text-xs font-black text-slate-800">
-                      Client or Department
+                      {tender.client?.name || tender.issuingAuthority || tender.organization || 'Internal'}
                     </td>
                     <td className="px-8 py-6 text-xs font-black text-slate-800 max-w-[200px] truncate">
                       {tender.title}
@@ -459,11 +466,12 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     </td>
                     <td className="px-8 py-6">
                       <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest w-fit
-                        ${tender.status === 'Won' ? 'bg-emerald-50 text-emerald-600' : 
+                        ${tender.status === 'Won' || tender.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 
+                          tender.status === 'Lost' || tender.status === 'Due' ? 'bg-rose-50 text-rose-600' :
                           tender.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
                           'bg-indigo-50 text-indigo-600'}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${tender.status === 'Won' ? 'bg-emerald-500' : tender.status === 'Active' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
-                        {tender.status === 'Won' ? 'WON' : tender.status === 'Active' ? 'STATUS' : 'PRIMARY'}
+                        <div className={`w-1.5 h-1.5 rounded-full ${tender.status === 'Won' || tender.status === 'Completed' ? 'bg-emerald-500' : tender.status === 'Lost' || tender.status === 'Due' ? 'bg-rose-500' : tender.status === 'Active' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
+                        {tender.status || 'DRAFT'}
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
@@ -494,8 +502,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
   const stats = [
     { label: 'Total Projects', value: departmentProjects.length, subtext: 'Assigned', color: 'slate' },
-    { label: 'Active Tasks', value: tasks.filter(t => t.status !== 'Completed').length, subtext: 'In Progress', color: 'blue' },
-    { label: 'Done Tasks', value: tasks.filter(t => t.status === 'Completed').length, subtext: 'Completed', color: 'emerald' },
+    { label: 'Active Tasks', value: tasks.filter(t => t.status !== 'Completed' && t.status !== 'Done').length, subtext: 'In Progress', color: 'blue' },
+    { label: 'Done Tasks', value: tasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, subtext: 'Completed', color: 'emerald' },
     { label: 'Team Size', value: members.filter(m => m.departmentId === user.departmentId).length, subtext: 'Members', color: 'slate' },
     { label: 'High Priority', value: tasks.filter(t => t.priority === 'High' || t.priority === 'Critical').length, subtext: 'Critical', color: 'rose', hasAlert: true },
   ];
@@ -555,8 +563,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
             </thead>
             <tbody className="divide-y divide-slate-50">
               {departmentProjects.length > 0 ? departmentProjects.map((item, i) => {
-                const projectTasks = tasks.filter(t => t.tenderId === item.tenderId);
-                const completedCount = projectTasks.filter(t => t.status === 'Completed').length;
+                const projectTasks = tasks.filter(t => String(t.assignmentId) === String(item.id));
+                const completedCount = projectTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length;
                 const progress = projectTasks.length > 0 ? Math.round((completedCount / projectTasks.length) * 100) : 0;
 
                 return (
@@ -612,8 +620,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
           </div>
           <div className="space-y-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
             {departmentMembers.length > 0 ? departmentMembers.map((member, i) => {
-              const memberTasks = tasks.filter(t => t.assigneeId === member.id);
-              const activeCount = memberTasks.filter(t => t.status !== 'Completed').length;
+              const memberTasks = tasks.filter(t => String(t.assigneeId) === String(member.id));
+              const activeCount = memberTasks.filter(t => t.status !== 'Completed' && t.status !== 'Done').length;
               const workload = memberTasks.length > 0 ? Math.min(Math.round((activeCount / 10) * 100), 100) : 0;
               
               return (
@@ -666,8 +674,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Average Progress</span>
               <span className="text-lg font-black text-blue-600">
                 {departmentProjects.length > 0 ? Math.round(departmentProjects.reduce((acc, p) => {
-                  const pTasks = tasks.filter(t => t.tenderId === p.tenderId);
-                  return acc + (pTasks.length > 0 ? (pTasks.filter(t => t.status === 'Completed').length / pTasks.length) * 100 : 0);
+                  const pTasks = tasks.filter(t => String(t.assignmentId) === String(p.id));
+                  return acc + (pTasks.length > 0 ? (pTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length / pTasks.length) * 100 : 0);
                 }, 0) / departmentProjects.length) : 0}%
               </span>
             </div>
@@ -678,7 +686,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'In Progress', value: departmentProjects.filter(p => p.status === 'In Progress').length || 1, color: '#3b82f6' },
+                      { name: 'In Progress', value: departmentProjects.filter(p => p.status === 'In Progress').length, color: '#3b82f6' },
                       { name: 'Completed', value: departmentProjects.filter(p => p.status === 'Completed').length, color: '#10b981' },
                       { name: 'Pending', value: departmentProjects.filter(p => p.status === 'Pending').length, color: '#f59e0b' }
                     ]}

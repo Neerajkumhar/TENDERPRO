@@ -302,7 +302,10 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                   </td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.tender?.title || 'N/A'}</td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">
-                    {tenders?.find(t => t.id === item.tenderId)?.teamMembers?.manager?.name || 'Unassigned'}
+                    {(() => {
+                      const manager = tenders?.find(t => t.id === item.tenderId)?.teamMembers?.manager;
+                      return manager ? `${manager.name} (${manager.email})` : 'Unassigned';
+                    })()}
                   </td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.tender?.client?.name || 'N/A'}</td>
                   <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}</td>
@@ -423,7 +426,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                   >
                     <option value="">Select Manager</option>
                     {members.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
+                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
                     ))}
                   </select>
                 </div>

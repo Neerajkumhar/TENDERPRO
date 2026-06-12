@@ -232,7 +232,10 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-xs font-bold text-slate-500">
-                        {tenders.find(t => t.id === (assignment.tenderId || assignment.tender?.id))?.teamMembers?.manager?.name || 'Unassigned'}
+                        {(() => {
+                          const manager = tenders.find(t => t.id === (assignment.tenderId || assignment.tender?.id))?.teamMembers?.manager;
+                          return manager ? `${manager.name} (${manager.email})` : 'Unassigned';
+                        })()}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -428,7 +431,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                   >
                     <option value="">Select Manager</option>
                     {members?.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
+                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
                     ))}
                   </select>
                 </div>

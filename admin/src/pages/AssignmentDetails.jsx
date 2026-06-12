@@ -220,7 +220,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
                     )}
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900">{assignment.assignee.name}</h4>
+                    <h4 className="text-sm font-black text-slate-900">{assignment.assignee.name} ({assignment.assignee.email})</h4>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{assignment.assignee.role || 'Team Member'}</p>
                   </div>
                 </div>
@@ -298,7 +298,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
                   >
                     <option value="">Unassigned</option>
                     {members.map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
+                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
                     ))}
                   </select>
                 </div>

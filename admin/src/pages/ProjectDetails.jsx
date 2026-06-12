@@ -257,7 +257,9 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                         <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-[8px] text-white overflow-hidden shrink-0">
                           {targetAssignment.assignee?.image ? <img src={targetAssignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={10} />}
                         </div>
-                        <span className="text-xs font-black text-slate-900 truncate">{targetAssignment.assignee?.name || 'Unassigned'}</span>
+                        <span className="text-xs font-black text-slate-900 truncate">
+                          {targetAssignment.assignee ? `${targetAssignment.assignee.name} (${targetAssignment.assignee.email})` : 'Unassigned'}
+                        </span>
                       </div>
                     </div>
                     <div>
@@ -510,7 +512,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                           <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
                             {assignment.assignee.image ? <img src={assignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={12} className="text-slate-400" />}
                           </div>
-                          <span className="text-[10px] font-bold text-slate-600">{assignment.assignee.name}</span>
+                          <span className="text-[10px] font-bold text-slate-600">{assignment.assignee.name} ({assignment.assignee.email})</span>
                         </div>
                       )}
                       <p className="text-[10px] text-slate-500 font-medium italic line-clamp-2 leading-relaxed">"{assignment.description}"</p>
@@ -596,7 +598,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                   >
                     <option value="">Select Manager</option>
                     {members?.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
+                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
                     ))}
                   </select>
                 </div>

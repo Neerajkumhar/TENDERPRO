@@ -24,8 +24,14 @@ const Attendance = ({ user }) => {
   const [view, setView] = useState('MONTH');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
-  const [startDate, setStartDate] = useState('2026-05-01');
-  const [endDate, setEndDate] = useState('2026-05-31');
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+  });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const datePickerRef = useRef(null);
 
@@ -68,37 +74,7 @@ const Attendance = ({ user }) => {
     }
   };
 
-  // Raw database of multiple login/logout dashboard sessions for self (Sarah/logged-in user)
-  const sessionsDatabase = [
-    // May 14th sessions (3 logins)
-    { date: "2026-05-14", session: 1, in: "09:02 AM", out: "01:00 PM", workMin: 238, status: "ON TIME" },
-    { date: "2026-05-14", session: 2, in: "01:45 PM", out: "04:30 PM", workMin: 165, status: "ON TIME" },
-    { date: "2026-05-14", session: 3, in: "05:00 PM", out: "06:05 PM", workMin: 65, status: "ON TIME" },
 
-    // May 13th sessions (2 logins)
-    { date: "2026-05-13", session: 1, in: "09:05 AM", out: "01:30 PM", workMin: 265, status: "ON TIME" },
-    { date: "2026-05-13", session: 2, in: "02:30 PM", out: "06:00 PM", workMin: 210, status: "ON TIME" },
-
-    // May 12th sessions (1 login)
-    { date: "2026-05-12", session: 1, in: "09:05 AM", out: "06:00 PM", workMin: 535, status: "ON TIME" },
-
-    // May 11th sessions (2 logins)
-    { date: "2026-05-11", session: 1, in: "09:01 AM", out: "12:30 PM", workMin: 209, status: "ON TIME" },
-    { date: "2026-05-11", session: 2, in: "01:30 PM", out: "06:00 PM", workMin: 270, status: "ON TIME" },
-
-    // May 10th sessions (1 login - late)
-    { date: "2026-05-10", session: 1, in: "09:15 AM", out: "06:00 PM", workMin: 525, status: "LATE" },
-
-    // May 8th sessions (1 login)
-    { date: "2026-05-08", session: 1, in: "09:03 AM", out: "06:00 PM", workMin: 537, status: "ON TIME" },
-
-    // May 5th sessions (2 logins)
-    { date: "2026-05-05", session: 1, in: "09:02 AM", out: "01:00 PM", workMin: 238, status: "ON TIME" },
-    { date: "2026-05-05", session: 2, in: "02:00 PM", out: "06:02 PM", workMin: 242, status: "ON TIME" },
-
-    // May 2nd sessions (1 login - late)
-    { date: "2026-05-02", session: 1, in: "09:30 AM", out: "06:00 PM", workMin: 510, status: "LATE" },
-  ];
 
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
@@ -221,13 +197,15 @@ const Attendance = ({ user }) => {
   const stats = getDynamicStats();
 
   const getDaySessionTimes = (dayNum) => {
-    const targetDate = `2026-05-${String(dayNum).padStart(2, '0')}`;
-    const dayRecords = [...sessions, ...sessionsDatabase].filter(s => s.date === targetDate);
+    const currYear = new Date().getFullYear();
+    const currMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+    const targetDate = `${currYear}-${currMonth}-${String(dayNum).padStart(2, '0')}`;
+    const dayRecords = [...sessions].filter(s => s.date === targetDate);
     
     if (dayRecords.length === 0) return null;
 
     // Filter out sessions that occur BEFORE the teammate's real joining date!
-    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date("2026-05-14");
+    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const jDateOnly = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
     const sParts = targetDate.split('-');
     const sDateOnly = new Date(parseInt(sParts[0], 10), parseInt(sParts[1], 10) - 1, parseInt(sParts[2], 10));
@@ -254,10 +232,10 @@ const Attendance = ({ user }) => {
 
   const getDynamicStatsSummary = () => {
     // 1. Get all unique dates with attendance records
-    const allRecords = [...sessions, ...sessionsDatabase];
+    const allRecords = [...sessions];
     
     // Filter out sessions that occur BEFORE the teammate's real joining date!
-    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date("2026-05-14");
+    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const jDateOnly = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
 
     const filteredRecords = allRecords.filter(r => {
@@ -315,10 +293,10 @@ const Attendance = ({ user }) => {
 
   // Process and compute layout rows depending on DAY view vs. WEEK/MONTH views
   const processedRecords = (() => {
-    let baseSessions = [...sessions, ...sessionsDatabase];
+    let baseSessions = [...sessions];
 
     // Logically filter out mock database sessions prior to the user's actual joining date
-    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date("2026-05-14");
+    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const jDateOnly = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
 
     baseSessions = baseSessions.filter(s => {
@@ -334,7 +312,9 @@ const Attendance = ({ user }) => {
 
     if (view === 'DAY') {
       // In DAY view: Show each individual login session for the selected day
-      const targetDate = `2026-05-${String(selectedDay).padStart(2, '0')}`;
+      const currYear = new Date().getFullYear();
+      const currMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+      const targetDate = `${currYear}-${currMonth}-${String(selectedDay).padStart(2, '0')}`;
       const daySessions = baseSessions.filter(s => s.date === targetDate);
       return daySessions.map(s => ({
         name: selfName,
@@ -417,7 +397,7 @@ const Attendance = ({ user }) => {
     const end = new Date(endDate);
     
     // Use base records for full historical export
-    const baseRecords = [...sessions, ...sessionsDatabase];
+    const baseRecords = [...sessions];
     const exportData = baseRecords.filter(r => {
       const rDate = new Date(r.date);
       return rDate >= start && rDate <= end;
@@ -745,8 +725,11 @@ const Attendance = ({ user }) => {
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-50">
                   <button 
                     onClick={() => {
-                      setStartDate('2026-05-08');
-                      setEndDate('2026-05-14');
+                      const end = new Date();
+                      const start = new Date(end);
+                      start.setDate(start.getDate() - 7);
+                      setStartDate(start.toISOString().split('T')[0]);
+                      setEndDate(end.toISOString().split('T')[0]);
                       setShowDatePicker(false);
                     }}
                     className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
@@ -755,8 +738,9 @@ const Attendance = ({ user }) => {
                   </button>
                   <button 
                     onClick={() => {
-                      setStartDate('2026-05-01');
-                      setEndDate('2026-05-31');
+                      const d = new Date();
+                      setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]);
+                      setEndDate(new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]);
                       setShowDatePicker(false);
                     }}
                     className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
@@ -966,7 +950,7 @@ const Attendance = ({ user }) => {
             <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm flex flex-col items-center">
                <div className="flex justify-between items-center w-full mb-10 px-2">
                   <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronLeft size={20} /></button>
-                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">MAY 2026</span>
+                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">{new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
                   <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronRight size={20} /></button>
                </div>
 
@@ -975,7 +959,7 @@ const Attendance = ({ user }) => {
                     <span key={d} className="text-center text-[9px] font-black text-slate-300 uppercase tracking-widest">{d}</span>
                   ))}
                   
-                  {Array.from({ length: 31 }).map((_, i) => {
+                  {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() }).map((_, i) => {
                     const dayNum = i + 1;
                     const isSelected = dayNum === selectedDay;
                     const dayTimes = getDaySessionTimes(dayNum);
@@ -986,8 +970,10 @@ const Attendance = ({ user }) => {
                           setSelectedDay(dayNum);
                           // Sync active start/end date context for convenience
                           const padDay = String(dayNum).padStart(2, '0');
-                          setStartDate(`2026-05-${padDay}`);
-                          setEndDate(`2026-05-${padDay}`);
+                          const currYear = new Date().getFullYear();
+                          const currMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+                          setStartDate(`${currYear}-${currMonth}-${padDay}`);
+                          setEndDate(`${currYear}-${currMonth}-${padDay}`);
                         }}
                         className={`flex flex-col items-center p-2 rounded-2xl group cursor-pointer border transition-all ${
                           isSelected 

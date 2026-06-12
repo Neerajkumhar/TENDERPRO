@@ -33,7 +33,7 @@ import {
   Legend
 } from 'recharts';
 
-const MemberDetails = ({ memberId, onBack, departments }) => {
+const MemberDetails = ({ memberId, onBack, departments, user }) => {
   const [member, setMember] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -60,8 +60,21 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
     absent: 0,
     onLeave: 0,
     totalWorkingDays: 0,
+    totalWorkingDays: 0,
     percentage: 0
   });
+  const [recentActivities, setRecentActivities] = useState([]);
+
+  const getCorePermissions = (role) => {
+    switch (role) {
+      case 'Admin': return ['Full System Access', 'Manage Users & Roles', 'Global Settings Control', 'Financial Overrides'];
+      case 'Core Team': return ['Manage Tender Flow', 'Internal Approval Rights', 'Task Assignment', 'Client Communication'];
+      case 'Project Manager': return ['Project Planning', 'Task Assignment', 'Team Monitoring', 'Status Reporting'];
+      case 'Tender Manager': return ['Tender Creation', 'Bid Submission', 'Document Management', 'Client Communication'];
+      case 'Finance Manager': return ['Budget Management', 'Invoice Processing', 'Payment Tracking', 'Financial Reporting'];
+      default: return ['Basic Access'];
+    }
+  };
 
   const fetchMemberDetails = async () => {
     try {
@@ -83,19 +96,32 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
 
   const fetchAttendanceAndLeaves = async (memberData) => {
     try {
-      const [attRes, leaveRes] = await Promise.all([
+      const [attRes, leaveRes, tasksRes] = await Promise.all([
         fetch(`/api/auth/attendance/${memberData.id}`),
-        fetch(`/api/leave-requests/user/${memberData.id}`)
+        fetch(`/api/leave-requests/user/${memberData.id}`),
+        fetch(`/api/tasks`)
       ]);
 
       let attData = [];
       let leaveData = [];
+      let tasksData = [];
 
       if (attRes.ok) attData = await attRes.json();
       if (leaveRes.ok) leaveData = await leaveRes.json();
+      if (tasksRes.ok) tasksData = await tasksRes.json();
 
       setAttendanceRecords(attData);
       setLeaveRequests(leaveData);
+
+      const memberTasks = tasksData.filter(t => t.assigneeId === memberData.id || (t.assignee && t.assignee.email === memberData.email));
+      const activities = memberTasks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3).map(t => ({
+        type: 'Task',
+        action: `Task updated to ${t.status}`,
+        target: t.title,
+        time: new Date(t.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        color: t.status === 'Completed' ? 'emerald' : t.status === 'In Progress' ? 'blue' : 'amber'
+      }));
+      setRecentActivities(activities);
 
       // Process Stats
       const joiningDate = new Map();
@@ -240,19 +266,21 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
           </div>
           Back to Directory
         </button>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={handleEditClick}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-500 transition-all shadow-sm"
-          >
-            <Edit size={16} />
-            <span>Edit Profile</span>
-          </button>
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all shadow-sm">
-            <Trash2 size={16} />
-            <span>Terminate</span>
-          </button>
-        </div>
+        {user?.role === 'Admin' && (
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleEditClick}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-500 transition-all shadow-sm"
+            >
+              <Edit size={16} />
+              <span>Edit Profile</span>
+            </button>
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all shadow-sm">
+              <Trash2 size={16} />
+              <span>Terminate</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-12 gap-6 sm:gap-8">
@@ -496,7 +524,7 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
               <div className="p-5 sm:p-6 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-100">
                 <h4 className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Core Permissions</h4>
                 <div className="space-y-2.5 sm:space-y-3">
-                  {['Manage Tender Flow', 'Internal Approval Rights', 'Financial Review Access', 'Member Recruitment'].map((perm, i) => (
+                  {getCorePermissions(member.role).map((perm, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                       <span className="text-[11px] sm:text-xs font-bold text-slate-600">{perm}</span>
@@ -509,7 +537,9 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
                 <div className="space-y-3.5 sm:space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-[11px] sm:text-xs font-bold text-slate-400">Joined Date</span>
-                    <span className="text-[11px] sm:text-xs font-black text-slate-700">12 Oct 2023</span>
+                    <span className="text-[11px] sm:text-xs font-black text-slate-700">
+                      {member.createdAt ? new Date(member.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown'}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[11px] sm:text-xs font-bold text-slate-400">System ID</span>
@@ -517,51 +547,17 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[11px] sm:text-xs font-bold text-slate-400">Last Login</span>
-                    <span className="text-[11px] sm:text-xs font-black text-slate-700">2 hours ago</span>
+                    <span className="text-[11px] sm:text-xs font-black text-slate-700">
+                      {attendanceRecords && attendanceRecords.length > 0 
+                        ? new Date(attendanceRecords.sort((a,b) => new Date(b.date) - new Date(a.date))[0].date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                        : 'Never'}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Activity Feed */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-2 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl">
-                  <Clock size={20} className="sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">Recent Activity</h3>
-                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic">Tracking system-wide contributions.</p>
-                </div>
-              </div>
-              <button className="text-[9px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1">
-                View Full Log <ExternalLink size={12} />
-              </button>
-            </div>
-
-            <div className="space-y-5 sm:space-y-6">
-              {[
-                { type: 'Tender', action: 'Approved financial bid for', target: 'Smart City Project', time: '1 hour ago', color: 'blue' },
-                { type: 'Member', action: 'Created account for new joiner', target: 'Sorubh Solanki', time: '5 hours ago', color: 'emerald' },
-                { type: 'Client', action: 'Updated contact details for', target: 'Rajasthan Govt', time: 'Yesterday', color: 'indigo' },
-              ].map((act, i) => (
-                <div key={i} className="flex gap-3 sm:gap-4 relative">
-                  {i !== 2 && <div className="absolute left-6 top-10 bottom-0 w-px bg-slate-100"></div>}
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-${act.color}-50 flex items-center justify-center text-${act.color}-600 flex-shrink-0 shadow-sm border border-${act.color}-100`}>
-                    <Award size={18} className="sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="pt-0.5 sm:pt-1">
-                    <p className="text-[13px] sm:text-sm font-bold text-slate-700">
-                      <span className="text-slate-400 font-medium">{act.action}</span> {act.target}
-                    </p>
-                    <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{act.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 

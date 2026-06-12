@@ -58,12 +58,12 @@ exports.createAssignment = async (req, res) => {
 // Get all assignments with tender and department info
 exports.getAssignments = async (req, res) => {
   try {
-    const assignments = await TenderAssignment.findAll({
+    let assignments = await TenderAssignment.findAll({
       include: [
         { 
           model: Tender, 
           as: 'tender', 
-          attributes: ['title', 'budget', 'status', 'reference'],
+          attributes: ['title', 'budget', 'status', 'reference', 'teamAssignments'],
           include: [{ model: require('../models/Client'), as: 'client', attributes: ['name'] }]
         },
         { model: Department, as: 'department', attributes: ['name'] },
@@ -71,6 +71,22 @@ exports.getAssignments = async (req, res) => {
       ],
       order: [['createdAt', 'DESC']]
     });
+
+    assignments = assignments.map(a => {
+      const assignmentObj = a.toJSON();
+      if (assignmentObj.tender && assignmentObj.tender.teamAssignments) {
+        let ta = assignmentObj.tender.teamAssignments;
+        if (typeof ta === 'string') {
+          try {
+            assignmentObj.tender.teamAssignments = JSON.parse(ta);
+          } catch(e) {
+            assignmentObj.tender.teamAssignments = {};
+          }
+        }
+      }
+      return assignmentObj;
+    });
+
     res.json(assignments);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching assignments', error: error.message });

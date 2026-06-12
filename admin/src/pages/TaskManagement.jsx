@@ -549,7 +549,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                     <option value="">-- Unassigned --</option>
                     {assigneeList.map((member) => (
                       <option key={member.id} value={member.id}>
-                        {member.name}
+                        {member.name} ({member.role} - {member.email})
                       </option>
                     ))}
                   </select>

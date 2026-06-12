@@ -63,9 +63,13 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
     fetchTasks();
   }, [user]);
 
-  // Filter assignments / active projects for the Project Manager (or fallback to all)
-  const pmProjects = assignments.filter(a => a.assigneeId === user.id || a.assignee?.email === user.email);
-  const activeProjectsList = pmProjects.length > 0 ? pmProjects : assignments;
+  // Filter assignments / active projects for the Project Manager
+  const pmProjects = assignments.filter(a => 
+    String(a.assigneeId) === String(user.id) || 
+    a.assignee?.email === user.email ||
+    (user.role === 'Project Manager' && String(a.departmentId) === String(user.departmentId))
+  );
+  const activeProjectsList = user.role === 'Project Manager' ? pmProjects : assignments;
 
   // Filter department members for the PM's dropdown list, strictly including only 'Core Team'
   const assigneeList = members.filter(m => m.departmentId === user.departmentId && m.role === 'Core Team');
@@ -204,6 +208,13 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
   const getFilteredTasks = () => {
     let filtered = tasks;
+
+    // Project Managers should ONLY see tasks from their assigned projects
+    if (user.role === 'Project Manager') {
+      const assignedProjectIds = pmProjects.map(a => String(a.id));
+      filtered = filtered.filter(t => assignedProjectIds.includes(String(t.assignmentId)));
+    }
+
     if (selectedProjectFilter !== 'ALL') {
       filtered = filtered.filter(t => String(t.assignmentId) === String(selectedProjectFilter));
     }
@@ -450,10 +461,6 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                  ));
                })()}
                </div>
-
-               <button className="mt-8 w-full py-4 bg-slate-50 border border-slate-100 rounded-2xl text-[9px] font-black text-slate-400 uppercase tracking-widest hover:bg-white hover:text-blue-600 hover:border-blue-100 transition-all">
-                  View Activity Log
-               </button>
             </div>
         </div>
       </div>
@@ -549,7 +556,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                     <option value="">-- Unassigned --</option>
                     {assigneeList.map((member) => (
                       <option key={member.id} value={member.id}>
-                        {member.name}
+                        {member.name} ({member.role} - {member.email})
                       </option>
                     ))}
                   </select>

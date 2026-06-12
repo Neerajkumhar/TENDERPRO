@@ -331,7 +331,7 @@ const CreateProject = ({ onCancel, onSave, clients = [], tenders = [] }) => {
                     >
                       <option value="">Select Manager</option>
                       {members.filter(m => m.role === 'Project Manager').map(m => (
-                        <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                        <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
                       ))}
                     </select>
                   </div>

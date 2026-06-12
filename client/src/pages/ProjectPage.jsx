@@ -32,9 +32,16 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
   const [editDeadline, setEditDeadline] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
-  // Filtering logic: Admins and Tender Managers see all projects; Project Managers see only their department's assigned projects; others see assigned ones
+  // Filtering logic: Admins see all projects; Tender Managers see projects connected with tenders assigned to them; Project Managers see only their department's assigned projects; others see assigned ones
   const myProjects = assignments.filter(item => {
-    if (user.role === 'Admin' || user.role === 'Tender Manager') return true;
+    if (user.role === 'Admin') return true;
+    if (user.role === 'Tender Manager') {
+      let ta = item.tender?.teamAssignments || {};
+      if (typeof ta === 'string') {
+        try { ta = JSON.parse(ta); } catch(e) { ta = {}; }
+      }
+      return String(ta.managerId) === String(user.id);
+    }
     if (user.role === 'Project Manager') {
       return String(item.departmentId) === String(user.departmentId);
     }
@@ -421,7 +428,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                   >
                     <option value="">Select Manager</option>
                     {members.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
+                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
                     ))}
                   </select>
                 </div>

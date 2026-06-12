@@ -269,7 +269,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
   const getMemberName = (id) => {
     if (!id) return 'Unassigned';
     const match = members.find(m => String(m.id) === String(id));
-    return match ? `${match.name} (${match.role})` : 'Unassigned';
+    return match ? `${match.name} (${match.role} - ${match.email})` : 'Unassigned';
   };
 
   const checklists = [
@@ -615,7 +615,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                           )}
                         </div>
                         <span className="text-[11px] font-bold text-slate-700">
-                          {project.department?.manager?.name || project.assignee?.name || 'Unassigned'}
+                          {project.department?.manager ? `${project.department.manager.name} (${project.department.manager.email})` : (project.assignee ? `${project.assignee.name} (${project.assignee.email})` : 'Unassigned')}
                         </span>
                       </div>
                     </div>

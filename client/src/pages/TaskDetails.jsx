@@ -208,6 +208,8 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     }
   };
 
+  const assignee = task?.assigneeId ? members.find(m => String(m.id) === String(task.assigneeId)) : null;
+
   return (
     <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
       {/* Header Area */}
@@ -482,11 +484,13 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assignee</p>
                 <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px]">
-                    {task.assigneeId ? 'ID' : 'UN'}
+                    {assignee ? assignee.name.charAt(0) : 'UN'}
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-800">{task.assigneeId ? 'Assigned Member' : 'Unassigned'}</p>
-                    <p className="text-[9px] font-bold text-slate-400">Engineering</p>
+                    <p className="text-xs font-black text-slate-800">
+                      {assignee ? `${assignee.name} (${assignee.email})` : 'Unassigned'}
+                    </p>
+                    <p className="text-[9px] font-bold text-slate-400">{assignee ? assignee.role : 'Engineering'}</p>
                   </div>
                 </div>
               </div>

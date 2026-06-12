@@ -435,7 +435,10 @@ function App() {
               tenders={
                 user.role === 'Tender Manager'
                   ? tenders.filter(t => {
-                      const ta = t.teamAssignments || {};
+                      let ta = t.teamAssignments || {};
+                      if (typeof ta === 'string') {
+                        try { ta = JSON.parse(ta); } catch(e) { ta = {}; }
+                      }
                       return (
                         ta.managerId === user.id ||
                         ta.reviewerId === user.id ||
@@ -662,6 +665,7 @@ function App() {
                 setSelectedMemberId(null);
               }}
               departments={departments}
+              user={user}
             />
           )}
           {activeTab === 'Reports' && <Reports />}

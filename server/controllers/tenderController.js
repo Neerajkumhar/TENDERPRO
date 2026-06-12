@@ -7,17 +7,24 @@ const TenderAssignment = require('../models/TenderAssignment');
 exports.getTenders = async (req, res) => {
   try {
     const { assignedTo } = req.query;
+    console.log('GET /api/tenders?assignedTo=', assignedTo);
 
     let tenders = await Tender.findAll({
       include: [{ model: Client, as: 'client', attributes: ['name', 'email'] }],
       order: [['createdAt', 'DESC']]
     });
 
+    // Convert Sequelize instances to plain JSON objects to safely access attributes
+    tenders = tenders.map(t => t.toJSON());
+
     // If assignedTo query param is provided, filter tenders where the user
     // appears as managerId, reviewerId, or approverId in teamAssignments
     if (assignedTo) {
       tenders = tenders.filter(t => {
-        const ta = t.teamAssignments || {};
+        let ta = t.teamAssignments || {};
+        if (typeof ta === 'string') {
+          try { ta = JSON.parse(ta); } catch(e) { ta = {}; }
+        }
         return (
           ta.managerId === assignedTo ||
           ta.reviewerId === assignedTo ||
@@ -49,7 +56,11 @@ exports.getTenderById = async (req, res) => {
 
     // Fetch team members if assigned
     if (tenderData.teamAssignments) {
-      const { managerId, reviewerId, approverId } = tenderData.teamAssignments;
+      let ta = tenderData.teamAssignments;
+      if (typeof ta === 'string') {
+        try { ta = JSON.parse(ta); } catch(e) { ta = {}; }
+      }
+      const { managerId, reviewerId, approverId } = ta;
       const userIds = [managerId, reviewerId, approverId].filter(Boolean);
       
       if (userIds.length > 0) {

@@ -514,44 +514,6 @@ const MemberDetails = ({ memberId, onBack, departments }) => {
             </div>
           </div>
 
-          {/* Activity Feed */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-2 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl">
-                  <Clock size={20} className="sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">Recent Activity</h3>
-                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic">Tracking system-wide contributions.</p>
-                </div>
-              </div>
-              <button className="text-[9px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1">
-                View Full Log <ExternalLink size={12} />
-              </button>
-            </div>
-
-            <div className="space-y-5 sm:space-y-6">
-              {[
-                { type: 'Tender', action: 'Approved financial bid for', target: 'Smart City Project', time: '1 hour ago', color: 'blue' },
-                { type: 'Member', action: 'Created account for new joiner', target: 'Sorubh Solanki', time: '5 hours ago', color: 'emerald' },
-                { type: 'Client', action: 'Updated contact details for', target: 'Rajasthan Govt', time: 'Yesterday', color: 'indigo' },
-              ].map((act, i) => (
-                <div key={i} className="flex gap-3 sm:gap-4 relative">
-                  {i !== 2 && <div className="absolute left-6 top-10 bottom-0 w-px bg-slate-100"></div>}
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-${act.color}-50 flex items-center justify-center text-${act.color}-600 flex-shrink-0 shadow-sm border border-${act.color}-100`}>
-                    <Award size={18} className="sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="pt-0.5 sm:pt-1">
-                    <p className="text-[13px] sm:text-sm font-bold text-slate-700">
-                      <span className="text-slate-400 font-medium">{act.action}</span> {act.target}
-                    </p>
-                    <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{act.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
