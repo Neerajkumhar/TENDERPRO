@@ -118,13 +118,13 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
   const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation Header */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white">
+        <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
           <button 
             onClick={() => setActiveView('overview')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
               activeView === 'overview' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
             }`}
           >
@@ -133,7 +133,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
           </button>
           <button 
             onClick={() => setActiveView('list')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
               activeView === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
             }`}
           >
@@ -141,7 +141,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
             Master List
           </button>
         </div>
-        <div className="flex gap-3 relative" ref={datePickerRef}>
+        <div className="flex gap-3 relative self-end sm:self-auto" ref={datePickerRef}>
            <button 
             onClick={() => setShowDatePicker(!showDatePicker)}
             className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
@@ -173,18 +173,18 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
       {activeView === 'overview' ? (
         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
           {/* Stats Grid - Matching Image 2 */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
             {statsData.map((stat, i) => (
-              <div key={i} className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
+              <div key={i} className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Charts Row - Matching Image 2 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
@@ -224,7 +224,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
@@ -234,8 +234,8 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                   <BarChart3 size={20} />
                 </div>
               </div>
-              <div className="flex items-center h-[300px] gap-8">
-                 <div className="flex-1 space-y-4">
+              <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[300px] gap-6 sm:gap-8">
+                 <div className="w-full sm:flex-1 space-y-4">
                     {budgetByStatus.map((cat, i) => (
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-[10px] font-black uppercase tracking-widest" style={{ color: cat.color }}>
@@ -248,7 +248,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                       </div>
                     ))}
                  </div>
-                 <div className="w-1/2 h-full relative flex items-center justify-center">
+                 <div className="w-full sm:w-1/2 h-[200px] sm:h-full relative flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
@@ -280,15 +280,15 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
           </div>
 
           {/* Recent Tenders Section - ADDED AS REQUESTED */}
-          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
-            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
+          <div className="bg-white rounded-2xl sm:rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
+            <div className="p-4 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/20">
                <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase tracking-widest">Recent Tenders</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase tracking-widest">Recent Tenders</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Latest bid activities and updates</p>
                </div>
                <button 
                   onClick={() => setActiveView('list')}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all shadow-sm active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all shadow-sm active:scale-95 self-end sm:self-auto"
                 >
                   View All
                   <ArrowRight size={14} />
@@ -349,23 +349,23 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
         </div>
       ) : (
         /* Active Tenders Master List */
-        <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 items-center justify-between bg-slate-50/30">
-            <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Active Tenders Master List</h3>
-            <div className="flex flex-wrap gap-3">
-              <div className="relative group">
+        <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500 rounded-2xl">
+          <div className="p-4 sm:p-8 border-b border-slate-50 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-slate-50/30">
+            <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase tracking-[0.1em]">Active Tenders Master List</h3>
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="relative group w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
                 <input 
                   type="text" 
                   placeholder="Search title or client..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-64 shadow-sm" 
+                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-full shadow-sm" 
                 />
               </div>
               <button 
                 onClick={onCreate}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
               >
                 Add New
               </button>
