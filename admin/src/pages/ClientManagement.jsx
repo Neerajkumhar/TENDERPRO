@@ -173,9 +173,9 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             {/* Search Bar - Grouped next to Filter */}
-            <div className="relative group w-full sm:w-80">
+            <div className="relative group w-full sm:w-80 order-2 sm:order-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
               <input 
                 type="text" 
@@ -186,7 +186,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
               />
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
               {/* Filter Button */}
               <div className="relative flex-1 sm:flex-none" ref={filterRef}>
                 <button 
@@ -242,12 +242,12 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center gap-3 sm:gap-6 group hover:shadow-xl transition-all duration-500">
-            <div className="p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform shrink-0">
+          <div key={i} className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center gap-3 sm:gap-6 group hover:shadow-xl transition-all duration-500">
+            <div className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform shrink-0`}>
               <stat.icon size={18} className="sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0">
-               <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 sm:mb-1 truncate">{stat.label}</p>
+               <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 sm:mb-1 truncate">{stat.label}</p>
                <h3 className="text-lg sm:text-2xl font-black text-slate-800 tracking-tight truncate">{stat.value}</h3>
             </div>
           </div>
@@ -262,12 +262,12 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
               <button className="text-[9px] sm:text-[10px] font-black text-blue-600 tracking-widest uppercase hover:underline">View All</button>
            </div>
            
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {filteredClients.map((client, i) => (
                 <div 
                   key={client.id || i} 
                   onClick={() => onView(client.id)}
-                  className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 group hover:border-blue-200 hover:shadow-lg transition-all relative overflow-hidden cursor-pointer active:scale-[0.98]"
+                  className="bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 group hover:border-blue-200 hover:shadow-lg transition-all relative overflow-hidden cursor-pointer active:scale-[0.98] flex flex-col justify-between"
                 >
                    <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
                       <button className="p-2 text-slate-300 hover:text-slate-600 rounded-lg transition-colors">
@@ -275,33 +275,35 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                       </button>
                    </div>
                    
-                   <div className="flex items-center sm:items-start gap-4 sm:gap-5 mb-6 sm:mb-8">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center text-lg sm:text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
-                         {client.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                         <h4 className="text-sm sm:text-base font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">{client.name}</h4>
-                         {client.manager && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{client.manager}</p>}
-                         <p className="text-[10px] sm:text-xs font-bold text-slate-400 truncate">{client.industry || 'General'}</p>
-                      </div>
+                   <div>
+                     <div className="flex items-center sm:items-start gap-4 sm:gap-5 mb-4 sm:mb-6">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center text-lg sm:text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
+                           {client.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                           <h4 className="text-sm sm:text-base font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">{client.name}</h4>
+                           {client.manager && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{client.manager}</p>}
+                           <p className="text-[10px] sm:text-xs font-bold text-slate-400 truncate">{client.industry || 'General'}</p>
+                        </div>
+                     </div>
+                     
+                     <div className="space-y-2.5 sm:space-y-3 mb-4 sm:mb-6">
+                        <div className="flex items-center gap-3 text-slate-500 min-w-0">
+                           <MapPin size={14} className="text-slate-300 shrink-0" />
+                           <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.location || 'Location N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-500 min-w-0">
+                           <Mail size={14} className="text-slate-300 shrink-0" />
+                           <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.email || 'No Email'}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-500 min-w-0">
+                           <Phone size={14} className="text-slate-300 shrink-0" />
+                           <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.phone || 'No Phone'}</span>
+                        </div>
+                     </div>
                    </div>
                    
-                   <div className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
-                      <div className="flex items-center gap-3 text-slate-500 min-w-0">
-                         <MapPin size={14} className="text-slate-300 shrink-0" />
-                         <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.location || 'Location N/A'}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-500 min-w-0">
-                         <Mail size={14} className="text-slate-300 shrink-0" />
-                         <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.email || 'No Email'}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-500 min-w-0">
-                         <Phone size={14} className="text-slate-300 shrink-0" />
-                         <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.phone || 'No Phone'}</span>
-                      </div>
-                   </div>
-                   
-                   <div className="flex justify-end items-end pt-5 sm:pt-6 border-t border-slate-50">
+                   <div className="flex justify-end items-end pt-4 sm:pt-5 border-t border-slate-50">
                        <div className="text-right shrink-0 ml-4">
                           <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 sm:mb-1">PIPELINE VALUE</p>
                           <p className="text-base sm:text-lg font-black text-blue-600 whitespace-nowrap">
@@ -356,7 +358,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowAddModal(false)}></div>
           <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
-            <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+            <div className="p-5 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div className="p-2 sm:p-3 bg-blue-600 text-white rounded-xl sm:rounded-2xl shadow-lg shrink-0">
                   <Plus size={20} className="sm:w-6 sm:h-6" />
@@ -369,7 +371,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
               <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 shrink-0"><X size={20} /></button>
             </div>
             
-            <form onSubmit={handleAddClient} className="p-4 sm:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar">
+            <form onSubmit={handleAddClient} className="p-6 sm:p-10 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
@@ -379,7 +381,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="e.g. Acme Corp"
                     value={newClient.name}
                     onChange={(e) => setNewClient({...newClient, name: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -389,7 +391,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="e.g. John Doe"
                     value={newClient.manager}
                     onChange={(e) => setNewClient({...newClient, manager: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -399,7 +401,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="e.g. Construction"
                     value={newClient.industry}
                     onChange={(e) => setNewClient({...newClient, industry: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -409,7 +411,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="City, Country"
                     value={newClient.location}
                     onChange={(e) => setNewClient({...newClient, location: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -419,7 +421,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="e.g. 123 Business Rd"
                     value={newClient.address}
                     onChange={(e) => setNewClient({...newClient, address: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -429,7 +431,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="e.g. 123 Business Rd"
                     value={newClient.gstAddress}
                     onChange={(e) => setNewClient({...newClient, gstAddress: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -439,7 +441,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="client@email.com"
                     value={newClient.email}
                     onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -449,7 +451,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="+1 (555) 000-0000"
                     value={newClient.phone}
                     onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
@@ -457,7 +459,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                   <select 
                     value={newClient.firmType}
                     onChange={(e) => setNewClient({...newClient, firmType: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500"
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500"
                   >
                     <option value="Private">Private</option>
                     <option value="Govt">Government</option>
@@ -470,11 +472,11 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     placeholder="Estimated Value"
                     value={newClient.value}
                     onChange={(e) => setNewClient({...newClient, value: e.target.value})}
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
                   />
                 </div>
               </div>
-              <div className="pt-4 sm:pt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 shrink-0">
+              <div className="pt-4 sm:pt-6 flex flex-col xs:flex-row gap-3 sm:gap-4 shrink-0">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 sm:py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:bg-slate-50 rounded-xl sm:rounded-2xl transition-all">Cancel</button>
                 <button type="submit" className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl sm:rounded-2xl text-sm font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all uppercase tracking-widest">Register Client</button>
               </div>
