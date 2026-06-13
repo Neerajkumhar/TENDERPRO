@@ -269,12 +269,6 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                   onClick={() => onView(client.id)}
                   className="bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 group hover:border-blue-200 hover:shadow-lg transition-all relative overflow-hidden cursor-pointer active:scale-[0.98] flex flex-col justify-between"
                 >
-                   <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-                      <button className="p-2 text-slate-300 hover:text-slate-600 rounded-lg transition-colors">
-                         <MoreVertical size={18} />
-                      </button>
-                   </div>
-                   
                    <div>
                      <div className="flex items-center sm:items-start gap-4 sm:gap-5 mb-4 sm:mb-6">
                         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center text-lg sm:text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
