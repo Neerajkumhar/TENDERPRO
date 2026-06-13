@@ -648,7 +648,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
       {isAddMemberOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsAddMemberOpen(false)}></div>
-          <div className="relative w-full max-w-full sm:max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-full sm:max-w-lg bg-white rounded-[2.5rem] shadow-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
             <div className="p-4 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl text-white shadow-lg bg-blue-600 shadow-blue-100">
@@ -664,7 +664,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               </button>
             </div>
 
-            <form onSubmit={handleAddMember} className="p-8 space-y-5">
+            <form onSubmit={handleAddMember} className="p-4 sm:p-8 space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
