@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const pg = require('pg');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
@@ -13,6 +14,7 @@ if (dbUrl) {
   console.log('Connecting to DB via URL:', dbUrl.split('@')[1] || 'URL present');
   sequelize = new Sequelize(dbUrl, {
     dialect: 'postgres',
+    dialectModule: pg,
     logging: false,
     dialectOptions: {
       connectTimeout: 60000,
@@ -36,6 +38,7 @@ if (dbUrl) {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT || 5432,
       dialect: 'postgres',
+      dialectModule: pg,
       logging: false,
       dialectOptions: {
         connectTimeout: 60000,
