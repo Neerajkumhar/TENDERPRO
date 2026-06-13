@@ -167,28 +167,28 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowLeaveModal(false)}></div>
-        <div className="bg-white w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col text-left">
+        <div className="bg-white w-full max-w-4xl max-h-[85vh] rounded-2xl sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col text-left">
           {/* Modal Header */}
-          <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-500 text-white rounded-2xl shadow-lg shadow-amber-200">
-                <Coffee size={24} />
+          <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/30">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-amber-500 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-amber-200">
+                <Coffee size={20} className="sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Team Leave Requests</h2>
-                <p className="text-xs text-slate-500 font-medium italic">Review and manage your department's time-off applications</p>
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight uppercase">Team Leave Requests</h2>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic">Review and manage your department's time-off applications</p>
               </div>
             </div>
             <button 
               onClick={() => setShowLeaveModal(false)}
-              className="p-3 hover:bg-white rounded-full text-slate-400 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100 shadow-sm"
+              className="p-2 sm:p-3 hover:bg-white rounded-full text-slate-400 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100 shadow-sm self-end sm:self-auto"
             >
-              <X size={24} />
+              <X size={20} className="sm:w-6 sm:h-6" />
             </button>
           </div>
 
           {/* Modal Content */}
-          <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 custom-scrollbar">
             {loadingLeaves ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -200,12 +200,12 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                 <p className="font-black text-[10px] uppercase tracking-widest">No pending leave requests found</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {leaveRequests.map((request) => (
-                  <div key={request.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-blue-100 transition-all group relative overflow-hidden">
+                  <div key={request.id} className="bg-white border border-slate-100 rounded-xl sm:rounded-[2rem] p-4 sm:p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-blue-100 transition-all group relative overflow-hidden">
                     {/* Status Badge */}
-                    <div className="absolute top-6 right-6">
-                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm
+                    <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+                      <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm
                         ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : 
                           request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 
                           'bg-rose-500 text-white shadow-rose-100'}`}>
@@ -213,36 +213,36 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                       </span>
                     </div>
 
-                    <div className="flex items-start gap-4 mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xl border-2 border-white shadow-sm overflow-hidden shrink-0">
+                    <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-lg sm:text-xl border-2 border-white shadow-sm overflow-hidden shrink-0">
                         {request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}
                       </div>
                       <div className="min-w-0 pr-16">
-                        <h4 className="font-black text-slate-900 uppercase tracking-tight truncate">{request.User?.name}</h4>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{request.User?.role}</p>
+                        <h4 className="font-black text-slate-900 uppercase tracking-tight truncate text-xs sm:text-sm">{request.User?.name}</h4>
+                        <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{request.User?.role}</p>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50">
-                        <div className="p-2 bg-white rounded-xl text-blue-500 shadow-sm">
-                          <Calendar size={16} />
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100/50">
+                        <div className="p-1.5 sm:p-2 bg-white rounded-lg sm:rounded-xl text-blue-500 shadow-sm shrink-0">
+                          <Calendar size={14} className="sm:w-4 sm:h-4" />
                         </div>
-                        <div className="flex-1">
-                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Duration</p>
-                          <p className="text-xs font-black text-slate-700">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Duration</p>
+                          <p className="text-[11px] sm:text-xs font-black text-slate-700 truncate">
                             {new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50">
-                        <div className="p-2 bg-white rounded-xl text-amber-500 shadow-sm">
-                          <AlertCircle size={16} />
+                      <div className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100/50">
+                        <div className="p-1.5 sm:p-2 bg-white rounded-lg sm:rounded-xl text-amber-500 shadow-sm shrink-0">
+                          <AlertCircle size={14} className="sm:w-4 sm:h-4" />
                         </div>
-                        <div className="flex-1">
-                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Type & Reason</p>
-                          <p className="text-xs font-bold text-slate-600 italic">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Type & Reason</p>
+                          <p className="text-[11px] sm:text-xs font-bold text-slate-600 italic line-clamp-2">
                             <span className="text-slate-900 font-black not-italic">{request.leaveType}: </span>
                             "{request.reason || 'No reason provided'}"
                           </p>
@@ -251,19 +251,19 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                     </div>
 
                     {request.status === 'Pending' && (
-                      <div className="flex gap-3 mt-6">
+                      <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
                         <button 
                           onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 bg-emerald-500 text-white rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
                         >
-                          <CheckCircle2 size={14} />
+                          <CheckCircle2 size={12} className="sm:w-3.5 sm:h-3.5" />
                           Approve
                         </button>
                         <button 
                           onClick={() => handleLeaveStatusUpdate(request.id, 'Rejected')}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-white border border-rose-100 text-rose-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all shadow-sm active:scale-95"
+                          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 bg-white border border-rose-100 text-rose-500 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all shadow-sm active:scale-95"
                         >
-                          <XCircle size={14} />
+                          <XCircle size={12} className="sm:w-3.5 sm:h-3.5" />
                           Reject
                         </button>
                       </div>
@@ -275,8 +275,8 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
           </div>
 
           {/* Modal Footer */}
-          <div className="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center px-10">
-             <div className="flex items-center gap-4">
+          <div className="p-4 sm:p-6 border-t border-slate-50 bg-slate-50/30 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center px-6 sm:px-10">
+             <div className="flex items-center gap-3 sm:gap-4">
                 <div className="flex -space-x-3">
                    {[1,2,3].map(i => (
                       <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm overflow-hidden">
@@ -288,24 +288,21 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
              </div>
              <button 
               onClick={() => setShowLeaveModal(false)}
-              className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95"
+              className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-slate-900 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95"
              >
                Close Panel
              </button>
           </div>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    );  return (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation Header */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white">
-        <div className="flex gap-2">
+      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-white p-4 sm:p-6 rounded-xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white gap-4">
+        <div className="flex overflow-x-auto pb-1 lg:pb-0 gap-2 w-full lg:w-auto">
           <button 
             onClick={() => setActiveView('overview')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+            className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 ${
               activeView === 'overview' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
             }`}
           >
@@ -314,7 +311,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
           </button>
           <button 
             onClick={() => setActiveView('list')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+            className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 ${
               activeView === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
             }`}
           >
@@ -322,23 +319,23 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
             Tenders Master List
           </button>
         </div>
-        <div className="flex gap-3 relative" ref={datePickerRef}>
+        <div className="flex flex-wrap sm:flex-nowrap gap-3 relative w-full lg:w-auto" ref={datePickerRef}>
            <button 
             onClick={() => setShowLeaveModal(true)}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
           >
             <Coffee size={18} />
             <span>Leave Requests</span>
           </button>
            <button 
             onClick={() => setShowDatePicker(!showDatePicker)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
            >
               <Calendar size={14} className="text-indigo-600" />
               <span>{new Date(selectedDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
               <ChevronDown size={12} className={`transition-transform duration-300 ${showDatePicker ? 'rotate-180' : ''}`} />
            </button>
-
+ 
            {showDatePicker && (
               <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
                 <div className="space-y-3">
@@ -359,30 +356,30 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
       </div>
 
       {activeView === 'overview' ? (
-        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
           {/* Stats Grid - Matching Image 2 */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
             {statsData.map((stat, i) => (
-              <div key={i} className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
+              <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Charts Row - Matching Image 2 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
-              <div className="flex justify-between items-start mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-6 lg:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
+              <div className="flex justify-between items-start mb-6 sm:mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bid outcomes over last 6 months</p>
                 </div>
-                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+                <div className="p-2.5 sm:p-3 bg-indigo-50 text-indigo-600 rounded-xl sm:rounded-2xl shrink-0">
                   <TrendingUp size={20} />
                 </div>
               </div>
-              <div className="h-[300px]">
+              <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                   <AreaChart data={outcomesData}>
                     <defs>
@@ -412,18 +409,18 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
-              <div className="flex justify-between items-start mb-8">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-6 lg:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
+              <div className="flex justify-between items-start mb-6 sm:mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total budget distribution by status</p>
                 </div>
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <div className="p-2.5 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl shrink-0">
                   <BarChart3 size={20} />
                 </div>
               </div>
-              <div className="flex items-center h-[300px] gap-8">
-                 <div className="flex-1 space-y-4">
+              <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 min-h-[300px] sm:h-[300px] w-full">
+                 <div className="w-full sm:flex-1 space-y-4">
                     {budgetByStatus.map((cat, i) => (
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-[10px] font-black uppercase tracking-widest" style={{ color: cat.color }}>
@@ -436,7 +433,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                       </div>
                     ))}
                  </div>
-                 <div className="w-1/2 h-full relative flex items-center justify-center">
+                 <div className="w-full sm:w-1/2 h-[220px] sm:h-full relative flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
@@ -465,7 +462,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                  </div>
               </div>
             </div>
-          </div>
+          </div>  </div>
 
           {/* Recent Tenders Section - ADDED AS REQUESTED */}
           <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
