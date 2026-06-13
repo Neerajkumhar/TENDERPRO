@@ -305,7 +305,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] text-left space-y-6 sm:space-y-8 animate-in fade-in duration-700">
-      <div className="flex justify-between items-center text-left">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-left">
         <div>
           <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Financial Overview</h1>
           <p className="text-[9px] sm:text-[10px] text-slate-500 mt-1 font-medium italic uppercase tracking-widest">Track revenue, expenses, and overall financial health.</p>
@@ -313,7 +313,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setIsExportModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             <Download size={14} />
             <span>Export Report</span>
@@ -321,47 +321,47 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-4">
         {statsData.map((stat, i) => (
-          <div key={i} className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
+          <div key={i} className="bg-white p-4 sm:p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group relative overflow-hidden">
             <div className={`absolute top-0 left-0 w-full h-1 bg-${stat.color}-500`}></div>
-            <div className="flex justify-between items-start mb-2">
-              <div className={`p-2.5 rounded-xl bg-${stat.color}-50/50 text-${stat.color}-600 mb-3`}>
+            <div className="flex justify-between items-start w-full mb-2">
+              <div className={`p-2 sm:p-2.5 rounded-xl bg-${stat.color}-50/50 text-${stat.color}-600 mb-2 sm:mb-3`}>
                 <stat.icon size={16} />
               </div>
               <div className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
                 {stat.trend}
               </div>
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">{stat.label}</p>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 leading-none">{stat.value}</h3>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5 truncate w-full">{stat.label}</p>
+            <h3 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 leading-none truncate w-full">{stat.value}</h3>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
-        <div className="col-span-12 xl:col-span-8 card p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
-          <div className="flex justify-between items-center mb-8">
+      <div className="grid grid-cols-12 gap-6 sm:gap-8">
+        <div className="col-span-12 xl:col-span-8 card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
             <div>
-              <h3 className="font-black text-slate-900 text-xl tracking-tight">Revenue vs Expense</h3>
+              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Revenue vs Expense</h3>
               <p className="text-xs text-slate-500 font-medium">Monthly performance comparison</p>
             </div>
-            <div className="flex flex-wrap items-center gap-6">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue (Billed)</span>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span>
+                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue (Billed)</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200"></span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200"></span>
+                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-rose-500 rounded-full"></span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expense</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
+                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Expense</span>
               </div>
             </div>
           </div>
-          <div className="h-[350px] w-full">
+          <div className="h-[280px] sm:h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueVsExpenseData}>
                 <defs>
@@ -422,10 +422,10 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-4 card p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative">
-          <div className="flex justify-between items-center mb-8">
+        <div className="col-span-12 xl:col-span-4 card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative">
+          <div className="flex justify-between items-center mb-6 sm:mb-8">
             <div>
-              <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase">Recent Alerts</h3>
+              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase">Recent Alerts</h3>
               <p className="text-xs text-slate-500 font-medium">Automatic system monitors</p>
             </div>
             <button className="p-2 hover:bg-slate-50 rounded-xl transition-all"><MoreHorizontal size={20} className="text-slate-400" /></button>
@@ -433,8 +433,8 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           <div className="space-y-4">
             {displayAlerts.length > 0 ? (
               displayAlerts.map((alert, i) => (
-                <div key={i} className={`flex items-start gap-4 p-4 rounded-2xl bg-${alert.color}-50 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
-                  <div className={`p-2 rounded-xl bg-white text-${alert.color}-600 shadow-sm shadow-${alert.color}-100 group-hover:scale-110 transition-transform`}>
+                <div key={i} className={`flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-${alert.color}-50 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
+                  <div className={`p-2 rounded-xl bg-white text-${alert.color}-600 shadow-sm shadow-${alert.color}-100 group-hover:scale-110 transition-transform shrink-0`}>
                     <AlertCircle size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -442,7 +442,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                       <p className={`text-[10px] font-black text-${alert.color}-600 uppercase tracking-widest`}>{alert.type}</p>
                       <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">{alert.time}</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-700 mt-0.5 line-clamp-1">{alert.message}</p>
+                    <p className="text-xs font-bold text-slate-700 mt-0.5 truncate">{alert.message}</p>
                   </div>
                 </div>
               ))
@@ -464,29 +464,35 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         </div>
 
         <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-          <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 justify-between items-center bg-slate-50/30">
+          <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/30">
             <div>
-              <h3 className="font-black text-slate-900 text-xl tracking-tight">Invoice Status Table</h3>
+              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Invoice Status Table</h3>
               <p className="text-xs text-slate-500 font-medium mt-1">Detailed log of recent financial transactions</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative group">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+              <div className="relative group w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                 <input 
                   type="text" 
                   placeholder="Search client or ID..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-500 transition-all w-64 shadow-sm" 
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-500 transition-all shadow-sm" 
                 />
               </div>
               
-              <div className="relative" ref={filterRef}>
+              <div className="relative flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto" ref={filterRef}>
                 <button 
                   onClick={() => setShowFilterPopover(!showFilterPopover)}
-                  className={`p-2.5 rounded-xl border transition-all shadow-sm active:scale-95 ${showFilterPopover || filterStatus !== 'All' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400'}`}
+                  className={`p-2.5 rounded-xl border transition-all shadow-sm active:scale-95 flex items-center justify-center ${showFilterPopover || filterStatus !== 'All' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400'}`}
                 >
                   <Filter size={18} />
+                </button>
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex-1 sm:flex-initial bg-slate-900 text-white px-6 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-slate-200 hover:bg-blue-600 transition-all uppercase tracking-widest text-center"
+                >
+                  Generate Invoice
                 </button>
 
                 {showFilterPopover && (
@@ -508,42 +514,35 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   </div>
                 )}
               </div>
-
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-slate-200 hover:bg-blue-600 transition-all uppercase tracking-widest"
-              >
-                Generate Invoice
-              </button>
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                  <th className="px-8 py-4">ID</th>
-                  <th className="px-8 py-4">Date</th>
-                  <th className="px-8 py-4">Client</th>
-                  <th className="px-8 py-4 text-center">Amount</th>
-                  <th className="px-8 py-4">Status</th>
-                  <th className="px-8 py-4 text-center">Actions</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">ID</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">Date</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">Client</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-center">Amount</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">Status</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredInvoices.length > 0 ? filteredInvoices.map((inv, i) => (
                   <tr key={i} className="hover:bg-blue-50/30 transition-all group">
-                    <td className="px-8 py-5 text-xs font-bold text-slate-400">{inv.invoiceNumber || inv.id}</td>
-                    <td className="px-8 py-5 text-xs font-bold text-slate-600">
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-xs font-bold text-slate-400">{inv.invoiceNumber || inv.id}</td>
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-xs font-bold text-slate-600 whitespace-nowrap">
                       {inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : 'N/A'}
                     </td>
-                    <td className="px-8 py-5 text-sm font-black text-slate-800">{inv.client}</td>
-                    <td className="px-8 py-5 text-sm font-black text-slate-900 text-center italic">
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-sm font-black text-slate-800">{inv.client}</td>
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-sm font-black text-slate-900 text-center italic whitespace-nowrap">
                       ₹{parseFloat(inv.amount || 0).toLocaleString('en-IN')}
                     </td>
-                    <td className="px-8 py-5">
-                      <div className={`w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${inv.status === 'Paid' ? 'bg-emerald-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
+                      <div className={`w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm whitespace-nowrap ${inv.status === 'Paid' ? 'bg-emerald-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
                     </td>
-                    <td className="px-8 py-5">
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
                       <div className="flex items-center justify-center gap-2">
                         <button 
                           onClick={() => onInvoiceClick && onInvoiceClick(inv.id)}
@@ -568,17 +567,17 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col max-h-[90vh]">
-            <div className="p-10 overflow-y-auto custom-scrollbar">
+          <div className="bg-white w-full max-w-xl rounded-2xl sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="p-5 sm:p-10 overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center mb-8">
-                <div><h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Generate New Invoice</h2><p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Add billing & transaction logging</p></div>
+                <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Generate New Invoice</h2><p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Add billing & transaction logging</p></div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><XCircle size={24} /></button>
               </div>
               <form onSubmit={handleCreateInvoice} className="space-y-6 text-left">
                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name</label><input type="text" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={formData.client} onChange={(e) => setFormData({...formData, client: e.target.value})} /></div>
-                <div className="grid grid-cols-2 gap-6"><div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Date</label><input type="date" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} /></div><div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label><select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold appearance-none" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Overdue">Overdue</option></select></div></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"><div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Date</label><input type="date" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} /></div><div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label><select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold appearance-none" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Overdue">Overdue</option></select></div></div>
                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label><div className="relative"><span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span><input type="number" className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} /></div></div>
-                <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-2"><button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest">Cancel</button><button type="submit" className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">Generate Invoice</button></div>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2"><button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest">Cancel</button><button type="submit" className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">Generate Invoice</button></div>
               </form>
             </div>
           </div>
