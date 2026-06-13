@@ -189,7 +189,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
     const deptData = {
       name: formData.get('name'),
       color: formData.get('color') || '#3b82f6',
-      description: 'Department managed through Team Management'
+      description: formData.get('description') || 'Department managed through Team Management'
     };
 
     try {
@@ -599,19 +599,29 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateDept} className="p-5 sm:p-8 space-y-6">
-              <div className="space-y-2">
+            <form onSubmit={handleCreateDept} className="p-5 sm:p-8 space-y-5">
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dept Name</label>
                 <input 
                   name="name" 
                   required 
                   placeholder="e.g. Finance" 
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white transition-all" 
+                  className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white transition-all shadow-sm" 
                 />
               </div>
-              <div className="space-y-2">
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
+                <textarea 
+                  name="description" 
+                  placeholder="Describe the department's purpose..." 
+                  className="w-full px-5 py-3 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white transition-all h-24 resize-none shadow-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Theme Color</label>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2.5 sm:gap-3">
                   {['#3b82f6', '#10b981', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'].map(color => (
                     <label key={color} className="relative cursor-pointer group">
                       <input type="radio" name="color" value={color} className="sr-only peer" defaultChecked={color === '#3b82f6'} />
@@ -628,13 +638,13 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                 <button 
                   type="button" 
                   onClick={() => setIsCreateDeptOpen(false)} 
-                  className="flex-1 py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:text-slate-700 transition-colors"
+                  className="flex-1 py-3.5 sm:py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:text-slate-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest"
+                  className="flex-[2] py-3.5 sm:py-4 bg-indigo-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-widest"
                 >
                   Create
                 </button>
