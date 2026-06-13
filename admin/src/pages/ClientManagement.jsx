@@ -204,7 +204,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
 
                 {/* Filter Dropdown */}
                 {showFilter && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
+                  <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">Firm Type</p>
                     {['All', 'Private', 'Govt'].map((type) => (
                       <button
