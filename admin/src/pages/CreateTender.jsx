@@ -346,22 +346,22 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
   };
 
   return (
-    <div className=" bg-[#F8FAFC] animate-in fade-in duration-700">
-      <div className="sticky top-0 z-50 bg-white border-b border-slate-100 px-8 py-4 flex justify-between items-center shadow-sm">
+    <div className="bg-[#F8FAFC] animate-in fade-in duration-700 min-h-screen">
+      <div className="sticky top-0 z-50 bg-white border-b border-slate-100 px-4 sm:px-8 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-600 rounded-lg text-white">
             <Plus size={20} />
           </div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">Register New Tender</h1>
+          <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Register New Tender</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-slate-600 font-bold text-sm hover:bg-slate-50 rounded-xl transition-all">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button className="flex items-center gap-2 px-3 py-2 text-slate-600 font-bold text-xs sm:text-sm hover:bg-slate-50 rounded-xl transition-all">
             <Plus size={18} />
             <span>Save Draft</span>
           </button>
           <button
             onClick={onCancel}
-            className="flex items-center gap-2 px-4 py-2 text-slate-600 font-bold text-sm hover:bg-slate-50 rounded-xl transition-all"
+            className="flex items-center gap-2 px-3 py-2 text-slate-600 font-bold text-xs sm:text-sm hover:bg-slate-50 rounded-xl transition-all"
           >
             <X size={18} />
             <span>Cancel</span>
@@ -369,30 +369,30 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
         </div>
       </div>
 
-      <div className="px-8 py-8 grid grid-cols-12 gap-8 text-left">
+      <div className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 grid grid-cols-12 gap-6 lg:gap-8 text-left">
         <div className="col-span-12 lg:col-span-3">
-          <div className="sticky top-28 space-y-8">
-            <div className="space-y-4">
+          <div className="sticky lg:top-28 space-y-4 lg:space-y-8">
+            <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible pb-3 lg:pb-0 gap-3 lg:gap-4 w-full scrollbar-thin scrollbar-thumb-slate-200">
               {sections.map((step) => (
                 <button
                   key={step.id}
                   onClick={() => handleStepNavigation(step.id)}
-                  className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all text-left group ${activeStep === step.id
+                  className={`flex-shrink-0 w-[180px] sm:w-[220px] lg:w-full flex items-center gap-3 lg:gap-4 p-3 rounded-2xl transition-all text-left group ${activeStep === step.id
                     ? 'bg-white shadow-xl shadow-blue-100/50 ring-1 ring-blue-100'
                     : 'hover:bg-white hover:shadow-md'
                     }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all ${activeStep === step.id
+                  <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black transition-all ${activeStep === step.id
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
                     : activeStep > step.id ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' : 'bg-slate-100 text-slate-400'
                     }`}>
                     {activeStep > step.id ? <CheckSquare size={16} /> : step.id}
                   </div>
-                  <div>
-                    <h4 className={`text-sm font-black tracking-tight ${activeStep === step.id ? 'text-blue-600' : 'text-slate-600'}`}>
+                  <div className="truncate">
+                    <h4 className={`text-xs lg:text-sm font-black tracking-tight truncate ${activeStep === step.id ? 'text-blue-600' : 'text-slate-600'}`}>
                       {step.title}
                     </h4>
-                    <p className="text-[10px] text-slate-400 font-medium">{step.subtitle}</p>
+                    <p className="text-[9px] lg:text-[10px] text-slate-400 font-medium truncate">{step.subtitle}</p>
                   </div>
                 </button>
               ))}
@@ -403,49 +403,49 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
         <div className="col-span-12 lg:col-span-9 pb-20">
           <div className="animate-in slide-in-from-right-8 duration-500 text-left">
             {activeStep === 1 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40">
-                <div className="flex items-center gap-4 mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-100">
                     <FileText size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Opportunity Overview</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Opportunity Overview</h3>
                     <p className="text-xs text-slate-500 font-medium">Log the essential information about this tender opportunity.</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="col-span-2 space-y-2 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-8">
+                  <div className="col-span-1 sm:col-span-2 space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Title <span className="text-rose-500">*</span></label>
-                    <input type="text" placeholder="e.g. Infrastructure Development Jaipur" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                    <input type="text" placeholder="e.g. Infrastructure Development Jaipur" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name <span className="text-rose-500">*</span></label>
-                    <select value={formData.clientId} onChange={(e) => setFormData({...formData, clientId: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
+                    <select value={formData.clientId} onChange={(e) => setFormData({...formData, clientId: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
                       <option value="">Select registered client</option>
                       {clients?.map(client => (<option key={client.id} value={client.id}>{client.name}</option>))}
                     </select>
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Reference ID <span className="text-rose-500">*</span></label>
-                    <input type="text" placeholder="e.g. TNDR/2024/001" value={formData.reference} onChange={(e) => setFormData({...formData, reference: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                    <input type="text" placeholder="e.g. TNDR/2024/001" value={formData.reference} onChange={(e) => setFormData({...formData, reference: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Type <span className="text-rose-500">*</span></label>
-                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
+                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
                       <option value="Private">Private Firm</option><option value="Government">Govt. Firm</option><option value="PSU">PSU</option><option value="Non-Profit">Non-Profit</option>
                     </select>
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">P.O. Number</label>
-                    <input type="text" placeholder="e.g. PO/2024/001" value={formData.poNumber} onChange={(e) => setFormData({...formData, poNumber: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                    <input type="text" placeholder="e.g. PO/2024/001" value={formData.poNumber} onChange={(e) => setFormData({...formData, poNumber: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">W.O. Number</label>
-                    <input type="text" placeholder="e.g. WO/2024/001" value={formData.woNumber} onChange={(e) => setFormData({...formData, woNumber: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                    <input type="text" placeholder="e.g. WO/2024/001" value={formData.woNumber} onChange={(e) => setFormData({...formData, woNumber: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bid Type <span className="text-rose-500">*</span></label>
-                    <select value={formData.bidType} onChange={(e) => handleBidTypeChange(e.target.value)} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
+                    <select value={formData.bidType} onChange={(e) => handleBidTypeChange(e.target.value)} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm">
                       <option value="Private">Private</option>
                       <option value="E-Bazar">E-Bazar</option>
                       <option value="Bid">Bid</option>
@@ -453,32 +453,32 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
                   </div>
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Submission Deadline <span className="text-rose-500">*</span></label>
-                    <input type="date" value={formData.submissionDate} onChange={(e) => setFormData({...formData, submissionDate: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
+                    <input type="date" value={formData.submissionDate} onChange={(e) => setFormData({...formData, submissionDate: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" />
                   </div>
                 </div>
               </div>
             )}
 
             {activeStep === 2 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40">
-                <div className="flex items-center gap-4 mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100">
                     <Target size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Project Scope</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Project Scope</h3>
                     <p className="text-xs text-slate-500 font-medium">Define the boundaries and requirements of the project.</p>
                   </div>
                 </div>
-                <div className="space-y-8">
+                <div className="space-y-6 lg:space-y-8">
                   <div className="space-y-2 text-left">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Project Description <span className="text-rose-500">*</span></label>
-                    <textarea value={formData.scope} onChange={(e) => setFormData({...formData, scope: e.target.value})} placeholder="Detailed overview of the project objectives..." rows={5} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
+                    <textarea value={formData.scope} onChange={(e) => setFormData({...formData, scope: e.target.value})} placeholder="Detailed overview of the project objectives..." rows={5} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
                   </div>
-                  <div className="grid grid-cols-2 gap-8 text-left">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-8 text-left">
+                    <div className="space-y-2 col-span-1 sm:col-span-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Milestones <span className="text-rose-500">*</span></label>
-                      <textarea value={formData.milestones} onChange={(e) => setFormData({...formData, milestones: e.target.value})} placeholder="List key deliverables..." rows={4} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
+                      <textarea value={formData.milestones} onChange={(e) => setFormData({...formData, milestones: e.target.value})} placeholder="List key deliverables..." rows={4} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
                     </div>
                   </div>
                 </div>
@@ -486,80 +486,80 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
             )}
 
             {activeStep === 3 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40">
-                <div className="flex items-center gap-4 mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-100">
                     <ShieldCheck size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Eligibility & Conditions</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Eligibility & Conditions</h3>
                     <p className="text-xs text-slate-500 font-medium">Specify the criteria for qualified bidders.</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-8 text-left">
+                <div className="grid grid-cols-1 gap-6 lg:gap-8 text-left">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Technical Criteria <span className="text-rose-500">*</span></label>
-                    <textarea value={formData.techCriteria} onChange={(e) => setFormData({...formData, techCriteria: e.target.value})} placeholder="Required technical expertise and past experience..." rows={3} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
+                    <textarea value={formData.techCriteria} onChange={(e) => setFormData({...formData, techCriteria: e.target.value})} placeholder="Required technical expertise and past experience..." rows={3} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Required Certifications <span className="text-rose-500">*</span></label>
-                    <textarea value={formData.certifications} onChange={(e) => setFormData({...formData, certifications: e.target.value})} placeholder="ISO, Industry specific certifications..." rows={3} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
+                    <textarea value={formData.certifications} onChange={(e) => setFormData({...formData, certifications: e.target.value})} placeholder="ISO, Industry specific certifications..." rows={3} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Terms & Conditions <span className="text-rose-500">*</span></label>
-                    <textarea value={formData.terms} onChange={(e) => setFormData({...formData, terms: e.target.value})} placeholder="Legal and operational terms..." rows={3} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
+                    <textarea value={formData.terms} onChange={(e) => setFormData({...formData, terms: e.target.value})} placeholder="Legal and operational terms..." rows={3} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
                   </div>
                 </div>
               </div>
             )}
 
             {activeStep === 4 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40">
-                <div className="flex items-center gap-4 mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="p-3 bg-amber-600 text-white rounded-2xl shadow-lg shadow-amber-100">
                     <IndianRupee size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Financial Details</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Financial Details</h3>
                     <p className="text-xs text-slate-500 font-medium">Define the budget and payment structure.</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-8 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-8 text-left">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Total Budget (INR) <span className="text-rose-500">*</span></label>
-                    <div className="relative"><input type="number" value={formData.budget} onChange={(e) => setFormData({...formData, budget: e.target.value})} placeholder="0.00" className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" /><IndianRupee className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} /></div>
+                    <div className="relative"><input type="number" value={formData.budget} onChange={(e) => setFormData({...formData, budget: e.target.value})} placeholder="0.00" className="w-full pl-12 pr-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" /><IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} /></div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tax (%) <span className="text-rose-500">*</span></label>
-                    <div className="relative"><input type="number" value={formData.tax} onChange={(e) => setFormData({...formData, tax: e.target.value})} placeholder="18" className="w-full pl-6 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" /><span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-black">%</span></div>
+                    <div className="relative"><input type="number" value={formData.tax} onChange={(e) => setFormData({...formData, tax: e.target.value})} placeholder="18" className="w-full pl-5 pr-12 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm" /><span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-black">%</span></div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Terms <span className="text-rose-500">*</span></label>
-                    <select value={formData.paymentTerms} onChange={(e) => setFormData({...formData, paymentTerms: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="Milestone Based">Milestone Based</option><option value="Net 30">Net 30</option><option value="Advanced Payment">Advanced Payment</option></select>
+                    <select value={formData.paymentTerms} onChange={(e) => setFormData({...formData, paymentTerms: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="Milestone Based">Milestone Based</option><option value="Net 30">Net 30</option><option value="Advanced Payment">Advanced Payment</option></select>
                   </div>
                 </div>
               </div>
             )}
 
             {activeStep === 5 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40">
-                <div className="flex justify-between items-center mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem]">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-100">
                       <UploadCloud size={24} />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-slate-900 tracking-tight">Documents Upload</h3>
+                      <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Documents Upload</h3>
                       <p className="text-xs text-slate-500 font-medium">Attach all necessary documentation for the tender.</p>
                     </div>
                   </div>
-                  <button onClick={addDocumentSlot} className="flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"><Plus size={16} /><span>Add More Files</span></button>
+                  <button onClick={addDocumentSlot} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95 w-full sm:w-auto"><Plus size={16} /><span>Add More Files</span></button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
                   {documentSlots.map((upload) => (
                     <div key={upload.id} className="space-y-4 animate-in zoom-in-95 duration-300 text-left">
                       <div className="flex justify-between items-center ml-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{upload.label} <span className="text-rose-500">*</span></label>{!upload.isFixed && (<button onClick={() => removeDocumentSlot(upload.id)} className="text-rose-500 hover:text-rose-700 transition-colors"><X size={14} /></button>)}</div>
-                      <div className={`border-2 border-dashed rounded-[2.5rem] p-10 text-center transition-all group cursor-pointer relative overflow-hidden h-full flex flex-col justify-center ${upload.url ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50 hover:border-blue-500 hover:bg-blue-50/50'}`}>{isUploading === upload.id ? (<div className="flex flex-col items-center animate-pulse"><Upload size={32} className="text-blue-600 animate-bounce mb-4" /><p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Uploading...</p></div>) : upload.url ? (<div className="flex flex-col items-center"><div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-[1.5rem] flex items-center justify-center mb-6"><CheckSquare size={32} /></div><p className="text-sm font-black text-slate-900 mb-1 truncate w-full px-4">{upload.fileName}</p><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">File Secured</p></div>) : (<><div className="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all text-slate-400 shadow-sm"><Upload size={32} /></div><p className="text-sm font-black text-slate-900 mb-1">Drop file here</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">or click to browse</p><div className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:border-blue-500 group-hover:text-blue-600 transition-all shadow-sm">Browse Files</div></>)}<input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e.target.files[0], upload.id)} />{!upload.url && <p className="text-[9px] text-slate-400 mt-6 font-bold italic">{upload.format}</p>}</div>
+                      <div className={`border-2 border-dashed rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 text-center transition-all group cursor-pointer relative overflow-hidden h-full flex flex-col justify-center ${upload.url ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50 hover:border-blue-500 hover:bg-blue-50/50'}`}>{isUploading === upload.id ? (<div className="flex flex-col items-center animate-pulse"><Upload size={32} className="text-blue-600 animate-bounce mb-4" /><p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Uploading...</p></div>) : upload.url ? (<div className="flex flex-col items-center"><div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-[1.5rem] flex items-center justify-center mb-6"><CheckSquare size={32} /></div><p className="text-sm font-black text-slate-900 mb-1 truncate w-full px-4">{upload.fileName}</p><p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">File Secured</p></div>) : (<><div className="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all text-slate-400 shadow-sm"><Upload size={32} /></div><p className="text-sm font-black text-slate-900 mb-1">Drop file here</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">or click to browse</p><div className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 group-hover:border-blue-500 group-hover:text-blue-600 transition-all shadow-sm">Browse Files</div></>)}<input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e.target.files[0], upload.id)} />{!upload.url && <p className="text-[9px] text-slate-400 mt-6 font-bold italic">{upload.format}</p>}</div>
                     </div>
                   ))}
                 </div>
@@ -567,58 +567,58 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
             )}
 
             {activeStep === 6 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40">
-                <div className="flex items-center gap-4 mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100">
                     <Users size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Internal Team Assignment</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Internal Team Assignment</h3>
                     <p className="text-xs text-slate-500 font-medium">Assign internal team members to manage this tender flow.</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-8 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 lg:gap-8 text-left">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Manager <span className="text-rose-500">*</span></label>
-                    <select value={formData.teamAssignments?.managerId} onChange={(e) => setFormData({ ...formData, teamAssignments: { ...formData.teamAssignments, managerId: e.target.value } })} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="">Select manager</option>{members.filter(member => member.role === 'Tender Manager').map(member => (<option key={member.id} value={member.id}>{member.name} ({member.role} - {member.email})</option>))}</select>
+                    <select value={formData.teamAssignments?.managerId} onChange={(e) => setFormData({ ...formData, teamAssignments: { ...formData.teamAssignments, managerId: e.target.value } })} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="">Select manager</option>{members.filter(member => member.role === 'Tender Manager').map(member => (<option key={member.id} value={member.id}>{member.name} ({member.role} - {member.email})</option>))}</select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reviewer <span className="text-rose-500">*</span></label>
-                    <select value={formData.teamAssignments?.reviewerId} onChange={(e) => setFormData({ ...formData, teamAssignments: { ...formData.teamAssignments, reviewerId: e.target.value } })} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="">Select reviewer</option>{members.map(member => (<option key={member.id} value={member.id}>{member.name} ({member.role} - {member.email})</option>))}</select>
+                    <select value={formData.teamAssignments?.reviewerId} onChange={(e) => setFormData({ ...formData, teamAssignments: { ...formData.teamAssignments, reviewerId: e.target.value } })} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="">Select reviewer</option>{members.map(member => (<option key={member.id} value={member.id}>{member.name} ({member.role} - {member.email})</option>))}</select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Approval Owner <span className="text-rose-500">*</span></label>
-                    <select value={formData.teamAssignments?.approverId} onChange={(e) => setFormData({ ...formData, teamAssignments: { ...formData.teamAssignments, approverId: e.target.value } })} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="">Select owner</option>{members.filter(m => m.role === 'Admin').map(member => (<option key={member.id} value={member.id}>{member.name} (Admin - {member.email})</option>))}</select>
+                    <select value={formData.teamAssignments?.approverId} onChange={(e) => setFormData({ ...formData, teamAssignments: { ...formData.teamAssignments, approverId: e.target.value } })} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="">Select owner</option>{members.filter(m => m.role === 'Admin').map(member => (<option key={member.id} value={member.id}>{member.name} (Admin - {member.email})</option>))}</select>
                   </div>
                 </div>
               </div>
             )}
 
             {activeStep === 7 && (
-              <div className="card p-10 bg-white border-none shadow-2xl shadow-slate-200/40 text-left">
-                <div className="flex items-center gap-4 mb-10">
+              <div className="card p-5 sm:p-8 lg:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 rounded-2xl sm:rounded-[2.5rem] text-left">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 lg:mb-10">
                   <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-100">
                     <Send size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">Entry Completion</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Entry Completion</h3>
                     <p className="text-xs text-slate-500 font-medium">Review and finalize the tender entry in our management system.</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-12 gap-10">
-                  <div className="col-span-12 lg:col-span-7 space-y-8">
+                <div className="grid grid-cols-12 gap-6 lg:gap-10">
+                  <div className="col-span-12 lg:col-span-7 space-y-6 lg:space-y-8">
                     <div className="space-y-2 text-left">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Submission Mode <span className="text-rose-500">*</span></label>
-                      <select value={formData.submissionMode} onChange={(e) => setFormData({...formData, submissionMode: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="Online Portal">Online Portal</option><option value="Physical Submission">Physical Submission</option><option value="Email Submission">Email Submission</option></select>
+                      <select value={formData.submissionMode} onChange={(e) => setFormData({...formData, submissionMode: e.target.value})} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500 focus:bg-white transition-all shadow-sm"><option value="Online Portal">Online Portal</option><option value="Physical Submission">Physical Submission</option><option value="Email Submission">Email Submission</option></select>
                     </div>
                     <div className="space-y-2 text-left">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Submission Address/URL <span className="text-rose-500">*</span></label>
-                      <textarea value={formData.submissionURL} onChange={(e) => setFormData({...formData, submissionURL: e.target.value})} placeholder="Paste the submission link or detailed address here..." rows={4} className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
+                      <textarea value={formData.submissionURL} onChange={(e) => setFormData({...formData, submissionURL: e.target.value})} placeholder="Paste the submission link or detailed address here..." rows={4} className="w-full px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none" />
                     </div>
                   </div>
                   <div className="col-span-12 lg:col-span-5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-4 block">Submission Checklist</label>
-                    <div className="bg-slate-50 rounded-[2.5rem] p-8 space-y-4 border border-slate-100">
+                    <div className="bg-slate-50 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 space-y-4 border border-slate-100">
                       {['Tender Notice Read & Understood', 'All Documents Attached', 'Eligibility Criteria Met', 'Financial Details Verified', 'Internal Review Completed', 'Approval Obtained', 'Ready for Submission'].map((item, i) => (
                         <label key={i} className="flex items-center gap-4 cursor-pointer group"><div className="relative flex items-center"><input type="checkbox" className="peer sr-only" /><div className="w-6 h-6 border-2 border-slate-200 rounded-lg peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all flex items-center justify-center"><CheckSquare className="text-white opacity-0 peer-checked:opacity-100 transition-all" size={16} /></div></div><span className="text-xs font-bold text-slate-600 group-hover:text-slate-900 transition-colors">{item}</span></label>
                       ))}
@@ -628,10 +628,10 @@ const CreateTender = ({ onCancel, initialData, onSave, clients }) => {
               </div>
             )}
 
-            <div className="flex items-center justify-between mt-12 bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
-              <button onClick={handleBack} disabled={activeStep === 1} className="flex items-center gap-3 px-10 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest"><ChevronLeft size={20} /><span>Previous Step</span></button>
-              <div className="flex items-center gap-2">{sections.map(s => (<div key={s.id} className={`h-1.5 rounded-full transition-all duration-500 ${activeStep === s.id ? 'w-8 bg-blue-600' : 'w-2 bg-slate-200'}`}></div>))}</div>
-              {activeStep === sections.length ? (<button onClick={handleFinalSubmit} disabled={isSubmitting} className="flex items-center gap-3 px-10 py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-emerald-600 transition-all shadow-xl active:scale-95 uppercase tracking-widest group disabled:opacity-70 disabled:cursor-not-allowed">{isSubmitting ? (<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>) : (<Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />)}<span>{initialData ? 'Update Entry' : 'Register Opportunity'}</span></button>) : (<button onClick={handleNext} className="flex items-center gap-3 px-10 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95 uppercase tracking-widest"><span>Next Step</span><ChevronRight size={20} /></button>)}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 lg:mt-12 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] shadow-sm border border-slate-100">
+              <button onClick={handleBack} disabled={activeStep === 1} className="flex items-center justify-center gap-3 w-full sm:w-auto px-6 sm:px-10 py-3.5 sm:py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest"><ChevronLeft size={20} /><span>Previous Step</span></button>
+              <div className="flex items-center gap-2 order-first sm:order-none">{sections.map(s => (<div key={s.id} className={`h-1.5 rounded-full transition-all duration-500 ${activeStep === s.id ? 'w-8 bg-blue-600' : 'w-2 bg-slate-200'}`}></div>))}</div>
+              {activeStep === sections.length ? (<button onClick={handleFinalSubmit} disabled={isSubmitting} className="flex items-center justify-center gap-3 w-full sm:w-auto px-6 sm:px-10 py-3.5 sm:py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-emerald-600 transition-all shadow-xl active:scale-95 uppercase tracking-widest group disabled:opacity-70 disabled:cursor-not-allowed">{isSubmitting ? (<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>) : (<Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />)}<span>{initialData ? 'Update Entry' : 'Register Opportunity'}</span></button>) : (<button onClick={handleNext} className="flex items-center justify-center gap-3 w-full sm:w-auto px-6 sm:px-10 py-3.5 sm:py-4 bg-blue-600 text-white rounded-2xl text-sm font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95 uppercase tracking-widest"><span>Next Step</span><ChevronRight size={20} /></button>)}
             </div>
           </div>
         </div>

@@ -10,7 +10,13 @@ let sequelize;
 
 const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
 
-if (dbUrl) {
+if (process.env.DB_DIALECT === 'sqlite') {
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: path.join(__dirname, '../database.sqlite'),
+    logging: false
+  });
+} else if (dbUrl) {
   console.log('Connecting to DB via URL:', dbUrl.split('@')[1] || 'URL present');
   sequelize = new Sequelize(dbUrl, {
     dialect: 'postgres',

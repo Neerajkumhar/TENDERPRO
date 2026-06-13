@@ -84,9 +84,56 @@ async function initializeDatabase() {
     await sequelize.authenticate();
     console.log('Database connection authenticated successfully.');
     
-    // Skip sync to avoid conflicts with existing tables and foreign keys
-    // Tables already exist in the database, no need to sync
-    console.log('Database ready for operations');
+    if (sequelize.options.dialect === 'sqlite') {
+      await sequelize.sync({ force: true });
+      console.log('SQLite database synced successfully.');
+
+      const User = require('./models/User');
+      const Client = require('./models/Client');
+      const Department = require('./models/Department');
+
+      // Create a default department
+      const dept = await Department.create({
+        name: 'Tendering & Procurement',
+        description: 'Handles all tender acquisitions and client bidding activities.',
+        color: 'blue'
+      });
+
+      // Create Admin user
+      await User.create({
+        name: 'Vikash Kumar',
+        email: 'vikash@vagwiin.com',
+        password: '12345678',
+        role: 'Admin',
+        departmentId: dept.id
+      });
+
+      // Create Tender Manager user
+      await User.create({
+        name: 'Tender Manager User',
+        email: 'manager@vagwiin.com',
+        password: '12345678',
+        role: 'Tender Manager',
+        departmentId: dept.id
+      });
+
+      // Create a default client
+      await Client.create({
+        name: 'Jaipur Development Authority',
+        email: 'jda@rajasthan.gov.in',
+        phone: '0141-2563211',
+        location: 'Jaipur, Rajasthan',
+        industry: 'Infrastructure',
+        status: 'Active',
+        firmType: 'Govt'
+      });
+
+      console.log('Database seeded successfully with local admin, tender manager, and client!');
+    } else {
+      // Skip sync to avoid conflicts with existing tables and foreign keys
+      // Tables already exist in the database, no need to sync
+      console.log('Database ready for operations');
+    }
     
     isDbInitialized = true;
   } catch (err) {
@@ -154,7 +201,7 @@ app.get('/api/health', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // Local development server startup
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+if (!process.env.VERCEL) {
   initializeDatabase().then(() => {
     const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
