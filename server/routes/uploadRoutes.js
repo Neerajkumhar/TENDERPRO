@@ -28,8 +28,9 @@ router.post('/', (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    console.log('File successfully uploaded:', req.file.filename);
-    const fullUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    const fileName = req.file.key || req.file.filename;
+    console.log('File successfully uploaded:', fileName);
+    const fullUrl = req.file.location || `${req.protocol}://${req.get('host')}/uploads/${fileName}`;
     res.json({ url: fullUrl });
   });
 });
