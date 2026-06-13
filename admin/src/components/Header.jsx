@@ -171,8 +171,8 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           {showNotificationsDropdown && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotificationsDropdown(false)}></div>
-              <div className="absolute right-0 mt-2 w-full sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] overflow-y-auto">
-                <div className="px-3 py-2 sm:px-4 sm:py-2 border-b border-slate-100 flex items-center justify-between">
+              <div className="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto top-16 sm:top-auto mt-2 w-auto sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[80vh] sm:max-h-none flex flex-col">
+                <div className="px-3 py-2 sm:px-4 sm:py-2 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
                     {unreadNotificationsCount > 0 && (
@@ -188,7 +188,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
                     </button>
                   )}
                 </div>
-                <div className="max-h-[70vh] sm:max-h-[300px] overflow-y-auto">
+                <div className="max-h-[60vh] sm:max-h-[300px] overflow-y-auto">
                   {notifications.length === 0 ? (
                     <div className="p-3 sm:p-4 text-center text-sm text-slate-500">No notifications</div>
                   ) : (
