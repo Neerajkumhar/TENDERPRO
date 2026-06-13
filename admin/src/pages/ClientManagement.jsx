@@ -240,15 +240,15 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
+      <div className="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center gap-3 sm:gap-6 group hover:shadow-xl transition-all duration-500">
-            <div className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform shrink-0`}>
-              <stat.icon size={18} className="sm:w-6 sm:h-6" />
+          <div key={i} className="bg-white p-3 sm:p-4 lg:p-5 rounded-2xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center gap-2 sm:gap-4 group hover:shadow-xl transition-all duration-500">
+            <div className="p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform shrink-0">
+              <stat.icon size={16} className="sm:w-5 lg:w-6 sm:h-5 lg:h-6" />
             </div>
-            <div className="min-w-0">
-               <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 sm:mb-1 truncate">{stat.label}</p>
-               <h3 className="text-lg sm:text-2xl font-black text-slate-800 tracking-tight truncate">{stat.value}</h3>
+            <div className="min-w-0 flex-1">
+               <p className="text-[8px] sm:text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-0.5 lg:mb-1 whitespace-normal sm:truncate leading-tight">{stat.label}</p>
+               <h3 className="text-base sm:text-lg lg:text-2xl font-black text-slate-800 tracking-tight truncate">{stat.value}</h3>
             </div>
           </div>
         ))}
