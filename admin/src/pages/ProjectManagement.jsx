@@ -205,7 +205,6 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
         <div className="col-span-12 lg:col-span-6 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
           <div className="p-4 sm:p-6 border-b border-slate-50 flex justify-between items-center">
             <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Active Project Portfolio</h3>
-            <button className="text-[10px] sm:text-xs font-black text-blue-600 hover:underline uppercase tracking-widest">View All Projects</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
