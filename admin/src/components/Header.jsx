@@ -171,7 +171,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           {showNotificationsDropdown && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotificationsDropdown(false)}></div>
-              <div className="absolute right-0 mt-2 w-full sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] overflow-y-auto">
+              <div className="absolute inset-x-0 mt-2 mx-4 sm:mx-0 sm:right-0 w-full sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] overflow-y-auto">
                 <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
