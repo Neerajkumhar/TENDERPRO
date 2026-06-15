@@ -5,7 +5,6 @@ import {
   Download, 
   Plus, 
   ChevronRight, 
-  MoreHorizontal,
   Briefcase,
   Edit2,
   Trash2,
@@ -15,7 +14,6 @@ import * as XLSX from 'xlsx';
 
 const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = [], onCreateProject, fetchAssignments }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeMenuId, setActiveMenuId] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [deletingProjectId, setDeletingProjectId] = useState(null);
 
@@ -330,47 +328,29 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                 <p className="text-sm font-black text-slate-900">₹{parseFloat(item.tender?.budget || 0).toLocaleString()}</p>
               </div>
               
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 <button 
-                  onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
-                  className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all active:scale-95"
+                  onClick={() => {
+                    setEditingProject(item);
+                    setEditTitle(item.title || '');
+                    setEditManager(item.assigneeId || '');
+                    setEditStatus(item.status || 'Pending');
+                    setEditPriority(item.priority || 'Medium');
+                    setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
+                    setEditDescription(item.description || '');
+                  }}
+                  title="Edit Project"
+                  className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100 transition-all active:scale-95 shadow-sm"
                 >
-                  <MoreHorizontal size={18} />
+                   <Edit2 size={14} />
                 </button>
-
-                {activeMenuId === item.id && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setActiveMenuId(null)} />
-                    <div className="absolute right-0 bottom-10 bg-white border border-slate-150 rounded-xl shadow-xl py-2 w-48 text-left z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                      <button 
-                        onClick={() => {
-                          setEditingProject(item);
-                          setEditTitle(item.title || '');
-                          setEditManager(item.assigneeId || '');
-                          setEditStatus(item.status || 'Pending');
-                          setEditPriority(item.priority || 'Medium');
-                          setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
-                          setEditDescription(item.description || '');
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full px-4 py-2.5 text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 text-sm font-bold transition-all"
-                      >
-                        <Edit2 size={14} className="text-slate-400" />
-                        <span>Edit Project</span>
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setDeletingProjectId(item.id);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full px-4 py-2.5 text-rose-600 hover:bg-rose-50/50 flex items-center gap-2.5 text-sm font-bold transition-all"
-                      >
-                        <Trash2 size={14} className="text-rose-500" />
-                        <span>Delete Project</span>
-                      </button>
-                    </div>
-                  </>
-                )}
+                <button 
+                  onClick={() => setDeletingProjectId(item.id)}
+                  title="Delete Project"
+                  className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all active:scale-95 shadow-sm"
+                >
+                   <Trash2 size={14} />
+                </button>
               </div>
             </div>
           </div>
@@ -427,47 +407,31 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                        {item.status}
                      </span>
                   </td>
-                  <td className="px-6 sm:px-8 py-6 text-right relative" onClick={(e) => e.stopPropagation()}>
-                     <button 
-                       onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
-                       className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all active:scale-95"
-                     >
-                        <MoreHorizontal size={20} />
-                     </button>
-
-                     {activeMenuId === item.id && (
-                       <>
-                         <div className="fixed inset-0 z-40" onClick={() => setActiveMenuId(null)} />
-                         <div className="absolute right-8 top-16 bg-white border border-slate-150 rounded-xl shadow-xl py-2 w-48 text-left z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <button 
-                              onClick={() => {
-                                setEditingProject(item);
-                                setEditTitle(item.title || '');
-                                setEditManager(item.assigneeId || '');
-                                setEditStatus(item.status || 'Pending');
-                                setEditPriority(item.priority || 'Medium');
-                                setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
-                                setEditDescription(item.description || '');
-                                setActiveMenuId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 text-sm font-bold transition-all"
-                            >
-                               <Edit2 size={16} className="text-slate-400" />
-                               <span>Edit Project</span>
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setDeletingProjectId(item.id);
-                                setActiveMenuId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-rose-600 hover:bg-rose-50/50 flex items-center gap-2.5 text-sm font-bold transition-all"
-                            >
-                               <Trash2 size={16} className="text-rose-500" />
-                               <span>Delete Project</span>
-                            </button>
-                         </div>
-                       </>
-                     )}
+                  <td className="px-6 sm:px-8 py-6 text-right" onClick={(e) => e.stopPropagation()}>
+                     <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => {
+                            setEditingProject(item);
+                            setEditTitle(item.title || '');
+                            setEditManager(item.assigneeId || '');
+                            setEditStatus(item.status || 'Pending');
+                            setEditPriority(item.priority || 'Medium');
+                            setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
+                            setEditDescription(item.description || '');
+                          }}
+                          title="Edit Project"
+                          className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100 transition-all active:scale-95 shadow-sm"
+                        >
+                           <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => setDeletingProjectId(item.id)}
+                          title="Delete Project"
+                          className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all active:scale-95 shadow-sm"
+                        >
+                           <Trash2 size={16} />
+                        </button>
+                     </div>
                   </td>
                 </tr>
               )) : (
