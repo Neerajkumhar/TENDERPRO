@@ -589,7 +589,7 @@ const Attendance = ({ user }) => {
                 </div>
 
                 {/* Date Selection Row */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
                     <input 
@@ -649,9 +649,9 @@ const Attendance = ({ user }) => {
   }
 
   return (
-    <div className="p-8 space-y-10 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       {/* Premium Dynamic Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
           <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Attendance Dashboard</h1>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
@@ -671,7 +671,7 @@ const Attendance = ({ user }) => {
 
       {/* Header Actions */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="relative w-full max-w-md group">
+        <div className="relative w-full lg:max-w-md group">
           <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={20} />
           <input 
             type="text" 
@@ -682,7 +682,7 @@ const Attendance = ({ user }) => {
           />
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full lg:w-auto">
           {/* Active Date Range Trigger */}
           <div className="relative" ref={datePickerRef}>
             <button 
@@ -695,7 +695,7 @@ const Attendance = ({ user }) => {
 
             {/* Premium Date Range Popover */}
             {showDatePicker && (
-              <div className="absolute right-0 mt-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-[60] w-80 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="absolute right-0 mt-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-[60] w-80 max-w-[calc(100vw-2rem)] space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="flex items-center justify-between pb-1 border-b border-slate-50">
                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Configure Date Window</h4>
                   <span className="text-[9px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">Filter</span>
@@ -776,9 +776,9 @@ const Attendance = ({ user }) => {
       </div>
 
       {/* Summary Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
+          <div key={i} className="bg-white p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
              <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
              <div className="flex items-center justify-between">
@@ -792,7 +792,7 @@ const Attendance = ({ user }) => {
         
         {/* Main Attendance List */}
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm">
+          <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[3.5rem] border border-slate-50 shadow-sm">
               <div className="flex justify-between items-center mb-10 px-2">
                 <div className="flex flex-col">
                     <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">DAILY VIEW ({view})</h3>
@@ -811,7 +811,62 @@ const Attendance = ({ user }) => {
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Mobile/Tablet Card View - Visible on screens smaller than lg */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+                {processedRecords.length === 0 ? (
+                  <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-8 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
+                    No attendance records found matching this window
+                  </div>
+                ) : (
+                  processedRecords.map((record, i) => (
+                    <div 
+                      key={i}
+                      className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:border-blue-200 transition-all"
+                    >
+                      {/* Top Row: User initial avatar + Name + Status */}
+                      <div className="flex justify-between items-start gap-3 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100 shadow-sm shrink-0">
+                            {record.initial}
+                          </div>
+                          <div>
+                            <span className="text-sm font-black text-slate-800 uppercase tracking-tight block">
+                              {record.name}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400">
+                              {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </span>
+                          </div>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${record.sColor}`}>
+                          {record.status}
+                        </span>
+                      </div>
+
+                      {/* Middle row: Times & Session Details */}
+                      <div className="border-t border-b border-slate-50 py-3 my-1 space-y-2">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-slate-400">Logins:</span>
+                          <span className="text-slate-700">
+                            {view === 'DAY' ? `Session #${record.sessionNum}` : `${record.sessionNum} ${record.sessionNum === 1 ? 'Login' : 'Logins'}`}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-slate-400">In-Time / Out-Time:</span>
+                          <span className="text-slate-700">{record.in} - {record.out}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-slate-400">{view === 'DAY' ? 'Session Work' : 'Total Work'}:</span>
+                          <span className="text-slate-700">{record.work}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View - Visible on screens lg and up */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-50">
@@ -879,7 +934,7 @@ const Attendance = ({ user }) => {
           </div>
 
           {/* User's Leave Requests History */}
-          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm">
+          <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[3.5rem] border border-slate-100 shadow-sm">
             <div className="flex justify-between items-center mb-8 px-2">
               <div className="flex flex-col">
                 <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">My Leave Requests</h3>
@@ -947,7 +1002,7 @@ const Attendance = ({ user }) => {
 
         {/* Calendar Sidebar */}
         <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm flex flex-col items-center">
+            <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[3.5rem] border border-slate-55 shadow-sm flex flex-col items-center">
                <div className="flex justify-between items-center w-full mb-10 px-2">
                   <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronLeft size={20} /></button>
                   <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">{new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
@@ -975,13 +1030,13 @@ const Attendance = ({ user }) => {
                           setStartDate(`${currYear}-${currMonth}-${padDay}`);
                           setEndDate(`${currYear}-${currMonth}-${padDay}`);
                         }}
-                        className={`flex flex-col items-center p-2 rounded-2xl group cursor-pointer border transition-all ${
+                        className={`flex flex-col items-center p-1 sm:p-2 rounded-2xl group cursor-pointer border transition-all ${
                           isSelected 
                             ? 'bg-blue-50 border-blue-200 shadow-sm scale-105' 
                             : 'bg-white border-transparent hover:bg-slate-50'
                         }`}
                       >
-                         <span className={`text-xs font-black transition-all ${
+                         <span className={`text-[10px] sm:text-xs font-black transition-all ${
                            isSelected ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'
                          }`}>
                            {dayNum}
@@ -990,13 +1045,15 @@ const Attendance = ({ user }) => {
                          {dayTimes ? (
                            <div className="flex flex-col items-center mt-1 space-y-0.5">
                              {/* Clock In */}
-                             <span className="text-[7px] font-black text-emerald-600 uppercase tracking-tighter leading-none">
+                             <span className="hidden sm:inline text-[7px] font-black text-emerald-600 uppercase tracking-tighter leading-none">
                                {dayTimes.in.replace(' AM', 'a').replace(' PM', 'p')}
                              </span>
                              {/* Clock Out */}
-                             <span className="text-[7px] font-black text-rose-500 uppercase tracking-tighter leading-none">
+                             <span className="hidden sm:inline text-[7px] font-black text-rose-500 uppercase tracking-tighter leading-none">
                                {dayTimes.out.replace(' AM', 'a').replace(' PM', 'p')}
                              </span>
+                             {/* Mobile Indicator Dot */}
+                             <span className="inline sm:hidden w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1"></span>
                            </div>
                          ) : (
                            <div className="w-1 h-1 rounded-full bg-slate-200 mt-2"></div>
