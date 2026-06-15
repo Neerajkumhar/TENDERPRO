@@ -295,7 +295,10 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
           </div>
         </div>
       </div>
-    );  return (
+    );
+  }
+
+  return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation Header */}
       <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-white p-4 sm:p-6 rounded-xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white gap-4">
@@ -419,7 +422,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                   <BarChart3 size={20} />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 min-h-[300px] sm:h-[300px] w-full">
+              <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 h-auto sm:h-[300px] w-full">
                  <div className="w-full sm:flex-1 space-y-4">
                     {budgetByStatus.map((cat, i) => (
                       <div key={i} className="space-y-1">
@@ -462,7 +465,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                  </div>
               </div>
             </div>
-          </div>  </div>
+          </div>
 
           {/* Recent Tenders Section - ADDED AS REQUESTED */}
           <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
@@ -480,7 +483,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left min-w-[800px]">
                 <thead>
                   <tr className="bg-slate-50/30 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     <th className="px-8 py-4">Tender Details</th>
@@ -541,23 +544,23 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
       ) : (
         /* Active Tenders Master List */
         <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="p-8 border-b border-slate-50 flex flex-wrap gap-4 items-center justify-between bg-slate-50/30">
+          <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-slate-50/30">
             <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Tenders Master List</h3>
-            <div className="flex flex-wrap gap-3">
-              <div className="relative group">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div className="relative group w-full sm:w-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
                 <input 
                   type="text" 
                   placeholder="Search title or client..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-64 shadow-sm" 
+                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-full sm:w-64 shadow-sm" 
                 />
               </div>
               {user?.role !== 'Tender Manager' && (
                 <button 
                   onClick={onCreate}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95"
+                  className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 text-center"
                 >
                   Add New Tender
                 </button>
@@ -565,7 +568,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left min-w-[900px]">
               <thead>
                 <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   <th className="px-8 py-4">ID</th>

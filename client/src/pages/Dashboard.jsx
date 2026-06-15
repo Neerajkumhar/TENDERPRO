@@ -322,33 +322,34 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
     const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
 
     return (
-      <div className="p-8 space-y-8 animate-in fade-in duration-700 bg-[#fbfcfd]">
-        <div className="flex justify-between items-end">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8 animate-in fade-in duration-700 bg-[#fbfcfd]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tender Overview</h1>
-            <p className="text-slate-500 mt-1 font-medium italic text-sm">Welcome back, {user.name}. Here is your global tender analytics.</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Tender Overview</h1>
+            <p className="text-slate-500 mt-1 font-medium italic text-xs sm:text-sm">Welcome back, {user.name}. Here is your global tender analytics.</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 shrink-0">
              <button 
               onClick={() => setShowLeaveModal(true)}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-xs font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-amber-500 text-white rounded-xl text-[10px] sm:text-xs font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
             >
-              <Coffee size={18} />
-              <span>Leave Requests</span>
+              <Coffee size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden sm:inline">Leave Requests</span>
+              <span className="sm:hidden">Leaves</span>
             </button>
-             <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
-                <Calendar size={18} className="text-indigo-600" />
-                <span>Select Period</span>
-                <ChevronDown size={16} />
+             <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
+                <Calendar size={16} className="text-indigo-600 sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Select Period</span>
+                <ChevronDown size={14} className="sm:w-4 sm:h-4" />
              </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
           {statsData.map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
+            <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
+              <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
             </div>
           ))}
         </div>

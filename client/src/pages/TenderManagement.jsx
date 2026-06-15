@@ -56,9 +56,9 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
   };
 
   return (
-    <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-10">
+    <div className="p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-6 sm:space-y-8 lg:space-y-10">
       {/* Page Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-[#1e293b] tracking-tight">Tenders Management</h1>
           <p className="text-slate-500 mt-1 font-semibold">Register and manage won or upcoming client tenders in real-time</p>
@@ -66,7 +66,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
         {user?.role !== 'Tender Manager' && (
           <button 
             onClick={onCreate}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
           >
             <Plus size={16} />
             <span>Register New Tender</span>
@@ -79,15 +79,15 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
       {/* Filters & Tenders Table Container */}
       <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
         {/* Table Toolbar */}
-        <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-50/20">
+        <div className="p-4 sm:p-8 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 bg-slate-50/20">
           <div>
             <h2 className="text-lg font-black text-slate-900 tracking-tight">Active Tender Portfolio</h2>
             <p className="text-xs text-slate-400 font-medium">Search and filter registered contracts</p>
           </div>
           
-          <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
             {/* Search Input */}
-            <div className="relative flex-1 md:w-80">
+            <div className="relative flex-1 lg:w-80 w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
@@ -99,12 +99,12 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
             </div>
 
             {/* Status Filter */}
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-12 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 outline-none appearance-none cursor-pointer focus:border-blue-400 transition-all shadow-sm"
+                className="w-full sm:w-auto pl-12 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 outline-none appearance-none cursor-pointer focus:border-blue-400 transition-all shadow-sm"
               >
                 <option value="All">All Statuses</option>
                 <option value="Registered">Registered</option>
@@ -119,7 +119,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
 
         {/* Table content */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[900px]">
             <thead>
               <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50">
                 <th className="px-8 py-6">Tender Details</th>
