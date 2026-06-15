@@ -3,7 +3,6 @@ import {
   Search,
   Filter,
   Plus,
-  MoreVertical,
   MapPin,
   Mail,
   Phone,
@@ -243,9 +242,8 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         {/* Main Content: Active Clients Grid */}
         <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-           <div className="flex justify-between items-center px-1">
+           <div className="px-1">
               <h3 className="text-[10px] sm:text-xs font-black text-slate-900 tracking-[0.2em] uppercase">ACTIVE CLIENTS</h3>
-              <button className="text-[9px] sm:text-[10px] font-black text-blue-600 tracking-widest uppercase hover:underline">View All</button>
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -255,12 +253,6 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                   onClick={() => onView(client.id)}
                   className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 group hover:border-blue-200 hover:shadow-lg transition-all relative overflow-hidden cursor-pointer active:scale-[0.98]"
                 >
-                   <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-                      <button className="p-2 text-slate-300 hover:text-slate-600 rounded-lg transition-colors">
-                         <MoreVertical size={18} />
-                      </button>
-                   </div>
-                   
                    <div className="flex items-center sm:items-start gap-4 sm:gap-5 mb-6 sm:mb-8">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center text-lg sm:text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
                          {client.name.charAt(0)}
