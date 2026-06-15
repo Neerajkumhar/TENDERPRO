@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
   Filter,
@@ -33,6 +33,18 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   const [filterType, setFilterType] = useState('All');
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilter(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [newClient, setNewClient] = useState({
     name: '',
@@ -172,8 +184,8 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
               />
             </div>
             
-            <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
-              <div className="relative flex-1 sm:flex-none">
+             <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
+              <div className="relative flex-1 sm:flex-none" ref={filterRef}>
                 <button 
                   onClick={() => setShowFilter(!showFilter)}
                   className={`w-full flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-white border ${filterType !== 'All' ? 'border-blue-400 text-blue-600' : 'border-slate-200 text-slate-600'} rounded-xl text-xs font-black hover:bg-slate-50 transition-all shadow-sm`}
@@ -183,7 +195,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                   <ChevronRight size={14} className={`shrink-0 transition-transform duration-300 ${showFilter ? '-rotate-90' : 'rotate-90'}`} />
                 </button>
                 {showFilter && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-in slide-in-from-top-2 text-left">
+                  <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-48 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-2 z-50 animate-in slide-in-from-top-2 text-left">
                     {['All', 'Private', 'Govt'].map((type) => (
                       <button
                         key={type}
@@ -191,7 +203,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                           setFilterType(type);
                           setShowFilter(false);
                         }}
-                        className={`w-full flex items-center justify-between px-5 py-2.5 text-xs font-bold transition-all ${filterType === type ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:bg-slate-50'}`}
+                        className={`w-full flex items-center justify-between px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterType === type ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:bg-slate-50'}`}
                       >
                         <span>{type === 'All' ? 'All Firm Types' : `${type} Firms`}</span>
                         {filterType === type && <Check size={14} />}
