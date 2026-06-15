@@ -275,8 +275,117 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
         </div>
       )}
 
+      {/* Mobile/Tablet Card View - Visible on screens smaller than lg */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+        {myProjects.length > 0 ? myProjects.map((item) => (
+          <div 
+            key={item.id}
+            onClick={() => onProjectClick(item.tenderId)}
+            className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 group hover:border-blue-200 hover:shadow-md transition-all relative cursor-pointer active:scale-[0.99] flex flex-col justify-between"
+          >
+            {/* Top Row: Icon + Title + Status */}
+            <div className="flex justify-between items-start gap-3 mb-4">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all shrink-0">
+                  <Briefcase size={16} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">
+                    {item.title || 'Untitled Project'}
+                  </h4>
+                  <p className="text-[10px] font-bold text-slate-400 truncate mt-0.5">
+                    Client: {item.tender?.client?.name || 'N/A'}
+                  </p>
+                </div>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${getStatusColor(item.status)}`}>
+                {item.status}
+              </span>
+            </div>
+
+            {/* Mid Row: Tender Details */}
+            <div className="border-t border-b border-slate-50 py-3 my-1 space-y-2">
+              <div className="flex justify-between text-xs font-bold gap-2">
+                <span className="text-slate-400 shrink-0">Tender:</span>
+                <span className="text-slate-600 truncate max-w-[200px] text-right">{item.tender?.title || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between text-xs font-bold gap-2">
+                <span className="text-slate-400 shrink-0">Start Date:</span>
+                <span className="text-slate-600">
+                  {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs font-bold gap-2">
+                <span className="text-slate-400 shrink-0">End Date:</span>
+                <span className="text-slate-600">
+                  {item.deadline ? new Date(item.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Row: Budget & Action menu */}
+            <div className="flex justify-between items-center mt-3 pt-1">
+              <div>
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">BUDGET</p>
+                <p className="text-sm font-black text-slate-900">₹{parseFloat(item.tender?.budget || 0).toLocaleString()}</p>
+              </div>
+              
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <button 
+                  onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
+                  className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all active:scale-95"
+                >
+                  <MoreHorizontal size={18} />
+                </button>
+
+                {activeMenuId === item.id && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setActiveMenuId(null)} />
+                    <div className="absolute right-0 bottom-10 bg-white border border-slate-150 rounded-xl shadow-xl py-2 w-48 text-left z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                      <button 
+                        onClick={() => {
+                          setEditingProject(item);
+                          setEditTitle(item.title || '');
+                          setEditManager(item.assigneeId || '');
+                          setEditStatus(item.status || 'Pending');
+                          setEditPriority(item.priority || 'Medium');
+                          setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
+                          setEditDescription(item.description || '');
+                          setActiveMenuId(null);
+                        }}
+                        className="w-full px-4 py-2.5 text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 text-sm font-bold transition-all"
+                      >
+                        <Edit2 size={14} className="text-slate-400" />
+                        <span>Edit Project</span>
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setDeletingProjectId(item.id);
+                          setActiveMenuId(null);
+                        }}
+                        className="w-full px-4 py-2.5 text-rose-600 hover:bg-rose-50/50 flex items-center gap-2.5 text-sm font-bold transition-all"
+                      >
+                        <Trash2 size={14} className="text-rose-500" />
+                        <span>Delete Project</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )) : (
+          <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center col-span-1 md:col-span-2">
+            <div className="flex flex-col items-center gap-3">
+              <Briefcase size={40} className="text-slate-200" />
+              <p className="text-slate-400 font-bold">No projects matching your view.</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Table Section - Matching Image Layout */}
-      <div className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+      <div className="hidden lg:block bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left min-w-[1000px]">
             <thead>
@@ -380,7 +489,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       {/* Edit Project Modal */}
       {editingProject && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-5 sm:p-8 flex flex-col gap-4 sm:gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
@@ -418,7 +527,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Manager</label>
                   <select 
@@ -444,7 +553,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Status</label>
                   <select 
@@ -507,7 +616,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       {/* Delete Confirmation Modal */}
       {deletingProjectId && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 p-5 sm:p-8 flex flex-col gap-4 sm:gap-6 animate-in zoom-in-95 duration-300">
             <div className="flex items-center gap-3.5 text-rose-600">
               <div className="p-3 bg-rose-50 rounded-xl">
                 <Trash2 size={24} />
