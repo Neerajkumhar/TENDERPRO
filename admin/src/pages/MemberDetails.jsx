@@ -130,14 +130,12 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
         const day = String(currDate.getDate()).padStart(2, '0');
         const dateStr = `${year}-${month}-${day}`;
 
-        const isWeekend = currDate.getDay() === 0 || currDate.getDay() === 6;
+        const isSunday = currDate.getDay() === 0;
 
         if (presentDates.has(dateStr)) {
           presentDaysCount++;
-          if (!isWeekend) {
-            totalWorkingDays++;
-          }
-        } else if (!isWeekend) {
+          totalWorkingDays++;
+        } else if (!isSunday) {
           totalWorkingDays++;
           if (approvedLeaveDates.has(dateStr)) {
             leaveDaysCount++;
