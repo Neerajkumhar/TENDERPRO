@@ -66,6 +66,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
 
   const [invoicesList, setInvoicesList] = useState([]);
   const [revenueVsExpenseData, setRevenueVsExpenseData] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalExpenses: 0,
@@ -132,6 +133,12 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
       if (chartRes.ok) {
         const chartData = await chartRes.json();
         setRevenueVsExpenseData(chartData);
+      }
+
+      const expRes = await fetch('/api/expenses');
+      if (expRes.ok) {
+        const expData = await expRes.json();
+        setExpenses(expData);
       }
     } catch (err) {
       console.error('Error fetching financial data:', err);
@@ -225,11 +232,36 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
     }
   };
 
+  const getBudgetUsed = () => {
+    try {
+      const saved = localStorage.getItem('tender_budgets');
+      const budgets = saved ? JSON.parse(saved) : [
+        { name: 'Logistics Expansion', allocated: 150000 },
+        { name: 'Digital Ad Spend', allocated: 85000 },
+        { name: 'Core Infrastructure R&D', allocated: 120000 },
+        { name: 'Recruitment Drive', allocated: 45000 },
+        { name: 'Cloud Server Upgrades', allocated: 90000 }
+      ];
+      const totalAllocated = budgets.reduce((sum, b) => sum + Number(b.allocated || 0), 0);
+      const totalSpent = budgets.reduce((sum, budget) => {
+        const budgetExpenses = expenses.filter(e => e.category === budget.name && e.status !== 'REJECTED');
+        const computedSpent = budgetExpenses.reduce((s, e) => s + Number(e.amount), 0);
+        return sum + computedSpent;
+      }, 0);
+      
+      if (totalAllocated === 0) return '0%';
+      return `${Math.round((totalSpent / totalAllocated) * 100)}%`;
+    } catch (e) {
+      return '0%';
+    }
+  };
+
   const statsData = [
     { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'blue', icon: IndianRupee },
     { label: 'Total Expenses', value: `₹${stats.totalExpenses.toLocaleString('en-IN')}`, trend: 'Live', isUp: false, color: 'rose', icon: TrendingDown },
     { label: 'Net Profit', value: `₹${stats.netProfit.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'emerald', icon: TrendingUp },
     { label: 'Cash Flow', value: `₹${stats.cashFlow.toLocaleString('en-IN')}`, trend: 'Stable', isUp: true, color: 'indigo', icon: Wallet },
+    { label: 'Budget Used', value: getBudgetUsed(), trend: 'Live', isUp: true, color: 'amber', icon: FileText },
     { label: 'Pending Invoices', value: String(stats.pendingCount), trend: 'Real', isUp: false, color: 'orange', icon: Clock },
     { label: 'Paid Invoices', value: String(stats.paidCount), trend: 'Real', isUp: true, color: 'blue', icon: CheckCircle2 },
     { label: 'Outstanding Dues', value: `₹${stats.outstandingDues.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'rose', icon: AlertCircle },
@@ -315,7 +347,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4">
         {statsData.map((stat, i) => (
           <div key={i} className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
             <div className={`absolute top-0 left-0 w-full h-1 bg-${stat.color}-500`}></div>
@@ -341,7 +373,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
               <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-rose-500 rounded-full"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Expense</span></div>
             </div>
           </div>
-          <div className="h-[250px] sm:h-[350px] w-full">
+          <div className="h-[250px] sm:h-[350px] w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%"><AreaChart data={revenueVsExpenseData}><defs><linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient><linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={10} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} /><Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}} /><Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" /><Area type="monotone" dataKey="payment" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorPay)" /><Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={2} fillOpacity={0} /></AreaChart></ResponsiveContainer>
           </div>
         </div>
@@ -354,7 +386,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[600px]">
+            <table className="w-full text-left min-w-[850px]">
               <thead>
                 <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]"><th className="px-6 sm:px-8 py-4">ID</th><th className="px-6 sm:px-8 py-4">Date</th><th className="px-6 sm:px-8 py-4">Client</th><th className="px-6 sm:px-8 py-4 text-center">Amount</th><th className="px-6 sm:px-8 py-4">Status</th><th className="px-6 sm:px-8 py-4 text-center">Actions</th></tr>
               </thead>

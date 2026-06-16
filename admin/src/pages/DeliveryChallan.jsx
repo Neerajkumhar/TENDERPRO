@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -47,10 +47,27 @@ const DeliveryChallan = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [challans, setChallans] = useState(() => {
-    const saved = localStorage.getItem('delivery_challans');
-    return saved ? JSON.parse(saved) : mockChallans;
-  });
+  const [challans, setChallans] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchChallans = async () => {
+    try {
+      const response = await fetch('/api/delivery-challans');
+      if (response.ok) {
+        const data = await response.json();
+        setChallans(data);
+      }
+    } catch (error) {
+      console.error('Error fetching delivery challans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChallans();
+  }, []);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -68,7 +85,7 @@ const DeliveryChallan = () => {
 
   const filteredChallans = challans.filter(challan => {
     const query = searchQuery.toLowerCase();
-    const matchesSearch = [challan.id, challan.client, challan.project, challan.shipVia, challan.status]
+    const matchesSearch = [challan.challanNumber || challan.id, challan.client, challan.project, challan.shipVia, challan.status]
       .some(field => String(field).toLowerCase().includes(query));
     
     const matchesStatus = statusFilter === 'ALL' || challan.status === statusFilter;
@@ -175,22 +192,15 @@ const DeliveryChallan = () => {
     }));
   };
 
-  const handleCreateSave = () => {
-    const newId = `DEL-${new Date().getFullYear()}-${String(challans.length + 1).padStart(3, '0')}`;
-    const newChallan = {
-      id: newId,
+  const handleCreateSave = async () => {
+    const payload = {
       client: createForm.client,
       project: createForm.project,
       transporter: createForm.transporter,
-      lrGatePass: createForm.lrNo,
+      lrNo: createForm.lrNo,
       dispatchDate: createForm.dispatchDate,
-      materialValue: Number(createForm.materialRows.reduce((sum, row) => sum + (Number(row.rate || 0) * Number(row.qty || 0)), 0)),
-      eWayBill: createForm.ewayBill,
+      ewayBill: createForm.ewayBill,
       status: 'PENDING',
-      shipVia: createForm.transporter,
-      itemsQty: Number(createForm.materialRows.reduce((sum, row) => sum + (Number(row.qty || 0)), 0)),
-      estWeight: '',
-      signedCopy: createForm.files.length > 0 ? 'Uploaded' : 'Pending',
       dispatchFrom: createForm.dispatchFrom,
       dispatchTo: createForm.dispatchTo,
       shippingAddress: createForm.shippingAddress,
@@ -204,13 +214,25 @@ const DeliveryChallan = () => {
       invoiceRef: createForm.invoiceRef,
       poRef: createForm.poRef,
       poDate: createForm.poDate,
-      materialRows: createForm.materialRows,
-      files: createForm.files
+      materialRows: createForm.materialRows
     };
-    const updatedArr = [...challans, newChallan];
-    setChallans(updatedArr);
-    try { localStorage.setItem('delivery_challans', JSON.stringify(updatedArr)); } catch (e) {}
-    setCreateOpen(false);
+
+    try {
+      const response = await fetch('/api/delivery-challans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (response.ok) {
+        fetchChallans();
+        setCreateOpen(false);
+      } else {
+        alert('Failed to register delivery challan');
+      }
+    } catch (error) {
+      console.error('Error creating delivery challan:', error);
+      alert('Network error registering delivery challan');
+    }
   };
 
   const handleReceiptLogoSelect = (e) => {
@@ -241,11 +263,23 @@ const DeliveryChallan = () => {
     setCreateOpen(false);
   };
 
-  const handleSave = (updated) => {
-    const updatedArr = challans.map(c => c.id === updated.id ? updated : c);
-    setChallans(updatedArr);
-    try { localStorage.setItem('delivery_challans', JSON.stringify(updatedArr)); } catch (e) {}
-    setModalOpen(false);
+  const handleSave = async (updated) => {
+    try {
+      const response = await fetch(`/api/delivery-challans/${updated.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+      if (response.ok) {
+        fetchChallans();
+        setModalOpen(false);
+      } else {
+        alert('Failed to update delivery challan');
+      }
+    } catch (error) {
+      console.error('Error updating delivery challan:', error);
+      alert('Network error updating delivery challan');
+    }
   };
 
   return (
@@ -323,7 +357,7 @@ const DeliveryChallan = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase">Challan No.</label>
-                <div className="mt-2 font-black">{selected.id}</div>
+                <div className="mt-2 font-black">{selected.challanNumber || selected.id}</div>
               </div>
 
               <div>
@@ -751,7 +785,7 @@ const DeliveryChallan = () => {
                     <tbody>
                       <tr>
                         <td className="font-black text-slate-400 uppercase tracking-widest text-[10px] pr-6 py-1">Challan No</td>
-                        <td className="font-bold text-slate-900 py-1">{selected.id}</td>
+                        <td className="font-bold text-slate-900 py-1">{selected.challanNumber || selected.id}</td>
                       </tr>
                       <tr>
                         <td className="font-black text-slate-400 uppercase tracking-widest text-[10px] pr-6 py-1">Date</td>
@@ -951,7 +985,7 @@ const DeliveryChallan = () => {
           <h2 className="text-sm sm:text-base font-black text-slate-800 tracking-tight uppercase">Delivery Ledger</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[800px]">
             <thead>
               <tr className="text-[8.5px] sm:text-[9.5px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
                 <th className="px-5 sm:px-8 py-3.5">Challan No.</th>
@@ -968,7 +1002,7 @@ const DeliveryChallan = () => {
             <tbody className="divide-y divide-slate-50">
               {filteredChallans.length > 0 ? filteredChallans.map((challan) => (
                 <tr key={challan.id} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
-                  <td className="px-5 sm:px-8 py-4 font-black text-slate-900 text-xs sm:text-sm">{challan.id}</td>
+                  <td className="px-5 sm:px-8 py-4 font-black text-slate-900 text-xs sm:text-sm">{challan.challanNumber || challan.id}</td>
                   <td className="px-5 sm:px-8 py-4">
                     <div className="font-black text-slate-800 uppercase tracking-tight text-xs sm:text-sm">{challan.client}</div>
                     <div className="text-[10px] font-bold text-slate-400 mt-0.5 truncate max-w-[200px]">{challan.project}</div>

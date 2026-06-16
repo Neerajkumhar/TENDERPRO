@@ -274,7 +274,7 @@ const Expenses = ({ onViewExpense }) => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[850px]">
             <thead>
               <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
                 <th className="px-6 sm:px-8 py-4 sm:py-5">Expense ID</th>

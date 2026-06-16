@@ -117,6 +117,15 @@ async function initializeDatabase() {
         departmentId: dept.id
       });
 
+      // Create Finance Manager user
+      await User.create({
+        name: 'Finance Manager User',
+        email: 'finance@vagwiin.com',
+        password: '12345678',
+        role: 'Finance Manager',
+        departmentId: dept.id
+      });
+
       // Create a default client
       await Client.create({
         name: 'Jaipur Development Authority',

@@ -507,7 +507,7 @@ const Budget = () => {
 
           <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left min-w-[850px]">
                 <thead>
                   <tr className="text-[8.5px] sm:text-[9.5px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
                     <th className="px-5 sm:px-8 py-3.5">Budget Category</th>
