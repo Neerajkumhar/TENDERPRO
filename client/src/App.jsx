@@ -102,6 +102,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialToken);
   const [user, setUser] = useState(initialUser);
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+  const [messagesActiveChatId, setMessagesActiveChatId] = useState(null);
 
   const [previousTab, setPreviousTab] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -316,6 +317,11 @@ function App() {
       setActiveTab('Project Management');
     }
     setSelectedProjectId(null);
+  };
+
+  const handleSendMessageToMember = (memberId) => {
+    setMessagesActiveChatId(memberId);
+    setIsMessagesOpen(true);
   };
 
   const handleBackToTenders = () => {
@@ -666,6 +672,7 @@ function App() {
               }}
               departments={departments}
               user={user}
+              onSendMessage={handleSendMessageToMember}
             />
           )}
           {activeTab === 'Reports' && <Reports />}
@@ -736,12 +743,19 @@ function App() {
       {/* Messages Popup Modal */}
       {isMessagesOpen && (
         <>
-          <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[90]" onClick={() => setIsMessagesOpen(false)}></div>
+          <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[90]" onClick={() => {
+            setIsMessagesOpen(false);
+            setMessagesActiveChatId(null);
+          }}></div>
           <Messages 
             user={user} 
             members={members} 
             isPopup={true} 
-            onClose={() => setIsMessagesOpen(false)} 
+            onClose={() => {
+              setIsMessagesOpen(false);
+              setMessagesActiveChatId(null);
+            }} 
+            initialActiveChatId={messagesActiveChatId}
           />
         </>
       )}

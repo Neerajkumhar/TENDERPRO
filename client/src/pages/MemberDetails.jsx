@@ -33,7 +33,7 @@ import {
   Legend
 } from 'recharts';
 
-const MemberDetails = ({ memberId, onBack, departments, user }) => {
+const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) => {
   const [member, setMember] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -267,7 +267,7 @@ const MemberDetails = ({ memberId, onBack, departments, user }) => {
           Back to Directory
         </button>
         {user?.role === 'Admin' && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 
               onClick={handleEditClick}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-500 transition-all shadow-sm"
@@ -361,10 +361,16 @@ const MemberDetails = ({ memberId, onBack, departments, user }) => {
                 </div>
               </div>
 
-              <button className="w-full mt-6 sm:mt-8 py-3 sm:py-4 bg-slate-900 text-white rounded-xl sm:rounded-[1.5rem] text-xs sm:text-sm font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2">
-                <MessageSquare size={18} />
-                <span>Send Message</span>
-              </button>
+              {member.id !== user?.id && (
+                <button 
+                  type="button"
+                  onClick={() => onSendMessage && onSendMessage(member.id)}
+                  className="w-full mt-6 sm:mt-8 py-3 sm:py-4 bg-slate-900 text-white rounded-xl sm:rounded-[1.5rem] text-xs sm:text-sm font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={18} />
+                  <span>Send Message</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -415,29 +421,29 @@ const MemberDetails = ({ memberId, onBack, departments, user }) => {
               </div>
 
               {/* Stats Grid */}
-              <div className="md:col-span-7 grid grid-cols-2 gap-4">
-                 <div className="p-5 rounded-3xl bg-emerald-50/50 border border-emerald-100/50 group hover:bg-emerald-50 transition-all">
+              <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-emerald-50/50 border border-emerald-100/50 group hover:bg-emerald-50 transition-all">
                     <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Present</p>
                     <div className="flex items-baseline gap-2">
                        <span className="text-2xl font-black text-slate-900">{attendanceStats.present}</span>
                        <span className="text-[10px] font-bold text-slate-400 uppercase">Days</span>
                     </div>
                  </div>
-                 <div className="p-5 rounded-3xl bg-rose-50/50 border border-rose-100/50 group hover:bg-rose-50 transition-all">
+                 <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-rose-50/50 border border-rose-100/50 group hover:bg-rose-50 transition-all">
                     <p className="text-[9px] font-black text-rose-600 uppercase tracking-widest mb-1">Absent</p>
                     <div className="flex items-baseline gap-2">
                        <span className="text-2xl font-black text-slate-900">{attendanceStats.absent}</span>
                        <span className="text-[10px] font-bold text-slate-400 uppercase">Days</span>
                     </div>
                  </div>
-                 <div className="p-5 rounded-3xl bg-amber-50/50 border border-amber-100/50 group hover:bg-amber-50 transition-all">
+                 <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-amber-50/50 border border-amber-100/50 group hover:bg-amber-50 transition-all">
                     <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">On Leave</p>
                     <div className="flex items-baseline gap-2">
                        <span className="text-2xl font-black text-slate-900">{attendanceStats.onLeave}</span>
                        <span className="text-[10px] font-bold text-slate-400 uppercase">Approved</span>
                     </div>
                  </div>
-                 <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100 group hover:bg-white transition-all">
+                 <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-100 group hover:bg-white transition-all">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Days</p>
                     <div className="flex items-baseline gap-2">
                        <span className="text-2xl font-black text-slate-900">{attendanceStats.totalWorkingDays}</span>

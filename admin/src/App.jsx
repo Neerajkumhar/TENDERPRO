@@ -104,6 +104,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialToken);
   const [user, setUser] = useState(initialUser);
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+  const [messagesActiveChatId, setMessagesActiveChatId] = useState(null);
 
   const [previousTab, setPreviousTab] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -315,6 +316,11 @@ function App() {
       setActiveTab('Project Management');
     }
     setSelectedProjectId(null);
+  };
+
+  const handleSendMessageToMember = (memberId) => {
+    setMessagesActiveChatId(memberId);
+    setIsMessagesOpen(true);
   };
 
   const handleBackToTenders = () => {
@@ -658,6 +664,8 @@ function App() {
                 setSelectedMemberId(null);
               }}
               departments={departments}
+              user={user}
+              onSendMessage={handleSendMessageToMember}
             />
           )}
           {activeTab === 'Reports' && <Reports />}
@@ -731,7 +739,11 @@ function App() {
           user={user}
           members={members}
           isPopup={true}
-          onClose={() => setIsMessagesOpen(false)}
+          onClose={() => {
+            setIsMessagesOpen(false);
+            setMessagesActiveChatId(null);
+          }}
+          initialActiveChatId={messagesActiveChatId}
         />
       )}
     </div>

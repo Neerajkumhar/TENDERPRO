@@ -18,9 +18,15 @@ import {
 import EmojiPicker from 'emoji-picker-react';
 import * as XLSX from 'xlsx';
 
-const Messages = ({ user, members = [], isPopup, onClose }) => {
-  const [activeChat, setActiveChat] = useState(null);
+const Messages = ({ user, members = [], isPopup, onClose, initialActiveChatId }) => {
+  const [activeChat, setActiveChat] = useState(initialActiveChatId || null);
   const [showChatList, setShowChatList] = useState(true);
+
+  useEffect(() => {
+    if (initialActiveChatId) {
+      setActiveChat(initialActiveChatId);
+    }
+  }, [initialActiveChatId]);
 
   useEffect(() => {
     if (activeChat) {
