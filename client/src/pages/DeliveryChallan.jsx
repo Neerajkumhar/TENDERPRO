@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ExportModal from '../components/ExportModal';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X, BarChart3, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X, BarChart3, CheckCircle2, Clock, ShieldCheck, Trash2 } from 'lucide-react';
 
 const mockChallans = [
   { id: 'DEL-2026-001', client: 'Acme Corp.', project: 'Solar Substation', transporter: 'Shree Transports', lrGatePass: 'LR12345 / GP678', dispatchDate: '2026-05-22', materialValue: 18800, eWayBill: 'EWB-998877', shipVia: 'Road', itemsQty: 32, estWeight: '1.8T', signedCopy: 'Uploaded', status: 'DELIVERED' },
@@ -280,6 +280,24 @@ const DeliveryChallan = () => {
     } catch (error) {
       console.error('Error updating delivery challan:', error);
       alert('Network error updating delivery challan');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this delivery challan?')) {
+      try {
+        const response = await fetch(`/api/delivery-challans/${id}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          fetchChallans();
+        } else {
+          alert('Failed to delete delivery challan');
+        }
+      } catch (error) {
+        console.error('Error deleting delivery challan:', error);
+        alert('Network error deleting delivery challan');
+      }
     }
   };
 
@@ -1005,6 +1023,7 @@ const DeliveryChallan = () => {
                       <button onClick={() => handleDetails(challan)} className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-all" title="Details"><Search size={15} /></button>
                       <button onClick={() => handlePrintOpen(challan)} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-lg transition-all" title="Print Receipt"><Printer size={15} /></button>
                       <button onClick={() => handleEdit(challan)} className="p-1.5 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-lg transition-all" title="Edit Record"><Edit size={15} /></button>
+                      <button onClick={() => handleDelete(challan.id)} className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition-all" title="Delete Record"><Trash2 size={15} /></button>
                     </div>
                   </td>
                 </tr>

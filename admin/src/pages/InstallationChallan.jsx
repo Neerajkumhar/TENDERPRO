@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ExportModal from '../components/ExportModal';
-import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X } from 'lucide-react';
+import { Search, Plus, Download, Filter, Truck, Edit, Printer, XCircle, X, Trash2 } from 'lucide-react';
 
 const mockChallans = [
   { id: 'INST-2026-001', client: 'Acme Corp.', project: 'Solar Substation', siteEngineer: 'Rajesh Sharma', installationDate: '2026-05-02', itemsQty: 43, estValuation: 12850, signedCopy: 'Uploaded', billingStatus: 'Pending Billing' },
@@ -247,6 +247,24 @@ const InstallationChallan = () => {
     } catch (error) {
       console.error('Error updating installation challan:', error);
       alert('Network error updating installation challan');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this installation challan?')) {
+      try {
+        const response = await fetch(`/api/installation-challans/${id}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          fetchChallans();
+        } else {
+          alert('Failed to delete installation challan');
+        }
+      } catch (error) {
+        console.error('Error deleting installation challan:', error);
+        alert('Network error deleting installation challan');
+      }
     }
   };
 
@@ -685,6 +703,10 @@ const InstallationChallan = () => {
                     <button onClick={() => handleEdit(challan)} className="flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 hover:bg-slate-50 transition">
                       <Edit size={14} />
                       <span>Edit</span>
+                    </button>
+                    <button onClick={() => handleDelete(challan.id)} className="flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 hover:bg-slate-50 transition">
+                      <Trash2 size={14} />
+                      <span>Delete</span>
                     </button>
                   </td>
                 </tr>
