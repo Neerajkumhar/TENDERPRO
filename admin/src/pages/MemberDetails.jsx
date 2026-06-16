@@ -96,46 +96,65 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
 
       // Process Stats
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const start = new Date(memberData.createdAt || '2026-05-01');
+      start.setHours(0, 0, 0, 0);
+
+      const presentDates = new Set(attData.map(r => r.date));
+      const approvedLeaveDates = new Set();
       
-      // Calculate total unique present days
-      const presentDays = new Set(attData.map(r => r.date)).size;
-      
-      // Calculate approved leave days (only counting those in the past or today)
-      let leaveDaysCount = 0;
       leaveData.filter(l => l.status === 'Approved').forEach(leave => {
         const lStart = new Date(leave.startDate);
         const lEnd = new Date(leave.endDate);
-        let curr = new Date(lStart);
-        while (curr <= lEnd && curr <= today) {
-          if (curr >= start) {
-            // Count only weekdays
-            if (curr.getDay() !== 0 && curr.getDay() !== 6) {
-              leaveDaysCount++;
-            }
-          }
-          curr.setDate(curr.getDate() + 1);
+        let currDate = new Date(lStart);
+        while (currDate <= lEnd) {
+          const year = currDate.getFullYear();
+          const month = String(currDate.getMonth() + 1).padStart(2, '0');
+          const day = String(currDate.getDate()).padStart(2, '0');
+          const dateStr = `${year}-${month}-${day}`;
+          approvedLeaveDates.add(dateStr);
+          currDate.setDate(currDate.getDate() + 1);
         }
       });
 
-      // Calculate total possible working days since joining (weekdays only)
-      let totalWorkable = 0;
-      let curr = new Date(start);
-      while (curr <= today) {
-        if (curr.getDay() !== 0 && curr.getDay() !== 6) {
-          totalWorkable++;
+      let presentDaysCount = 0;
+      let leaveDaysCount = 0;
+      let absentDaysCount = 0;
+      let totalWorkingDays = 0;
+
+      let currDate = new Date(start);
+      while (currDate <= today) {
+        const year = currDate.getFullYear();
+        const month = String(currDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
+        const isWeekend = currDate.getDay() === 0 || currDate.getDay() === 6;
+
+        if (presentDates.has(dateStr)) {
+          presentDaysCount++;
+          if (!isWeekend) {
+            totalWorkingDays++;
+          }
+        } else if (!isWeekend) {
+          totalWorkingDays++;
+          if (approvedLeaveDates.has(dateStr)) {
+            leaveDaysCount++;
+          } else {
+            absentDaysCount++;
+          }
         }
-        curr.setDate(curr.getDate() + 1);
+
+        currDate.setDate(currDate.getDate() + 1);
       }
 
-      // Ensure minimum 1 day to avoid division by zero
-      const effectiveTotal = Math.max(totalWorkable, 1);
-      const absentDays = Math.max(0, effectiveTotal - presentDays - leaveDaysCount);
-      const percentage = Math.round((presentDays / effectiveTotal) * 100);
+      const effectiveTotal = Math.max(totalWorkingDays, 1);
+      const percentage = Math.round((presentDaysCount / effectiveTotal) * 100);
 
       setAttendanceStats({
-        present: presentDays,
-        absent: absentDays,
+        present: presentDaysCount,
+        absent: absentDaysCount,
         onLeave: leaveDaysCount,
         totalWorkingDays: effectiveTotal,
         percentage
@@ -216,6 +235,8 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
     { name: 'Absent', value: attendanceStats.absent, color: '#f43f5e' },
     { name: 'On Leave', value: attendanceStats.onLeave, color: '#f59e0b' }
   ].filter(d => d.value > 0);
+
+  const displayPieData = pieData.length > 0 ? pieData : [{ name: 'No Data', value: 1, color: '#e2e8f0' }];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -353,19 +374,21 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
               {/* Circular Graph */}
-              <div className="md:col-span-5 flex flex-col items-center">
+              <div className="md:col-span-5 flex flex-col items-center min-w-0 w-full">
                 <div className="relative w-full h-[220px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="99%" height="100%">
                     <PieChart>
                       <Pie
-                        data={pieData}
+                        data={displayPieData}
+                        cx="50%"
+                        cy="50%"
                         innerRadius={65}
                         outerRadius={85}
                         paddingAngle={5}
                         dataKey="value"
                         animationDuration={1000}
                       >
-                        {pieData.map((entry, index) => (
+                        {displayPieData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                         ))}
                       </Pie>
