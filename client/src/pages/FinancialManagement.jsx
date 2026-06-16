@@ -23,7 +23,9 @@ import {
   Coffee,
   X,
   User as UserIcon,
-  Calendar
+  Calendar,
+  UploadCloud,
+  Loader2
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -61,13 +63,19 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
     client: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    status: 'Pending'
+    status: 'Pending',
+    project: '',
+    tenderId: '',
+    attachment: ''
   });
 
   const [invoicesList, setInvoicesList] = useState([]);
   const [revenueVsExpenseData, setRevenueVsExpenseData] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [budgetsList, setBudgetsList] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [tenders, setTenders] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalExpenses: 0,
@@ -147,6 +155,18 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
         const budgetsData = await budgetsRes.json();
         setBudgetsList(budgetsData);
       }
+
+      const clientsRes = await fetch('/api/clients');
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json();
+        setClients(clientsData);
+      }
+
+      const tendersRes = await fetch('/api/tenders');
+      if (tendersRes.ok) {
+        const tendersData = await tendersRes.json();
+        setTenders(tendersData);
+      }
     } catch (err) {
       console.error('Error fetching financial data:', err);
     }
@@ -155,6 +175,31 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
   useEffect(() => {
     fetchInvoicesAndStats();
   }, []);
+
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+    setIsUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({
+          ...prev,
+          attachment: data.url
+        }));
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleCreateInvoice = async (e) => {
     if (e) e.preventDefault();
@@ -170,8 +215,11 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
         body: JSON.stringify({
           client: formData.client,
           amount: parseFloat(formData.amount),
-          date: formData.date,
-          status: formData.status
+          date: formData.date || new Date().toISOString().split('T')[0],
+          status: formData.status || 'Pending',
+          project: formData.project,
+          tenderId: formData.tenderId,
+          attachments: formData.attachment ? [{ name: 'Invoice Document', url: formData.attachment }] : []
         })
       });
       
@@ -180,7 +228,10 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
           client: '',
           amount: '',
           date: new Date().toISOString().split('T')[0],
-          status: 'Pending'
+          status: 'Pending',
+          project: '',
+          tenderId: '',
+          attachment: ''
         });
         setIsModalOpen(false);
         fetchInvoicesAndStats();
@@ -189,6 +240,24 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
       console.error('Error creating invoice:', err);
     }
   };
+
+  // Handle file upload and convert to Base64 string
+  const handleFileUpload = (file) => {
+    if (!file) return;
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, attachment: reader.result }));
+      setIsUploading(false);
+    };
+    reader.onerror = () => {
+      console.error('Error reading file');
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleExportReport = ({ format, startDate, endDate }) => {
 
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
@@ -418,10 +487,79 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 transition-colors"><X size={24} /></button>
               </div>
               <form onSubmit={handleCreateInvoice} className="space-y-6 text-left">
-                <div className="space-y-2 text-left"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name</label><input type="text" placeholder="Enter client name" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" value={formData.client} onChange={(e) => setFormData({...formData, client: e.target.value})} /></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-left"><div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Date</label><input type="date" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} /></div><div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Invoice Status</label><select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Overdue">Overdue</option></select></div></div>
-                <div className="space-y-2 text-left"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label><div className="relative"><span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span><input type="number" placeholder="0.00" className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} /></div></div>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2 text-left"><button type="button" onClick={() => setIsModalOpen(false)} className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest">Cancel</button><button type="submit" className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95">Generate Invoice</button></div>
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Client</label>
+                  <select 
+                    required
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    value={formData.client} 
+                    onChange={(e) => setFormData({...formData, client: e.target.value})}
+                  >
+                    <option value="">Select Client</option>
+                    {clients.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Project</label>
+                  <select 
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    value={formData.tenderId} 
+                    onChange={(e) => {
+                      const t = tenders.find(t => t.id === e.target.value);
+                      setFormData({...formData, tenderId: e.target.value, project: t ? t.title : ''});
+                    }}
+                  >
+                    <option value="">Select Project</option>
+                    {tenders.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                  <div className="relative">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                    <input 
+                      type="number" 
+                      required
+                      placeholder="0.00" 
+                      className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                      value={formData.amount} 
+                      onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
+                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                    <input 
+                      type="file" 
+                      className="absolute inset-0 opacity-0 cursor-pointer" 
+                      onChange={(e) => handleFileUpload(e.target.files[0])}
+                    />
+                    {isUploading ? (
+                      <Loader2 className="animate-spin text-blue-500" size={24} />
+                    ) : formData.attachment ? (
+                      <>
+                        <CheckCircle2 className="text-emerald-500" size={24} />
+                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Document Uploaded</p>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="text-slate-400" size={24} />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Click or drag to upload</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2 text-left">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest">Cancel</button>
+                  <button type="submit" disabled={isUploading} className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95 disabled:opacity-50">
+                    {isUploading ? 'Uploading...' : 'Generate Invoice'}
+                  </button>
+                </div>
               </form>
             </div>
           </div>

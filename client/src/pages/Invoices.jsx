@@ -72,6 +72,7 @@ const Invoices = ({ onInvoiceClick }) => {
   const [invoices, setInvoices] = useState([]);
 
   const [editInvoiceId, setEditInvoiceId] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
@@ -226,6 +227,31 @@ const Invoices = ({ onInvoiceClick }) => {
     return 'Pending';
   };
 
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+    setIsUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({
+          ...prev,
+          attachment: data.url
+        }));
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleCreateInvoice = async (e) => {
     if (e) e.preventDefault();
     if (!formData.client || !formData.project || !formData.amount) {
@@ -239,7 +265,8 @@ const Invoices = ({ onInvoiceClick }) => {
       status: mapStatusToBackend(formData.status),
       amount_due: formData.amount_due !== '' ? parseFloat(formData.amount_due) : parseFloat(formData.amount) || 0,
       paid_amount: formData.paid_amount !== '' ? parseFloat(formData.paid_amount) : 0,
-      date: formData.issueDate
+      date: formData.issueDate,
+      attachments: formData.attachment ? [{ name: 'Invoice Document', url: formData.attachment }] : []
     };
 
     try {
@@ -256,6 +283,7 @@ const Invoices = ({ onInvoiceClick }) => {
         loadBackendInvoices();
         setIsModalOpen(false);
         setEditInvoiceId(null);
+        setFormData({ client: '', project: '', tenderId: '', issueDate: new Date().toISOString().split('T')[0], dueDate: '', amount: '', amount_due: '', paid_amount: '', billingAddress: '', gstDetails: '', reference: '', invoiceRef: '', poNumber: '', poRef: '', poAddress: '', poDate: '', ewayBill: '', dispatchDate: '', deliveryDate: '', transporter: '', vehicleNumber: '', lrNo: '', driverName: '', clientGstin: '', contactPerson: '', contactPhone: '', placeOfSupply: '', dispatchFrom: '', dispatchTo: '', shippingAddress: '', materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }], notes: '', status: 'PENDING', attachment: '' });
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -467,58 +495,81 @@ const Invoices = ({ onInvoiceClick }) => {
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><XCircle size={24} /></button>
               </div>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client</label>
-                    <select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all appearance-none" value={formData.client} onChange={e => setFormData({...formData, client: e.target.value})}>
-                      <option value="">Select Client</option>
-                      {clients.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Project</label>
-                    <select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all appearance-none" value={formData.tenderId} onChange={e => {
-                        const t = tenders.find(ti => String(ti.id) === String(e.target.value));
-                        setFormData({...formData, tenderId: e.target.value, project: t?.title || '', client: t?.client?.name || formData.client, amount: t?.budget || formData.amount});
-                      }}>
-                      <option value="">Select Tender (Optional)</option>
-                      {tenders
-                        .filter(t => {
-                          const isAlreadyInvoiced = invoices.some(inv => inv.tenderId === t.id && inv.id !== editInvoiceId);
-                          return t.status !== 'Completed' && !isAlreadyInvoiced;
-                        })
-                        .map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
-                    </select>
+              <form onSubmit={handleCreateInvoice} className="space-y-6">
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Client</label>
+                  <select 
+                    required
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    value={formData.client} 
+                    onChange={(e) => setFormData({...formData, client: e.target.value})}
+                  >
+                    <option value="">Select Client</option>
+                    {clients.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Project</label>
+                  <select 
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    value={formData.tenderId} 
+                    onChange={(e) => {
+                      const t = tenders.find(t => t.id === e.target.value);
+                      setFormData({...formData, tenderId: e.target.value, project: t ? t.title : ''});
+                    }}
+                  >
+                    <option value="">Select Project</option>
+                    {tenders.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
+                  </select>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                  <div className="relative">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                    <input 
+                      type="number" 
+                      required
+                      placeholder="0.00" 
+                      className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                      value={formData.amount} 
+                      onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                    />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Amount (INR)</label>
-                    <div className="relative"><span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span><input type="number" className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} /></div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
-                    <select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                      <option value="PENDING">PENDING</option><option value="PAID">PAID</option><option value="OVERDUE">OVERDUE</option>
-                    </select>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
+                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                    <input 
+                      type="file" 
+                      className="absolute inset-0 opacity-0 cursor-pointer" 
+                      onChange={(e) => handleFileUpload(e.target.files[0])}
+                    />
+                    {isUploading ? (
+                      <Loader2 className="animate-spin text-blue-500" size={24} />
+                    ) : formData.attachment ? (
+                      <>
+                        <CheckCircle2 className="text-emerald-500" size={24} />
+                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Document Uploaded</p>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="text-slate-400" size={24} />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Click or drag to upload</p>
+                      </>
+                    )}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Date</label>
-                    <input type="date" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={formData.issueDate} onChange={e => setFormData({...formData, issueDate: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Due Date</label>
-                    <input type="date" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold" value={formData.dueDate} onChange={e => setFormData({...formData, dueDate: e.target.value})} />
-                  </div>
-                </div>
+
                 <div className="flex flex-col sm:flex-row gap-4 pt-4 sticky bottom-0 bg-white pb-2">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
-                  <button type="button" onClick={handleCreateInvoice} className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95">{editInvoiceId ? 'Update Invoice' : 'Generate & Send'}</button>
+                  <button type="submit" disabled={isUploading} className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 disabled:opacity-50">
+                    {isUploading ? 'Uploading...' : (editInvoiceId ? 'Update Invoice' : 'Generate & Send')}
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>

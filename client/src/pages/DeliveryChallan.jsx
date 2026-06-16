@@ -97,7 +97,7 @@ const DeliveryChallan = () => {
   const deliveredCount = challans.filter(c => c.status === 'DELIVERED').length;
   const transitCount = challans.filter(c => c.status === 'IN TRANSIT').length;
   const pendingCount = challans.filter(c => c.status === 'PENDING').length;
-  const totalItems = challans.reduce((sum, c) => sum + (c.itemsQty || 0), 0);
+  const totalItems = challans.reduce((sum, c) => sum + Number(c.itemsQty || 0), 0);
 
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
