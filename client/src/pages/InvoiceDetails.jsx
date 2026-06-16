@@ -122,7 +122,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8 print:hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 print:hidden">
         <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Amount</p>
           <p className="text-2xl font-black text-slate-900 italic">₹{toNumber(invoice.amount).toLocaleString('en-IN')}</p>
@@ -142,10 +142,10 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
       </div>
 
       <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden print:border-none print:shadow-none">
-        <div className="p-8 sm:p-12">
+        <div className="p-4 sm:p-8 md:p-12">
           {/* Company Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start border-b border-slate-100 pb-10 gap-8">
-            <div className="flex gap-6 items-center">
+          <div className="flex flex-col md:flex-row justify-between items-start border-b border-slate-100 pb-10 gap-8">
+            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
               {invoice.companyLogo ? (
                 <img src={invoice.companyLogo} className="w-20 h-20 object-contain rounded-2xl bg-slate-50 p-2 shadow-inner" alt="Logo" />
               ) : (
@@ -154,18 +154,18 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
               <div>
                 <h1 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">{invoice.companyName || 'TENDERPRO SYSTEMS'}</h1>
                 <p className="text-[11px] text-slate-500 font-bold mt-1 leading-relaxed uppercase whitespace-pre-line">{invoice.companyAddress || '123 INDUSTRY PARK, SECTOR 62\nNOIDA, UP 201309'}</p>
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
                   <span>PH: {invoice.companyPhone || '+91 120 456 7890'}</span>
                   <span>GSTIN: {invoice.companyGSTIN || '09AABCS1234A1Z5'}</span>
                 </div>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left md:text-right w-full md:w-auto">
               <h2 className="text-4xl font-black text-blue-900 tracking-tighter italic uppercase">INVOICE</h2>
               <div className="mt-6 space-y-1.5">
                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Invoice Number</p>
                 <p className="text-lg font-black text-slate-800">{invoice.invoiceNumber || invoice.id.slice(0,8)}</p>
-                <div className="pt-2 flex flex-col items-end gap-1">
+                <div className="pt-2 flex flex-col items-start md:items-end gap-1">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
                   <span className={`px-4 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{invoice.status}</span>
                 </div>
@@ -215,29 +215,31 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
 
           {/* Items Table */}
           <div className="py-10">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
-                  <th className="px-6 py-4 rounded-l-2xl">Description</th>
-                  <th className="px-6 py-4 text-center">Qty</th>
-                  <th className="px-6 py-4 text-right">Rate (₹)</th>
-                  <th className="px-6 py-4 text-right rounded-r-2xl">Amount (₹)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {currentItems.map((it, i) => (
-                  <tr key={i} className="group hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-6">
-                      <p className="text-sm font-black text-slate-800 uppercase tracking-tight">{it.name}</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tight">{it.description}</p>
-                    </td>
-                    <td className="px-6 py-6 text-center text-sm font-black text-slate-600">{it.qty}</td>
-                    <td className="px-6 py-6 text-right text-sm font-black text-slate-600">{toNumber(it.rate).toLocaleString('en-IN')}</td>
-                    <td className="px-6 py-6 text-right text-sm font-black text-slate-900 italic">{(toNumber(it.qty) * toNumber(it.rate)).toLocaleString('en-IN')}</td>
+            <div className="overflow-x-auto rounded-3xl border border-slate-100/80 w-full scrollbar-hide">
+              <table className="w-full text-left min-w-[600px] sm:min-w-full">
+                <thead>
+                  <tr className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
+                    <th className="px-6 py-4 rounded-l-2xl">Description</th>
+                    <th className="px-6 py-4 text-center">Qty</th>
+                    <th className="px-6 py-4 text-right">Rate (₹)</th>
+                    <th className="px-6 py-4 text-right rounded-r-2xl">Amount (₹)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {currentItems.map((it, i) => (
+                    <tr key={i} className="group hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-6">
+                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight">{it.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tight">{it.description}</p>
+                      </td>
+                      <td className="px-6 py-6 text-center text-sm font-black text-slate-600">{it.qty}</td>
+                      <td className="px-6 py-6 text-right text-sm font-black text-slate-600">{toNumber(it.rate).toLocaleString('en-IN')}</td>
+                      <td className="px-6 py-6 text-right text-sm font-black text-slate-900 italic">{(toNumber(it.qty) * toNumber(it.rate)).toLocaleString('en-IN')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Totals Section */}
