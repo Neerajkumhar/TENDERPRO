@@ -1,10 +1,9 @@
 const { Sequelize } = require('sequelize');
-const pg = require('pg');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 // Support for Railway and other environments
-const dbUrl = process.env.DATABASE_URL;
+const dbUrl = process.env.DATABASE_URL || process.env.MYSQL_URL;
 
 let sequelize;
 
@@ -17,10 +16,12 @@ if (process.env.DB_DIALECT === 'sqlite') {
     logging: false
   });
 } else if (dbUrl) {
-  console.log('Connecting to DB via URL:', dbUrl.split('@')[1] || 'URL present');
+  const isMysql = dbUrl.startsWith('mysql');
+  console.log(`Connecting to ${isMysql ? 'MySQL' : 'PostgreSQL'} via URL`);
+  
   sequelize = new Sequelize(dbUrl, {
-    dialect: 'postgres',
-    dialectModule: pg,
+    dialect: isMysql ? 'mysql' : 'postgres',
+    dialectModule: isMysql ? require('mysql2') : require('pg'),
     logging: false,
     dialectOptions: {
       connectTimeout: 60000,
@@ -36,15 +37,19 @@ if (process.env.DB_DIALECT === 'sqlite') {
     }
   });
 } else {
+  // Default to PostgreSQL but allow override via environment variables
+  const dialect = process.env.DB_DIALECT || 'postgres';
+  const isMysql = dialect === 'mysql';
+  
   sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASS,
+    process.env.DB_NAME || process.env.MYSQLDATABASE,
+    process.env.DB_USER || process.env.MYSQLUSER,
+    process.env.DB_PASS || process.env.MYSQLPASSWORD,
     {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT || 5432,
-      dialect: 'postgres',
-      dialectModule: pg,
+      host: process.env.DB_HOST || process.env.MYSQLHOST,
+      port: process.env.DB_PORT || process.env.MYSQLPORT || (isMysql ? 3306 : 5432),
+      dialect: dialect,
+      dialectModule: isMysql ? require('mysql2') : require('pg'),
       logging: false,
       dialectOptions: {
         connectTimeout: 60000,

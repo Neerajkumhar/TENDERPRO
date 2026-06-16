@@ -76,6 +76,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection and initialization
 let isDbInitialized = false;
+let initializationError = null;
+
 async function initializeDatabase() {
   if (isDbInitialized) return;
   
@@ -85,63 +87,73 @@ async function initializeDatabase() {
     console.log('Database connection authenticated successfully.');
     
     if (sequelize.options.dialect === 'sqlite') {
-      await sequelize.sync({ force: true });
-      console.log('SQLite database synced successfully.');
+      // Only force sync in local development
+      const shouldForce = !process.env.VERCEL && process.env.NODE_ENV !== 'production';
+      await sequelize.sync({ force: shouldForce });
+      console.log(`SQLite database synced (force: ${shouldForce}) successfully.`);
 
-      const User = require('./models/User');
-      const Client = require('./models/Client');
-      const Department = require('./models/Department');
+      if (shouldForce) {
+        const User = require('./models/User');
+        const Client = require('./models/Client');
+        const Department = require('./models/Department');
 
-      // Create a default department
-      const dept = await Department.create({
-        name: 'Tendering & Procurement',
-        description: 'Handles all tender acquisitions and client bidding activities.',
-        color: 'blue'
-      });
+        // Create a default department
+        const dept = await Department.create({
+          name: 'Tendering & Procurement',
+          description: 'Handles all tender acquisitions and client bidding activities.',
+          color: 'blue'
+        });
 
-      // Create Admin user
-      await User.create({
-        name: 'Vikash Kumar',
-        email: 'vikash@vagwiin.com',
-        password: '12345678',
-        role: 'Admin',
-        departmentId: dept.id
-      });
+        // Create Admin user
+        await User.create({
+          name: 'Vikash Kumar',
+          email: 'vikash@vagwiin.com',
+          password: '12345678',
+          role: 'Admin',
+          departmentId: dept.id
+        });
 
-      // Create Tender Manager user
-      await User.create({
-        name: 'Tender Manager User',
-        email: 'manager@vagwiin.com',
-        password: '12345678',
-        role: 'Tender Manager',
-        departmentId: dept.id
-      });
+        // Create Tender Manager user
+        await User.create({
+          name: 'Tender Manager User',
+          email: 'manager@vagwiin.com',
+          password: '12345678',
+          role: 'Tender Manager',
+          departmentId: dept.id
+        });
 
-      // Create Finance Manager user
-      await User.create({
-        name: 'Finance Manager User',
-        email: 'finance@vagwiin.com',
-        password: '12345678',
-        role: 'Finance Manager',
-        departmentId: dept.id
-      });
+        // Create Finance Manager user
+        await User.create({
+          name: 'Finance Manager User',
+          email: 'finance@vagwiin.com',
+          password: '12345678',
+          role: 'Finance Manager',
+          departmentId: dept.id
+        });
 
-      // Create a default client
-      await Client.create({
-        name: 'Jaipur Development Authority',
-        email: 'jda@rajasthan.gov.in',
-        phone: '0141-2563211',
-        location: 'Jaipur, Rajasthan',
-        industry: 'Infrastructure',
-        status: 'Active',
-        firmType: 'Govt'
-      });
+        // Create a default client
+        await Client.create({
+          name: 'Jaipur Development Authority',
+          email: 'jda@rajasthan.gov.in',
+          phone: '0141-2563211',
+          location: 'Jaipur, Rajasthan',
+          industry: 'Infrastructure',
+          status: 'Active',
+          firmType: 'Govt'
+        });
 
-      console.log('Database seeded successfully with local admin, tender manager, and client!');
+        console.log('Database seeded successfully!');
+      }
     } else {
       // Sync schema alterations (create missing tables & columns)
       console.log('Syncing database schema alterations...');
-      await sequelize.sync({ alter: true });
+      // Use a timeout for sync in serverless environments
+      const syncPromise = sequelize.sync({ alter: true });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database sync timed out')), 15000)
+      );
+      
+      await Promise.race([syncPromise, timeoutPromise]);
       console.log('Database schema alterations synced successfully.');
 
       // Ensure default department and Finance Manager exist
@@ -156,7 +168,7 @@ async function initializeDatabase() {
         }
       });
 
-      const [financeUser, created] = await User.findOrCreate({
+      await User.findOrCreate({
         where: { email: 'finance@vagwiin.com' },
         defaults: {
           name: 'Finance Manager User',
@@ -165,38 +177,45 @@ async function initializeDatabase() {
           departmentId: dept.id
         }
       });
-
-      if (created) {
-        console.log('Finance Manager user seeded in main database successfully.');
-      } else {
-        console.log('Finance Manager user already exists in main database.');
-      }
     }
     
     isDbInitialized = true;
+    initializationError = null;
   } catch (err) {
     console.error('Database initialization failed:', err.message);
-    // In serverless, we don't necessarily want to kill the process here
-    // as it might succeed on a subsequent request
+    initializationError = err.message;
+    // We still mark as initialized to allow subsequent queries to attempt running
+    // if the connection was established but sync/seeding failed
+    if (err.message.includes('sync') || err.message.includes('seeding')) {
+      isDbInitialized = true;
+    }
   }
 }
 
 // Middleware to ensure DB is initialized before handling requests
 app.use(async (req, res, next) => {
+  // Skip initialization for health check
+  if (req.path === '/api/health') return next();
+
   try {
     if (!isDbInitialized) {
       await initializeDatabase();
     }
     
-    if (!isDbInitialized && !req.path.includes('/health')) {
+    if (!isDbInitialized) {
       return res.status(500).json({ 
         error: 'Database not initialized', 
-        message: 'The server is unable to connect to the database. Please check connection settings.' 
+        message: initializationError || 'The server is unable to connect to the database.',
+        hint: 'Please check your DATABASE_URL or MYSQL_URL environment variables.'
       });
     }
     next();
   } catch (err) {
-    res.status(500).json({ error: 'Server initialization error', message: err.message });
+    res.status(500).json({ 
+      error: 'Server initialization error', 
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 });
 
