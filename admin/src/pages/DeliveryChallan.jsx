@@ -580,7 +580,6 @@ const DeliveryChallan = () => {
                   <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-500 mb-2">New Consignment Registration</p>
                   <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-900">Create Delivery Challan</h2>
                 </div>
-                <button onClick={() => setCreateOpen(false)} className="px-4 py-3 rounded-2xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition">Cancel</button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

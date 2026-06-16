@@ -554,7 +554,6 @@ const DeliveryChallan = () => {
                   <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-500 mb-2">New Consignment Registration</p>
                   <h2 className="text-2xl sm:text-3xl xl:text-4xl font-black uppercase tracking-tight text-slate-900">Create Delivery Challan</h2>
                 </div>
-                <button onClick={() => setCreateOpen(false)} className="px-5 py-3 rounded-xl sm:rounded-2xl border border-slate-200 text-slate-600 font-black uppercase tracking-widest text-[10px] hover:bg-slate-50 transition">Discard Draft</button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
