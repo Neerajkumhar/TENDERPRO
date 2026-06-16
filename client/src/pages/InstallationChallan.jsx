@@ -89,7 +89,10 @@ const InstallationChallan = () => {
   const invoicedCount = challans.filter(c => c.billingStatus === 'Invoiced').length;
   const pendingBillingCount = challans.filter(c => c.billingStatus === 'Pending Billing').length;
   const draftCount = challans.filter(c => c.billingStatus === 'Draft').length;
-  const totalInstalledValue = challans.reduce((sum, c) => sum + Number(c.estValuation || 0), 0);
+  const totalInstalledValue = challans.reduce((sum, c) => {
+    const val = parseFloat(String(c.estValuation || '0').replace(/[^0-9.-]+/g, ""));
+    return sum + (isNaN(val) ? 0 : val);
+  }, 0);
 
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);

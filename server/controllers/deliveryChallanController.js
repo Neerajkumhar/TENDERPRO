@@ -43,7 +43,6 @@ const seedChallans = async () => {
 
 exports.getChallans = async (req, res) => {
   try {
-    await seedChallans();
     const challans = await DeliveryChallan.findAll({
       order: [['createdAt', 'DESC']]
     });
@@ -98,9 +97,9 @@ exports.createChallan = async (req, res) => {
     const count = await DeliveryChallan.count();
     const challanNumber = `DEL-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
 
-    // Calculate material value and qty
-    const itemsQty = materialRows ? materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0) : 0;
-    const materialValue = materialRows ? materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0) : 0;
+    // Calculate material value and qty if not provided
+    const computedItemsQty = materialRows ? materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0) : 0;
+    const computedMaterialValue = materialRows ? materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0) : 0;
 
     const challan = await DeliveryChallan.create({
       challanNumber,
@@ -124,8 +123,8 @@ exports.createChallan = async (req, res) => {
       dispatchTo: dispatchTo || null,
       shippingAddress: shippingAddress || null,
       poAddress: poAddress || null,
-      materialValue: parseFloat(materialValue) || 0,
-      itemsQty: itemsQty,
+      materialValue: req.body.materialValue !== undefined ? req.body.materialValue : parseFloat(computedMaterialValue) || 0,
+      itemsQty: req.body.itemsQty !== undefined ? req.body.itemsQty : computedItemsQty,
       materialRows: materialRows || [],
       status: status || 'PENDING',
       signedCopy: signedCopy || 'Pending',
@@ -155,10 +154,14 @@ exports.updateChallan = async (req, res) => {
 
     const { materialRows, ...updateData } = req.body;
 
-    // Recalculate material value and qty if materialRows provided
+    // Recalculate material value and qty if materialRows provided and NOT explicitly in body
     if (materialRows) {
-      updateData.itemsQty = materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0);
-      updateData.materialValue = materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0);
+      if (updateData.itemsQty === undefined) {
+        updateData.itemsQty = materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0);
+      }
+      if (updateData.materialValue === undefined) {
+        updateData.materialValue = materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0);
+      }
       updateData.materialRows = materialRows;
     }
 

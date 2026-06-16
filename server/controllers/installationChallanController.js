@@ -39,7 +39,6 @@ const seedChallans = async () => {
 
 exports.getChallans = async (req, res) => {
   try {
-    await seedChallans();
     const challans = await InstallationChallan.findAll({
       order: [['createdAt', 'DESC']]
     });
@@ -86,9 +85,9 @@ exports.createChallan = async (req, res) => {
     const count = await InstallationChallan.count();
     const challanNumber = `INST-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
 
-    // Calculate material qty and valuation
-    const itemsQty = materialRows ? materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0) : 0;
-    const estValuation = materialRows ? materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0) : 0;
+    // Calculate material qty and valuation ONLY if not provided
+    const computedItemsQty = materialRows ? materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0) : 0;
+    const computedEstValuation = materialRows ? materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0) : 0;
 
     const challan = await InstallationChallan.create({
       challanNumber,
@@ -104,8 +103,8 @@ exports.createChallan = async (req, res) => {
       invoiceRef: invoiceRef || null,
       poRef: poRef || null,
       poDate: poDate || null,
-      itemsQty: itemsQty,
-      estValuation: parseFloat(estValuation) || 0,
+      itemsQty: req.body.itemsQty !== undefined ? req.body.itemsQty : computedItemsQty,
+      estValuation: req.body.estValuation !== undefined ? req.body.estValuation : parseFloat(computedEstValuation) || 0,
       materialRows: materialRows || [],
       billingStatus: billingStatus || 'Draft',
       signedCopy: signedCopy || 'Pending',
@@ -135,10 +134,14 @@ exports.updateChallan = async (req, res) => {
 
     const { materialRows, ...updateData } = req.body;
 
-    // Recalculate material qty and valuation if materialRows provided
+    // Recalculate material qty and valuation if materialRows provided and NOT explicitly in body
     if (materialRows) {
-      updateData.itemsQty = materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0);
-      updateData.estValuation = materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0);
+      if (updateData.itemsQty === undefined) {
+        updateData.itemsQty = materialRows.reduce((sum, row) => sum + (Number(row.qty) || 0), 0);
+      }
+      if (updateData.estValuation === undefined) {
+        updateData.estValuation = materialRows.reduce((sum, row) => sum + ((Number(row.qty) || 0) * (Number(row.rate) || 0)), 0);
+      }
       updateData.materialRows = materialRows;
     }
 
