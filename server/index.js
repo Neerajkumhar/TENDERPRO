@@ -139,9 +139,38 @@ async function initializeDatabase() {
 
       console.log('Database seeded successfully with local admin, tender manager, and client!');
     } else {
-      // Skip sync to avoid conflicts with existing tables and foreign keys
-      // Tables already exist in the database, no need to sync
-      console.log('Database ready for operations');
+      // Sync schema alterations (create missing tables & columns)
+      console.log('Syncing database schema alterations...');
+      await sequelize.sync({ alter: true });
+      console.log('Database schema alterations synced successfully.');
+
+      // Ensure default department and Finance Manager exist
+      const Department = require('./models/Department');
+      const User = require('./models/User');
+
+      const [dept] = await Department.findOrCreate({
+        where: { name: 'Tendering & Procurement' },
+        defaults: {
+          description: 'Handles all tender acquisitions and client bidding activities.',
+          color: 'blue'
+        }
+      });
+
+      const [financeUser, created] = await User.findOrCreate({
+        where: { email: 'finance@vagwiin.com' },
+        defaults: {
+          name: 'Finance Manager User',
+          password: '12345678',
+          role: 'Finance Manager',
+          departmentId: dept.id
+        }
+      });
+
+      if (created) {
+        console.log('Finance Manager user seeded in main database successfully.');
+      } else {
+        console.log('Finance Manager user already exists in main database.');
+      }
     }
     
     isDbInitialized = true;
