@@ -92,9 +92,9 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
   };
 
   return (
-    <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
+    <div className="p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack}
@@ -103,8 +103,8 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic uppercase">
                 {expense.id}
               </h1>
               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5 ${getStatusBadge(expense.status)}`}>
@@ -122,7 +122,7 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Details */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 p-8">
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 p-5 sm:p-8">
             <h2 className="text-lg font-black text-slate-800 tracking-tight italic uppercase mb-6 flex items-center gap-2">
               <FileText size={20} className="text-blue-500" />
               Expenditure Details
@@ -178,7 +178,7 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
 
         {/* Right Column: Document Preview */}
         <div className="space-y-6">
-          <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 p-8 sticky top-8">
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] shadow-xl shadow-slate-200/30 border border-slate-100 p-5 sm:p-8 sticky top-8">
             <h2 className="text-lg font-black text-slate-800 tracking-tight italic uppercase mb-6 flex items-center gap-2">
               <FileText size={20} className="text-blue-500" />
               Supporting Document

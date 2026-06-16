@@ -258,7 +258,7 @@ const Expenses = ({ onViewExpense }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12">
         {stats.map((stat, index) => (
           <div key={index} className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 flex flex-col justify-center transition-all hover:shadow-md">
             <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 sm:mb-2">{stat.label}</span>
@@ -291,7 +291,7 @@ const Expenses = ({ onViewExpense }) => {
               {filteredExpenses.length > 0 ? (
                 filteredExpenses.map((expense, index) => (
                   <tr key={expense.id || index} className="transition-all hover:bg-slate-50 group">
-                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-black text-blue-600 tracking-tight">{expense.id}</td>
+                    <td onClick={() => onViewExpense(expense.id)} className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-black text-blue-600 tracking-tight cursor-pointer hover:underline">{expense.id}</td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><div className="flex items-center gap-2"><Tag size={12} className="text-slate-300" /><span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{expense.category}</span></div></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-500 uppercase">{expense.vendor}</td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-400">{expense.date}</td>
