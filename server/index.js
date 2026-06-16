@@ -19,6 +19,7 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
 
 // Load models to ensure they are registered with Sequelize
 require('./models/User');
@@ -34,6 +35,7 @@ require('./models/LeaveBalance');
 require('./models/Notification');
 require('./models/Payment');
 require('./models/DocumentRequest');
+require('./models/Budget');
 
 // Set up associations
 const User = require('./models/User');
@@ -237,6 +239,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/leave-requests', require('./routes/leaveRequestRoutes'));
 app.use('/api/doc-requests', require('./routes/docRequestRoutes'));
+app.use('/api/budgets', budgetRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 

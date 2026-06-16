@@ -56,12 +56,20 @@ const Budget = () => {
   const periods = ['ANNUAL', 'QUARTERLY', 'MONTHLY'];
   const years = ['2023-24', '2024-25', '2025-26'];
 
-  const [budgetList, setBudgetList] = useState(() => {
-    const saved = localStorage.getItem('tender_budgets');
-    return saved ? JSON.parse(saved) : mockCategories;
-  });
-
+  const [budgetList, setBudgetList] = useState([]);
   const [expenses, setExpenses] = useState([]);
+
+  const fetchBudgets = async () => {
+    try {
+      const response = await fetch('/api/budgets');
+      if (response.ok) {
+        const data = await response.json();
+        setBudgetList(data);
+      }
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -76,6 +84,7 @@ const Budget = () => {
       }
     };
     fetchExpenses();
+    fetchBudgets();
   }, []);
 
   // Compute dynamic spent amounts from expenses
@@ -117,43 +126,52 @@ const Budget = () => {
     }, 4000);
   };
 
-  const updateBudgets = (newList) => {
-    setBudgetList(newList);
-    localStorage.setItem('tender_budgets', JSON.stringify(newList));
-  };
-
-  const handleSaveBudget = (e) => {
+  const handleSaveBudget = async (e) => {
     if (e) e.preventDefault();
     if (!formData.title || !formData.amount) {
       alert('Please fill in budget title and allocation amount');
       return;
     }
 
-    const newCat = {
-      id: budgetList.length + 1,
-      name: formData.title.toUpperCase(),
-      department: formData.category,
-      status: 'ON TRACK',
-      allocated: parseFloat(formData.amount) || 0,
-      spent: 0,
-      utilization: 0,
-      trend: '0.0%',
-      color: 'bg-indigo-500'
-    };
+    try {
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.title.toUpperCase(),
+          department: formData.category,
+          allocated: parseFloat(formData.amount) || 0,
+          status: 'ON TRACK',
+          trend: '0.0%',
+          color: 'bg-indigo-500',
+          fiscalYear: formData.fiscalYear,
+          period: formData.period,
+          threshold: parseInt(formData.threshold) || 80,
+          description: formData.description
+        })
+      });
 
-    updateBudgets([...budgetList, newCat]);
-    triggerToast(`Budget category "${formData.title}" initialized successfully!`);
-
-    setFormData({
-      title: '',
-      category: 'OPERATIONS',
-      period: 'ANNUAL',
-      fiscalYear: '2024-25',
-      amount: '',
-      threshold: '80',
-      description: ''
-    });
-    setIsModalOpen(false);
+      if (response.ok) {
+        triggerToast(`Budget category "${formData.title}" initialized successfully!`);
+        fetchBudgets();
+        setFormData({
+          title: '',
+          category: 'OPERATIONS',
+          period: 'ANNUAL',
+          fiscalYear: '2024-25',
+          amount: '',
+          threshold: '80',
+          description: ''
+        });
+        setIsModalOpen(false);
+      } else {
+        const errData = await response.json();
+        alert(errData.message || 'Failed to create budget');
+      }
+    } catch (error) {
+      console.error('Error creating budget:', error);
+      alert('Error connecting to the server');
+    }
   };
 
   const handleExportReport = ({ format, startDate, endDate }) => {
@@ -256,7 +274,8 @@ const Budget = () => {
   const tabularBudgets = activeDepartmentView ? filteredBudgets.filter(b => (b.department || 'OPERATIONS') === activeDepartmentView) : [];
 
   if (selectedCategoryDetails) {
-    return <BudgetDetails category={selectedCategoryDetails} onBack={() => setSelectedCategoryDetails(null)} />;
+    const categoryExpenses = expenses.filter(e => e.category === selectedCategoryDetails.name);
+    return <BudgetDetails category={selectedCategoryDetails} expenses={categoryExpenses} onBack={() => setSelectedCategoryDetails(null)} />;
   }
 
   return (
@@ -568,11 +587,11 @@ const Budget = () => {
             onClick={() => setIsModalOpen(false)}
           ></div>
           
-          <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100">
-            <div className="p-10">
+          <div className="bg-white w-full max-w-xl rounded-3xl sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Initialize Budget Allocation</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Initialize Budget Allocation</h2>
                   <p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Set financial targets & departments</p>
                 </div>
                 <button 
@@ -595,7 +614,7 @@ const Budget = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Department Category</label>
                     <select 
@@ -657,18 +676,18 @@ const Budget = () => {
                   ></textarea>
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2">
                   <button 
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                    className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
                   >
                     Discard Draft
                   </button>
                   <button 
                     type="button"
                     onClick={handleSaveBudget}
-                    className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+                    className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
                   >
                     Activate Budget
                   </button>

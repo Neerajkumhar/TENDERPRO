@@ -17,15 +17,7 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 
-const mockTransactions = [
-  { id: 'TRX-001', date: '2024-05-10', description: 'Q2 Software Licenses', amount: 15000, status: 'Completed', department: 'IT' },
-  { id: 'TRX-002', date: '2024-05-12', description: 'Marketing Campaign Ad Spend', amount: 25000, status: 'Completed', department: 'Marketing' },
-  { id: 'TRX-003', date: '2024-05-15', description: 'Logistics Vendor Payment', amount: 45000, status: 'Pending', department: 'Operations' },
-  { id: 'TRX-004', date: '2024-05-18', description: 'Office Equipment Upgrade', amount: 8500, status: 'Completed', department: 'Operations' },
-  { id: 'TRX-005', date: '2024-05-20', description: 'Consulting Retainer', amount: 12000, status: 'Processing', department: 'R&D' }
-];
-
-const BudgetDetails = ({ category, onBack }) => {
+const BudgetDetails = ({ category, expenses = [], onBack }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -33,10 +25,21 @@ const BudgetDetails = ({ category, onBack }) => {
 
   if (!category) return null;
 
-  const filteredTransactions = mockTransactions.filter(t => {
+  // Map expenses to transaction format
+  const transactions = expenses.map(e => ({
+    id: e.id,
+    date: e.date,
+    description: e.description || `${e.category} payment to ${e.vendor}`,
+    amount: parseFloat(e.amount),
+    status: e.status,
+    vendor: e.vendor
+  }));
+
+  const filteredTransactions = transactions.filter(t => {
     const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          t.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
+                          t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (t.vendor && t.vendor.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesStatus = statusFilter === 'ALL' || t.status.toUpperCase() === statusFilter.toUpperCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -44,7 +47,7 @@ const BudgetDetails = ({ category, onBack }) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
-    const exportData = mockTransactions.filter(trx => {
+    const exportData = transactions.filter(trx => {
       const trxDate = new Date(trx.date);
       return trxDate >= start && trxDate <= end;
     });
@@ -254,7 +257,7 @@ const BudgetDetails = ({ category, onBack }) => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[650px]">
             <thead>
               <tr className="text-[8.5px] sm:text-[9.5px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
                 <th className="px-5 sm:px-8 py-3.5">Transaction ID</th>

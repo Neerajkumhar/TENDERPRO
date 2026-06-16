@@ -56,12 +56,20 @@ const Budget = () => {
   const periods = ['ANNUAL', 'QUARTERLY', 'MONTHLY'];
   const years = ['2023-24', '2024-25', '2025-26'];
 
-  const [budgetList, setBudgetList] = useState(() => {
-    const saved = localStorage.getItem('tender_budgets');
-    return saved ? JSON.parse(saved) : mockCategories;
-  });
-
+  const [budgetList, setBudgetList] = useState([]);
   const [expenses, setExpenses] = useState([]);
+
+  const fetchBudgets = async () => {
+    try {
+      const response = await fetch('/api/budgets');
+      if (response.ok) {
+        const data = await response.json();
+        setBudgetList(data);
+      }
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -76,6 +84,7 @@ const Budget = () => {
       }
     };
     fetchExpenses();
+    fetchBudgets();
   }, []);
 
   // Compute dynamic spent amounts from expenses
@@ -117,43 +126,52 @@ const Budget = () => {
     }, 4000);
   };
 
-  const updateBudgets = (newList) => {
-    setBudgetList(newList);
-    localStorage.setItem('tender_budgets', JSON.stringify(newList));
-  };
-
-  const handleSaveBudget = (e) => {
+  const handleSaveBudget = async (e) => {
     if (e) e.preventDefault();
     if (!formData.title || !formData.amount) {
       alert('Please fill in budget title and allocation amount');
       return;
     }
 
-    const newCat = {
-      id: budgetList.length + 1,
-      name: formData.title.toUpperCase(),
-      department: formData.category,
-      status: 'ON TRACK',
-      allocated: parseFloat(formData.amount) || 0,
-      spent: 0,
-      utilization: 0,
-      trend: '0.0%',
-      color: 'bg-indigo-500'
-    };
+    try {
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.title.toUpperCase(),
+          department: formData.category,
+          allocated: parseFloat(formData.amount) || 0,
+          status: 'ON TRACK',
+          trend: '0.0%',
+          color: 'bg-indigo-500',
+          fiscalYear: formData.fiscalYear,
+          period: formData.period,
+          threshold: parseInt(formData.threshold) || 80,
+          description: formData.description
+        })
+      });
 
-    updateBudgets([...budgetList, newCat]);
-    triggerToast(`Budget category "${formData.title}" initialized successfully!`);
-
-    setFormData({
-      title: '',
-      category: 'OPERATIONS',
-      period: 'ANNUAL',
-      fiscalYear: '2024-25',
-      amount: '',
-      threshold: '80',
-      description: ''
-    });
-    setIsModalOpen(false);
+      if (response.ok) {
+        triggerToast(`Budget category "${formData.title}" initialized successfully!`);
+        fetchBudgets();
+        setFormData({
+          title: '',
+          category: 'OPERATIONS',
+          period: 'ANNUAL',
+          fiscalYear: '2024-25',
+          amount: '',
+          threshold: '80',
+          description: ''
+        });
+        setIsModalOpen(false);
+      } else {
+        const errData = await response.json();
+        alert(errData.message || 'Failed to create budget');
+      }
+    } catch (error) {
+      console.error('Error creating budget:', error);
+      alert('Error connecting to the server');
+    }
   };
 
   const handleExportReport = ({ format, startDate, endDate }) => {
@@ -267,7 +285,8 @@ const Budget = () => {
   const tabularBudgets = activeDepartmentView ? filteredBudgets.filter(b => (b.department || 'OPERATIONS') === activeDepartmentView) : [];
 
   if (selectedCategoryDetails) {
-    return <BudgetDetails category={selectedCategoryDetails} onBack={() => setSelectedCategoryDetails(null)} />;
+    const categoryExpenses = expenses.filter(e => e.category === selectedCategoryDetails.name);
+    return <BudgetDetails category={selectedCategoryDetails} expenses={categoryExpenses} onBack={() => setSelectedCategoryDetails(null)} />;
   }
 
   return (

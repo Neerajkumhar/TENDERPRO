@@ -67,6 +67,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
   const [invoicesList, setInvoicesList] = useState([]);
   const [revenueVsExpenseData, setRevenueVsExpenseData] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [budgetsList, setBudgetsList] = useState([]);
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalExpenses: 0,
@@ -139,6 +140,12 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
       if (expRes.ok) {
         const expData = await expRes.json();
         setExpenses(expData);
+      }
+
+      const budgetsRes = await fetch('/api/budgets');
+      if (budgetsRes.ok) {
+        const budgetsData = await budgetsRes.json();
+        setBudgetsList(budgetsData);
       }
     } catch (err) {
       console.error('Error fetching financial data:', err);
@@ -234,16 +241,8 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
 
   const getBudgetUsed = () => {
     try {
-      const saved = localStorage.getItem('tender_budgets');
-      const budgets = saved ? JSON.parse(saved) : [
-        { name: 'Logistics Expansion', allocated: 150000 },
-        { name: 'Digital Ad Spend', allocated: 85000 },
-        { name: 'Core Infrastructure R&D', allocated: 120000 },
-        { name: 'Recruitment Drive', allocated: 45000 },
-        { name: 'Cloud Server Upgrades', allocated: 90000 }
-      ];
-      const totalAllocated = budgets.reduce((sum, b) => sum + Number(b.allocated || 0), 0);
-      const totalSpent = budgets.reduce((sum, budget) => {
+      const totalAllocated = budgetsList.reduce((sum, b) => sum + Number(b.allocated || 0), 0);
+      const totalSpent = budgetsList.reduce((sum, budget) => {
         const budgetExpenses = expenses.filter(e => e.category === budget.name && e.status !== 'REJECTED');
         const computedSpent = budgetExpenses.reduce((s, e) => s + Number(e.amount), 0);
         return sum + computedSpent;
