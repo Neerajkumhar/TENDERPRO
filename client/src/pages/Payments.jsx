@@ -70,6 +70,94 @@ const Payments = () => {
     }, 4000);
   };
 
+  const handleDownloadReceipt = (tx) => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a5'
+      });
+
+      // Header Bar styling
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 148, 15, 'F');
+
+      // Title Text
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('TENDERPRO SYSTEMS - PAYMENT RECEIPT', 8, 9.5);
+
+      // Metadata Info
+      doc.setTextColor(71, 85, 105); // slate-600
+      doc.setFontSize(8);
+      doc.text(`Receipt ID: ${tx.paymentId || 'N/A'}`, 8, 24);
+      doc.text(`Date: ${tx.date || 'N/A'}`, 8, 29);
+      doc.text(`Reference Invoice: ${tx.invoiceNumber || 'N/A'}`, 8, 34);
+
+      // Line separator
+      doc.setDrawColor(241, 245, 249); // slate-100
+      doc.line(8, 39, 140, 39);
+
+      // Billing Details
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('BILL TO:', 8, 47);
+      doc.setFont('helvetica', 'normal');
+      doc.text(tx.client || 'N/A', 8, 52);
+
+      // Details block
+      doc.setFont('helvetica', 'bold');
+      doc.text('TRANSACTION DETAILS:', 8, 65);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text('Payment Method:', 8, 71);
+      doc.text(tx.method || 'N/A', 50, 71);
+
+      doc.text('Status:', 8, 76);
+      doc.text(tx.status || 'N/A', 50, 76);
+
+      // Line separator
+      doc.setDrawColor(241, 245, 249); // slate-100
+      doc.line(8, 82, 140, 82);
+
+      // Total Box
+      doc.setFillColor(248, 250, 252); // slate-50
+      doc.rect(8, 87, 132, 14, 'F');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42); // slate-900
+      doc.text('AMOUNT RECEIVED:', 12, 96);
+      
+      const amountStr = `INR ${parseFloat(tx.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      doc.text(amountStr, 90, 96);
+
+      // Notes section if present
+      if (tx.notes) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text('Notes:', 8, 110);
+        doc.setFont('helvetica', 'italic');
+        doc.text(tx.notes, 8, 115);
+      }
+
+      // Footer Notes
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184); // slate-400
+      doc.text('Thank you for your business!', 8, 132);
+      doc.text('This is a system generated receipt and requires no signature.', 8, 137);
+
+      doc.save(`Receipt_${tx.paymentId || 'Transaction'}.pdf`);
+      triggerToast('Receipt downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating PDF receipt:', error);
+      alert('Failed to generate PDF receipt');
+    }
+  };
+
   const fetchPayments = async () => {
     setIsLoading(true);
     try {
@@ -277,7 +365,7 @@ const Payments = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <div className="grid grid-cols-2 xs:grid-cols-3 md:flex gap-2 w-full md:w-auto">
           <button 
             onClick={() => setIsExportModalOpen(true)}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
@@ -324,7 +412,7 @@ const Payments = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, index) => (
           <div key={index} className="bg-white p-4.5 sm:p-5 rounded-2xl border border-slate-100 flex flex-col items-start group hover:shadow-md transition-all duration-300">
             <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} mb-3 transition-transform group-hover:scale-105`}>
@@ -433,7 +521,7 @@ const Payments = () => {
 
                <div className="flex gap-2 pt-1">
                  <button onClick={() => setSelectedTransaction(null)} className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-100 transition-all">Close</button>
-                 <button onClick={() => { triggerToast("Receipt Downloaded!"); setSelectedTransaction(null); }} className="flex-[2] py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-md flex items-center justify-center gap-2"><Download size={14} />Download Receipt</button>
+                 <button onClick={() => { handleDownloadReceipt(selectedTransaction); setSelectedTransaction(null); }} className="flex-[2] py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-md flex items-center justify-center gap-2"><Download size={14} />Download Receipt</button>
                </div>
             </div>
           </div>
