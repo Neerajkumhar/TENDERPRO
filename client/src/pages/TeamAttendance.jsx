@@ -596,38 +596,38 @@ const TeamAttendance = ({ user }) => {
             </div>
 
             <div className="overflow-x-auto">
-               <table className="w-full">
+               <table className="w-full min-w-[800px] text-left">
                   <thead>
                      <tr className="border-b border-slate-50">
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">TEAMMATE</th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">TEAMMATE</th>
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                           {view === 'DAY' ? 'DATE' : 'RANGE'}
                         </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                           {view === 'DAY' ? 'LOGINS' : 'DAYS PRESENT'}
                         </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                           {view === 'DAY' ? 'IN-TIME' : 'RECENT IN'}
                         </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                           {view === 'DAY' ? 'OUT-TIME' : 'RECENT OUT'}
                         </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                           {view === 'DAY' ? 'WORKED' : 'TOTAL WORKED'}
                         </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">STATUS</th>
+                        <th className="pb-6 px-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">STATUS</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                      {loadingRecords ? (
                        <tr>
-                         <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic animate-pulse">
+                         <td colSpan="7" className="py-12 px-4 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic animate-pulse">
                            Querying MySQL Database logs...
                          </td>
                        </tr>
                      ) : processedRecords.length === 0 ? (
                        <tr>
-                         <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
+                         <td colSpan="7" className="py-12 px-4 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
                            No attendance records logged for this day
                          </td>
                        </tr>
@@ -642,7 +642,7 @@ const TeamAttendance = ({ user }) => {
                                className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
                                onClick={() => toggleRow(record.userId, record.date)}
                              >
-                                <td className="py-4 sm:py-6">
+                                <td className="py-4 sm:py-6 px-4">
                                    <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-white shadow-sm transition-all group-hover:scale-110">
                                          {initial}
@@ -660,22 +660,22 @@ const TeamAttendance = ({ user }) => {
                                       </div>
                                    </div>
                                 </td>
-                                <td className="py-4 sm:py-6 text-sm font-bold text-slate-500">
+                                <td className="py-4 sm:py-6 px-4 text-sm font-bold text-slate-500">
                                   {record.type === 'DAY' 
                                     ? new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                                     : `${new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                                 </td>
-                                <td className="py-4 sm:py-6 text-sm font-black text-slate-600">
+                                <td className="py-4 sm:py-6 px-4 text-sm font-black text-slate-600">
                                   <span className="bg-slate-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
                                     {record.type === 'DAY' 
                                       ? `${record.sessionNum} ${record.sessionNum === 1 ? 'Login' : 'Logins'}`
                                       : `${record.sessionNum} ${record.sessionNum === 1 ? 'Day' : 'Days'}`}
                                   </span>
                                 </td>
-                                <td className="py-4 sm:py-6 text-sm font-black text-slate-900">{record.in}</td>
-                                <td className="py-4 sm:py-6 text-sm font-black text-slate-900">{record.out}</td>
-                                <td className="py-4 sm:py-6 text-sm font-black text-slate-900">{record.work}</td>
-                                <td className="py-4 sm:py-6">
+                                <td className="py-4 sm:py-6 px-4 text-sm font-black text-slate-900">{record.in}</td>
+                                <td className="py-4 sm:py-6 px-4 text-sm font-black text-slate-900">{record.out}</td>
+                                <td className="py-4 sm:py-6 px-4 text-sm font-black text-slate-900">{record.work}</td>
+                                <td className="py-4 sm:py-6 px-4">
                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
                                      record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
                                    }`}>
