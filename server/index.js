@@ -36,6 +36,9 @@ require('./models/Notification');
 require('./models/Payment');
 require('./models/DocumentRequest');
 require('./models/Budget');
+require('./models/Client');
+require('./models/ClientInteraction');
+
 
 // Set up associations
 const User = require('./models/User');
@@ -68,6 +71,12 @@ User.hasMany(DocumentRequest, { foreignKey: 'userId' });
 DocumentRequest.belongsTo(User, { foreignKey: 'userId' });
 Tender.hasMany(DocumentRequest, { foreignKey: 'tenderId' });
 DocumentRequest.belongsTo(Tender, { foreignKey: 'tenderId' });
+
+// Client and ClientInteraction associations
+const Client = require('./models/Client');
+const ClientInteraction = require('./models/ClientInteraction');
+Client.hasMany(ClientInteraction, { foreignKey: 'clientId', onDelete: 'CASCADE' });
+ClientInteraction.belongsTo(Client, { foreignKey: 'clientId' });
 
 const app = express();
 
@@ -134,7 +143,7 @@ async function initializeDatabase() {
         });
 
         // Create a default client
-        await Client.create({
+        const defaultClient = await Client.create({
           name: 'Jaipur Development Authority',
           email: 'jda@rajasthan.gov.in',
           phone: '0141-2563211',
@@ -143,6 +152,39 @@ async function initializeDatabase() {
           status: 'Active',
           firmType: 'Govt'
         });
+
+        // Seed default client interactions
+        const ClientInteraction = require('./models/ClientInteraction');
+        await ClientInteraction.bulkCreate([
+          { 
+            clientId: defaultClient.id, 
+            type: 'Meeting', 
+            text: 'Financial proposal review meeting held with client stakeholders.', 
+            date: new Date(Date.now() - 1000 * 60 * 60 * 2),
+            user: 'Admin' 
+          },
+          { 
+            clientId: defaultClient.id, 
+            type: 'Email', 
+            text: 'Sent updated quotation for TND-2024-001 with revised scope.', 
+            date: new Date(Date.now() - 1000 * 60 * 60 * 24),
+            user: 'Admin' 
+          },
+          { 
+            clientId: defaultClient.id, 
+            type: 'Call', 
+            text: 'Call with manager regarding technical requirements and site visit.', 
+            date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 28),
+            user: 'Rakesh Sharma' 
+          },
+          { 
+            clientId: defaultClient.id, 
+            type: 'Document', 
+            text: 'Client uploaded signed NDA and project requirements document.', 
+            date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
+            user: 'System' 
+          }
+        ]);
 
         console.log('Database seeded successfully!');
       }

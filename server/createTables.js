@@ -17,8 +17,10 @@ require('./models/DocumentRequest');
 require('./models/Tender');
 require('./models/TenderAssignment');
 require('./models/Client');
+require('./models/ClientInteraction');
 require('./models/Task');
 require('./models/Reminder');
+
 
 async function createTables() {
   try {

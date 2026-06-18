@@ -45,8 +45,22 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
     managerPhoto: ''
   });
   const [associatedTenders, setAssociatedTenders] = useState([]);
+  const [interactions, setInteractions] = useState([]);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [interactionFormData, setInteractionFormData] = useState({
+    type: 'Meeting',
+    text: '',
+    user: '',
+    date: ''
+  });
 
   useEffect(() => {
+    const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setInteractionFormData(prev => ({
+      ...prev,
+      user: savedUser.name || 'Admin',
+      date: new Date().toISOString().substring(0, 16)
+    }));
     fetchClientDetails();
   }, [clientId]);
 
@@ -65,11 +79,68 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
       if (tenderResponse.ok) {
         setAssociatedTenders(tenderData.filter(t => t.clientId === clientId));
       }
+
+      const interactionsResponse = await fetch(`/api/clients/${clientId}/interactions`);
+      const interactionsData = await interactionsResponse.json();
+      if (interactionsResponse.ok) {
+        setInteractions(interactionsData);
+      }
     } catch (error) {
-      console.error('Error fetching client details or tenders:', error);
+      console.error('Error fetching client details, tenders or interactions:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogInteraction = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`/api/clients/${clientId}/interactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(interactionFormData)
+      });
+      if (response.ok) {
+        const newInteraction = await response.json();
+        setInteractions(prev => [newInteraction, ...prev]);
+        setIsLogModalOpen(false);
+        // Reset form
+        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        setInteractionFormData({
+          type: 'Meeting',
+          text: '',
+          user: savedUser.name || 'Admin',
+          date: new Date().toISOString().substring(0, 16)
+        });
+      } else {
+        alert('Failed to log interaction');
+      }
+    } catch (error) {
+      console.error('Error logging interaction:', error);
+    }
+  };
+
+  const formatInteractionDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    
+    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    // Check if today
+    if (date.toDateString() === now.toDateString()) {
+      return `Today, ${timeStr}`;
+    }
+    
+    // Check if yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+      return `Yesterday, ${timeStr}`;
+    }
+    
+    // Otherwise format as 'DD MMM YYYY'
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   const handleClientUpdate = async (e) => {
@@ -418,32 +489,58 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
 
           {/* Activity Log */}
           <div className="bg-white rounded-[2rem] border border-slate-100 p-6 sm:p-8 shadow-xl shadow-slate-200/40">
-            <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight mb-8">Interaction History</h3>
-            <div className="space-y-8 relative before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-50">
-              {[
-                { type: 'Meeting', text: 'Financial proposal review meeting held with client stakeholders.', date: 'Today, 10:30 AM', user: 'Admin' },
-                { type: 'Email', text: 'Sent updated quotation for TND-2024-001 with revised scope.', date: 'Yesterday, 04:15 PM', user: 'Admin' },
-                { type: 'Call', text: 'Call with manager regarding technical requirements and site visit.', date: '21 May 2024', user: 'Rakesh Sharma' },
-                { type: 'Document', text: 'Client uploaded signed NDA and project requirements document.', date: '19 May 2024', user: 'System' },
-              ].map((activity, i) => (
-                <div key={i} className="relative pl-10 group">
-                  <div className="absolute left-0 top-1 w-8 h-8 rounded-xl bg-white border-2 border-slate-100 group-hover:border-blue-500 group-hover:scale-110 transition-all flex items-center justify-center z-10 shadow-sm">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
-                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{activity.type}</span>
-                      <span className="text-[10px] text-slate-400 font-bold">• {activity.date}</span>
-                    </div>
-                    <p className="text-sm font-bold text-slate-700 leading-relaxed">{activity.text}</p>
-                    <p className="text-[10px] text-slate-400 font-bold mt-1 italic">Action by {activity.user}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Interaction History</h3>
+              <button 
+                onClick={() => {
+                  const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  setInteractionFormData(prev => ({
+                    ...prev,
+                    user: savedUser.name || 'Admin',
+                    date: new Date().toISOString().substring(0, 16)
+                  }));
+                  setIsLogModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-bold transition-all shadow-sm"
+              >
+                <Plus size={14} />
+                <span>Log Interaction</span>
+              </button>
             </div>
-            <button className="mt-8 w-full py-3 border border-dashed border-slate-200 rounded-2xl text-xs font-black text-slate-400 uppercase tracking-widest hover:border-blue-300 hover:text-blue-600 transition-all">
-              Load More History
-            </button>
+            {interactions.length > 0 ? (
+              <div className="space-y-8 relative before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-50">
+                {interactions.map((activity, i) => (
+                  <div key={i} className="relative pl-10 group">
+                    <div className="absolute left-0 top-1 w-8 h-8 rounded-xl bg-white border-2 border-slate-100 group-hover:border-blue-500 group-hover:scale-110 transition-all flex items-center justify-center z-10 shadow-sm">
+                      <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]
+                        ${activity.type === 'Meeting' ? 'bg-indigo-500' :
+                          activity.type === 'Call' ? 'bg-emerald-500' :
+                          activity.type === 'Email' ? 'bg-amber-500' :
+                          activity.type === 'Document' ? 'bg-rose-500' : 'bg-blue-500'}`}>
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+                        <span className={`text-[10px] font-black uppercase tracking-widest
+                          ${activity.type === 'Meeting' ? 'text-indigo-600' :
+                            activity.type === 'Call' ? 'text-emerald-600' :
+                            activity.type === 'Email' ? 'text-amber-600' :
+                            activity.type === 'Document' ? 'text-rose-600' : 'text-blue-600'}`}>
+                          {activity.type}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-bold">• {formatInteractionDate(activity.date)}</span>
+                      </div>
+                      <p className="text-sm font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">{activity.text}</p>
+                      <p className="text-[10px] text-slate-400 font-bold mt-1 italic">Action by {activity.user}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-sm font-bold text-slate-400">
+                No interactions logged for this client yet.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -698,6 +795,91 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                   className="flex-1 py-3.5 px-6 bg-blue-600 text-white rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
                 >
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Log Interaction Modal */}
+      {isLogModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2rem] sm:rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="p-6 sm:p-8 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center shrink-0">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Log Interaction</h2>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic mt-0.5">Record a meeting, call, email, or document for {client.name}</p>
+              </div>
+              <button onClick={() => setIsLogModalOpen(false)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 shrink-0"><X size={20} /></button>
+            </div>
+            
+            <form className="p-6 sm:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar" onSubmit={handleLogInteraction}>
+              <div className="space-y-5 sm:space-y-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Interaction Type</label>
+                  <select 
+                    value={interactionFormData.type}
+                    onChange={(e) => setInteractionFormData({...interactionFormData, type: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="Meeting">Meeting</option>
+                    <option value="Call">Call</option>
+                    <option value="Email">Email</option>
+                    <option value="Document">Document</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Notes / Description</label>
+                  <textarea 
+                    value={interactionFormData.text}
+                    onChange={(e) => setInteractionFormData({...interactionFormData, text: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all min-h-[100px] resize-none" 
+                    placeholder="Enter details about the interaction..."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Date & Time</label>
+                    <input 
+                      type="datetime-local" 
+                      value={interactionFormData.date}
+                      onChange={(e) => setInteractionFormData({...interactionFormData, date: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Logged By</label>
+                    <input 
+                      type="text" 
+                      value={interactionFormData.user}
+                      onChange={(e) => setInteractionFormData({...interactionFormData, user: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all"
+                      placeholder="Admin"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4 shrink-0">
+                <button 
+                  type="button"
+                  onClick={() => setIsLogModalOpen(false)}
+                  className="flex-1 py-3.5 px-6 border border-slate-200 rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-3.5 px-6 bg-blue-600 text-white rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+                >
+                  Log Interaction
                 </button>
               </div>
             </form>

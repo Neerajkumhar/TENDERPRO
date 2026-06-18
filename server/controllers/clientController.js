@@ -95,3 +95,40 @@ exports.deleteClient = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get all interactions for a specific client
+exports.getClientInteractions = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const ClientInteraction = require('../models/ClientInteraction');
+    const interactions = await ClientInteraction.findAll({
+      where: { clientId: clientId },
+      order: [['date', 'DESC'], ['createdAt', 'DESC']]
+    });
+    res.json(interactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Create a new interaction for a client
+exports.createClientInteraction = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const { type, text, user, date } = req.body;
+    const ClientInteraction = require('../models/ClientInteraction');
+
+    const newInteraction = await ClientInteraction.create({
+      clientId,
+      type,
+      text,
+      user: user || 'System',
+      date: date || new Date()
+    });
+
+    res.status(201).json(newInteraction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
