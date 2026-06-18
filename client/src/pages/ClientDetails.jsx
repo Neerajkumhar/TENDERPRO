@@ -814,9 +814,9 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
               <button onClick={() => setIsLogModalOpen(false)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 shrink-0"><X size={20} /></button>
             </div>
             
-            <form className="p-6 sm:p-8 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar" onSubmit={handleLogInteraction}>
-              <div className="space-y-5 sm:space-y-6">
-                <div className="space-y-1.5">
+            <form className="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex-1 flex flex-col min-h-0" onSubmit={handleLogInteraction}>
+              <div className="space-y-5 sm:space-y-6 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-4">
+                <div className="space-y-1.5 shrink-0">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Interaction Type</label>
                   <select 
                     value={interactionFormData.type}
@@ -831,18 +831,18 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                   </select>
                 </div>
                 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 shrink-0">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Notes / Description</label>
                   <textarea 
                     value={interactionFormData.text}
                     onChange={(e) => setInteractionFormData({...interactionFormData, text: e.target.value})}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all min-h-[100px] resize-none" 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all min-h-[120px] resize-none" 
                     placeholder="Enter details about the interaction..."
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 shrink-0">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Date & Time</label>
                     <input 
@@ -867,7 +867,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                 </div>
               </div>
               
-              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4 shrink-0">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-slate-100 shrink-0 mt-auto">
                 <button 
                   type="button"
                   onClick={() => setIsLogModalOpen(false)}
