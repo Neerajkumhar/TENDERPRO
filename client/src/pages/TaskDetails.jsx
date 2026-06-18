@@ -286,7 +286,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
           {/* Subtasks / Checklist */}
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <CheckCircle2 size={16} className="text-emerald-500" /> Subtasks & Checklist
               </h3>
@@ -299,8 +299,8 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 { text: 'Draft technical specifications', done: false },
                 { text: 'Get approval from lead engineer', done: false }
               ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
+                <label key={idx} className="flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
+                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
                     <CheckCircle2 size={14} />
                   </div>
                   <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
