@@ -512,11 +512,11 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   const departmentMembers = members.filter(m => m.departmentId === user.departmentId);
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 mt-1 font-medium italic">Welcome back, {user.name}. Here is your department overview.</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
+          <p className="text-slate-500 mt-1 font-medium italic text-xs sm:text-sm">Welcome back, {user.name}. Here is your department overview.</p>
         </div>
         <div className="flex gap-3">
            {(user.role === 'Project Manager' || user.role === 'Tender Manager' || user.role === 'Finance Manager') && (
@@ -531,9 +531,9 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
+          <div key={i} className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
             {stat.hasAlert && stat.value > 0 && (
               <div className="absolute top-4 right-4 w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
                 <AlertTriangle size={12} />
@@ -555,11 +555,11 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
           <table className="w-full text-left">
             <thead>
               <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                <th className="px-8 py-5">Project Name</th>
-                <th className="px-8 py-5">Status</th>
-                <th className="px-8 py-5">Progress %</th>
-                <th className="px-8 py-5">Deadline</th>
-                <th className="px-8 py-5 text-right">Actions</th>
+                <th className="px-4 sm:px-8 py-4 sm:py-5">Project Name</th>
+                <th className="px-4 sm:px-8 py-4 sm:py-5">Status</th>
+                <th className="px-4 sm:px-8 py-4 sm:py-5">Progress %</th>
+                <th className="px-4 sm:px-8 py-4 sm:py-5">Deadline</th>
+                <th className="px-4 sm:px-8 py-4 sm:py-5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -570,13 +570,13 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
                 return (
                   <tr key={i} onClick={() => onProjectClick(item.tenderId)} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
-                    <td className="px-8 py-6">
+                    <td className="px-4 sm:px-8 py-4 sm:py-6">
                       <div className="flex items-center gap-3">
                         <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
                         <span className="text-sm font-black text-slate-700">{item.title || item.tender?.title || 'Unknown Project'}</span>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-4 sm:px-8 py-4 sm:py-6">
                       <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest
                         ${item.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 
                           item.status === 'In Progress' ? 'bg-blue-100 text-blue-600' : 
@@ -584,7 +584,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-4 sm:px-8 py-4 sm:py-6">
                       <div className="flex items-center gap-4">
                         <span className="text-sm font-black text-slate-900 w-10">{progress}%</span>
                         <div className="flex-1 max-w-[100px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -592,10 +592,10 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-xs font-bold text-slate-400">
+                    <td className="px-4 sm:px-8 py-4 sm:py-6 text-xs font-bold text-slate-400">
                       {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'No Deadline'}
                     </td>
-                    <td className="px-8 py-6 text-right">
+                    <td className="px-4 sm:px-8 py-4 sm:py-6 text-right">
                       <ExternalLink className="text-slate-300 hover:text-blue-600 inline-block" size={18} />
                     </td>
                   </tr>

@@ -83,11 +83,11 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
           <table className="w-full text-left">
             <thead>
               <tr className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                <th className="px-6 sm:px-8 py-5 sm:py-6">Member</th>
-                <th className="px-6 sm:px-8 py-5 sm:py-6">Role & Designation</th>
-                <th className="px-6 sm:px-8 py-5 sm:py-6">Department</th>
-                <th className="px-6 sm:px-8 py-5 sm:py-6">Status</th>
-                <th className="px-6 sm:px-8 py-5 sm:py-6 text-right">Actions</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">Member</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">Role & Designation</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">Department</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">Status</th>
+                <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -97,7 +97,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                   onClick={() => onMemberClick && onMemberClick(member.id)}
                   className="hover:bg-blue-50/20 transition-all group cursor-pointer"
                 >
-                  <td className="px-6 sm:px-8 py-5 sm:py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="relative flex-shrink-0">
                         {member.image ? (
@@ -126,7 +126,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                       <span className="text-sm font-black text-slate-800">{member.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 sm:px-8 py-5 sm:py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-50 text-slate-400 rounded-lg group-hover:text-blue-600 transition-colors hidden sm:block">
                         <Users size={16} />
@@ -134,7 +134,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                       <span className="text-xs sm:text-sm font-bold text-slate-600">{member.role || 'Team Member'}</span>
                     </div>
                   </td>
-                  <td className="px-6 sm:px-8 py-5 sm:py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-50 text-slate-400 rounded-lg hidden sm:block">
                         <Briefcase size={16} />
@@ -144,13 +144,13 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 sm:px-8 py-5 sm:py-6">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
                     <span className={`px-3 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest
                       ${member.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                       {member.status || 'Active'}
                     </span>
                   </td>
-                  <td className="px-6 sm:px-8 py-5 sm:py-6 text-right">
+                  <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 text-right">
                     <div className="flex items-center justify-end gap-1 sm:gap-2">
                       <button className="p-2 sm:p-2.5 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
                         <Mail size={16} className="sm:w-[18px] sm:h-[18px]" />

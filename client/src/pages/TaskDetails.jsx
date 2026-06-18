@@ -211,9 +211,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   const assignee = task?.assigneeId ? members.find(m => String(m.id) === String(task.assigneeId)) : null;
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
         <div className="flex items-start gap-4">
           <button 
             onClick={onBack}
@@ -268,12 +268,12 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Main Left Content */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="xl:col-span-8 space-y-8">
           
           {/* Description Card */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <ListTodo size={16} className="text-blue-500" /> Task Description
             </h3>
@@ -285,7 +285,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <CheckCircle2 size={16} className="text-emerald-500" /> Subtasks & Checklist
@@ -311,7 +311,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Task Attachments Card */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem] space-y-6">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <Paperclip size={16} className="text-indigo-500" /> Attachments & Documents
@@ -414,7 +414,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Comments / Activity */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <MessageSquare size={16} className="text-purple-500" /> Comments & Activity
             </h3>
@@ -463,8 +463,8 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
 
         {/* Sidebar Info */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem] space-y-6">
+        <div className="xl:col-span-4 space-y-6">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
               <AlertCircle size={16} className="text-orange-500" /> Task Meta
             </h3>
@@ -515,7 +515,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Minimal Activity Log */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <History size={16} className="text-slate-400" /> History
             </h3>
@@ -564,7 +564,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             </div>
 
             {/* Modal Preview Body */}
-            <div className="p-8 max-h-[80vh] overflow-y-auto bg-slate-50/50 flex flex-col justify-center">
+            <div className="p-4 sm:p-8 max-h-[80vh] overflow-y-auto bg-slate-50/50 flex flex-col justify-center">
               {previewFile.name.match(/\.(jpeg|jpg|gif|png|webp)/i) ? (
                 <img 
                   src={previewFile.url} 

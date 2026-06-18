@@ -240,25 +240,6 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
       console.error('Error creating invoice:', err);
     }
   };
-
-  // Handle file upload and convert to Base64 string
-  const handleFileUpload = (file) => {
-    if (!file) return;
-    setIsUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, attachment: reader.result }));
-      setIsUploading(false);
-    };
-    reader.onerror = () => {
-      console.error('Error reading file');
-      setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleExportReport = ({ format, startDate, endDate }) => {
-
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
     const end = new Date(endDate);

@@ -347,7 +347,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
         {/* Section 1: Overview */}
         <div className="grid grid-cols-12 gap-6 sm:gap-8">
         {/* Main Content Area */}
-        <div className="col-span-12 lg:col-span-8 space-y-6 sm:space-y-8">
+        <div className="col-span-12 xl:col-span-8 space-y-6 sm:space-y-8">
           <div className="card p-6 sm:p-10 bg-white border-none shadow-2xl shadow-slate-200/40 relative overflow-hidden group rounded-[2rem] sm:rounded-[3rem]">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Briefcase size={80} className="sm:w-[120px] sm:h-[120px]" />
@@ -387,7 +387,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
         </div>
 
         {/* Sidebar / Quick Info */}
-        <div className="col-span-12 lg:col-span-4 space-y-6 sm:space-y-8">
+        <div className="col-span-12 xl:col-span-4 space-y-6 sm:space-y-8">
           <div className="card p-6 sm:p-8 bg-white border-none shadow-2xl shadow-slate-200/40 flex flex-col items-center justify-center rounded-[2rem] sm:rounded-[3rem]">
             <h3 className="w-full text-left font-black text-slate-900 text-lg sm:text-xl tracking-tight mb-6 sm:mb-10 uppercase italic">Task Progress</h3>
             <div className="relative w-40 h-40 sm:w-56 sm:h-56 mb-6 sm:mb-10">

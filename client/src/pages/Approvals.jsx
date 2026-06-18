@@ -82,27 +82,27 @@ const Approvals = ({ user }) => {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
-      <div className="flex justify-between items-end">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
             <ClipboardCheck className="text-blue-600" size={32} />
             Pending Approvals
           </h1>
-          <p className="text-slate-500 mt-1 font-medium italic text-sm">
+          <p className="text-slate-500 mt-1 font-medium italic text-xs sm:text-sm">
             Review and manage all pending requests across the platform.
           </p>
         </div>
         <button 
           onClick={fetchApprovals}
-          className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all w-full sm:w-auto shrink-0"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin text-blue-600' : 'text-slate-400'} />
           <span>Refresh</span>
         </button>
       </div>
 
-      <div className="flex gap-4 border-b border-slate-200">
+      <div className="flex flex-wrap gap-4 border-b border-slate-200">
         <button
           onClick={() => setActiveTab('Leaves')}
           className={`pb-4 px-2 text-sm font-black uppercase tracking-widest transition-all relative ${

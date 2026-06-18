@@ -97,8 +97,8 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
   if (!assignment) return <div className="p-8 text-center">Assignment not found.</div>;
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <button 
           onClick={onBack}
           className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors font-bold"
@@ -106,10 +106,10 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
           <ArrowLeft size={20} />
           <span>Back to Management</span>
         </button>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <button
             onClick={() => setShowEditModal(true)}
-            className="px-6 py-2 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center gap-2"
+            className="px-4 py-2 sm:px-6 sm:py-2 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center gap-2"
           >
             <Edit3 size={14} />
             Edit Task
@@ -119,7 +119,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
               key={status}
               disabled={updating}
               onClick={() => handleStatusUpdate(status)}
-              className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+              className={`px-4 py-2 sm:px-6 sm:py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                 assignment.status === status 
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' 
                 : 'bg-white border border-slate-200 text-slate-500 hover:border-blue-300'
@@ -132,7 +132,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
       </div>
 
       <div className="grid grid-cols-12 gap-8">
-        <div className="col-span-12 lg:col-span-8 space-y-8">
+        <div className="col-span-12 xl:col-span-8 space-y-8">
           <div className="card bg-white p-10 border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
             <div className="flex items-center gap-4 mb-8">
               <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
@@ -156,7 +156,7 @@ const AssignmentDetails = ({ assignmentId, onBack, tenders, departments, members
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-4 space-y-8">
+        <div className="col-span-12 xl:col-span-4 space-y-8">
           <div className="card bg-white p-8 border-none shadow-xl shadow-slate-200/40 rounded-[2rem]">
             <h3 className="font-black text-slate-900 text-lg tracking-tight mb-8">Assignment Metadata</h3>
             <div className="space-y-6">

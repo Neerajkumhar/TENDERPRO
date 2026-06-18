@@ -439,7 +439,7 @@ const TeamAttendance = ({ user }) => {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       
       {/* Premium Header */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">Team Attendance Panel</h1>
           <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
@@ -562,9 +562,9 @@ const TeamAttendance = ({ user }) => {
       </div>
 
       {/* Stats Panel */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
+          <div key={i} className="bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
              <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
              <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 sm:mb-4">{stat.label}</p>
              <div className="flex items-center justify-between">
@@ -575,10 +575,10 @@ const TeamAttendance = ({ user }) => {
       </div>
 
       {/* Main Grid split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-10">
         
         {/* Attendance Log Table */}
-        <div className="lg:col-span-8 bg-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3.5rem] border border-slate-50 shadow-sm">
+        <div className="xl:col-span-8 bg-white p-4 sm:p-8 xl:p-10 rounded-[2rem] sm:rounded-[3.5rem] border border-slate-50 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-10 px-2 gap-4">
                <div className="flex flex-col">
                   <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tighter uppercase italic">DEPT ATTENDANCE LOG ({view})</h3>
@@ -589,7 +589,7 @@ const TeamAttendance = ({ user }) => {
                <button 
                  onClick={() => setIsExportModalOpen(true)}
                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
-               >
+              >
                   <Download size={16} />
                   <span>EXPORT REPORT</span>
                </button>
@@ -642,7 +642,7 @@ const TeamAttendance = ({ user }) => {
                                className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
                                onClick={() => toggleRow(record.userId, record.date)}
                              >
-                                <td className="py-6">
+                                <td className="py-4 sm:py-6">
                                    <div className="flex items-center gap-4">
                                       <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-white shadow-sm transition-all group-hover:scale-110">
                                          {initial}
@@ -660,22 +660,22 @@ const TeamAttendance = ({ user }) => {
                                       </div>
                                    </div>
                                 </td>
-                                <td className="py-6 text-sm font-bold text-slate-500">
+                                <td className="py-4 sm:py-6 text-sm font-bold text-slate-500">
                                   {record.type === 'DAY' 
                                     ? new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                                     : `${new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                                 </td>
-                                <td className="py-6 text-sm font-black text-slate-600">
+                                <td className="py-4 sm:py-6 text-sm font-black text-slate-600">
                                   <span className="bg-slate-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
                                     {record.type === 'DAY' 
                                       ? `${record.sessionNum} ${record.sessionNum === 1 ? 'Login' : 'Logins'}`
                                       : `${record.sessionNum} ${record.sessionNum === 1 ? 'Day' : 'Days'}`}
                                   </span>
                                 </td>
-                                <td className="py-6 text-sm font-black text-slate-900">{record.in}</td>
-                                <td className="py-6 text-sm font-black text-slate-900">{record.out}</td>
-                                <td className="py-6 text-sm font-black text-slate-900">{record.work}</td>
-                                <td className="py-6">
+                                <td className="py-4 sm:py-6 text-sm font-black text-slate-900">{record.in}</td>
+                                <td className="py-4 sm:py-6 text-sm font-black text-slate-900">{record.out}</td>
+                                <td className="py-4 sm:py-6 text-sm font-black text-slate-900">{record.work}</td>
+                                <td className="py-4 sm:py-6">
                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
                                      record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
                                    }`}>
@@ -740,8 +740,8 @@ const TeamAttendance = ({ user }) => {
         </div>
 
         {/* Dynamic Sidebar Calendar */}
-        <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm flex flex-col items-center">
+        <div className="xl:col-span-4 space-y-8">
+            <div className="bg-white p-4 sm:p-8 xl:p-10 rounded-[3.5rem] border border-slate-50 shadow-sm flex flex-col items-center">
                <div className="flex justify-between items-center w-full mb-10 px-2">
                   <button onClick={handlePrevMonth} className="p-2 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"><ChevronLeft size={20} /></button>
                   <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">

@@ -241,12 +241,12 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-10 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full overflow-x-hidden relative">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full overflow-x-hidden relative">
       
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className={`bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-500 ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
+          <div key={i} className={`bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-500 ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
             <div className="flex justify-between items-start mb-4 sm:mb-6">
                <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${stat.light} ${stat.color.replace('bg-', 'text-')} shadow-sm`}>
                   {stat.label === 'TO DO' ? <ClipboardListIcon size={20} /> : <stat.icon size={20} />}
@@ -295,10 +295,10 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 pb-10">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-8 pb-10">
         
         {/* Kanban Board - Main Area */}
-        <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="xl:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {columns.map((col) => (
             <div 
               key={col.id} 
@@ -390,7 +390,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         </div>
 
         {/* Task Activity Sidebar - Secondary Board */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="xl:col-span-3 space-y-6">
             <div className="bg-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full sticky top-6">
                <div className="flex items-center gap-3 mb-6 px-1">
                   <LayoutGrid size={18} className="text-blue-600" />
