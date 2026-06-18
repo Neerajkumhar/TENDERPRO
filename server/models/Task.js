@@ -47,6 +47,11 @@ const Task = sequelize.define('Task', {
     type: DataTypes.TEXT,
     allowNull: true,
     defaultValue: '[]',
+  },
+  subtasks: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    defaultValue: '[]',
   }
 }, {
   timestamps: true,

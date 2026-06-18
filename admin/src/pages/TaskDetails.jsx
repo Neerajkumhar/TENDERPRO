@@ -31,6 +31,10 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [subtasks, setSubtasks] = useState([]);
+  const [isAddingSubtask, setIsAddingSubtask] = useState(false);
+  const [newSubtaskText, setNewSubtaskText] = useState('');
+
   const mockTasksFallback = [
     { id: 'm1', title: 'FIX BUGS IN TASK MODULE', desc: 'RESOLVE REPORTED ISSUES', priority: 'HIGH', project: 'WEB APP', deadline: 'Tomorrow', status: 'To Do', pColor: 'text-rose-500' },
     { id: 'm2', title: 'PREPARE MONTHLY REPORT', desc: 'COMPILE AND ANALYZE DATA', priority: 'LOW', project: 'REPORTING', deadline: 'May 20', status: 'To Do', pColor: 'text-emerald-500' },
@@ -104,6 +108,73 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     }
   };
 
+  const handleToggleSubtask = async (subtaskId) => {
+    const updatedSubtasks = subtasks.map(item => 
+      item.id === subtaskId ? { ...item, done: !item.done } : item
+    );
+    setSubtasks(updatedSubtasks);
+
+    // Save to DB if it's a database task
+    if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
+      try {
+        await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subtasks: JSON.stringify(updatedSubtasks) })
+        });
+      } catch (error) {
+        console.error('Failed to save subtasks status:', error);
+      }
+    }
+  };
+
+  const handleAddSubtask = async (e) => {
+    if (e) e.preventDefault();
+    if (!newSubtaskText.trim()) return;
+
+    const newSubtask = {
+      id: 'sub-' + Date.now(),
+      text: newSubtaskText.trim(),
+      done: false
+    };
+
+    const updatedSubtasks = [...subtasks, newSubtask];
+    setSubtasks(updatedSubtasks);
+    setNewSubtaskText('');
+    setIsAddingSubtask(false);
+
+    // Save to DB if it's a database task
+    if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
+      try {
+        await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subtasks: JSON.stringify(updatedSubtasks) })
+        });
+      } catch (error) {
+        console.error('Failed to save subtask:', error);
+      }
+    }
+  };
+
+  const handleDeleteSubtask = async (subtaskId) => {
+    const updatedSubtasks = subtasks.filter(item => item.id !== subtaskId);
+    setSubtasks(updatedSubtasks);
+
+    // Save to DB if it's a database task
+    if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
+      try {
+        await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subtasks: JSON.stringify(updatedSubtasks) })
+        });
+      } catch (error) {
+        console.error('Failed to delete subtask:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchTask = async () => {
       setLoading(true);
@@ -116,6 +187,11 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           setAttachments([
             { id: 'att-1', name: 'Task_Requirements_v2.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', uploadedAt: '18 May 2024', size: '1.24 MB' },
             { id: 'att-2', name: 'Design_Feedback_Notes.png', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80', uploadedAt: '19 May 2024', size: '3.45 MB' }
+          ]);
+          setSubtasks([
+            { id: 'sub-1', text: 'Review initial requirements doc', done: true },
+            { id: 'sub-2', text: 'Draft technical specifications', done: false },
+            { id: 'sub-3', text: 'Get approval from lead engineer', done: false }
           ]);
           setLoading(false);
           return;
@@ -135,6 +211,15 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             }
           } else {
             setAttachments([]);
+          }
+          if (data.subtasks) {
+            try {
+              setSubtasks(JSON.parse(data.subtasks));
+            } catch (e) {
+              setSubtasks([]);
+            }
+          } else {
+            setSubtasks([]);
           }
         }
       } catch (err) {
@@ -211,9 +296,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   const assignee = task?.assigneeId ? members.find(m => String(m.id) === String(task.assigneeId)) : null;
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
         <div className="flex items-start gap-4">
           <button 
             onClick={onBack}
@@ -268,12 +353,12 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Main Left Content */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="xl:col-span-8 space-y-8">
           
           {/* Description Card */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <ListTodo size={16} className="text-blue-500" /> Task Description
             </h3>
@@ -285,33 +370,70 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-6">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <CheckCircle2 size={16} className="text-emerald-500" /> Subtasks & Checklist
               </h3>
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">1/3 Completed</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">
+                {subtasks.length > 0 ? `${subtasks.filter(s => s.done).length}/${subtasks.length} Completed` : 'No Subtasks'}
+              </span>
             </div>
             
             <div className="space-y-3">
-              {[
-                { text: 'Review initial requirements doc', done: true },
-                { text: 'Draft technical specifications', done: false },
-                { text: 'Get approval from lead engineer', done: false }
-              ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
-                    <CheckCircle2 size={14} />
+              {subtasks.map((item) => (
+                <div key={item.id} className="flex items-start justify-between gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-100">
+                  <div 
+                    onClick={() => handleToggleSubtask(item.id)}
+                    className="flex items-start gap-4 cursor-pointer flex-1"
+                  >
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
+                      <CheckCircle2 size={14} />
+                    </div>
+                    <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
                   </div>
-                  <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
-                </label>
+                  <button 
+                    onClick={() => handleDeleteSubtask(item.id)}
+                    className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    title="Delete Subtask"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               ))}
+              
+              {subtasks.length === 0 && !isAddingSubtask && (
+                <div className="text-center py-6 bg-slate-50/30 rounded-2xl border border-dashed border-slate-100">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest italic">No subtasks created yet</p>
+                </div>
+              )}
             </div>
-            <button className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1">+ ADD SUBTASK</button>
+
+            {isAddingSubtask ? (
+              <form onSubmit={handleAddSubtask} className="mt-4 flex gap-2">
+                <input 
+                  type="text" 
+                  autoFocus
+                  placeholder="Enter subtask title..." 
+                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400"
+                  value={newSubtaskText}
+                  onChange={(e) => setNewSubtaskText(e.target.value)}
+                />
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all">Add</button>
+                <button type="button" onClick={() => { setIsAddingSubtask(false); setNewSubtaskText(''); }} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
+              </form>
+            ) : (
+              <button 
+                onClick={() => setIsAddingSubtask(true)}
+                className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1"
+              >
+                + ADD SUBTASK
+              </button>
+            )}
           </div>
 
           {/* Task Attachments Card */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem] space-y-6">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <Paperclip size={16} className="text-indigo-500" /> Attachments & Documents
@@ -414,7 +536,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Comments / Activity */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <MessageSquare size={16} className="text-purple-500" /> Comments & Activity
             </h3>
@@ -463,8 +585,8 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
 
         {/* Sidebar Info */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem] space-y-6">
+        <div className="xl:col-span-4 space-y-6">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
               <AlertCircle size={16} className="text-orange-500" /> Task Meta
             </h3>
@@ -515,7 +637,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Minimal Activity Log */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <History size={16} className="text-slate-400" /> History
             </h3>
@@ -564,7 +686,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             </div>
 
             {/* Modal Preview Body */}
-            <div className="p-8 max-h-[80vh] overflow-y-auto bg-slate-50/50 flex flex-col justify-center">
+            <div className="p-4 sm:p-8 max-h-[80vh] overflow-y-auto bg-slate-50/50 flex flex-col justify-center">
               {previewFile.name.match(/\.(jpeg|jpg|gif|png|webp)/i) ? (
                 <img 
                   src={previewFile.url} 
