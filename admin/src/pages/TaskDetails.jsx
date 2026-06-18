@@ -30,6 +30,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   const [previewFile, setPreviewFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const [subtasks, setSubtasks] = useState([]);
+  const [newSubtaskText, setNewSubtaskText] = useState('');
+  const [showAddSubtaskInput, setShowAddSubtaskInput] = useState(false);
 
   const mockTasksFallback = [
     { id: 'm1', title: 'FIX BUGS IN TASK MODULE', desc: 'RESOLVE REPORTED ISSUES', priority: 'HIGH', project: 'WEB APP', deadline: 'Tomorrow', status: 'To Do', pColor: 'text-rose-500' },
@@ -104,6 +107,73 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     }
   };
 
+  const toggleSubtask = async (subtaskId) => {
+    const updatedSubtasks = subtasks.map(sub => {
+      if (sub.id === subtaskId) {
+        return { ...sub, done: !sub.done };
+      }
+      return sub;
+    });
+    setSubtasks(updatedSubtasks);
+
+    if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
+      try {
+        await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subtasks: JSON.stringify(updatedSubtasks) })
+        });
+      } catch (error) {
+        console.error('Failed to update subtasks on server:', error);
+      }
+    }
+  };
+
+  const handleAddSubtask = async (e) => {
+    if (e) e.preventDefault();
+    if (!newSubtaskText.trim()) return;
+
+    const newSub = {
+      id: 'sub-' + Date.now(),
+      text: newSubtaskText.trim(),
+      done: false
+    };
+
+    const updatedSubtasks = [...subtasks, newSub];
+    setSubtasks(updatedSubtasks);
+    setNewSubtaskText('');
+    setShowAddSubtaskInput(false);
+
+    if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
+      try {
+        await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subtasks: JSON.stringify(updatedSubtasks) })
+        });
+      } catch (error) {
+        console.error('Failed to add subtask on server:', error);
+      }
+    }
+  };
+
+  const deleteSubtask = async (subtaskId) => {
+    const updatedSubtasks = subtasks.filter(sub => sub.id !== subtaskId);
+    setSubtasks(updatedSubtasks);
+
+    if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
+      try {
+        await fetch(`/api/tasks/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subtasks: JSON.stringify(updatedSubtasks) })
+        });
+      } catch (error) {
+        console.error('Failed to delete subtask on server:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchTask = async () => {
       setLoading(true);
@@ -117,6 +187,11 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             { id: 'att-1', name: 'Task_Requirements_v2.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', uploadedAt: '18 May 2024', size: '1.24 MB' },
             { id: 'att-2', name: 'Design_Feedback_Notes.png', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80', uploadedAt: '19 May 2024', size: '3.45 MB' }
           ]);
+          setSubtasks([
+            { id: 'sub-1', text: 'Review initial requirements doc', done: true },
+            { id: 'sub-2', text: 'Draft technical specifications', done: false },
+            { id: 'sub-3', text: 'Get approval from lead engineer', done: false }
+          ]);
           setLoading(false);
           return;
         }
@@ -127,6 +202,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         if (response.ok) {
           const data = await response.json();
           setTask(data);
+          
           if (data.attachments) {
             try {
               setAttachments(JSON.parse(data.attachments));
@@ -135,6 +211,16 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             }
           } else {
             setAttachments([]);
+          }
+
+          if (data.subtasks) {
+            try {
+              setSubtasks(JSON.parse(data.subtasks));
+            } catch (e) {
+              setSubtasks([]);
+            }
+          } else {
+            setSubtasks([]);
           }
         }
       } catch (err) {
@@ -285,29 +371,74 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-6">
+          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <CheckCircle2 size={16} className="text-emerald-500" /> Subtasks & Checklist
               </h3>
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">1/3 Completed</span>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">
+                {subtasks.length > 0 ? `${subtasks.filter(s => s.done).length}/${subtasks.length} Completed` : 'No Subtasks'}
+              </span>
             </div>
             
             <div className="space-y-3">
-              {[
-                { text: 'Review initial requirements doc', done: true },
-                { text: 'Draft technical specifications', done: false },
-                { text: 'Get approval from lead engineer', done: false }
-              ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
-                    <CheckCircle2 size={14} />
-                  </div>
-                  <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
-                </label>
+              {subtasks.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 transition-all group border border-transparent hover:border-slate-100">
+                  <label className="flex items-start gap-4 cursor-pointer flex-1">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={item.done}
+                      onChange={() => toggleSubtask(item.id)}
+                    />
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200 border border-slate-200'}`}>
+                      <CheckCircle2 size={14} />
+                    </div>
+                    <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => deleteSubtask(item.id)}
+                    className="p-2 text-slate-300 hover:text-rose-500 rounded-xl hover:bg-white border border-transparent hover:border-slate-100 shadow-sm opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                    title="Delete Subtask"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               ))}
+              
+              {subtasks.length === 0 && !showAddSubtaskInput && (
+                <div className="text-center py-6 bg-slate-50/30 rounded-2xl border border-dashed border-slate-100">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest italic">No subtasks created yet</p>
+                </div>
+              )}
             </div>
-            <button className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1">+ ADD SUBTASK</button>
+            
+            {showAddSubtaskInput ? (
+              <form onSubmit={handleAddSubtask} className="mt-4 flex items-center gap-3">
+                <input
+                  type="text"
+                  value={newSubtaskText}
+                  onChange={(e) => setNewSubtaskText(e.target.value)}
+                  placeholder="Enter new subtask..."
+                  className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400 shadow-sm"
+                  autoFocus
+                />
+                <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md active:scale-95 cursor-pointer">
+                  Save
+                </button>
+                <button type="button" onClick={() => { setShowAddSubtaskInput(false); setNewSubtaskText(''); }} className="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer">
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <button 
+                onClick={() => setShowAddSubtaskInput(true)} 
+                className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1 cursor-pointer"
+              >
+                + ADD SUBTASK
+              </button>
+            )}
           </div>
 
           {/* Task Attachments Card */}

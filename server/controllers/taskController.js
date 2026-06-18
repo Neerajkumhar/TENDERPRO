@@ -54,7 +54,7 @@ const syncProjectStatuses = async (assignmentId, tenderId) => {
 // Create a new task
 exports.createTask = async (req, res) => {
   try {
-    const { tenderId, assignmentId, assigneeId, creatorId, title, description, priority, deadline } = req.body;
+    const { tenderId, assignmentId, assigneeId, creatorId, title, description, priority, deadline, subtasks } = req.body;
     
     const task = await Task.create({
       tenderId,
@@ -64,7 +64,8 @@ exports.createTask = async (req, res) => {
       title,
       description,
       priority,
-      deadline: deadline || null
+      deadline: deadline || null,
+      subtasks: subtasks || '[]'
     });
 
     try {
