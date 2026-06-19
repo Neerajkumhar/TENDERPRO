@@ -42,6 +42,9 @@ const InstallationChallan = () => {
   const [challans, setChallans] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [tenders, setTenders] = useState([]);
+  const [clients, setClients] = useState([]);
+
   const fetchChallans = async () => {
     try {
       const response = await fetch('/api/installation-challans');
@@ -56,9 +59,28 @@ const InstallationChallan = () => {
     }
   };
 
+  const fetchTendersAndClients = async () => {
+    try {
+      const tendersRes = await fetch('/api/tenders');
+      if (tendersRes.ok) {
+        const tendersData = await tendersRes.json();
+        setTenders(tendersData);
+      }
+      const clientsRes = await fetch('/api/clients');
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json();
+        setClients(clientsData);
+      }
+    } catch (error) {
+      console.error('Error fetching tenders or clients:', error);
+    }
+  };
+
   useEffect(() => {
     fetchChallans();
+    fetchTendersAndClients();
   }, []);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -365,7 +387,16 @@ const InstallationChallan = () => {
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase">Client</label>
                 {isEditing ? (
-                  <input value={selected.client} onChange={e => setSelected({...selected, client: e.target.value})} className="w-full mt-2 p-3 border rounded-2xl" />
+                  <select 
+                    value={selected.client} 
+                    onChange={e => setSelected({...selected, client: e.target.value})} 
+                    className="w-full mt-2 p-3 border border-slate-200 rounded-2xl bg-white text-sm font-bold outline-none"
+                  >
+                    <option value="">-- Select Client --</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
                 ) : (
                   <div className="mt-2 font-black text-slate-900">{selected.client}</div>
                 )}
@@ -374,7 +405,24 @@ const InstallationChallan = () => {
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase">Project</label>
                 {isEditing ? (
-                  <input value={selected.project} onChange={e => setSelected({...selected, project: e.target.value})} className="w-full mt-2 p-3 border rounded-2xl" />
+                  <select 
+                    value={selected.project} 
+                    onChange={e => {
+                      const selectedTenderTitle = e.target.value;
+                      const matchedTender = tenders.find(t => t.title === selectedTenderTitle);
+                      setSelected({
+                        ...selected,
+                        project: selectedTenderTitle,
+                        client: matchedTender && matchedTender.client ? matchedTender.client.name : selected.client
+                      });
+                    }} 
+                    className="w-full mt-2 p-3 border border-slate-200 rounded-2xl bg-white text-sm font-bold outline-none"
+                  >
+                    <option value="">-- Select Tender --</option>
+                    {tenders.map(t => (
+                      <option key={t.id} value={t.title}>{t.title}</option>
+                    ))}
+                  </select>
                 ) : (
                   <div className="mt-2 font-black text-slate-900">{selected.project}</div>
                 )}
@@ -542,7 +590,16 @@ const InstallationChallan = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400">Consignee Client Name</label>
-                  <input value={createForm.client} onChange={(e) => setCreateForm(prev => ({ ...prev, client: e.target.value }))} placeholder="Enter client organisation" className="w-full px-5 py-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition" />
+                  <select 
+                    value={createForm.client} 
+                    onChange={(e) => setCreateForm(prev => ({ ...prev, client: e.target.value }))} 
+                    className="w-full px-5 py-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition"
+                  >
+                    <option value="">-- Select Client --</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
 
                   <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400">Installation Date</label>
                   <input type="date" value={createForm.installationDate} onChange={(e) => setCreateForm(prev => ({ ...prev, installationDate: e.target.value }))} className="w-full px-5 py-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition" />
@@ -559,7 +616,24 @@ const InstallationChallan = () => {
 
                 <div className="space-y-4">
                   <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400">Tender / Project Name</label>
-                  <input value={createForm.project} onChange={(e) => setCreateForm(prev => ({ ...prev, project: e.target.value }))} placeholder="Enter associated project/tender" className="w-full px-5 py-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition" />
+                  <select 
+                    value={createForm.project} 
+                    onChange={(e) => {
+                      const selectedTenderTitle = e.target.value;
+                      const matchedTender = tenders.find(t => t.title === selectedTenderTitle);
+                      setCreateForm(prev => ({ 
+                        ...prev, 
+                        project: selectedTenderTitle,
+                        client: matchedTender && matchedTender.client ? matchedTender.client.name : prev.client
+                      }));
+                    }} 
+                    className="w-full px-5 py-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition"
+                  >
+                    <option value="">-- Select Tender --</option>
+                    {tenders.map(t => (
+                      <option key={t.id} value={t.title}>{t.title}</option>
+                    ))}
+                  </select>
 
                   <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400">Site Address</label>
                   <input value={createForm.siteAddress} onChange={(e) => setCreateForm(prev => ({ ...prev, siteAddress: e.target.value }))} placeholder="E.g., Site A, Phase 2, Gurugram" className="w-full px-5 py-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition" />

@@ -50,6 +50,9 @@ const DeliveryChallan = () => {
   const [challans, setChallans] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [tenders, setTenders] = useState([]);
+  const [clients, setClients] = useState([]);
+
   const fetchChallans = async () => {
     try {
       const response = await fetch('/api/delivery-challans');
@@ -64,9 +67,28 @@ const DeliveryChallan = () => {
     }
   };
 
+  const fetchTendersAndClients = async () => {
+    try {
+      const tendersRes = await fetch('/api/tenders');
+      if (tendersRes.ok) {
+        const tendersData = await tendersRes.json();
+        setTenders(tendersData);
+      }
+      const clientsRes = await fetch('/api/clients');
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json();
+        setClients(clientsData);
+      }
+    } catch (error) {
+      console.error('Error fetching tenders or clients:', error);
+    }
+  };
+
   useEffect(() => {
     fetchChallans();
+    fetchTendersAndClients();
   }, []);
+
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -382,7 +404,16 @@ const DeliveryChallan = () => {
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</label>
                 {isEditing ? (
-                  <input value={selected.client} onChange={e => setSelected({...selected, client: e.target.value})} className="w-full mt-1.5 sm:mt-2 p-3 border border-slate-200 rounded-xl sm:rounded-2xl focus:border-blue-400 outline-none font-bold" />
+                  <select 
+                    value={selected.client} 
+                    onChange={e => setSelected({...selected, client: e.target.value})} 
+                    className="w-full mt-1.5 sm:mt-2 p-3 border border-slate-200 rounded-xl sm:rounded-2xl focus:border-blue-400 outline-none font-bold bg-white text-sm"
+                  >
+                    <option value="">-- Select Client --</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
                 ) : (
                   <div className="mt-1.5 sm:mt-2 font-black text-slate-800 uppercase">{selected.client}</div>
                 )}
@@ -391,7 +422,24 @@ const DeliveryChallan = () => {
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Project</label>
                 {isEditing ? (
-                  <input value={selected.project} onChange={e => setSelected({...selected, project: e.target.value})} className="w-full mt-1.5 sm:mt-2 p-3 border border-slate-200 rounded-xl sm:rounded-2xl focus:border-blue-400 outline-none font-bold" />
+                  <select 
+                    value={selected.project} 
+                    onChange={e => {
+                      const selectedTenderTitle = e.target.value;
+                      const matchedTender = tenders.find(t => t.title === selectedTenderTitle);
+                      setSelected({
+                        ...selected,
+                        project: selectedTenderTitle,
+                        client: matchedTender && matchedTender.client ? matchedTender.client.name : selected.client
+                      });
+                    }} 
+                    className="w-full mt-1.5 sm:mt-2 p-3 border border-slate-200 rounded-xl sm:rounded-2xl focus:border-blue-400 outline-none font-bold bg-white text-sm"
+                  >
+                    <option value="">-- Select Tender --</option>
+                    {tenders.map(t => (
+                      <option key={t.id} value={t.title}>{t.title}</option>
+                    ))}
+                  </select>
                 ) : (
                   <div className="mt-1.5 sm:mt-2 font-black text-slate-800">{selected.project}</div>
                 )}
@@ -560,7 +608,16 @@ const DeliveryChallan = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400 block mb-2">Consignee Client Name</label>
-                    <input value={createForm.client} onChange={(e) => setCreateForm(prev => ({ ...prev, client: e.target.value }))} placeholder="Enter client organisation" className="w-full px-5 py-4 rounded-xl sm:rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition shadow-sm" />
+                    <select 
+                      value={createForm.client} 
+                      onChange={(e) => setCreateForm(prev => ({ ...prev, client: e.target.value }))} 
+                      className="w-full px-5 py-4 rounded-xl sm:rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition shadow-sm"
+                    >
+                      <option value="">-- Select Client --</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -594,7 +651,24 @@ const DeliveryChallan = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400 block mb-2">Tender / Project Name</label>
-                    <input value={createForm.project} onChange={(e) => setCreateForm(prev => ({ ...prev, project: e.target.value }))} placeholder="Enter associated project/tender" className="w-full px-5 py-4 rounded-xl sm:rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition shadow-sm" />
+                    <select 
+                      value={createForm.project} 
+                      onChange={(e) => {
+                        const selectedTenderTitle = e.target.value;
+                        const matchedTender = tenders.find(t => t.title === selectedTenderTitle);
+                        setCreateForm(prev => ({ 
+                          ...prev, 
+                          project: selectedTenderTitle,
+                          client: matchedTender && matchedTender.client ? matchedTender.client.name : prev.client
+                        }));
+                      }} 
+                      className="w-full px-5 py-4 rounded-xl sm:rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition shadow-sm"
+                    >
+                      <option value="">-- Select Tender --</option>
+                      {tenders.map(t => (
+                        <option key={t.id} value={t.title}>{t.title}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
