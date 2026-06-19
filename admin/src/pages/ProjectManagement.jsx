@@ -202,7 +202,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
 
       <div className="grid grid-cols-12 gap-6 sm:gap-8">
         {/* Active Project Portfolio */}
-        <div className="col-span-12 lg:col-span-6 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
+        <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
           <div className="p-4 sm:p-6 border-b border-slate-50 flex justify-between items-center">
             <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Active Project Portfolio</h3>
           </div>
@@ -214,6 +214,9 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                   <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tender Manager</th>
                   <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client</th>
                   <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Budget</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Priority</th>
+                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Deadline</th>
                   <th className="px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                   <th className="px-4 py-3 sm:px-6 sm:py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
                 </tr>
@@ -247,115 +250,54 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                     </td>
                     <td className="px-4 py-3 sm:px-6 sm:py-4 font-mono text-xs sm:text-sm font-bold text-slate-700 whitespace-nowrap">₹{parseFloat(assignment.tender?.budget || 0).toLocaleString()}</td>
                     <td className="px-4 py-3 sm:px-6 sm:py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${assignment.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest px-2 py-1 bg-blue-50 rounded-lg border border-blue-100 whitespace-nowrap">
+                        {assignment.department?.name || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 sm:px-6 sm:py-4">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${assignment.priority === 'High' ? 'bg-rose-100 text-rose-600' :
+                          assignment.priority === 'Medium' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'
                         }`}>
+                        {assignment.priority || 'Medium'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 sm:px-6 sm:py-4 text-xs font-bold text-slate-500 whitespace-nowrap">
+                      {assignment.deadline ? new Date(assignment.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'N/A'}
+                    </td>
+                    <td className="px-4 py-3 sm:px-6 sm:py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${
+                        assignment.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' :
+                        assignment.status === 'In Progress' ? 'bg-blue-50 text-blue-600' :
+                        'bg-slate-50 text-slate-400'
+                      }`}>
                         {assignment.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 sm:px-6 sm:py-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onProjectClick(assignment.tenderId || assignment.tender?.id, assignment.id);
-                        }}
-                        className="p-1.5 sm:p-2 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-blue-600 shadow-sm border border-transparent hover:border-slate-100"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onProjectClick(assignment.tenderId || assignment.tender?.id, assignment.id);
+                          }}
+                          className="p-1.5 sm:p-2 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-blue-600 shadow-sm border border-transparent hover:border-slate-100"
+                          title="View Project Details"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => handleAssignmentDelete(e, assignment.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          title="Delete Assignment"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-slate-400 text-xs italic">No matching projects found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Assigned Tender Work List */}
-        <div className="col-span-12 lg:col-span-6 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
-          <div className="p-4 sm:p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-            <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Assigned Project Work</h3>
-            <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-100">
-              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{filteredAssignments.length} Tasks</span>
-            </div>
-          </div>
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/50">
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Project</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Department</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Priority</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Deadline</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Status</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredAssignments.length > 0 ? (
-                  filteredAssignments.slice(0, 8).map((task, i) => (
-                    <tr
-                      key={task.id || i}
-                      onClick={() => onProjectClick(task.tenderId || task.tender?.id, task.id)}
-                      className="group hover:bg-blue-50/30 transition-all cursor-pointer"
-                    >
-                      <td className="px-4 py-3 sm:px-6 sm:py-4">
-                        <div className="max-w-[150px]">
-                          <p className="text-xs font-black text-slate-900 truncate">{task.title || 'Untitled Project'}</p>
-                          <p className="text-[9px] font-bold text-slate-400 mt-0.5 line-clamp-1 italic">"{task.tender?.title || 'Unknown'}"</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 sm:px-6 sm:py-4">
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest px-2 py-1 bg-blue-50 rounded-lg border border-blue-100 whitespace-nowrap">
-                          {task.department?.name}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 sm:px-6 sm:py-4">
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${task.priority === 'High' ? 'bg-rose-100 text-rose-600' :
-                            task.priority === 'Medium' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'
-                          }`}>
-                          {task.priority}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 sm:px-6 sm:py-4 text-xs font-bold text-slate-500 whitespace-nowrap">
-                        {task.deadline ? new Date(task.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'N/A'}
-                      </td>
-                      <td className="px-4 py-3 sm:px-6 sm:py-4 text-right">
-                        <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${task.status === 'Completed' ? 'bg-emerald-500 text-white' :
-                            task.status === 'In Progress' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'
-                          }`}>
-                          {task.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 sm:px-6 sm:py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onProjectClick(task.tenderId || task.tender?.id, task.id);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                            title="View Project Details"
-                          >
-                            <ChevronRight size={16} />
-                          </button>
-                          <button
-                            onClick={(e) => handleAssignmentDelete(e, task.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                            title="Delete Assignment"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-4 py-12 text-center text-slate-400 text-xs italic">No matching assignments found.</td>
+                    <td colSpan="9" className="px-6 py-12 text-center text-slate-400 text-xs italic">No matching projects found.</td>
                   </tr>
                 )}
               </tbody>
