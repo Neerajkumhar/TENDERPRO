@@ -575,7 +575,6 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                 </div>
               ))}
             </div>
-            <button className="w-full mt-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-slate-200">View Rankings</button>
           </div>
         </div>
       </div>
