@@ -37,7 +37,7 @@ const progressData = [
   { name: 'Not Started', value: 5, color: '#94a3b8' },
 ];
 
-const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetchAssignments }) => {
+const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetchAssignments, onMemberClick }) => {
   const [project, setProject] = useState(null);
   const [projectAssignments, setProjectAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -482,7 +482,11 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                         <p className="text-[9px] text-slate-400 font-bold italic truncate uppercase tracking-tighter">{member.role}</p>
                       </div>
                     </div>
-                    <button className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                    <button 
+                      onClick={() => onMemberClick?.(member.id)}
+                      className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      title={`View Profile of ${member.name}`}
+                    >
                       <Mail size={16} />
                     </button>
                   </div>

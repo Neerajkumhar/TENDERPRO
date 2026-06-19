@@ -582,6 +582,10 @@ function App() {
               fetchAssignments={fetchAssignments}
               user={members.find(m => m.email === user.email) || user}
               members={members}
+              onMemberClick={(id) => {
+                setSelectedMemberId(id);
+                setActiveTab('Member Profile');
+              }}
             />
           )}
           {activeTab === 'Tender Details' && (
