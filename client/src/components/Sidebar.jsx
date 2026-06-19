@@ -43,7 +43,11 @@ const menuItems = [
   { icon: FileText, label: 'Tenders', activeTab: 'Tender Management', roles: ['Tender Manager'] },
   { icon: Briefcase, label: 'Projects', activeTab: 'Projects', roles: ['Tender Manager'] },
   { icon: Users, label: 'Clients', activeTab: 'Client Management', roles: ['Tender Manager'] },
+<<<<<<< HEAD
 
+=======
+  { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Tender Manager'] },
+>>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
   { icon: Calendar, label: 'Calendar', activeTab: 'Calendar', roles: ['Tender Manager'] },
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Tender Manager'] },
 
@@ -66,8 +70,13 @@ const menuItems = [
   { icon: Truck, label: 'Installation Challan', activeTab: 'Installation Challan', roles: ['Finance Manager'] },
   { icon: Truck, label: 'Delivery Challan', activeTab: 'Delivery Challan', roles: ['Finance Manager'] },
   { icon: PieChart, label: 'Budget', activeTab: 'Budget', roles: ['Finance Manager'] },
+<<<<<<< HEAD
 
   { icon: ClipboardCheck, label: 'Approvals', activeTab: 'Approvals', roles: ['Finance Manager'] },
+=======
+  { icon: BarChart3, label: 'Reports', activeTab: 'Reports', roles: ['Finance Manager'] },
+  { icon: MessageSquare, label: 'Messages', activeTab: 'Messages', roles: ['Admin', 'Tender Manager', 'Project Manager', 'Finance Manager', 'Core Team'] },
+>>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
 
   // Team Member
   { icon: LayoutDashboard, label: 'Dashboard', activeTab: 'Member Dashboard', roles: ['Core Team'] },

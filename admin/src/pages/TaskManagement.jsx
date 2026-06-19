@@ -258,6 +258,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         </h2>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+<<<<<<< HEAD
           {user.role === 'Project Manager' && (
             <select
               value={selectedProjectFilter}
@@ -271,6 +272,8 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
             </select>
           )}
 
+=======
+>>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
           {/* CREATE TASK BUTTON FOR PROJECT MANAGERS */}
           {user.role === 'Project Manager' && (
             <button 
@@ -549,7 +552,11 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                     <option value="">-- Unassigned --</option>
                     {assigneeList.map((member) => (
                       <option key={member.id} value={member.id}>
+<<<<<<< HEAD
                         {member.name} ({member.role} - {member.email})
+=======
+                        {member.name}
+>>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
                       </option>
                     ))}
                   </select>
