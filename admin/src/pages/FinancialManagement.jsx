@@ -192,8 +192,8 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
   const handleCreateInvoice = async (e) => {
     if (e) e.preventDefault();
-    if (!formData.client || !formData.amount) {
-      alert('Please fill in client name and billing amount');
+    if (!formData.client || !formData.project || !formData.amount || !formData.attachment) {
+      alert('Please fill in all details (client, project, billing amount, and upload invoice document)');
       return;
     }
 
@@ -656,7 +656,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
               </div>
               <form onSubmit={handleCreateInvoice} className="space-y-6 text-left">
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Client</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Client <span className="text-rose-500">*</span></label>
                   <select 
                     required
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
@@ -669,8 +669,9 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Project</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Project <span className="text-rose-500">*</span></label>
                   <select 
+                    required
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
                     value={formData.tenderId} 
                     onChange={(e) => {
@@ -684,7 +685,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹) <span className="text-rose-500">*</span></label>
                   <div className="relative">
                     <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
                     <input 
@@ -699,7 +700,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document <span className="text-rose-500">*</span></label>
                   <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
                     <input 
                       type="file" 
