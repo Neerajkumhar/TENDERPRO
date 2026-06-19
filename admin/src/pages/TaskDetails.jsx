@@ -371,7 +371,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-<<<<<<< HEAD
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -406,28 +405,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                     <Trash2 size={14} />
                   </button>
                 </div>
-=======
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-emerald-500" /> <span className="hidden xs:inline">Subtasks &</span> Checklist
-              </h3>
-              <span className="text-[9px] sm:text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">1/3 Done</span>
-            </div>
-            
-            <div className="space-y-2 sm:space-y-3">
-              {[
-                { text: 'Review initial requirements doc', done: true },
-                { text: 'Draft technical specifications', done: false },
-                { text: 'Get approval from lead engineer', done: false }
-              ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
-                    <CheckCircle2 size={14} />
-                  </div>
-                  <span className={`text-xs sm:text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
-                </label>
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
               ))}
               
               {subtasks.length === 0 && !showAddSubtaskInput && (
@@ -436,8 +413,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 </div>
               )}
             </div>
-<<<<<<< HEAD
-            
             {showAddSubtaskInput ? (
               <form onSubmit={handleAddSubtask} className="mt-4 flex items-center gap-3">
                 <input
@@ -463,9 +438,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 + ADD SUBTASK
               </button>
             )}
-=======
-            <button className="mt-4 text-[9px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1">+ ADD ITEM</button>
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
           </div>
 
           {/* Task Attachments Card */}
@@ -626,7 +598,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
               <div>
                 <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assignee</p>
                 <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-<<<<<<< HEAD
                   <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px]">
                     {assignee ? assignee.name.charAt(0) : 'UN'}
                   </div>
@@ -635,14 +606,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                       {assignee ? `${assignee.name} (${assignee.email})` : 'Unassigned'}
                     </p>
                     <p className="text-[9px] font-bold text-slate-400">{assignee ? assignee.role : 'Engineering'}</p>
-=======
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px] shrink-0 shadow-inner">
-                    {task.assigneeId ? 'ID' : 'UN'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] sm:text-xs font-black text-slate-800 truncate">{task.assigneeId ? 'Assigned Member' : 'Unassigned'}</p>
-                    <p className="text-[9px] font-bold text-slate-400">Project Team</p>
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
                   </div>
                 </div>
               </div>

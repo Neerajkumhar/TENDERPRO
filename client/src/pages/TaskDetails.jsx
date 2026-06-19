@@ -297,15 +297,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   const assignee = task?.assigneeId ? members.find(m => String(m.id) === String(task.assigneeId)) : null;
 
   return (
-<<<<<<< HEAD
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
       {/* Header Area */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
-=======
-    <div className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
-      {/* Header Area */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
         <div className="flex items-start gap-4">
           <button 
             onClick={onBack}
@@ -360,7 +354,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
       </div>
 
-<<<<<<< HEAD
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         {/* Main Left Content */}
         <div className="xl:col-span-8 space-y-8">
@@ -368,15 +361,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           {/* Description Card */}
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-=======
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        {/* Main Left Content */}
-        <div className="lg:col-span-8 space-y-6 sm:space-y-8">
-          
-          {/* Description Card */}
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
               <ListTodo size={16} className="text-blue-500" /> Task Description
             </h3>
             <div className="p-5 sm:p-6 bg-slate-50/50 rounded-2xl sm:rounded-[1.5rem] border border-slate-100">
@@ -387,7 +371,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-<<<<<<< HEAD
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -422,28 +405,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                     <Trash2 size={14} />
                   </button>
                 </div>
-=======
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-emerald-500" /> <span className="hidden xs:inline">Subtasks &</span> Checklist
-              </h3>
-              <span className="text-[9px] sm:text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">1/3 Done</span>
-            </div>
-            
-            <div className="space-y-2 sm:space-y-3">
-              {[
-                { text: 'Review initial requirements doc', done: true },
-                { text: 'Draft technical specifications', done: false },
-                { text: 'Get approval from lead engineer', done: false }
-              ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200'}`}>
-                    <CheckCircle2 size={14} />
-                  </div>
-                  <span className={`text-xs sm:text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
-                </label>
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
               ))}
               
               {subtasks.length === 0 && !showAddSubtaskInput && (
@@ -452,8 +413,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 </div>
               )}
             </div>
-<<<<<<< HEAD
-            
             {showAddSubtaskInput ? (
               <form onSubmit={handleAddSubtask} className="mt-4 flex items-center gap-3">
                 <input
@@ -483,13 +442,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
           {/* Task Attachments Card */}
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
-=======
-            <button className="mt-4 text-[9px] sm:text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1">+ ADD ITEM</button>
-          </div>
-
-          {/* Task Attachments Card */}
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
             <div className="flex justify-between items-center">
               <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <Paperclip size={16} className="text-indigo-500" /> <span className="hidden xs:inline">Task</span> Attachments
@@ -577,15 +529,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Comments / Activity */}
-<<<<<<< HEAD
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <MessageSquare size={16} className="text-purple-500" /> Comments & Activity
-=======
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <MessageSquare size={16} className="text-purple-500" /> Discussion
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
             </h3>
             
             <div className="space-y-6 mb-8">
@@ -632,17 +578,10 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
 
         {/* Sidebar Info */}
-<<<<<<< HEAD
         <div className="xl:col-span-4 space-y-6">
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
               <AlertCircle size={16} className="text-orange-500" /> Task Meta
-=======
-        <div className="lg:col-span-4 space-y-6">
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
-            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-              <AlertCircle size={16} className="text-orange-500" /> Task Info
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
             </h3>
             
             <div className="space-y-5">
@@ -659,7 +598,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
               <div>
                 <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assignee</p>
                 <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-<<<<<<< HEAD
                   <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px]">
                     {assignee ? assignee.name.charAt(0) : 'UN'}
                   </div>
@@ -668,14 +606,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                       {assignee ? `${assignee.name} (${assignee.email})` : 'Unassigned'}
                     </p>
                     <p className="text-[9px] font-bold text-slate-400">{assignee ? assignee.role : 'Engineering'}</p>
-=======
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px] shrink-0 shadow-inner">
-                    {task.assigneeId ? 'ID' : 'UN'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] sm:text-xs font-black text-slate-800 truncate">{task.assigneeId ? 'Assigned Member' : 'Unassigned'}</p>
-                    <p className="text-[9px] font-bold text-slate-400">Project Team</p>
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
                   </div>
                 </div>
               </div>
@@ -700,15 +630,9 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Minimal Activity Log */}
-<<<<<<< HEAD
           <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
               <History size={16} className="text-slate-400" /> History
-=======
-          <div className="p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <History size={16} className="text-slate-400" /> Recent History
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
             </h3>
             <div className="space-y-4">
               <div className="flex gap-3">

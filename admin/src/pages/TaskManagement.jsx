@@ -258,7 +258,6 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         </h2>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-<<<<<<< HEAD
           {user.role === 'Project Manager' && (
             <select
               value={selectedProjectFilter}
@@ -272,8 +271,6 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
             </select>
           )}
 
-=======
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
           {/* CREATE TASK BUTTON FOR PROJECT MANAGERS */}
           {user.role === 'Project Manager' && (
             <button 
@@ -290,14 +287,17 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 pb-10">
         
         {/* Kanban Board - Main Area */}
-        <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-          {columns.map((col) => (
-            <div 
-              key={col.id} 
-              className="space-y-4 sm:space-y-6 flex flex-col h-full group/column"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, col.id)}
-            >
+        <div className="lg:col-span-9">
+          <div className="bg-white p-5 sm:p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
+            <div className="overflow-x-auto pb-2 custom-scrollbar">
+              <div className="flex gap-4 sm:gap-6 min-w-[920px] items-start pt-2">
+                {columns.map((col) => (
+                  <div 
+                    key={col.id} 
+                    className="flex-1 min-w-[210px] space-y-4 sm:space-y-6 flex flex-col group/column"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, col.id)}
+                  >
               <div className="flex justify-between items-center px-2">
                   <div className="flex items-center gap-3">
                      <div className={`w-1 h-5 rounded-full ${
@@ -379,7 +379,10 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
               </div>
             </div>
           ))}
+            </div>
+          </div>
         </div>
+      </div>
 
         {/* Task Activity Sidebar - Secondary Board */}
         <div className="lg:col-span-3 space-y-6">
@@ -552,11 +555,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                     <option value="">-- Unassigned --</option>
                     {assigneeList.map((member) => (
                       <option key={member.id} value={member.id}>
-<<<<<<< HEAD
                         {member.name} ({member.role} - {member.email})
-=======
-                        {member.name}
->>>>>>> 77515609c26df6aa7dbc464f0a5c1fa2703c2cda
                       </option>
                     ))}
                   </select>
