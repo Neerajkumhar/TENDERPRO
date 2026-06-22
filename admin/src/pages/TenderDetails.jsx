@@ -474,8 +474,8 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         </div>
 
         {/* --- ROW 2 --- */}
-        {/* Technical Evaluation (Span 2) */}
-        <div className="lg:col-span-2 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+        {/* Technical Evaluation (Span 3) */}
+        <div className="lg:col-span-3 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
             <ShieldCheck size={20} className="text-indigo-500" />
             <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Technical Parameters</h2>
@@ -493,71 +493,6 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                 {tender.certifications || 'No specific certifications requested.'}
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Related Projects (Span 1) */}
-        <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2 w-full">
-            <Briefcase size={16} className="text-blue-500" />
-            <span>Related Projects</span>
-          </h3>
-          <div className="flex-1 overflow-y-auto space-y-3 max-h-[300px] pr-2">
-            {relatedProjects.length > 0 ? (
-              relatedProjects.map((project, idx) => (
-                <div 
-                  key={idx} 
-                  onClick={() => onProjectClick && onProjectClick(project.tenderId || tender.id)}
-                  className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-3 hover:border-blue-200 transition-colors cursor-pointer"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col pr-2">
-                      <span className="text-sm font-bold text-slate-800 leading-tight">
-                        {project.title || project.department?.name || 'Assigned Project'}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400 line-clamp-2 mt-1 italic">
-                        "{project.description || 'No specific description provided'}"
-                      </span>
-                    </div>
-                    <span className={`shrink-0 px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-md ${
-                      project.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 
-                      project.status === 'In Progress' ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {project.status}
-                    </span>
-                  </div>
-                  
-                  <div className="pt-2 border-t border-slate-200/60 flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</span>
-                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
-                        {project.department?.name || 'General'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigned Manager</span>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
-                          {(project.department?.manager?.image || project.assignee?.image) ? (
-                            <img src={project.department?.manager?.image || project.assignee?.image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <Users size={10} className="text-slate-400" />
-                          )}
-                        </div>
-                        <span className="text-[11px] font-bold text-slate-700">
-                          {project.department?.manager ? `${project.department.manager.name} (${project.department.manager.email})` : (project.assignee ? `${project.assignee.name} (${project.assignee.email})` : 'Unassigned')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-100 rounded-2xl min-h-[220px]">
-                <Briefcase size={24} className="text-slate-300 mb-2" />
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No active projects</p>
-              </div>
-            )}
           </div>
         </div>
 
@@ -607,8 +542,8 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         </div>
 
         {/* --- ROW 4 --- */}
-        {/* Documentation Vault (Span 2) */}
-        <div className="lg:col-span-2 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
+        {/* Documentation Vault (Span 3) */}
+        <div className="lg:col-span-3 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
             <FileText size={20} className="text-blue-500" />
             <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Documentation Vault</h2>
@@ -750,30 +685,6 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                 )}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Assurance Checklist (Span 1) */}
-        <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-            <CheckCircle2 size={20} className="text-emerald-500" />
-            <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Checklist</h2>
-          </div>
-          <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
-            {displayChecklist.map((item, idx) => (
-              <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border ${
-                item.checked ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'
-              }`}>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                  item.checked ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
-                }`}>
-                  <CheckCircle2 size={12} />
-                </div>
-                <span className={`text-[11px] font-bold leading-tight ${item.checked ? 'text-slate-800' : 'text-slate-400'}`}>
-                  {item.title}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
 
