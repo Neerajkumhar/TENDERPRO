@@ -459,16 +459,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                     <option value="Govt">Government</option>
                   </select>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pipeline Value (₹)</label>
-                  <input 
-                    type="number" 
-                    placeholder="Estimated Value"
-                    value={newClient.value}
-                    onChange={(e) => setNewClient({...newClient, value: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
-                  />
-                </div>
+
               </div>
               <div className="pt-4 sm:pt-6 flex flex-col xs:flex-row gap-3 sm:gap-4 shrink-0">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 sm:py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:bg-slate-50 rounded-xl sm:rounded-2xl transition-all">Cancel</button>
