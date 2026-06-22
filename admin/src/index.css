@@ -57,4 +57,19 @@ body {
   background: #94a3b8;
 }
 
+/* Kanban Board Responsive Layout */
+.kanban-columns-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  align-items: flex-start !important;
+}
+
+.kanban-column {
+  flex: 1 1 0% !important;
+  min-width: 300px !important;
+}
+
+
 

@@ -290,11 +290,11 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         <div className="lg:col-span-9">
           <div className="bg-white p-5 sm:p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
             <div className="overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
-              <div className="flex flex-row flex-nowrap gap-4 sm:gap-6 w-full items-start pt-2">
+              <div className="kanban-columns-container gap-4 sm:gap-6 pt-2">
                 {columns.map((col) => (
                   <div 
                     key={col.id} 
-                    className="flex-1 min-w-[300px] space-y-4 sm:space-y-6 flex flex-col group/column"
+                    className="kanban-column space-y-4 sm:space-y-6 flex flex-col group/column"
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, col.id)}
                   >
