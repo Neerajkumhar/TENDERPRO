@@ -300,12 +300,13 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
         {/* Kanban Board - Main Area */}
         <div className="xl:col-span-9">
           <div className="bg-white p-5 sm:p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
-            <div className="overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
-              <div className="kanban-columns-container gap-4 sm:gap-6 pt-2">
+            <div className="overflow-x-auto pb-2 custom-scrollbar scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth' }}>
+              <div className="gap-4 sm:gap-6 pt-2" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', width: '100%', alignItems: 'flex-start' }}>
                 {columns.map((col) => (
                   <div 
                     key={col.id} 
-                    className="kanban-column space-y-4 sm:space-y-6 flex flex-col group/column"
+                    className="space-y-4 sm:space-y-6 flex flex-col group/column"
+                    style={{ flex: '1 1 0%', minWidth: '300px' }}
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, col.id)}
                   >
