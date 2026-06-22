@@ -57,12 +57,13 @@ body {
   background: #94a3b8;
 }
 
-/* Kanban Board Responsive Layout */
+/* Kanban Board Layout Rules */
 .kanban-columns-container {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
-  width: 100% !important;
+  width: max-content !important;
+  min-width: 100% !important;
   align-items: flex-start !important;
 }
 
