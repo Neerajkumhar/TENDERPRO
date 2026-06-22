@@ -731,7 +731,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-800 truncate">{documentLabels[key]}</p>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">
-                             {files[key] ? files[key].name : (existingDocUrl ? 'Uploaded' : 'Required')}
+                            {files[key] ? files[key].name : (existingDocUrl ? 'Uploaded' : 'Required')}
                           </p>
                         </div>
                       </div>
