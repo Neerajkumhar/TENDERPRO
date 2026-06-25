@@ -65,9 +65,10 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
 
   // Filter assignments / active projects for the Project Manager
   const pmProjects = assignments.filter(a => 
-    String(a.assigneeId) === String(user.id) || 
-    a.assignee?.email === user.email ||
-    (user.role === 'Project Manager' && String(a.departmentId) === String(user.departmentId))
+    a.assigneeId && (
+      String(a.assigneeId) === String(user.id) || 
+      a.assignee?.email === user.email
+    )
   );
   const activeProjectsList = user.role === 'Project Manager' ? pmProjects : assignments;
 
@@ -298,95 +299,97 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-8 pb-10">
         
         {/* Kanban Board - Main Area */}
-        <div className="xl:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {columns.map((col) => (
-            <div 
-              key={col.id} 
-              className="space-y-4 sm:space-y-6 flex flex-col h-full group/column"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, col.id)}
-            >
-              <div className="flex justify-between items-center px-2">
-                  <div className="flex items-center gap-3">
-                     <div className={`w-1 h-5 rounded-full ${
-                       col.id === 'To Do' ? 'bg-blue-600' : 
-                       col.id === 'In Progress' ? 'bg-orange-500' : 
-                       col.id === 'Review' ? 'bg-purple-600' : 
-                       'bg-emerald-500'
-                     }`}></div>
-                     <span className="text-[11px] font-black text-slate-800 tracking-[0.2em] uppercase">{col.label}</span>
-                     <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-black">{getTasksByStatus(col.id).length}</span>
-                  </div>
-                  {user.role === 'Project Manager' && (
-                    <button 
-                      onClick={() => setShowCreateModal(true)}
-                      className="text-slate-200 hover:text-blue-600 transition-all"
+        <div className="xl:col-span-9 overflow-x-auto pb-4">
+          <div className="grid grid-cols-4 gap-4 sm:gap-6 min-w-[850px] xl:min-w-0">
+            {columns.map((col) => (
+              <div 
+                key={col.id} 
+                className="space-y-4 sm:space-y-6 flex flex-col h-full group/column"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col.id)}
+              >
+                <div className="flex justify-between items-center px-2">
+                    <div className="flex items-center gap-3">
+                       <div className={`w-1 h-5 rounded-full ${
+                         col.id === 'To Do' ? 'bg-blue-600' : 
+                         col.id === 'In Progress' ? 'bg-orange-500' : 
+                         col.id === 'Review' ? 'bg-purple-600' : 
+                         'bg-emerald-500'
+                       }`}></div>
+                       <span className="text-[11px] font-black text-slate-800 tracking-[0.2em] uppercase">{col.label}</span>
+                       <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-black">{getTasksByStatus(col.id).length}</span>
+                    </div>
+                    {user.role === 'Project Manager' && (
+                      <button 
+                        onClick={() => setShowCreateModal(true)}
+                        className="text-slate-200 hover:text-blue-600 transition-all"
+                      >
+                         <Plus size={16} />
+                      </button>
+                    )}
+                </div>
+
+                <div className="space-y-4 flex-1 min-h-[300px] lg:min-h-[600px] p-2 rounded-3xl sm:rounded-[2.5rem] bg-slate-50/20 border-2 border-transparent hover:border-blue-100/50 transition-all duration-300 border-dashed">
+                  {getTasksByStatus(col.id).map((task) => (
+                    <div 
+                      key={task.id} 
+                      id={`task-${task.id}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task.id)}
+                      onDragEnd={handleDragEnd}
+                      className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing group relative overflow-hidden"
                     >
-                       <Plus size={16} />
-                    </button>
-                  )}
-              </div>
+                      <div className={`absolute top-0 left-0 right-0 h-1 ${
+                         task.priority === 'High' || task.priority === 'HIGH' ? 'bg-rose-500' : 
+                         task.priority === 'Medium' || task.priority === 'MEDIUM' ? 'bg-orange-500' : 
+                         'bg-emerald-500'
+                      }`}></div>
 
-              <div className="space-y-4 flex-1 min-h-[300px] lg:min-h-[600px] p-2 rounded-3xl sm:rounded-[2.5rem] bg-slate-50/20 border-2 border-transparent hover:border-blue-100/50 transition-all duration-300 border-dashed">
-                {getTasksByStatus(col.id).map((task) => (
-                  <div 
-                    key={task.id} 
-                    id={`task-${task.id}`}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, task.id)}
-                    onDragEnd={handleDragEnd}
-                    className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-grab active:cursor-grabbing group relative overflow-hidden"
-                  >
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${
-                       task.priority === 'High' || task.priority === 'HIGH' ? 'bg-rose-500' : 
-                       task.priority === 'Medium' || task.priority === 'MEDIUM' ? 'bg-orange-500' : 
-                       'bg-emerald-500'
-                    }`}></div>
-
-                    <div className="flex justify-between items-start mb-4">
-                       <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-slate-50
-                         ${task.priority === 'High' || task.priority === 'HIGH' ? 'text-rose-500' : 
-                           task.priority === 'Medium' || task.priority === 'MEDIUM' ? 'text-orange-500' : 
-                           'text-emerald-500'}`}>
-                         {task.priority}
-                       </span>
-                       <button className="text-slate-200 hover:text-slate-400 transition-colors">
-                          <MoreVertical size={14} />
-                       </button>
-                    </div>
-                    
-                    <h4 
-                       onClick={() => onView && onView(task.id)}
-                       className="text-[13px] font-black text-slate-900 tracking-tight leading-snug uppercase mb-1 cursor-pointer hover:text-blue-600 hover:underline transition-all"
-                     >
-                       {task.title}
-                     </h4>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-6 line-clamp-1">{task.desc || task.description || 'NO DESCRIPTION'}</p>
-                    
-                    <div className="flex items-center justify-between border-t border-slate-50 pt-5">
-                      <div className="flex items-center gap-2 min-w-0">
-                          <div className={`w-2 h-2 rounded-full shrink-0 ${
-                            col.id === 'In Progress' ? 'bg-orange-500' : 
-                            col.id === 'Review' ? 'bg-purple-600' : 
-                            col.id === 'Completed' ? 'bg-emerald-500' : 
-                            'bg-blue-600'
-                          }`}></div>
-                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">
-                            {task.project || (task.tender?.title ? task.tender.title.substring(0, 15) : 'GENERAL')}
-                          </span>
+                      <div className="flex justify-between items-start mb-4">
+                         <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-slate-50
+                           ${task.priority === 'High' || task.priority === 'HIGH' ? 'text-rose-500' : 
+                             task.priority === 'Medium' || task.priority === 'MEDIUM' ? 'text-orange-500' : 
+                             'text-emerald-500'}`}>
+                           {task.priority}
+                         </span>
+                         <button className="text-slate-200 hover:text-slate-400 transition-colors">
+                            <MoreVertical size={14} />
+                         </button>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-300 shrink-0 ml-2">
-                          <Clock size={12} />
-                          <span className="text-[9px] font-black uppercase tracking-tight">
-                            {task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'NO DEADLINE'}
-                          </span>
+                      
+                      <h4 
+                         onClick={() => onView && onView(task.id)}
+                         className="text-[13px] font-black text-slate-900 tracking-tight leading-snug uppercase mb-1 cursor-pointer hover:text-blue-600 hover:underline transition-all"
+                       >
+                         {task.title}
+                       </h4>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-6 line-clamp-1">{task.desc || task.description || 'NO DESCRIPTION'}</p>
+                      
+                      <div className="flex items-center justify-between border-t border-slate-50 pt-5">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <div className={`w-2 h-2 rounded-full shrink-0 ${
+                              col.id === 'In Progress' ? 'bg-orange-500' : 
+                              col.id === 'Review' ? 'bg-purple-600' : 
+                              col.id === 'Completed' ? 'bg-emerald-500' : 
+                              'bg-blue-600'
+                            }`}></div>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">
+                              {task.project || (task.tender?.title ? task.tender.title.substring(0, 15) : 'GENERAL')}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-300 shrink-0 ml-2">
+                            <Clock size={12} />
+                            <span className="text-[9px] font-black uppercase tracking-tight">
+                              {task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'NO DEADLINE'}
+                            </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Task Activity Sidebar - Secondary Board */}

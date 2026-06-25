@@ -41,7 +41,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       return String(ta.managerId) === String(user.id);
     }
     if (user.role === 'Project Manager') {
-      return String(item.departmentId) === String(user.departmentId);
+      return item.assigneeId && String(item.assigneeId) === String(user.id);
     }
     return String(item.assigneeId) === String(user.id);
   }).filter(item => {

@@ -46,6 +46,8 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
   });
   const [associatedTenders, setAssociatedTenders] = useState([]);
   const [interactions, setInteractions] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [interactionFormData, setInteractionFormData] = useState({
     type: 'Meeting',
@@ -68,16 +70,42 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
     try {
       const response = await fetch(`/api/clients`);
       const data = await response.json();
+      let foundClient = null;
       if (response.ok) {
         // Find the specific client from the list (ideally there would be a GET /api/clients/:id)
-        const foundClient = data.find(c => c.id === clientId);
+        foundClient = data.find(c => c.id === clientId);
         setClient(foundClient);
       }
       
       const tenderResponse = await fetch(`/api/tenders`);
       const tenderData = await tenderResponse.json();
+      let clientTenders = [];
       if (tenderResponse.ok) {
-        setAssociatedTenders(tenderData.filter(t => t.clientId === clientId));
+        clientTenders = tenderData.filter(t => t.clientId === clientId);
+        setAssociatedTenders(clientTenders);
+      }
+
+      const clientTenderIds = clientTenders.map(t => t.id);
+
+      // Fetch Invoices
+      let filteredInvoices = [];
+      const invoiceResponse = await fetch(`/api/invoices`);
+      if (invoiceResponse.ok) {
+        const invoiceData = await invoiceResponse.json();
+        filteredInvoices = invoiceData.filter(inv => inv.tenderId && clientTenderIds.includes(inv.tenderId));
+        setInvoices(filteredInvoices);
+      }
+
+      // Fetch Payments
+      const paymentResponse = await fetch(`/api/payments`);
+      if (paymentResponse.ok) {
+        const paymentData = await paymentResponse.json();
+        const clientInvoiceIds = filteredInvoices.map(inv => inv.id);
+        const filteredPayments = paymentData.filter(pay => 
+          (pay.invoiceId && clientInvoiceIds.includes(pay.invoiceId)) ||
+          (pay.client && pay.client.toLowerCase() === foundClient?.name?.toLowerCase())
+        );
+        setPayments(filteredPayments);
       }
 
       const interactionsResponse = await fetch(`/api/clients/${clientId}/interactions`);
@@ -263,6 +291,10 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
     );
   }
 
+  const totalTenderValue = associatedTenders.reduce((sum, t) => sum + (parseFloat(t.budget) || 0), 0);
+  const totalPaidAmount = payments.reduce((sum, pmt) => sum + (((pmt.status || '').toUpperCase() === 'RECEIVED') ? (parseFloat(pmt.amount) || 0) : 0), 0);
+  const totalDueAmount = Math.max(0, totalTenderValue - totalPaidAmount);
+
   return (
     <div className="p-4 sm:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Area */}
@@ -307,14 +339,18 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
         </div>
 
         {/* Quick Stats Banner */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-slate-100/50 rounded-[28px] border border-slate-200/50">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-1 bg-slate-100/50 rounded-[28px] border border-slate-200/50">
           <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Since</p>
             <p className="text-sm font-black text-slate-900 mt-1">{new Date(client.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
           </div>
           <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Value</p>
-            <p className="text-sm font-black text-slate-900 mt-1">{client.value || '₹ 0'}</p>
+            <p className="text-sm font-black text-slate-900 mt-1">₹ {totalTenderValue.toLocaleString('en-IN')}</p>
+          </div>
+          <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Due Amount</p>
+            <p className="text-sm font-black text-rose-600 mt-1">₹ {totalDueAmount.toLocaleString('en-IN')}</p>
           </div>
           <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Tenders</p>
@@ -721,6 +757,123 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                     <tr>
                       <td colSpan="5" className="px-8 py-8 text-center text-sm font-bold text-slate-400">
                         No tenders associated with this client.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Client Invoices */}
+          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+              <div>
+                <h3 className="font-black text-slate-900 text-xl tracking-tight">Client Invoices</h3>
+                <p className="text-xs text-slate-500 font-medium mt-1">Manage and track invoices issued for this client's tenders</p>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    <th className="px-8 py-4">Invoice #</th>
+                    <th className="px-8 py-4">Tender / Project</th>
+                    <th className="px-8 py-4">Date</th>
+                    <th className="px-8 py-4">Due Date</th>
+                    <th className="px-8 py-4">Total Amount</th>
+                    <th className="px-8 py-4">Due Amount</th>
+                    <th className="px-8 py-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {invoices.length > 0 ? (
+                    invoices.map((inv, i) => (
+                      <tr 
+                        key={i} 
+                        className="hover:bg-blue-50/30 transition-all group"
+                      >
+                        <td className="px-8 py-5 text-xs font-black text-slate-700">{inv.invoiceNumber}</td>
+                        <td className="px-8 py-5">
+                          <p className="text-sm font-black text-slate-800 line-clamp-1">{inv.project || 'N/A'}</p>
+                          <p className="text-[10px] text-slate-400 font-bold mt-0.5">{inv.tender?.title || 'General'}</p>
+                        </td>
+                        <td className="px-8 py-5 text-xs font-bold text-slate-500">
+                          {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="px-8 py-5 text-xs font-bold text-slate-500">
+                          {inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                        </td>
+                        <td className="px-8 py-5 text-sm font-black text-slate-900">₹ {parseFloat(inv.amount).toLocaleString('en-IN')}</td>
+                        <td className="px-8 py-5 text-sm font-black text-rose-600">₹ {parseFloat(inv.amount_due || 0).toLocaleString('en-IN')}</td>
+                        <td className="px-8 py-5">
+                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
+                            ${inv.status === 'Paid' ? 'bg-emerald-100 text-emerald-600' : 
+                              inv.status === 'Pending' ? 'bg-amber-100 text-amber-600' : 
+                              'bg-rose-100 text-rose-600'}`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="px-8 py-8 text-center text-sm font-bold text-slate-400">
+                        No invoices associated with this client.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Payments & Transactions */}
+          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+              <div>
+                <h3 className="font-black text-slate-900 text-xl tracking-tight">Payments & Transactions</h3>
+                <p className="text-xs text-slate-500 font-medium mt-1">Transaction history for this client</p>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    <th className="px-8 py-4">Transaction ID</th>
+                    <th className="px-8 py-4">Invoice #</th>
+                    <th className="px-8 py-4">Date</th>
+                    <th className="px-8 py-4">Payment Method</th>
+                    <th className="px-8 py-4">Amount</th>
+                    <th className="px-8 py-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {payments.length > 0 ? (
+                    payments.map((pmt, i) => (
+                      <tr 
+                        key={i} 
+                        className="hover:bg-blue-50/30 transition-all group"
+                      >
+                        <td className="px-8 py-5 text-xs font-black text-slate-700">{pmt.paymentId}</td>
+                        <td className="px-8 py-5 text-xs font-bold text-slate-500">{pmt.invoiceNumber || 'General'}</td>
+                        <td className="px-8 py-5 text-xs font-bold text-slate-500">
+                          {new Date(pmt.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="px-8 py-5 text-xs font-bold text-slate-600 uppercase tracking-wider">{pmt.method}</td>
+                        <td className="px-8 py-5 text-sm font-black text-slate-900">₹ {parseFloat(pmt.amount).toLocaleString('en-IN')}</td>
+                        <td className="px-8 py-5">
+                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
+                            ${pmt.status === 'RECEIVED' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                            {pmt.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="px-8 py-8 text-center text-sm font-bold text-slate-400">
+                        No transactions logged for this client.
                       </td>
                     </tr>
                   )}

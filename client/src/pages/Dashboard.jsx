@@ -497,16 +497,19 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   }
 
   // DEFAULT PROJECT MANAGER DASHBOARD
-  const departmentProjects = assignments.filter(
-    item => String(item.departmentId) === String(user.departmentId)
-  );
+  const departmentProjects = user.role === 'Project Manager'
+    ? assignments.filter(item => item.assigneeId && String(item.assigneeId) === String(user.id))
+    : assignments.filter(item => String(item.departmentId) === String(user.departmentId));
+
+  const projectIds = new Set(departmentProjects.map(p => String(p.id)));
+  const departmentTasks = tasks.filter(t => t.assignmentId && projectIds.has(String(t.assignmentId)));
 
   const stats = [
     { label: 'Total Projects', value: departmentProjects.length, subtext: 'Assigned', color: 'slate' },
-    { label: 'Active Tasks', value: tasks.filter(t => t.status !== 'Completed' && t.status !== 'Done').length, subtext: 'In Progress', color: 'blue' },
-    { label: 'Done Tasks', value: tasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, subtext: 'Completed', color: 'emerald' },
+    { label: 'Active Tasks', value: departmentTasks.filter(t => t.status !== 'Completed' && t.status !== 'Done').length, subtext: 'In Progress', color: 'blue' },
+    { label: 'Done Tasks', value: departmentTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, subtext: 'Completed', color: 'emerald' },
     { label: 'Team Size', value: members.filter(m => m.departmentId === user.departmentId).length, subtext: 'Members', color: 'slate' },
-    { label: 'High Priority', value: tasks.filter(t => t.priority === 'High' || t.priority === 'Critical').length, subtext: 'Critical', color: 'rose', hasAlert: true },
+    { label: 'High Priority', value: departmentTasks.filter(t => t.priority === 'High' || t.priority === 'Critical').length, subtext: 'Critical', color: 'rose', hasAlert: true },
   ];
 
   const departmentMembers = members.filter(m => m.departmentId === user.departmentId);
@@ -548,7 +551,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
       <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
         <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
-          <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Projects Overview</h3>
+          <h3 className="font-black text-slate-900 text-lg tracking-tight">Assigned Projects Overview</h3>
           <MoreHorizontal className="text-slate-400 cursor-pointer hover:text-slate-600 transition-colors" />
         </div>
         <div className="overflow-x-auto">

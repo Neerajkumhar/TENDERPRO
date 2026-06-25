@@ -169,9 +169,6 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
           <button onClick={handlePrint} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
             <Printer size={16} /> Print
           </button>
-          <button onClick={openEdit} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
-            <Edit size={16} /> Edit
-          </button>
           <button onClick={handleDelete} className="flex items-center gap-2 px-5 py-2.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-100">
             <Trash2 size={16} /> Delete
           </button>

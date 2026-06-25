@@ -143,7 +143,8 @@ const Invoices = ({ onInvoiceClick }) => {
         dispatchTo: inv.dispatchTo,
         shippingAddress: inv.shippingAddress,
         materialRows: inv.materialRows,
-        tenderId: inv.tenderId
+        tenderId: inv.tenderId,
+        attachments: inv.attachments || []
       }));
       setInvoices(backendData);
     } catch (error) {
@@ -262,12 +263,17 @@ const Invoices = ({ onInvoiceClick }) => {
     const payload = {
       ...formData,
       amount: parseFloat(formData.amount),
-      status: mapStatusToBackend(formData.status),
       amount_due: formData.amount_due !== '' ? parseFloat(formData.amount_due) : parseFloat(formData.amount) || 0,
       paid_amount: formData.paid_amount !== '' ? parseFloat(formData.paid_amount) : 0,
       date: formData.issueDate,
       attachments: formData.attachment ? [{ name: 'Invoice Document', url: formData.attachment }] : []
     };
+
+    if (!editInvoiceId) {
+      payload.status = mapStatusToBackend(formData.status);
+    } else {
+      delete payload.status;
+    }
 
     try {
       const url = editInvoiceId ? `/api/invoices/${editInvoiceId}` : '/api/invoices';
@@ -295,11 +301,13 @@ const Invoices = ({ onInvoiceClick }) => {
 
   const handleEditClick = (invoice) => {
     setEditInvoiceId(invoice.id);
+    const existingAttachment = invoice.attachments && invoice.attachments[0] ? invoice.attachments[0].url : '';
     setFormData({
       ...invoice,
       amount: String(invoice.amount),
       amount_due: String(invoice.amount_due || invoice.amount || ''),
       paid_amount: String(invoice.paid_amount || ''),
+      attachment: existingAttachment,
       materialRows: Array.isArray(invoice.materialRows) && invoice.materialRows.length 
         ? invoice.materialRows 
         : [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }]
@@ -510,7 +518,7 @@ const Invoices = ({ onInvoiceClick }) => {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Project</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Tender</label>
                   <select 
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
                     value={formData.tenderId} 
@@ -519,7 +527,7 @@ const Invoices = ({ onInvoiceClick }) => {
                       setFormData({...formData, tenderId: e.target.value, project: t ? t.title : ''});
                     }}
                   >
-                    <option value="">Select Project</option>
+                    <option value="">Select Tender</option>
                     {tenders.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
                   </select>
                 </div>
@@ -550,10 +558,33 @@ const Invoices = ({ onInvoiceClick }) => {
                     {isUploading ? (
                       <Loader2 className="animate-spin text-blue-500" size={24} />
                     ) : formData.attachment ? (
-                      <>
+                      <div className="z-10 text-center flex flex-col items-center gap-2">
                         <CheckCircle2 className="text-emerald-500" size={24} />
                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Document Uploaded</p>
-                      </>
+                        <div className="flex items-center gap-2 mt-1">
+                          <a 
+                            href={formData.attachment} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-xs text-blue-600 font-bold hover:underline cursor-pointer z-20"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            View Current File
+                          </a>
+                          <span className="text-slate-300 text-xs">|</span>
+                          <button 
+                            type="button" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFormData(prev => ({ ...prev, attachment: '' }));
+                            }} 
+                            className="text-xs text-rose-500 font-bold hover:underline cursor-pointer z-20"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <p className="text-[9px] text-slate-400 font-bold mt-1">(Click or drag a new file to replace it)</p>
+                      </div>
                     ) : (
                       <>
                         <UploadCloud className="text-slate-400" size={24} />
