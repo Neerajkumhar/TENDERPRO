@@ -161,7 +161,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
             <Wallet size={16} />
           </div>
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Total Allocated</span>
-          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">${category.allocated.toLocaleString()}</span>
+          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">₹{category.allocated.toLocaleString('en-IN')}</span>
           <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight block mt-1 leading-none">Fiscal Year 2024</span>
         </div>
 
@@ -170,7 +170,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
             <TrendingUp size={16} />
           </div>
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Total Spent</span>
-          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">${category.spent.toLocaleString()}</span>
+          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">₹{category.spent.toLocaleString('en-IN')}</span>
           <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight block mt-1 leading-none">Year to Date</span>
         </div>
 
@@ -281,7 +281,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
                       {trx.status}
                     </span>
                   </td>
-                  <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 text-right">${trx.amount.toLocaleString()}</td>
+                  <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 text-right">₹{trx.amount.toLocaleString('en-IN')}</td>
                 </tr>
               ))}
             </tbody>

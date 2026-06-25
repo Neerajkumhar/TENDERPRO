@@ -10,17 +10,23 @@ const defaultBudgets = [
 
 exports.getBudgets = async (req, res) => {
   try {
-    let budgets = await Budget.findAll({
-      order: [['createdAt', 'ASC']]
+    const mockNames = [
+      'LOGISTICS EXPANSION', 'Logistics Expansion',
+      'DIGITAL AD SPEND', 'Digital Ad Spend',
+      'CORE INFRASTRUCTURE R&D', 'Core Infrastructure R&D',
+      'RECRUITMENT DRIVE', 'Recruitment Drive',
+      'CLOUD SERVER UPGRADES', 'Cloud Server Upgrades'
+    ];
+
+    await Budget.destroy({
+      where: {
+        name: mockNames
+      }
     });
 
-    // Seed default budgets if table is empty
-    if (budgets.length === 0) {
-      await Budget.bulkCreate(defaultBudgets);
-      budgets = await Budget.findAll({
-        order: [['createdAt', 'ASC']]
-      });
-    }
+    const budgets = await Budget.findAll({
+      order: [['createdAt', 'ASC']]
+    });
 
     res.json(budgets);
   } catch (error) {

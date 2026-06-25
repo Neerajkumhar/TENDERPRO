@@ -33,6 +33,16 @@ exports.createPayment = async (req, res) => {
   try {
     const { client, invoiceId, invoiceNumber, amount, date, method, status, notes } = req.body;
     
+    const invoice = await Invoice.findByPk(invoiceId);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    const maxAllowed = parseFloat(invoice.amount_due !== undefined && invoice.amount_due !== null ? invoice.amount_due : invoice.amount);
+    if (parseFloat(amount) > maxAllowed) {
+      return res.status(400).json({ message: `Payment amount ₹${parseFloat(amount).toLocaleString('en-IN')} exceeds the invoice amount due of ₹${maxAllowed.toLocaleString('en-IN')}` });
+    }
+
     const count = await Payment.count();
     const paymentId = `PMT-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
     
@@ -62,6 +72,20 @@ exports.updatePayment = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
     if (!payment) return res.status(404).json({ error: 'Payment not found' });
+
+    const newInvoiceId = req.body.invoiceId || payment.invoiceId;
+    const invoice = await Invoice.findByPk(newInvoiceId);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    const isSameInvoice = payment.invoiceId === newInvoiceId;
+    const oldAmount = (isSameInvoice && payment.status === 'RECEIVED') ? parseFloat(payment.amount || 0) : 0;
+    const maxAllowed = parseFloat(invoice.amount_due !== undefined && invoice.amount_due !== null ? invoice.amount_due : invoice.amount) + oldAmount;
+
+    if (req.body.amount !== undefined && parseFloat(req.body.amount) > maxAllowed) {
+      return res.status(400).json({ message: `Payment amount ₹${parseFloat(req.body.amount).toLocaleString('en-IN')} exceeds the invoice amount due of ₹${maxAllowed.toLocaleString('en-IN')}` });
+    }
 
     const oldInvoiceId = payment.invoiceId;
     await payment.update(req.body);

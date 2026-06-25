@@ -207,6 +207,21 @@ const Payments = () => {
       return;
     }
 
+    const inv = invoices.find(i => i.id === formData.invoiceId);
+    if (!inv) {
+      alert('Selected invoice not found');
+      return;
+    }
+
+    const isSameInvoice = editingTransaction && editingTransaction.invoiceId === formData.invoiceId;
+    const oldAmount = (isSameInvoice && editingTransaction.status === 'RECEIVED') ? parseFloat(editingTransaction.amount || 0) : 0;
+    const maxAllowed = parseFloat(inv.amount_due !== undefined && inv.amount_due !== null ? inv.amount_due : inv.amount) + oldAmount;
+
+    if (parseFloat(formData.amount) > maxAllowed) {
+      alert(`Payment amount ₹${parseFloat(formData.amount).toLocaleString('en-IN')} exceeds the invoice amount due of ₹${maxAllowed.toLocaleString('en-IN')}`);
+      return;
+    }
+
     try {
       const method = editingTransaction ? 'PUT' : 'POST';
       const url = editingTransaction ? `/api/payments/${editingTransaction.id}` : '/api/payments';

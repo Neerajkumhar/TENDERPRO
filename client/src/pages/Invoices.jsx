@@ -35,6 +35,7 @@ const Invoices = ({ onInvoiceClick }) => {
     client: '',
     project: '',
     tenderId: '',
+    tenderValue: '',
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: '',
     amount: '',
@@ -289,7 +290,7 @@ const Invoices = ({ onInvoiceClick }) => {
         loadBackendInvoices();
         setIsModalOpen(false);
         setEditInvoiceId(null);
-        setFormData({ client: '', project: '', tenderId: '', issueDate: new Date().toISOString().split('T')[0], dueDate: '', amount: '', amount_due: '', paid_amount: '', billingAddress: '', gstDetails: '', reference: '', invoiceRef: '', poNumber: '', poRef: '', poAddress: '', poDate: '', ewayBill: '', dispatchDate: '', deliveryDate: '', transporter: '', vehicleNumber: '', lrNo: '', driverName: '', clientGstin: '', contactPerson: '', contactPhone: '', placeOfSupply: '', dispatchFrom: '', dispatchTo: '', shippingAddress: '', materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }], notes: '', status: 'PENDING', attachment: '' });
+        setFormData({ client: '', project: '', tenderId: '', tenderValue: '', issueDate: new Date().toISOString().split('T')[0], dueDate: '', amount: '', amount_due: '', paid_amount: '', billingAddress: '', gstDetails: '', reference: '', invoiceRef: '', poNumber: '', poRef: '', poAddress: '', poDate: '', ewayBill: '', dispatchDate: '', deliveryDate: '', transporter: '', vehicleNumber: '', lrNo: '', driverName: '', clientGstin: '', contactPerson: '', contactPhone: '', placeOfSupply: '', dispatchFrom: '', dispatchTo: '', shippingAddress: '', materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }], notes: '', status: 'PENDING', attachment: '' });
       } else {
         const error = await response.json();
         alert(`Error: ${error.message}`);
@@ -302,12 +303,14 @@ const Invoices = ({ onInvoiceClick }) => {
   const handleEditClick = (invoice) => {
     setEditInvoiceId(invoice.id);
     const existingAttachment = invoice.attachments && invoice.attachments[0] ? invoice.attachments[0].url : '';
+    const associatedTender = tenders.find(t => t.id === invoice.tenderId);
     setFormData({
       ...invoice,
       amount: String(invoice.amount),
       amount_due: String(invoice.amount_due || invoice.amount || ''),
       paid_amount: String(invoice.paid_amount || ''),
       attachment: existingAttachment,
+      tenderValue: associatedTender ? String(associatedTender.budget || '') : '',
       materialRows: Array.isArray(invoice.materialRows) && invoice.materialRows.length 
         ? invoice.materialRows 
         : [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }]
@@ -424,7 +427,7 @@ const Invoices = ({ onInvoiceClick }) => {
             </button>
           </div>
           
-          <button onClick={() => { setEditInvoiceId(null); setFormData({ client: '', project: '', tenderId: '', issueDate: new Date().toISOString().split('T')[0], dueDate: '', amount: '', amount_due: '', paid_amount: '', billingAddress: '', gstDetails: '', reference: '', invoiceRef: '', poNumber: '', poRef: '', poAddress: '', poDate: '', ewayBill: '', dispatchDate: '', deliveryDate: '', transporter: '', vehicleNumber: '', lrNo: '', driverName: '', clientGstin: '', contactPerson: '', contactPhone: '', placeOfSupply: '', dispatchFrom: '', dispatchTo: '', shippingAddress: '', materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }], notes: '', status: 'PENDING' }); setIsModalOpen(true); }} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95">
+          <button onClick={() => { setEditInvoiceId(null); setFormData({ client: '', project: '', tenderId: '', tenderValue: '', issueDate: new Date().toISOString().split('T')[0], dueDate: '', amount: '', amount_due: '', paid_amount: '', billingAddress: '', gstDetails: '', reference: '', invoiceRef: '', poNumber: '', poRef: '', poAddress: '', poDate: '', ewayBill: '', dispatchDate: '', deliveryDate: '', transporter: '', vehicleNumber: '', lrNo: '', driverName: '', clientGstin: '', contactPerson: '', contactPhone: '', placeOfSupply: '', dispatchFrom: '', dispatchTo: '', shippingAddress: '', materialRows: [{ description: '', itemCode: '', hsnCode: '', qty: '', unit: 'pcs', rate: '', remarks: '' }], notes: '', status: 'PENDING' }); setIsModalOpen(true); }} className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95">
             <Plus size={18} />
             <span>New Invoice</span>
           </button>
@@ -522,7 +525,13 @@ const Invoices = ({ onInvoiceClick }) => {
                     value={formData.tenderId} 
                     onChange={(e) => {
                       const t = tenders.find(t => t.id === e.target.value);
-                      setFormData({...formData, tenderId: e.target.value, project: t ? t.title : ''});
+                      setFormData({
+                        ...formData, 
+                        tenderId: e.target.value, 
+                        project: t ? t.title : '',
+                        client: t && t.client ? t.client.name : formData.client,
+                        tenderValue: t ? (t.budget || '') : ''
+                      });
                     }}
                   >
                     <option value="">Select Tender</option>
@@ -530,18 +539,35 @@ const Invoices = ({ onInvoiceClick }) => {
                   </select>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
-                  <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
-                    <input 
-                      type="number" 
-                      required
-                      placeholder="0.00" 
-                      className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
-                      value={formData.amount} 
-                      onChange={(e) => setFormData({...formData, amount: e.target.value})} 
-                    />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Value (₹)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <input 
+                        type="text" 
+                        disabled
+                        placeholder="0.00" 
+                        className="w-full pl-10 pr-5 py-3.5 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-black opacity-70" 
+                        value={formData.tenderValue} 
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <input 
+                        type="number" 
+                        required
+                        placeholder="0.00" 
+                        className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                        value={formData.amount} 
+                        onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                      />
+                    </div>
                   </div>
                 </div>
 

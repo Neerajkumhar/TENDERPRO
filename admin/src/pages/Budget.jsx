@@ -25,14 +25,6 @@ import {
   Clock
 } from 'lucide-react';
 
-const mockCategories = [
-  { id: 1, name: 'Logistics Expansion', department: 'OPERATIONS', status: 'ON TRACK', allocated: 150000, spent: 105000, utilization: 70, trend: '+2.4%', color: 'bg-blue-600' },
-  { id: 2, name: 'Digital Ad Spend', department: 'MARKETING', status: 'ON TRACK', allocated: 85000, spent: 42500, utilization: 50, trend: '+1.2%', color: 'bg-emerald-500' },
-  { id: 3, name: 'Core Infrastructure R&D', department: 'R&D', status: 'OVER BUDGET', allocated: 120000, spent: 128000, utilization: 106, trend: '+5.8%', color: 'bg-rose-500' },
-  { id: 4, name: 'Recruitment Drive', department: 'HUMAN RESOURCES', status: 'ON TRACK', allocated: 45000, spent: 31500, utilization: 70, trend: '+0.5%', color: 'bg-amber-500' },
-  { id: 5, name: 'Cloud Server Upgrades', department: 'IT INFRASTRUCTURE', status: 'UNDER BUDGET', allocated: 90000, spent: 54000, utilization: 60, trend: '-1.1%', color: 'bg-indigo-500' },
-];
-
 import BudgetDetails from './BudgetDetails';
 
 const Budget = () => {
@@ -58,6 +50,7 @@ const Budget = () => {
 
   const [budgetList, setBudgetList] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [tenders, setTenders] = useState([]);
 
   const fetchBudgets = async () => {
     try {
@@ -83,7 +76,19 @@ const Budget = () => {
         console.error('Error fetching expenses:', error);
       }
     };
+    const fetchTenders = async () => {
+      try {
+        const response = await fetch('/api/tenders');
+        if (response.ok) {
+          const data = await response.json();
+          setTenders(data);
+        }
+      } catch (error) {
+        console.error('Error fetching tenders:', error);
+      }
+    };
     fetchExpenses();
+    fetchTenders();
     fetchBudgets();
   }, []);
 
@@ -246,13 +251,15 @@ const Budget = () => {
   const criticalCount = filteredBudgets.filter(b => b.status === 'OVER BUDGET').length;
   const overallUtilizationRate = totalAllocated > 0 ? Math.round((totalSpent / totalAllocated) * 100) : 0;
 
+  const savingsRate = totalAllocated > 0 ? Math.round(((totalAllocated - totalSpent) / totalAllocated) * 100) : 0;
+
   const stats = [
-    { label: 'TOTAL BUDGET', value: `$${totalAllocated.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, sub: `FISCAL YEAR: ${selectedFY}`, icon: Wallet, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'TOTAL SPENT', value: `$${totalSpent.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, sub: `${overallUtilizationRate}% OF TOTAL UTILIZED`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-    { label: 'REMAINING', value: `$${totalRemaining.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, sub: 'AVAILABLE BALANCE', icon: PieChart, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'TOTAL BUDGET', value: `₹${totalAllocated.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `FISCAL YEAR: ${selectedFY}`, icon: Wallet, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'TOTAL SPENT', value: `₹${totalSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${overallUtilizationRate}% OF TOTAL UTILIZED`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'REMAINING', value: `₹${totalRemaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'AVAILABLE BALANCE', icon: PieChart, color: 'text-purple-600', bg: 'bg-purple-50' },
     { label: 'OVER BUDGET', value: String(criticalCount), sub: 'CRITICAL ATTENTION', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
-    { label: 'SAVINGS GOAL', value: '12%', sub: 'TARGET SAVINGS: 15%', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { label: 'PROJECTS', value: '24', sub: 'ACTIVE ALLOCATION', icon: Layers, color: 'text-slate-600', bg: 'bg-slate-50' },
+    { label: 'SAVINGS GOAL', value: `${savingsRate}%`, sub: 'REAL-TIME SAVINGS RATE', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50' },
+    { label: 'PROJECTS', value: String(tenders.length), sub: 'ACTIVE ALLOCATION', icon: Layers, color: 'text-slate-600', bg: 'bg-slate-50' },
   ];
 
   // Group budgets by department
@@ -449,11 +456,11 @@ const Budget = () => {
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-slate-50/50 rounded-xl p-3">
                       <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Allocated</span>
-                      <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">${stat.allocated.toLocaleString()}</span>
+                      <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">₹{stat.allocated.toLocaleString('en-IN')}</span>
                     </div>
                     <div className="bg-slate-50/50 rounded-xl p-3">
                       <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Spent</span>
-                      <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">${stat.spent.toLocaleString()}</span>
+                      <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">₹{stat.spent.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
 
@@ -536,8 +543,8 @@ const Budget = () => {
                             {cat.status}
                           </span>
                         </td>
-                        <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 tracking-tight">${cat.allocated.toLocaleString()}</td>
-                        <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 tracking-tight">${cat.spent.toLocaleString()}</td>
+                        <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 tracking-tight">₹{cat.allocated.toLocaleString('en-IN')}</td>
+                        <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 tracking-tight">₹{cat.spent.toLocaleString('en-IN')}</td>
                         <td className="px-5 sm:px-8 py-4 min-w-[140px]">
                           <div className="flex items-center gap-2">
                             <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -652,9 +659,9 @@ const Budget = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Total Allocation ($)</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Total Allocation (₹)</label>
                   <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">$</span>
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
                     <input 
                       type="number"
                       placeholder="0.00"

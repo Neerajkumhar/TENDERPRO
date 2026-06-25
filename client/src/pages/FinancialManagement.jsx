@@ -66,6 +66,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
     status: 'Pending',
     project: '',
     tenderId: '',
+    tenderValue: '',
     attachment: ''
   });
 
@@ -231,6 +232,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
           status: 'Pending',
           project: '',
           tenderId: '',
+          tenderValue: '',
           attachment: ''
         });
         setIsModalOpen(false);
@@ -482,32 +484,55 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Project</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Tender</label>
                   <select 
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
                     value={formData.tenderId} 
                     onChange={(e) => {
                       const t = tenders.find(t => t.id === e.target.value);
-                      setFormData({...formData, tenderId: e.target.value, project: t ? t.title : ''});
+                      setFormData({
+                        ...formData, 
+                        tenderId: e.target.value, 
+                        project: t ? t.title : '',
+                        client: t && t.client ? t.client.name : formData.client,
+                        tenderValue: t ? (t.budget || '') : ''
+                      });
                     }}
                   >
-                    <option value="">Select Project</option>
+                    <option value="">Select Tender</option>
                     {tenders.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
                   </select>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
-                  <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
-                    <input 
-                      type="number" 
-                      required
-                      placeholder="0.00" 
-                      className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
-                      value={formData.amount} 
-                      onChange={(e) => setFormData({...formData, amount: e.target.value})} 
-                    />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Value (₹)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <input 
+                        type="text" 
+                        disabled
+                        placeholder="0.00" 
+                        className="w-full pl-10 pr-5 py-3.5 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-black opacity-70" 
+                        value={formData.tenderValue} 
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <input 
+                        type="number" 
+                        required
+                        placeholder="0.00" 
+                        className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                        value={formData.amount} 
+                        onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                      />
+                    </div>
                   </div>
                 </div>
 
