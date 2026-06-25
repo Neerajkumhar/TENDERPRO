@@ -19,6 +19,7 @@ const statusClasses = {
 };
 
 const defaultDeliveryForm = {
+  tenderId: '',
   client: '',
   project: '',
   dispatchDate: '',
@@ -48,6 +49,7 @@ const DeliveryChallan = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [challans, setChallans] = useState([]);
+  const [tenders, setTenders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchChallans = async () => {
@@ -66,6 +68,18 @@ const DeliveryChallan = () => {
 
   useEffect(() => {
     fetchChallans();
+    const fetchTenders = async () => {
+      try {
+        const response = await fetch('/api/tenders');
+        if (response.ok) {
+          const data = await response.json();
+          setTenders(data);
+        }
+      } catch (error) {
+        console.error('Error fetching tenders:', error);
+      }
+    };
+    fetchTenders();
   }, []);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -558,6 +572,48 @@ const DeliveryChallan = () => {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <div className="space-y-6">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400 block mb-2">Select Tender</label>
+                    <select
+                      value={createForm.tenderId || ''}
+                      onChange={(e) => {
+                        const tId = e.target.value;
+                        const selectedTender = tenders.find(t => t.id === tId);
+                        if (selectedTender) {
+                          setCreateForm(prev => ({
+                            ...prev,
+                            tenderId: tId,
+                            client: selectedTender.client?.name || '',
+                            project: selectedTender.title || '',
+                            poRef: selectedTender.poNumber || selectedTender.woNumber || selectedTender.reference || '',
+                            shippingAddress: selectedTender.client?.address || selectedTender.client?.location || '',
+                            contactPerson: selectedTender.client?.manager || '',
+                            contactPhone: selectedTender.client?.managerPhone || '',
+                            clientGstin: selectedTender.client?.gstAddress || '',
+                          }));
+                        } else {
+                          setCreateForm(prev => ({
+                            ...prev,
+                            tenderId: '',
+                            client: '',
+                            project: '',
+                            poRef: '',
+                            shippingAddress: '',
+                            contactPerson: '',
+                            contactPhone: '',
+                            clientGstin: '',
+                          }));
+                        }
+                      }}
+                      className="w-full px-5 py-4 rounded-xl sm:rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition shadow-sm"
+                    >
+                      <option value="">-- Select Tender --</option>
+                      {tenders.map(t => (
+                        <option key={t.id} value={t.id}>{t.title} ({t.client?.name || 'No Client'})</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400 block mb-2">Consignee Client Name</label>
                     <input value={createForm.client} onChange={(e) => setCreateForm(prev => ({ ...prev, client: e.target.value }))} placeholder="Enter client organisation" className="w-full px-5 py-4 rounded-xl sm:rounded-[1.5rem] border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition shadow-sm" />

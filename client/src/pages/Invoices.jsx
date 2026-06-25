@@ -453,7 +453,6 @@ const Invoices = ({ onInvoiceClick }) => {
                 <th className="px-6 sm:px-8 py-4 sm:py-5">No.</th>
                 <th className="px-6 sm:px-8 py-4 sm:py-5">Client</th>
                 <th className="px-6 sm:px-8 py-4 sm:py-5">Project</th>
-                <th className="px-6 sm:px-8 py-4 sm:py-5">Transporter</th>
                 <th className="px-6 sm:px-8 py-4 sm:py-5">Issue Date</th>
                 <th className="px-6 sm:px-8 py-4 sm:py-5">Amount</th>
                 <th className="px-6 sm:px-8 py-4 sm:py-5">Status</th>
@@ -467,7 +466,6 @@ const Invoices = ({ onInvoiceClick }) => {
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-black text-blue-600">{invoice.invoiceNumber || invoice.id.slice(0,8)}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-black text-slate-800 uppercase">{invoice.client}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-bold text-slate-500 truncate max-w-[150px] block uppercase">{invoice.project}</span></td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-bold text-slate-400 uppercase">{invoice.transporter || '-'}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-bold text-slate-400">{invoice.issueDate}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-black text-slate-900 italic">₹{invoice.amount.toLocaleString('en-IN')}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6">
