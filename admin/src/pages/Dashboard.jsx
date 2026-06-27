@@ -166,7 +166,7 @@ const Dashboard = ({ user, members = [], assignments = [], onProjectClick, onVie
   const statsData = [
     { label: 'Total Tenders', value: String(tenders.length), trend: '+ 12%', isUp: true, color: 'blue' },
     { label: 'Active Tenders', value: String(tenders.filter(t => t.status === 'Active' || t.status === 'Registered').length), trend: '+ 8%', isUp: true, color: 'green' },
-    { label: 'Pending Tenders', value: String(tenders.filter(t => t.status === 'Draft' || t.status === 'Pending').length), trend: '+ 5%', isUp: true, color: 'amber' },
+    { label: 'Pending Tenders', value: String(tenders.filter(t => t.status !== 'Completed' && t.status !== 'Lost' && t.status !== 'Archived').length), trend: '+ 5%', isUp: true, color: 'amber' },
     { label: 'Due Today', value: String(tenders.filter(t => t.submissionDate && new Date(t.submissionDate).toDateString() === new Date().toDateString()).length), trend: 'Real', isUp: false, color: 'red' },
     { label: 'Total Revenue', value: `₹${financialStats.totalRevenue.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'emerald' },
     { label: 'Outstanding', value: `₹${financialStats.outstandingDues.toLocaleString('en-IN')}`, trend: 'Active', isUp: false, color: 'orange' },
