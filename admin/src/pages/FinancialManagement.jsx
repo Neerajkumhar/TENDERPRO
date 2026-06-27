@@ -677,12 +677,19 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                     value={formData.tenderId} 
                     onChange={(e) => {
                       const t = tenders.find(t => t.id === e.target.value);
+                      let suggestedAmount = '';
+                      if (t) {
+                        const invoicesForTender = invoicesList.filter(inv => inv.tenderId === e.target.value);
+                        const invoicedSum = invoicesForTender.reduce((sum, inv) => sum + Number(inv.amount || 0), 0);
+                        suggestedAmount = String(Math.max(0, Number(t.budget || 0) - invoicedSum));
+                      }
                       setFormData({
                         ...formData, 
                         tenderId: e.target.value, 
                         project: t ? t.title : '',
                         client: t && t.client ? t.client.name : formData.client,
-                        tenderValue: t ? (t.budget || '') : ''
+                        tenderValue: t ? (t.budget || '') : '',
+                        amount: t ? suggestedAmount : formData.amount
                       });
                     }}
                   >

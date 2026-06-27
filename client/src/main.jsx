@@ -4,11 +4,36 @@ import './index.css'
 import App from './App.jsx'
 import { compressImage } from './utils/imageCompressor'
 
-// Intercept fetch to compress images before upload
+// Intercept fetch to add authorization token and compress images before upload
 const originalFetch = window.fetch;
 window.fetch = async function (input, init) {
-  if (typeof input === 'string' && input.includes('/api/upload') && init && init.body instanceof FormData) {
-    const formData = init.body;
+  const options = init || {};
+  
+  // Attach Authorization header if token exists
+  const token = localStorage.getItem('token');
+  if (token) {
+    if (!options.headers) {
+      options.headers = {};
+    }
+    
+    if (options.headers instanceof Headers) {
+      if (!options.headers.has('Authorization')) {
+        options.headers.set('Authorization', `Bearer ${token}`);
+      }
+    } else if (Array.isArray(options.headers)) {
+      const hasAuth = options.headers.some(([key]) => key.toLowerCase() === 'authorization');
+      if (!hasAuth) {
+        options.headers.push(['Authorization', `Bearer ${token}`]);
+      }
+    } else {
+      if (!options.headers['Authorization'] && !options.headers['authorization']) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+  }
+
+  if (typeof input === 'string' && input.includes('/api/upload') && options.body instanceof FormData) {
+    const formData = options.body;
     const file = formData.get('file');
     if (file && file.type && file.type.startsWith('image/')) {
       try {
@@ -21,13 +46,13 @@ window.fetch = async function (input, init) {
             newFormData.append(key, value);
           }
         }
-        init.body = newFormData;
+        options.body = newFormData;
       } catch (err) {
         console.error('Image compression failed, uploading original file:', err);
       }
     }
   }
-  return originalFetch.apply(this, arguments);
+  return originalFetch.call(this, input, options);
 };
 
 // Suppress Recharts resize observer warnings caused by rendering inside hidden tabs

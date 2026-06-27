@@ -189,12 +189,13 @@ async function initializeDatabase() {
         console.log('Database seeded successfully!');
       }
     } else {
-      // Sync schema alterations (create missing tables & columns)
-      console.log('Syncing database schema alterations...');
-      // Use a timeout for sync in serverless environments
+      // Use a longer timeout for sync in development or non-serverless environments
+      const isServerless = !!process.env.VERCEL;
+      const syncTimeout = isServerless ? 15000 : 300000; // 15 seconds for serverless, 5 minutes for development
+      
       const syncPromise = sequelize.sync({ alter: true });
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database sync timed out')), 15000)
+        setTimeout(() => reject(new Error('Database sync timed out')), syncTimeout)
       );
       
       await Promise.race([syncPromise, timeoutPromise]);
@@ -263,25 +264,27 @@ app.use(async (req, res, next) => {
   }
 });
 
+const { protect } = require('./middleware/authMiddleware');
+
 app.use('/api/auth', authRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/departments', departmentRoutes);
-app.use('/api/members', memberRoutes);
-app.use('/api/tenders', tenderRoutes);
-app.use('/api/assignments', assignmentRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/reminders', reminderRoutes);
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/delivery-challans', deliveryChallanRoutes);
-app.use('/api/installation-challans', installationChallanRoutes);
-app.use('/api/expenses', expenseRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/leave-requests', require('./routes/leaveRequestRoutes'));
-app.use('/api/doc-requests', require('./routes/docRequestRoutes'));
-app.use('/api/budgets', budgetRoutes);
+app.use('/api/clients', protect, clientRoutes);
+app.use('/api/upload', protect, uploadRoutes);
+app.use('/api/departments', protect, departmentRoutes);
+app.use('/api/members', protect, memberRoutes);
+app.use('/api/tenders', protect, tenderRoutes);
+app.use('/api/assignments', protect, assignmentRoutes);
+app.use('/api/tasks', protect, taskRoutes);
+app.use('/api/reminders', protect, reminderRoutes);
+app.use('/api/invoices', protect, invoiceRoutes);
+app.use('/api/delivery-challans', protect, deliveryChallanRoutes);
+app.use('/api/installation-challans', protect, installationChallanRoutes);
+app.use('/api/expenses', protect, expenseRoutes);
+app.use('/api/messages', protect, messageRoutes);
+app.use('/api/notifications', protect, notificationRoutes);
+app.use('/api/payments', protect, paymentRoutes);
+app.use('/api/leave-requests', protect, require('./routes/leaveRequestRoutes'));
+app.use('/api/doc-requests', protect, require('./routes/docRequestRoutes'));
+app.use('/api/budgets', protect, budgetRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 
