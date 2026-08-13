@@ -185,8 +185,8 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
           {/* Charts & Recent Tenders Row - Side-by-Side */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             
-            {/* Tender Activity Timeline Card */}
-            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between">
+            {/* Tender Activity Timeline Card - Reduced Horizontal Size */}
+            <div className="lg:col-span-5 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <div>
@@ -229,7 +229,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
             </div>
 
             {/* Recent Tenders Card (Placed adjacent to Tender Activity Timeline Card) */}
-            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between overflow-hidden">
+            <div className="lg:col-span-7 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between overflow-hidden">
               <div>
                 <div className="flex justify-between items-center mb-3 border-b border-slate-50 pb-3">
                   <div>
