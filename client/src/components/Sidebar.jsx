@@ -120,7 +120,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
       ${isCollapsed ? 'lg:w-0 lg:overflow-hidden lg:border-none' : 'lg:w-64'}
       top-0 left-0
     `}>
-      <div className="p-6 flex items-center justify-between gap-3 min-w-[256px]">
+      <div className="p-6 flex items-center justify-between gap-3 w-full">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-blue-200">
             <div className="w-4 h-4 border-2 border-white rotate-45"></div>
@@ -141,7 +141,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         )}
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar min-w-[256px]">
+      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar w-full">
         {filteredMenuItems.map((item, index) => {
           const isActive = activeTab === item.activeTab;
           return (

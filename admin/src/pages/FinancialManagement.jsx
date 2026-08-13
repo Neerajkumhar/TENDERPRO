@@ -57,22 +57,12 @@ const categoryData = [
   { name: 'Operations', value: 20, color: '#6366f1' },
 ];
 
-const alerts = [
-  { type: 'Financial Warning', message: 'Budget overspend Acme Corp.', time: '1 hour ago', color: 'rose' },
-  { type: 'Financial Warning', message: 'Unusual expense spike in Marketing.', time: '2 hours ago', color: 'amber' },
-  { type: 'Approval', message: 'Expense claim ₹5,000 approved.', time: '4 hours ago', color: 'blue' },
-  { type: 'Approval', message: 'New invoice generated for TechCorp.', time: '5 hours ago', color: 'blue' },
-];
-
 const FinancialManagement = ({ onInvoiceClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showFilterPopover, setShowFilterPopover] = useState(false);
-  const [isAlertsCleared, setIsAlertsCleared] = useState(() => {
-    return localStorage.getItem('financeAlertsCleared') === 'true';
-  });
   const filterRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -361,30 +351,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     { label: 'Outstanding Dues', value: `₹${stats.outstandingDues.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'rose', icon: AlertCircle },
   ];
 
-  const dynamicAlerts = [...invoicesList]
-    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-    .slice(0, 4)
-    .map(inv => {
-      let color = 'blue';
-      let type = 'Pending Action';
-      let message = `New pending invoice generated for ${inv.client}.`;
-      
-      if (inv.status === 'Overdue') {
-        color = 'rose';
-        type = 'Financial Warning';
-        message = `Invoice for ${inv.client} is Overdue!`;
-      } else if (inv.status === 'Paid') {
-        color = 'blue';
-        type = 'Approval';
-        message = `Payment of ₹${parseFloat(inv.amount || 0).toLocaleString('en-IN')} received from ${inv.client}.`;
-      }
 
-      const dateStr = inv.date ? new Date(inv.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent';
-
-      return { type, message, time: dateStr, color };
-    });
-
-  const displayAlerts = isAlertsCleared ? [] : (dynamicAlerts.length > 0 ? dynamicAlerts : alerts);
 
   return (
     <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] text-left space-y-6 sm:space-y-8 animate-in fade-in duration-700">
@@ -424,22 +391,22 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       </div>
 
       <div className="grid grid-cols-12 gap-5">
-        <div className="col-span-12 xl:col-span-8 p-4 sm:p-5 bg-white border border-slate-100/90 rounded-xl shadow-xs relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+        <div className="col-span-12 lg:col-span-5 xl:col-span-4 p-4 sm:p-5 bg-white border border-slate-100/90 rounded-xl shadow-xs relative overflow-hidden">
+          <div className="flex flex-col justify-between items-start gap-3 mb-6">
             <div>
               <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Revenue vs Expense</h3>
               <p className="text-xs text-slate-500 font-medium">Monthly performance comparison</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 sm:gap-6">
-              <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Revenue (Billed)</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Revenue</span>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Payment (Cash)</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Payment</span>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
                 <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expense</span>
               </div>
@@ -506,50 +473,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-4 p-4 sm:p-5 bg-white border border-slate-100/90 rounded-xl shadow-xs relative flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight uppercase">Recent Alerts</h3>
-                <p className="text-xs text-slate-500 font-medium">Automatic system monitors</p>
-              </div>
-              <button className="p-1.5 hover:bg-slate-50 rounded-xl transition-all"><MoreHorizontal size={18} className="text-slate-400" /></button>
-            </div>
-            <div className="space-y-3">
-              {displayAlerts.length > 0 ? (
-                displayAlerts.map((alert, i) => (
-                  <div key={i} className={`flex items-start gap-3 p-3 rounded-xl bg-${alert.color}-50/60 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
-                    <div className={`p-1.5 rounded-lg bg-white text-${alert.color}-600 shadow-xs group-hover:scale-105 transition-transform shrink-0`}>
-                      <AlertCircle size={16} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-2">
-                        <p className={`text-[10px] font-extrabold text-${alert.color}-600 uppercase tracking-wider`}>{alert.type}</p>
-                        <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">{alert.time}</span>
-                      </div>
-                      <p className="text-xs font-bold text-slate-700 mt-0.5 truncate">{alert.message}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-6 text-center text-slate-400 text-xs italic font-medium">No recent alerts.</div>
-              )}
-            </div>
-          </div>
-          {displayAlerts.length > 0 && (
-            <button 
-              onClick={() => {
-                setIsAlertsCleared(true);
-                localStorage.setItem('financeAlertsCleared', 'true');
-              }}
-              className="w-full mt-4 py-2.5 border border-slate-200 border-dashed rounded-xl text-[10px] font-bold text-slate-400 uppercase tracking-wider hover:border-blue-300 hover:text-blue-600 transition-all"
-            >
-              Clear Alerts
-            </button>
-          )}
-        </div>
-
-        <div className="col-span-12 bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
+        <div className="col-span-12 lg:col-span-7 xl:col-span-8 bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
           <div className="p-4 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/20">
             <div>
               <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Invoice Status Table</h3>

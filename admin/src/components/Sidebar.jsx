@@ -167,7 +167,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         top-0 left-0
       `}>
         {/* Brand Header */}
-        <div className="p-4 flex items-center justify-between gap-3 border-b border-slate-800/60 min-w-[256px]">
+        <div className="p-4 flex items-center justify-between gap-3 border-b border-slate-800/60 w-full">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shrink-0 shadow-md shadow-blue-600/30">
               <div className="w-4 h-4 border-2 border-white rotate-45 flex items-center justify-center">
@@ -195,7 +195,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         </div>
 
         {/* Navigation Sections - Fixed No Scrollbar & Tight Spacing */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden min-w-[256px]">
+        <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden w-full">
           {superAdminMenuGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="space-y-0.5">
               {group.title && (
@@ -270,7 +270,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
       ${isCollapsed ? 'lg:w-0 lg:overflow-hidden lg:border-none' : 'lg:w-56'}
       top-0 left-0
     `}>
-      <div className="p-4 flex items-center justify-between gap-3 border-b border-slate-100 min-w-[224px]">
+      <div className="p-4 flex items-center justify-between gap-3 border-b border-slate-100 w-full">
         <div className="flex items-center gap-2.5 overflow-hidden">
           <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-md shadow-blue-200">
             <div className="w-3.5 h-3.5 border-2 border-white rotate-45"></div>
@@ -290,7 +290,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         )}
       </div>
 
-      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar min-w-[224px]">
+      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar w-full">
         {filteredMenuItems.map((item, index) => {
           const isActive = activeTab === item.activeTab;
           return (
