@@ -178,21 +178,21 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {statsData.map((stat, i) => (
-          <div key={i} className="card p-4 sm:p-6 bg-white border-none shadow-xl shadow-slate-200/40 hover:scale-[1.02] transition-all group cursor-pointer flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-3 sm:mb-4">
-              <div className="p-2 sm:p-3 rounded-2xl bg-slate-50 text-slate-600 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
-                <stat.icon size={20} className="sm:w-6 sm:h-6" />
+          <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between hover:shadow-md hover:border-slate-200 transition-all duration-300">
+            <div className="flex justify-between items-center mb-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                <stat.icon size={16} />
               </div>
-              <div className={`flex items-center gap-1 text-[10px] sm:text-xs font-black ${stat.isUp ? 'text-blue-500' : 'text-rose-500'}`}>
-                {stat.isUp ? <TrendingUp size={12} /> : <TrendingUp size={12} className="rotate-180" />}
+              <div className={`flex items-center gap-1 text-[10px] font-bold ${stat.isUp ? 'text-blue-500' : 'text-rose-500'}`}>
+                {stat.isUp ? <TrendingUp size={11} /> : <TrendingUp size={11} className="rotate-180" />}
                 {stat.trend || '12%'}
               </div>
             </div>
             <div>
-              <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <h3 className="text-lg sm:text-2xl font-black text-slate-900 mt-1 truncate">{stat.value}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">{stat.label}</p>
+              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight truncate">{stat.value}</h3>
             </div>
           </div>
         ))}
