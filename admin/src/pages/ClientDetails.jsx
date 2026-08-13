@@ -338,80 +338,80 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
           </div>
         </div>
 
-        {/* Quick Stats Banner */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-1 bg-slate-100/50 rounded-[28px] border border-slate-200/50">
-          <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Since</p>
-            <p className="text-sm font-black text-slate-900 mt-1">{new Date(client.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+        {/* Quick Stats Banner - Minimized */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-1 bg-slate-100/50 rounded-2xl border border-slate-200/50">
+          <div className="bg-white rounded-xl p-3 shadow-xs border border-slate-100/90">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Client Since</p>
+            <p className="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">{new Date(client.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
           </div>
-          <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Value</p>
-            <p className="text-sm font-black text-slate-900 mt-1">₹ {totalTenderValue.toLocaleString('en-IN')}</p>
+          <div className="bg-white rounded-xl p-3 shadow-xs border border-slate-100/90">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Value</p>
+            <p className="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">₹ {totalTenderValue.toLocaleString('en-IN')}</p>
           </div>
-          <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Due Amount</p>
-            <p className="text-sm font-black text-rose-600 mt-1">₹ {totalDueAmount.toLocaleString('en-IN')}</p>
+          <div className="bg-white rounded-xl p-3 shadow-xs border border-slate-100/90">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Due Amount</p>
+            <p className="text-xs sm:text-sm font-extrabold text-rose-600 mt-0.5">₹ {totalDueAmount.toLocaleString('en-IN')}</p>
           </div>
-          <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Tenders</p>
-            <p className="text-sm font-black text-slate-900 mt-1">{associatedTenders.filter(t => t.status === 'Active' || t.status === 'Registered').length} Tenders</p>
+          <div className="bg-white rounded-xl p-3 shadow-xs border border-slate-100/90">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Tenders</p>
+            <p className="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5">{associatedTenders.filter(t => t.status === 'Active' || t.status === 'Registered').length} Tenders</p>
           </div>
-          <div className="bg-white rounded-[24px] p-4 shadow-sm border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</p>
-            <div className="flex items-center gap-2 mt-1">
-              <Shield size={14} className="text-blue-500" />
-              <span className="text-sm font-black text-slate-900">{client.firmType || 'Private'}</span>
+          <div className="bg-white rounded-xl p-3 shadow-xs border border-slate-100/90">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Shield size={13} className="text-blue-500" />
+              <span className="text-xs sm:text-sm font-extrabold text-slate-900">{client.firmType || 'Private'}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-5">
         {/* Left Side: Profile & Details */}
-        <div className="col-span-12 lg:col-span-4 space-y-8">
-          {/* Client Profile Card */}
-          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden group">
-            <div className="h-24 bg-gradient-to-r from-blue-600 to-indigo-600" />
-            <div className="px-8 pb-8">
-              <div className="relative -mt-12 mb-6">
-                <div className="w-24 h-24 rounded-[32px] bg-white p-1.5 shadow-xl ring-4 ring-white group-hover:scale-105 transition-transform duration-500">
-                  <div className="w-full h-full rounded-[24px] bg-blue-100 flex items-center justify-center text-blue-700 text-3xl font-black">
+        <div className="col-span-12 lg:col-span-4 space-y-5">
+          {/* Client Profile Card - Minimized */}
+          <div className="bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden group">
+            <div className="h-16 bg-gradient-to-r from-blue-600 to-indigo-600" />
+            <div className="px-5 pb-5">
+              <div className="relative -mt-8 mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-white p-1 shadow-md ring-4 ring-white group-hover:scale-105 transition-transform duration-300">
+                  <div className="w-full h-full rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-extrabold">
                     {client.name.charAt(0)}
                   </div>
                 </div>
               </div>
               
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">{client.name}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <MapPin size={14} className="text-slate-400" />
-                <span className="text-xs font-bold text-slate-500">{client.location || 'Location Not Set'}</span>
+              <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">{client.name}</h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <MapPin size={13} className="text-slate-400" />
+                <span className="text-xs font-semibold text-slate-500">{client.location || 'Location Not Set'}</span>
               </div>
 
-              <div className="mt-8 space-y-4">
-                <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-transparent hover:border-blue-100 transition-all">
-                  <div className="p-2 bg-white rounded-xl shadow-sm text-blue-500">
-                    <Mail size={16} />
+              <div className="mt-5 space-y-2.5">
+                <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100/70">
+                  <div className="p-1.5 bg-white rounded-lg shadow-xs text-blue-500">
+                    <Mail size={14} />
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Email Address</p>
                     <p className="text-xs font-bold text-slate-700 truncate">{client.email || 'Not Provided'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-transparent hover:border-blue-100 transition-all">
-                  <div className="p-2 bg-white rounded-xl shadow-sm text-blue-500">
-                    <Phone size={16} />
+                <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100/70">
+                  <div className="p-1.5 bg-white rounded-lg shadow-xs text-blue-500">
+                    <Phone size={14} />
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone Number</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</p>
                     <p className="text-xs font-bold text-slate-700">{client.phone || 'Not Provided'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-transparent hover:border-blue-100 transition-all">
-                  <div className="p-2 bg-white rounded-xl shadow-sm text-indigo-500">
-                    <Globe size={16} />
+                <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100/70">
+                  <div className="p-1.5 bg-white rounded-lg shadow-xs text-indigo-500">
+                    <Globe size={14} />
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Website</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Website</p>
                     <p className="text-xs font-bold text-slate-700 truncate">{client.website || 'Not Provided'}</p>
                   </div>
                 </div>
@@ -419,39 +419,40 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
             </div>
           </div>
 
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-black text-slate-900 text-lg tracking-tight">Assigned Manager</h3>
+          {/* Assigned Manager Card - Minimized */}
+          <div className="bg-white border border-slate-100/90 rounded-xl shadow-xs p-4 sm:p-5">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Assigned Manager</h3>
               <button 
                 onClick={openEditManager}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
               >
-                <Edit2 size={16} />
+                <Edit2 size={15} />
               </button>
             </div>
-            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[28px] border border-slate-100 group">
+            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 group">
               <img 
                 src={client.managerPhoto || (client.manager ? `https://i.pravatar.cc/150?u=${client.manager}` : null)} 
-                className="w-14 h-14 rounded-2xl shadow-sm border-2 border-white object-cover" 
+                className="w-10 h-10 rounded-xl shadow-xs border-2 border-white object-cover shrink-0" 
                 alt="" 
               />
-              <div>
-                <p className="text-sm font-black text-slate-900">{client.manager || 'No Manager Assigned'}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Account Executive</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-extrabold text-slate-900 truncate">{client.manager || 'No Manager Assigned'}</p>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Account Executive</p>
               </div>
             </div>
             
-            <div className="mt-6 space-y-3">
+            <div className="mt-4 space-y-2">
               {client.managerEmail && (
-                <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                  <Mail size={14} className="text-slate-400" />
-                  <span>{client.managerEmail}</span>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 min-w-0">
+                  <Mail size={13} className="text-slate-400 shrink-0" />
+                  <span className="truncate">{client.managerEmail}</span>
                 </div>
               )}
               {client.managerPhone && (
-                <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                  <Phone size={14} className="text-slate-400" />
-                  <span>{client.managerPhone}</span>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 min-w-0">
+                  <Phone size={13} className="text-slate-400 shrink-0" />
+                  <span className="truncate">{client.managerPhone}</span>
                 </div>
               )}
             </div>
@@ -705,25 +706,25 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
           </div>
         )}
 
-        {/* Right Side: Tenders & History */}
-        <div className="col-span-12 lg:col-span-8 space-y-8">
-          {/* Associated Tenders */}
-          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+        {/* Right Side: Tenders & History - Minimized Cards */}
+        <div className="col-span-12 lg:col-span-8 space-y-5">
+          {/* Associated Tenders - Minimized */}
+          <div className="bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
               <div>
-                <h3 className="font-black text-slate-900 text-xl tracking-tight">Associated Tenders</h3>
-                <p className="text-xs text-slate-500 font-medium mt-1">Track all tenders linked to this client</p>
+                <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Associated Tenders</h3>
+                <p className="text-xs text-slate-500 font-medium">Track all tenders linked to this client</p>
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-8 py-4">Tender ID</th>
-                    <th className="px-8 py-4">Tender Name</th>
-                    <th className="px-8 py-4">Value</th>
-                    <th className="px-8 py-4">Status</th>
-                    <th className="px-8 py-4"></th>
+                  <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3">Tender ID</th>
+                    <th className="px-4 py-3">Tender Name</th>
+                    <th className="px-4 py-3">Value</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -734,28 +735,28 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                         onClick={() => onTenderClick && onTenderClick(tender.id)}
                         className="hover:bg-blue-50/30 transition-all group cursor-pointer"
                       >
-                        <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.reference || tender.id.slice(0, 8)}</td>
-                        <td className="px-8 py-5">
-                          <p className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors">{tender.title}</p>
+                        <td className="px-4 py-3 text-xs font-bold text-slate-400">{tender.reference || tender.id.slice(0, 8)}</td>
+                        <td className="px-4 py-3">
+                          <p className="text-xs sm:text-sm font-extrabold text-slate-800 group-hover:text-blue-600 transition-colors">{tender.title}</p>
                         </td>
-                        <td className="px-8 py-5 text-sm font-black text-slate-900">₹ {tender.budget || '0'}</td>
-                        <td className="px-8 py-5">
-                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
-                            ${tender.status === 'Active' ? 'bg-blue-100 text-blue-600' : 
-                              tender.status === 'Won' ? 'bg-blue-100 text-blue-600' : 
-                              tender.status === 'Registered' ? 'bg-amber-100 text-amber-600' : 
-                              'bg-slate-100 text-slate-600'}`}>
+                        <td className="px-4 py-3 text-xs sm:text-sm font-extrabold text-slate-900">₹ {tender.budget || '0'}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider
+                            ${tender.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
+                              tender.status === 'Won' ? 'bg-blue-50 text-blue-600' : 
+                              tender.status === 'Registered' ? 'bg-amber-50 text-amber-600' : 
+                              'bg-slate-50 text-slate-600'}`}>
                             {tender.status}
                           </span>
                         </td>
-                        <td className="px-8 py-5 text-right">
+                        <td className="px-4 py-3 text-right">
                           <ExternalLink size={14} className="text-slate-300 group-hover:text-blue-500 transition-all inline" />
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="px-8 py-8 text-center text-sm font-bold text-slate-400">
+                      <td colSpan="5" className="px-6 py-6 text-center text-xs font-bold text-slate-400">
                         No tenders associated with this client.
                       </td>
                     </tr>
@@ -765,25 +766,25 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
             </div>
           </div>
 
-          {/* Client Invoices */}
-          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+          {/* Client Invoices - Minimized */}
+          <div className="bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
               <div>
-                <h3 className="font-black text-slate-900 text-xl tracking-tight">Client Invoices</h3>
-                <p className="text-xs text-slate-500 font-medium mt-1">Manage and track invoices issued for this client's tenders</p>
+                <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Client Invoices</h3>
+                <p className="text-xs text-slate-500 font-medium">Manage and track invoices issued for this client's tenders</p>
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-8 py-4">Invoice #</th>
-                    <th className="px-8 py-4">Tender / Project</th>
-                    <th className="px-8 py-4">Date</th>
-                    <th className="px-8 py-4">Due Date</th>
-                    <th className="px-8 py-4">Total Amount</th>
-                    <th className="px-8 py-4">Due Amount</th>
-                    <th className="px-8 py-4">Status</th>
+                  <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3">Invoice #</th>
+                    <th className="px-4 py-3">Tender / Project</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Due Date</th>
+                    <th className="px-4 py-3">Total Amount</th>
+                    <th className="px-4 py-3">Due Amount</th>
+                    <th className="px-4 py-3">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -793,24 +794,24 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                         key={i} 
                         className="hover:bg-blue-50/30 transition-all group"
                       >
-                        <td className="px-8 py-5 text-xs font-black text-slate-700">{inv.invoiceNumber}</td>
-                        <td className="px-8 py-5">
-                          <p className="text-sm font-black text-slate-800 line-clamp-1">{inv.project || 'N/A'}</p>
-                          <p className="text-[10px] text-slate-400 font-bold mt-0.5">{inv.tender?.title || 'General'}</p>
+                        <td className="px-4 py-3 text-xs font-bold text-slate-700">{inv.invoiceNumber}</td>
+                        <td className="px-4 py-3">
+                          <p className="text-xs font-bold text-slate-800 line-clamp-1">{inv.project || 'N/A'}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">{inv.tender?.title || 'General'}</p>
                         </td>
-                        <td className="px-8 py-5 text-xs font-bold text-slate-500">
+                        <td className="px-4 py-3 text-xs font-semibold text-slate-500">
                           {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
-                        <td className="px-8 py-5 text-xs font-bold text-slate-500">
+                        <td className="px-4 py-3 text-xs font-semibold text-slate-500">
                           {inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                         </td>
-                        <td className="px-8 py-5 text-sm font-black text-slate-900">₹ {parseFloat(inv.amount).toLocaleString('en-IN')}</td>
-                        <td className="px-8 py-5 text-sm font-black text-rose-600">₹ {parseFloat(inv.amount_due || 0).toLocaleString('en-IN')}</td>
-                        <td className="px-8 py-5">
-                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
-                            ${inv.status === 'Paid' ? 'bg-blue-100 text-blue-600' : 
-                              inv.status === 'Pending' ? 'bg-amber-100 text-amber-600' : 
-                              'bg-rose-100 text-rose-600'}`}>
+                        <td className="px-4 py-3 text-xs font-extrabold text-slate-900">₹ {parseFloat(inv.amount).toLocaleString('en-IN')}</td>
+                        <td className="px-4 py-3 text-xs font-extrabold text-rose-600">₹ {parseFloat(inv.amount_due || 0).toLocaleString('en-IN')}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider
+                            ${inv.status === 'Paid' ? 'bg-blue-50 text-blue-600' : 
+                              inv.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 
+                              'bg-rose-50 text-rose-600'}`}>
                             {inv.status}
                           </span>
                         </td>
@@ -818,7 +819,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-8 py-8 text-center text-sm font-bold text-slate-400">
+                      <td colSpan="7" className="px-6 py-6 text-center text-xs font-bold text-slate-400">
                         No invoices associated with this client.
                       </td>
                     </tr>
@@ -828,24 +829,24 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
             </div>
           </div>
 
-          {/* Payments & Transactions */}
-          <div className="card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+          {/* Payments & Transactions - Minimized */}
+          <div className="bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
               <div>
-                <h3 className="font-black text-slate-900 text-xl tracking-tight">Payments & Transactions</h3>
-                <p className="text-xs text-slate-500 font-medium mt-1">Transaction history for this client</p>
+                <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Payments & Transactions</h3>
+                <p className="text-xs text-slate-500 font-medium">Transaction history for this client</p>
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <th className="px-8 py-4">Transaction ID</th>
-                    <th className="px-8 py-4">Invoice #</th>
-                    <th className="px-8 py-4">Date</th>
-                    <th className="px-8 py-4">Payment Method</th>
-                    <th className="px-8 py-4">Amount</th>
-                    <th className="px-8 py-4">Status</th>
+                  <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3">Transaction ID</th>
+                    <th className="px-4 py-3">Invoice #</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Payment Method</th>
+                    <th className="px-4 py-3">Amount</th>
+                    <th className="px-4 py-3">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -855,16 +856,16 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                         key={i} 
                         className="hover:bg-blue-50/30 transition-all group"
                       >
-                        <td className="px-8 py-5 text-xs font-black text-slate-700">{pmt.paymentId}</td>
-                        <td className="px-8 py-5 text-xs font-bold text-slate-500">{pmt.invoiceNumber || 'General'}</td>
-                        <td className="px-8 py-5 text-xs font-bold text-slate-500">
+                        <td className="px-4 py-3 text-xs font-bold text-slate-700">{pmt.paymentId}</td>
+                        <td className="px-4 py-3 text-xs font-medium text-slate-500">{pmt.invoiceNumber || 'General'}</td>
+                        <td className="px-4 py-3 text-xs font-medium text-slate-500">
                           {new Date(pmt.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
-                        <td className="px-8 py-5 text-xs font-bold text-slate-600 uppercase tracking-wider">{pmt.method}</td>
-                        <td className="px-8 py-5 text-sm font-black text-slate-900">₹ {parseFloat(pmt.amount).toLocaleString('en-IN')}</td>
-                        <td className="px-8 py-5">
-                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
-                            ${pmt.status === 'RECEIVED' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
+                        <td className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">{pmt.method}</td>
+                        <td className="px-4 py-3 text-xs font-extrabold text-slate-900">₹ {parseFloat(pmt.amount).toLocaleString('en-IN')}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider
+                            ${pmt.status === 'RECEIVED' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>
                             {pmt.status}
                           </span>
                         </td>
@@ -872,7 +873,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="6" className="px-8 py-8 text-center text-sm font-bold text-slate-400">
+                      <td colSpan="6" className="px-6 py-6 text-center text-xs font-bold text-slate-400">
                         No transactions logged for this client.
                       </td>
                     </tr>
@@ -882,10 +883,10 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
             </div>
           </div>
 
-          {/* Activity Log */}
-          <div className="card p-8 bg-white border-none shadow-xl shadow-slate-200/40">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="font-black text-slate-900 text-xl tracking-tight">Interaction History</h3>
+          {/* Activity Log - Minimized */}
+          <div className="bg-white border border-slate-100/90 rounded-xl shadow-xs p-4 sm:p-5">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Interaction History</h3>
               <button 
                 onClick={() => {
                   const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -896,18 +897,18 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                   }));
                   setIsLogModalOpen(true);
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-bold transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-bold transition-all shadow-xs"
               >
                 <Plus size={14} />
                 <span>Log Interaction</span>
               </button>
             </div>
             {interactions.length > 0 ? (
-              <div className="space-y-8 relative before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-50">
+              <div className="space-y-6 relative before:absolute before:left-[13px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
                 {interactions.map((activity, i) => (
-                  <div key={i} className="relative pl-10 group">
-                    <div className="absolute left-0 top-1 w-8 h-8 rounded-xl bg-white border-2 border-slate-100 group-hover:border-blue-500 group-hover:scale-110 transition-all flex items-center justify-center z-10 shadow-sm">
-                      <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]
+                  <div key={i} className="relative pl-8 group">
+                    <div className="absolute left-0 top-0.5 w-7 h-7 rounded-lg bg-white border border-slate-200 group-hover:border-blue-500 group-hover:scale-105 transition-all flex items-center justify-center z-10 shadow-xs">
+                      <div className={`w-2 h-2 rounded-full
                         ${activity.type === 'Meeting' ? 'bg-indigo-500' :
                           activity.type === 'Call' ? 'bg-blue-500' :
                           activity.type === 'Email' ? 'bg-amber-500' :
@@ -915,24 +916,24 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                       </div>
                     </div>
                     <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className={`text-[10px] font-black uppercase tracking-widest
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className={`text-[9px] font-extrabold uppercase tracking-wider
                           ${activity.type === 'Meeting' ? 'text-indigo-600' :
                             activity.type === 'Call' ? 'text-blue-600' :
                             activity.type === 'Email' ? 'text-amber-600' :
                             activity.type === 'Document' ? 'text-rose-600' : 'text-blue-600'}`}>
                           {activity.type}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-bold">• {formatInteractionDate(activity.date)}</span>
+                        <span className="text-[9px] text-slate-400 font-semibold">• {formatInteractionDate(activity.date)}</span>
                       </div>
-                      <p className="text-sm font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">{activity.text}</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-1 italic">Action by {activity.user}</p>
+                      <p className="text-xs font-semibold text-slate-700 leading-relaxed whitespace-pre-wrap">{activity.text}</p>
+                      <p className="text-[9px] text-slate-400 font-medium mt-0.5 italic">Action by {activity.user}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-sm font-bold text-slate-400">
+              <div className="text-center py-6 text-xs font-bold text-slate-400">
                 No interactions logged for this client yet.
               </div>
             )}
