@@ -345,18 +345,11 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
           {statsData.map((stat, i) => (
-            <div key={i} className="bg-white border border-slate-200/70 p-3.5 rounded-2xl shadow-xs space-y-2 hover:shadow-md transition">
-              <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                  <FileText size={16} />
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">{stat.value}</h3>
-              </div>
+            <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
+              <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -541,26 +534,17 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white border border-slate-200/70 p-3.5 rounded-2xl shadow-xs space-y-2 hover:shadow-md transition relative">
+          <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
             {stat.hasAlert && stat.value > 0 && (
-              <div className="absolute top-3 right-3 w-5 h-5 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
+              <div className="absolute top-4 right-4 w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
                 <AlertTriangle size={12} />
               </div>
             )}
-            <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                {i === 0 ? <Briefcase size={16} /> : i === 1 ? <Clock size={16} /> : i === 2 ? <CheckCircle2 size={16} /> : i === 3 ? <Users size={16} /> : <AlertTriangle size={16} />}
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-              <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">{stat.value}</h3>
-            </div>
-            <div className="flex items-center gap-1 text-[10px] font-bold text-blue-600">
-              <span>{stat.subtext}</span>
-            </div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
+            <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-1">{stat.value}</h3>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.subtext}</p>
           </div>
         ))}
       </div>

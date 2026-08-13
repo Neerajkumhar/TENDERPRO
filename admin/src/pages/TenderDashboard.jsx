@@ -151,18 +151,11 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
       {activeView === 'overview' ? (
         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
           {/* Stats Grid - Matching Image 2 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {statsData.map((stat, i) => (
-              <div key={i} className="bg-white border border-slate-200/70 p-3.5 rounded-2xl shadow-xs space-y-2 hover:shadow-md transition">
-                <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                    <FileText size={16} />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                  <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">{stat.value}</h3>
-                </div>
+              <div key={i} className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
               </div>
             ))}
           </div>
