@@ -98,72 +98,83 @@ async function initializeDatabase() {
     console.log('Database connection authenticated successfully.');
     
     if (sequelize.options.dialect === 'sqlite') {
-      // Only force sync in local development
-      const shouldForce = !process.env.VERCEL && process.env.NODE_ENV !== 'production';
-      await sequelize.sync({ force: shouldForce });
-      console.log(`SQLite database synced (force: ${shouldForce}) successfully.`);
+      await sequelize.sync({ force: false });
+      console.log('SQLite database synced successfully.');
 
-      if (shouldForce) {
-        const User = require('./models/User');
-        const Client = require('./models/Client');
-        const Department = require('./models/Department');
+      const User = require('./models/User');
+      const Client = require('./models/Client');
+      const Department = require('./models/Department');
 
-        // Create a default department
-        const dept = await Department.create({
-          name: 'Tendering & Procurement',
+      // Ensure default department exists
+      const [dept] = await Department.findOrCreate({
+        where: { name: 'Tendering & Procurement' },
+        defaults: {
           description: 'Handles all tender acquisitions and client bidding activities.',
           color: 'blue'
-        });
+        }
+      });
 
-        // Create Admin user
-        await User.create({
+      // Ensure Admin user exists
+      await User.findOrCreate({
+        where: { email: 'vikash@vagwiin.com' },
+        defaults: {
           name: 'Vikash Kumar',
-          email: 'vikash@vagwiin.com',
           password: '12345678',
           role: 'Admin',
           departmentId: dept.id
-        });
+        }
+      });
 
-        // Create Super Admin user
-        await User.create({
+      // Ensure Super Admin user exists
+      await User.findOrCreate({
+        where: { email: 'superadmin@vagwiin.com' },
+        defaults: {
           name: 'Super Admin',
-          email: 'superadmin@vagwiin.com',
           password: '12345678',
           role: 'Super Admin',
           departmentId: dept.id
-        });
+        }
+      });
 
-        // Create Tender Manager user
-        await User.create({
+      // Ensure Tender Manager user exists
+      await User.findOrCreate({
+        where: { email: 'manager@vagwiin.com' },
+        defaults: {
           name: 'Tender Manager User',
-          email: 'manager@vagwiin.com',
           password: '12345678',
           role: 'Tender Manager',
           departmentId: dept.id
-        });
+        }
+      });
 
-        // Create Finance Manager user
-        await User.create({
+      // Ensure Finance Manager user exists
+      await User.findOrCreate({
+        where: { email: 'finance@vagwiin.com' },
+        defaults: {
           name: 'Finance Manager User',
-          email: 'finance@vagwiin.com',
           password: '12345678',
           role: 'Finance Manager',
           departmentId: dept.id
-        });
+        }
+      });
 
-        // Create a default client
-        const defaultClient = await Client.create({
+      // Ensure default client exists
+      const [defaultClient] = await Client.findOrCreate({
+        where: { email: 'jda@rajasthan.gov.in' },
+        defaults: {
           name: 'Jaipur Development Authority',
-          email: 'jda@rajasthan.gov.in',
           phone: '0141-2563211',
           location: 'Jaipur, Rajasthan',
           industry: 'Infrastructure',
           status: 'Active',
           firmType: 'Govt'
-        });
+        }
+      });
 
-        // Seed default client interactions
-        const ClientInteraction = require('./models/ClientInteraction');
+      // Seed default client interactions if none exist
+      const ClientInteraction = require('./models/ClientInteraction');
+      const interactionCount = await ClientInteraction.count({ where: { clientId: defaultClient.id } });
+      if (interactionCount === 0) {
         await ClientInteraction.bulkCreate([
           { 
             clientId: defaultClient.id, 
@@ -178,24 +189,8 @@ async function initializeDatabase() {
             text: 'Sent updated quotation for TND-2024-001 with revised scope.', 
             date: new Date(Date.now() - 1000 * 60 * 60 * 24),
             user: 'Admin' 
-          },
-          { 
-            clientId: defaultClient.id, 
-            type: 'Call', 
-            text: 'Call with manager regarding technical requirements and site visit.', 
-            date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 28),
-            user: 'Rakesh Sharma' 
-          },
-          { 
-            clientId: defaultClient.id, 
-            type: 'Document', 
-            text: 'Client uploaded signed NDA and project requirements document.', 
-            date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
-            user: 'System' 
           }
         ]);
-
-        console.log('Database seeded successfully!');
       }
     } else {
       // Use a longer timeout for sync in development or non-serverless environments
@@ -237,9 +232,13 @@ async function initializeDatabase() {
     initializationError = null;
   } catch (err) {
     console.error('Database initialization failed:', err.message);
+    if (err.message.includes('ETIMEDOUT')) {
+      console.warn('\n⚠️  AWS RDS CONNECTION TIMED OUT!');
+      console.warn('Reason: AWS VPC Security Group sg-0cf17d3a80744e978 is blocking incoming port 5432 connections from your current IP address.');
+      console.warn('Fix 1 (AWS Console): Go to EC2 -> Security Groups -> sg-0cf17d3a80744e978 -> Inbound rules -> Add Rule -> PostgreSQL (5432) -> My IP (or Anywhere 0.0.0.0/0).');
+      console.warn('Fix 2 (Local Dev Fallback): Set DB_DIALECT=sqlite in server/.env to use local database.sqlite for offline development.\n');
+    }
     initializationError = err.message;
-    // We still mark as initialized to allow subsequent queries to attempt running
-    // if the connection was established but sync/seeding failed
     if (err.message.includes('sync') || err.message.includes('seeding')) {
       isDbInitialized = true;
     }
@@ -315,7 +314,7 @@ app.get('/api/health', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // Local development server startup
-if (!process.env.VERCEL) {
+if (require.main === module && !process.env.VERCEL) {
   initializeDatabase().then(() => {
     const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
