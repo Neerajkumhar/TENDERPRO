@@ -173,11 +173,11 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
       {activeView === 'overview' ? (
         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
           {/* Stats Grid - Matching Image 2 */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {statsData.map((stat, i) => (
-              <div key={i} className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
+              <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 relative overflow-hidden hover:shadow-md hover:border-slate-200 transition-all duration-300">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 truncate">{stat.label}</p>
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
               </div>
             ))}
           </div>
