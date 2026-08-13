@@ -267,7 +267,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       )}
 
       {/* Table Section - Matching Image Layout */}
-      <div className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-xs border border-slate-100/90 overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left min-w-[1000px]">
             <thead>

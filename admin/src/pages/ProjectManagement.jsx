@@ -202,9 +202,9 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
 
       <div className="grid grid-cols-12 gap-6 sm:gap-8">
         {/* Active Project Portfolio */}
-        <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
-          <div className="p-4 sm:p-6 border-b border-slate-50 flex justify-between items-center">
-            <h3 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Active Project Portfolio</h3>
+        <div className="col-span-12 bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
+            <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Active Project Portfolio</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
