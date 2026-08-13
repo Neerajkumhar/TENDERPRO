@@ -689,60 +689,6 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
       </div>
 
-      {/* Team Workload Card */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col h-full">
-        <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-50">
-          <div>
-            <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight uppercase tracking-wider">Team Workload</h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Capacity tracking</p>
-          </div>
-          <MoreHorizontal className="text-slate-400 cursor-pointer" size={18} />
-        </div>
-        <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-          {departmentMembers.length > 0 ? departmentMembers.map((member, i) => {
-            const memberTasks = tasks.filter(t => String(t.assigneeId) === String(member.id));
-            const activeCount = memberTasks.filter(t => t.status !== 'Completed' && t.status !== 'Done').length;
-            const workload = memberTasks.length > 0 ? Math.min(Math.round((activeCount / 10) * 100), 100) : 0;
-            
-            return (
-              <div key={i} className="group cursor-pointer p-3 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="relative shrink-0">
-                    {member.image ? (
-                      <img src={member.image} className="w-9 h-9 rounded-xl border-2 border-white shadow-xs group-hover:scale-105 transition-transform object-cover" alt={member.name} />
-                    ) : (
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 border-2 border-white shadow-xs flex items-center justify-center text-slate-400 font-black text-xs">
-                        {member.name[0]}
-                      </div>
-                    )}
-                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full shadow-xs ${member.status === 'Active' ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
-                    
-                    {unreadCounts[member.id] > 0 && (
-                      <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-4 px-1 bg-blue-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-md animate-bounce z-10">
-                        {unreadCounts[member.id]}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-slate-800 text-xs tracking-tight truncate uppercase">{member.name}</h4>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{activeCount} Active Tasks</p>
-                  </div>
-                  <span className={`text-xs font-bold italic ${workload > 75 ? 'text-rose-500' : 'text-slate-900'}`}>{workload}%</span>
-                </div>
-                
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-1000 ease-out ${workload > 75 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : workload > 50 ? 'bg-blue-600' : 'bg-blue-500'}`} 
-                    style={{width: `${workload}%`}}
-                  ></div>
-                </div>
-              </div>
-            );
-          }) : (
-            <div className="flex flex-col items-center justify-center h-32 text-slate-400 italic text-xs">No members in your department</div>
-          )}
-        </div>
-      </div>
       {renderLeaveModal()}
     </div>
   );
