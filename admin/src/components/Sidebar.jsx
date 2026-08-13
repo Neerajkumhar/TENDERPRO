@@ -290,16 +290,16 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
         )}
       </div>
 
-      <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto custom-scrollbar min-w-[224px]">
+      <nav className="flex-1 pr-2.5 pl-0 py-3 space-y-0.5 overflow-y-auto custom-scrollbar min-w-[224px]">
         {filteredMenuItems.map((item, index) => {
           const isActive = activeTab === item.activeTab;
           return (
             <button
               key={index}
               onClick={() => setActiveTab(item.activeTab)}
-              className={`w-full flex items-center px-2.5 py-2 rounded-lg transition-all group relative ${
+              className={`w-full flex items-center pl-4 pr-2.5 py-2 rounded-r-xl transition-all group relative ${
                 isActive 
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
