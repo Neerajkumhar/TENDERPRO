@@ -404,20 +404,21 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-4">
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-3">
         {statsData.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group relative overflow-hidden">
-            <div className={`absolute top-0 left-0 w-full h-1 bg-${stat.color}-500`}></div>
-            <div className="flex justify-between items-start w-full mb-2">
-              <div className={`p-2 sm:p-2.5 rounded-xl bg-${stat.color}-50/50 text-${stat.color}-600 mb-2 sm:mb-3`}>
+          <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between hover:shadow-md hover:border-slate-200 transition-all duration-300 relative overflow-hidden">
+            <div className="flex justify-between items-center mb-2 w-full">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
                 <stat.icon size={16} />
               </div>
-              <div className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 {stat.trend}
               </div>
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5 truncate w-full">{stat.label}</p>
-            <h3 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 leading-none truncate w-full">{stat.value}</h3>
+            <div className="w-full">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate w-full">{stat.label}</p>
+              <h3 className="text-base font-extrabold text-slate-900 tracking-tight truncate w-full">{stat.value}</h3>
+            </div>
           </div>
         ))}
       </div>
