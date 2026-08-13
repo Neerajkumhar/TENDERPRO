@@ -345,11 +345,11 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {statsData.map((stat, i) => (
-            <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-[1.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
-              <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
+            <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 relative overflow-hidden hover:shadow-md hover:border-slate-200 transition-all duration-300">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 truncate">{stat.label}</p>
+              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
             </div>
           ))}
         </div>
@@ -534,17 +534,19 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
+          <div key={i} className="bg-white p-3.5 sm:p-4 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between relative hover:shadow-md hover:border-slate-200 transition-all duration-300">
             {stat.hasAlert && stat.value > 0 && (
-              <div className="absolute top-4 right-4 w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
-                <AlertTriangle size={12} />
+              <div className="absolute top-3 right-3 w-5 h-5 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
+                <AlertTriangle size={11} />
               </div>
             )}
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
-            <h3 className="text-4xl font-black text-slate-900 tracking-tighter mb-1">{stat.value}</h3>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.subtext}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">{stat.label}</p>
+            <div className="flex items-baseline justify-between mt-auto">
+              <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.subtext}</span>
+            </div>
           </div>
         ))}
       </div>
