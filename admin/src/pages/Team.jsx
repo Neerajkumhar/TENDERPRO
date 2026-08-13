@@ -107,12 +107,12 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                             <User size={24} />
                           </div>
                         )}
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-white rounded-full ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-white rounded-full ${member.status === 'Active' ? 'bg-blue-500' : 'bg-amber-500'}`}></div>
                         
                         {/* Dual Unread Badges */}
                         <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
                           {unreadCounts[member.id] > 0 && (
-                            <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                            <div className="min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
                               {unreadCounts[member.id]}
                             </div>
                           )}
@@ -146,7 +146,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                   </td>
                   <td className="px-8 py-6">
                     <span className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest
-                      ${member.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                      ${member.status === 'Active' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>
                       {member.status || 'Active'}
                     </span>
                   </td>
@@ -163,7 +163,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 italic font-medium">
                     No team members found in your department.
                   </td>
                 </tr>

@@ -331,12 +331,12 @@ const Messages = ({ user, members = [], isPopup, onClose, initialActiveChatId })
           <div className="flex justify-between items-center">
              <div className="flex items-center gap-3">
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase italic">TEAM MESSAGES</h2>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 shadow-sm animate-pulse">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 shadow-sm animate-pulse">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                   <span className="text-[10px] font-black uppercase tracking-widest">Live</span>
                 </div>
                 {displayTotal > 0 && (
-                  <span className={`px-2 py-0.5 text-white text-[10px] font-black rounded-lg shadow-lg animate-bounce ${totalUnreadCount > 0 ? 'bg-emerald-500 shadow-emerald-100' : 'bg-amber-500 shadow-amber-100'}`}>
+                  <span className={`px-2 py-0.5 text-white text-[10px] font-black rounded-lg shadow-lg animate-bounce ${totalUnreadCount > 0 ? 'bg-blue-500 shadow-blue-100' : 'bg-amber-500 shadow-amber-100'}`}>
                     {displayTotal}
                   </span>
                 )}
@@ -393,7 +393,7 @@ const Messages = ({ user, members = [], isPopup, onClose, initialActiveChatId })
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 border border-white shadow-sm overflow-hidden transition-all group-hover:scale-105 font-bold">
                          {chat.name.charAt(0).toUpperCase()}
                       </div>
-                      {chat.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>}
+                      {chat.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></div>}
                    </div>
                    <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-0.5 sm:mb-1">
@@ -411,7 +411,7 @@ const Messages = ({ user, members = [], isPopup, onClose, initialActiveChatId })
                               </span>
                             )}
                             {chat.unread > 0 && (
-                              <span className="min-w-[20px] h-5 px-1 rounded-full bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-emerald-100 animate-in zoom-in duration-300">
+                              <span className="min-w-[20px] h-5 px-1 rounded-full bg-blue-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-blue-100 animate-in zoom-in duration-300">
                                 {chat.unread}
                               </span>
                             )}
@@ -447,8 +447,8 @@ const Messages = ({ user, members = [], isPopup, onClose, initialActiveChatId })
                 <div>
                    <h3 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-tight leading-none mb-1 sm:mb-1.5">{activeChatInfo.name}</h3>
                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${activeChatInfo.online ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
-                      <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest ${activeChatInfo.online ? 'text-emerald-500' : 'text-slate-400'}`}>
+                      <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${activeChatInfo.online ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
+                      <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest ${activeChatInfo.online ? 'text-blue-500' : 'text-slate-400'}`}>
                         {activeChatInfo.online ? 'online' : 'offline'}
                       </span>
                    </div>
@@ -620,7 +620,7 @@ const Messages = ({ user, members = [], isPopup, onClose, initialActiveChatId })
                   {activeChatMember?.status && (
                     <div>
                        <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                       <span className={`px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest ${activeChatMember.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                       <span className={`px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest ${activeChatMember.status === 'Active' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
                          {activeChatMember.status}
                        </span>
                     </div>

@@ -52,7 +52,22 @@ window.fetch = async function (input, init) {
       }
     }
   }
-  return originalFetch.call(this, input, options);
+  const response = await originalFetch.call(this, input, options);
+
+  if (response.status === 401) {
+    const urlStr = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+    if (!urlStr.includes('/api/auth/login') && !urlStr.includes('/api/auth/register')) {
+      const existingToken = localStorage.getItem('token');
+      if (existingToken) {
+        console.warn('Session expired or unauthorized (401). Clearing invalid session token...');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event('auth:unauthorized'));
+      }
+    }
+  }
+
+  return response;
 };
 
 // Suppress Recharts resize observer warnings caused by rendering inside hidden tabs

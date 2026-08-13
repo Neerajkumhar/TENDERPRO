@@ -26,7 +26,7 @@ const ChallanManagement = () => {
             onClick={() => setActiveSubTab('Installation')}
             className={`flex items-center gap-2 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${
               activeSubTab === 'Installation' 
-                ? 'bg-white text-emerald-600 shadow-md ring-1 ring-slate-900/5 scale-100' 
+                ? 'bg-white text-blue-600 shadow-md ring-1 ring-slate-900/5 scale-100' 
                 : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 scale-95'
             }`}
           >

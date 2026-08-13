@@ -25,7 +25,7 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('Admin', 'Tender Manager', 'Project Manager', 'Finance Manager', 'Core Team'),
+    type: DataTypes.ENUM('Admin', 'Super Admin', 'Tender Manager', 'Project Manager', 'Finance Manager', 'Core Team'),
     defaultValue: 'Core Team',
   },
   departmentId: {
@@ -67,12 +67,18 @@ const User = sequelize.define('User', {
 }, {
   hooks: {
     beforeCreate: async (user) => {
+      if (user.email) {
+        user.email = user.email.trim().toLowerCase();
+      }
       if (user.password) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
     beforeUpdate: async (user) => {
+      if (user.email) {
+        user.email = user.email.trim().toLowerCase();
+      }
       if (user.changed('password')) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);

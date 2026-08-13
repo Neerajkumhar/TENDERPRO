@@ -113,7 +113,7 @@ const MemberDashboard = ({ user }) => {
   const sidebarTasks = [
     { id: 101, title: 'Fix payment API bug', priority: 'HIGH', time: 'Today, 5:00 PM', due: 'DUE IN 2H 15M', color: 'rose' },
     { id: 102, title: 'Submit monthly report', priority: 'MEDIUM', time: 'Tomorrow, 11:00 AM', due: 'DUE IN 1D', color: 'orange' },
-    { id: 103, title: 'UI review meeting', priority: 'LOW', time: 'May 16, 2024', due: 'DUE IN 3D', color: 'emerald' },
+    { id: 103, title: 'UI review meeting', priority: 'LOW', time: 'May 16, 2024', due: 'DUE IN 3D', color: 'blue' },
     { id: 104, title: 'Client feedback changes', priority: 'URGENT', time: 'May 14, 2024', due: 'OVERDUE', color: 'rose' },
   ];
 
@@ -126,7 +126,7 @@ const MemberDashboard = ({ user }) => {
 
   // Mock initial tasks for display if actual ones are empty
   const mockBoardTasks = [
-    { id: 'm1', title: 'Create wireframes', priority: 'LOW', color: 'emerald', status: 'To Do' },
+    { id: 'm1', title: 'Create wireframes', priority: 'LOW', color: 'blue', status: 'To Do' },
     { id: 'm2', title: 'Design dashboard UI', priority: 'MEDIUM', color: 'orange', status: 'In Progress' },
     { id: 'm3', title: 'Code review - Issue #45', priority: 'HIGH', color: 'rose', status: 'Review' },
     { id: 'm4', title: 'Project setup', priority: 'DONE', color: 'slate', status: 'Completed' },
@@ -147,7 +147,7 @@ const MemberDashboard = ({ user }) => {
         <div className="xl:col-span-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'TASKS TODAY', value: 8, trend: '12% from yesterday', up: true, icon: ClipboardList, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'IN PROGRESS', value: tasks.filter(t => t.status === 'In Progress').length || 5, trend: '8% from yesterday', up: true, icon: Clock, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+            { label: 'IN PROGRESS', value: tasks.filter(t => t.status === 'In Progress').length || 5, trend: '8% from yesterday', up: true, icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50' },
             { label: 'DUE TASKS', value: tasks.filter(t => t.status !== 'Completed' && new Date(t.deadline) < new Date()).length || 3, trend: '4% from yesterday', up: false, icon: AlertCircle, color: 'text-rose-500', bg: 'bg-rose-50' },
             { label: 'COMPLETED', value: tasks.filter(t => t.status === 'Completed').length || 12, trend: '20% from yesterday', up: true, icon: CheckCircle2, color: 'text-purple-500', bg: 'bg-purple-50' },
           ].map((stat, i) => (
@@ -163,8 +163,8 @@ const MemberDashboard = ({ user }) => {
                 <h3 className="text-3xl font-black text-slate-900 tracking-tighter mt-1">{stat.value}</h3>
               </div>
               <div className="mt-4 flex items-center gap-1.5">
-                {stat.up ? <TrendingUp size={14} className="text-emerald-500" /> : <TrendingDown size={14} className="text-rose-500" />}
-                <span className={`text-[10px] font-bold ${stat.up ? 'text-emerald-500' : 'text-rose-500'}`}>{stat.trend}</span>
+                {stat.up ? <TrendingUp size={14} className="text-blue-500" /> : <TrendingDown size={14} className="text-rose-500" />}
+                <span className={`text-[10px] font-bold ${stat.up ? 'text-blue-500' : 'text-rose-500'}`}>{stat.trend}</span>
               </div>
             </div>
           ))}
@@ -220,7 +220,7 @@ const MemberDashboard = ({ user }) => {
                   <Pie
                     data={[
                       { name: 'To Do', value: tasks.filter(t => t.status === 'To Do').length || 8, color: '#3b82f6', percent: '29%' },
-                      { name: 'In Progress', value: tasks.filter(t => t.status === 'In Progress').length || 5, color: '#10b981', percent: '18%' },
+                      { name: 'In Progress', value: tasks.filter(t => t.status === 'In Progress').length || 5, color: '#3b82f6', percent: '18%' },
                       { name: 'Review', value: tasks.filter(t => t.status === 'Review').length || 6, color: '#f59e0b', percent: '21%' },
                       { name: 'Done', value: tasks.filter(t => t.status === 'Completed').length || 9, color: '#8b5cf6', percent: '32%' },
                     ]}
@@ -231,7 +231,7 @@ const MemberDashboard = ({ user }) => {
                   >
                     {[
                       { color: '#3b82f6' },
-                      { color: '#10b981' },
+                      { color: '#3b82f6' },
                       { color: '#f59e0b' },
                       { color: '#8b5cf6' },
                     ].map((entry, index) => (

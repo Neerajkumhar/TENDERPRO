@@ -386,7 +386,7 @@ const Invoices = ({ onInvoiceClick }) => {
 
   const stats = [
     { label: 'TOTAL INVOICES', value: String(totalInvoices), color: 'text-slate-600' },
-    { label: 'PAID', value: String(paidCount), color: 'text-emerald-500' },
+    { label: 'PAID', value: String(paidCount), color: 'text-blue-500' },
     { label: 'PENDING', value: String(pendingCount), color: 'text-amber-500' },
     { label: 'OVERDUE', value: String(overdueCount), color: 'text-rose-500' },
     { label: 'TOTAL REVENUE', value: `₹${totalAmountVal.toLocaleString('en-IN')}`, color: 'text-blue-600' },
@@ -394,7 +394,7 @@ const Invoices = ({ onInvoiceClick }) => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen text-left">
+    <div className="p-4 sm:p-5 lg:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen text-left">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 sm:mb-10 gap-6">
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic uppercase">INVOICES</h1>
         
@@ -472,7 +472,7 @@ const Invoices = ({ onInvoiceClick }) => {
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-bold text-slate-400">{invoice.issueDate}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6"><span className="text-xs font-black text-slate-900 italic">₹{invoice.amount.toLocaleString('en-IN')}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6">
-                      <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${invoice.status === 'PAID' ? 'bg-emerald-500 text-white' : invoice.status === 'PENDING' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'}`}>
+                      <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${invoice.status === 'PAID' ? 'bg-blue-500 text-white' : invoice.status === 'PENDING' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'}`}>
                         {invoice.status}
                       </span>
                     </td>
@@ -485,7 +485,7 @@ const Invoices = ({ onInvoiceClick }) => {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="8" className="px-6 sm:px-8 py-20 text-center text-slate-400 font-bold italic">{isLoading ? 'Fetching data...' : 'No invoices found'}</td></tr>
+                <tr><td colSpan="8" className="px-6 sm:px-8 py-10 text-center text-slate-400 font-bold italic">{isLoading ? 'Fetching data...' : 'No invoices found'}</td></tr>
               )}
             </tbody>
           </table>
@@ -580,7 +580,7 @@ const Invoices = ({ onInvoiceClick }) => {
 
                 <div className="space-y-2 text-left">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
-                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-blue-200 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
                     <input 
                       type="file" 
                       className="absolute inset-0 opacity-0 cursor-pointer" 
@@ -590,8 +590,8 @@ const Invoices = ({ onInvoiceClick }) => {
                       <Loader2 className="animate-spin text-blue-500" size={24} />
                     ) : formData.attachment ? (
                       <div className="z-10 text-center flex flex-col items-center gap-2">
-                        <CheckCircle2 className="text-emerald-500" size={24} />
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Document Uploaded</p>
+                        <CheckCircle2 className="text-blue-500" size={24} />
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Document Uploaded</p>
                         <div className="flex items-center gap-2 mt-1">
                           <a 
                             href={formData.attachment} 
@@ -640,7 +640,7 @@ const Invoices = ({ onInvoiceClick }) => {
       <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} onExport={handleExportReport} title="Export Invoices Report" />
       {showToast && (
         <div className="fixed bottom-6 right-6 z-[250] bg-slate-900/90 text-white backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-800 animate-in slide-in-from-bottom-5 duration-300">
-          <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+          <CheckCircle2 className="text-blue-500 shrink-0" size={20} />
           <span className="text-xs font-black uppercase tracking-wider">{toastMessage}</span>
         </div>
       )}

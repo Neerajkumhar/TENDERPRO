@@ -35,7 +35,7 @@ import {
 
 const statsData = [
   { label: 'Total Team', value: '42', trend: '+ 2', isUp: true, color: 'blue', icon: Users },
-  { label: 'Active Now', value: '38', trend: '92%', isUp: true, color: 'emerald', icon: UserCheck },
+  { label: 'Active Now', value: '38', trend: '92%', isUp: true, color: 'blue', icon: UserCheck },
   { label: 'Departments', value: '6', trend: 'Global', isUp: true, color: 'indigo', icon: Building2 },
   { label: 'On Leave', value: '4', trend: '- 1', isUp: false, color: 'amber', icon: Clock },
 ];
@@ -217,7 +217,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
   });
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in duration-700">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
         <div>
@@ -249,7 +249,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Team', value: teamMembers.length, trend: '+ 2', isUp: true, color: 'blue', icon: Users },
-          { label: 'Active Now', value: teamMembers.filter(m => m.status === 'Active').length, trend: '92%', isUp: true, color: 'emerald', icon: UserCheck },
+          { label: 'Active Now', value: teamMembers.filter(m => m.status === 'Active').length, trend: '92%', isUp: true, color: 'blue', icon: UserCheck },
           { label: 'Departments', value: departments.length, trend: 'Global', isUp: true, color: 'indigo', icon: Building2 },
           { label: 'On Leave', value: teamMembers.filter(m => m.status === 'On Leave').length, trend: '- 1', isUp: false, color: 'amber', icon: Clock },
         ].map((stat, i) => (
@@ -259,7 +259,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               <div className={`p-2 rounded-lg bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all`}>
                 <stat.icon size={18} />
               </div>
-              <div className={`text-[10px] font-black ${stat.isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <div className={`text-[10px] font-black ${stat.isUp ? 'text-blue-600' : 'text-rose-600'}`}>
                 {stat.trend}
               </div>
             </div>
@@ -345,7 +345,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                             {/* Dual Unread Badges */}
                             <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
                               {unreadCounts[member.id] > 0 && (
-                                <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                                <div className="min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
                                   {unreadCounts[member.id]}
                                 </div>
                               )}
@@ -367,9 +367,9 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                       </td>
                       <td className="px-4 py-3 sm:px-6 sm:py-4">
                         <div className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
-                          member.status === 'Active' ? 'text-emerald-600' : 'text-slate-400'
+                          member.status === 'Active' ? 'text-blue-600' : 'text-slate-400'
                         }`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                          <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'Active' ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
                           {member.status}
                         </div>
                       </td>
@@ -499,7 +499,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
         {/* Right Sidebar (Right 4) */}
         <div className="col-span-12 lg:col-span-4 space-y-8">
           {/* Department Distribution */}
-          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40">
+          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40">
             <h3 className="font-black text-slate-900 text-lg tracking-tight mb-6">Dept. Distribution</h3>
             <div className="h-[250px] relative">
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -559,7 +559,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                           <User size={20} />
                         </div>
                       )}
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white rounded-full flex items-center justify-center">
                         <CheckCircle2 className="text-white" size={8} />
                       </div>
                     </div>
@@ -622,7 +622,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Theme Color</label>
                 <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                  {['#3b82f6', '#10b981', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'].map(color => (
+                  {['#3b82f6', '#3b82f6', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'].map(color => (
                     <label key={color} className="relative cursor-pointer group">
                       <input type="radio" name="color" value={color} className="sr-only peer" defaultChecked={color === '#3b82f6'} />
                       <div className="w-8 h-8 rounded-lg transition-all peer-checked:ring-4 ring-offset-2 ring-slate-200" style={{ backgroundColor: color }}></div>
@@ -772,12 +772,12 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                           onChange={(e) => handleDocumentUpload(doc.key, e.target.files[0])}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className={`w-full px-4 py-3 bg-slate-50 border ${memberFormData[doc.key] ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-500'} rounded-2xl text-[11px] font-bold outline-none flex items-center justify-between transition-all shadow-sm`}>
+                        <div className={`w-full px-4 py-3 bg-slate-50 border ${memberFormData[doc.key] ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-500'} rounded-2xl text-[11px] font-bold outline-none flex items-center justify-between transition-all shadow-sm`}>
                           <span className="truncate mr-2">
                             {uploadingDoc === doc.key ? 'Uploading...' : memberFormData[doc.key] ? 'Uploaded' : 'Select File'}
                           </span>
                           {memberFormData[doc.key] ? (
-                            <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
+                            <CheckCircle2 size={16} className="text-blue-500 flex-shrink-0" />
                           ) : (
                             <Plus size={16} className="text-slate-400 flex-shrink-0" />
                           )}

@@ -311,7 +311,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">{client.name}</h1>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm
-                  ${client.status === 'Active' ? 'bg-emerald-500 text-white shadow-emerald-200' : 
+                  ${client.status === 'Active' ? 'bg-blue-500 text-white shadow-blue-200' : 
                     client.status === 'Lead' ? 'bg-blue-500 text-white shadow-blue-200' : 
                     'bg-amber-500 text-white shadow-amber-200'}`}>
                   {client.status}
@@ -398,7 +398,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-transparent hover:border-blue-100 transition-all">
-                  <div className="p-2 bg-white rounded-xl shadow-sm text-emerald-500">
+                  <div className="p-2 bg-white rounded-xl shadow-sm text-blue-500">
                     <Phone size={16} />
                   </div>
                   <div className="flex-1 overflow-hidden">
@@ -467,7 +467,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                 <p className="text-xs text-slate-500 font-medium italic mt-1">Update corporate information for {client.name}.</p>
               </div>
               
-              <form className="p-8 space-y-6" onSubmit={handleClientUpdate}>
+              <form className="p-5 space-y-4" onSubmit={handleClientUpdate}>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
@@ -608,7 +608,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                 <p className="text-xs text-slate-500 font-medium italic mt-1">Update contact details for the assigned manager.</p>
               </div>
               
-              <form className="p-8 space-y-6" onSubmit={handleManagerUpdate}>
+              <form className="p-5 space-y-4" onSubmit={handleManagerUpdate}>
                 <div className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Manager Name</label>
@@ -742,7 +742,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                         <td className="px-8 py-5">
                           <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
                             ${tender.status === 'Active' ? 'bg-blue-100 text-blue-600' : 
-                              tender.status === 'Won' ? 'bg-emerald-100 text-emerald-600' : 
+                              tender.status === 'Won' ? 'bg-blue-100 text-blue-600' : 
                               tender.status === 'Registered' ? 'bg-amber-100 text-amber-600' : 
                               'bg-slate-100 text-slate-600'}`}>
                             {tender.status}
@@ -808,7 +808,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                         <td className="px-8 py-5 text-sm font-black text-rose-600">₹ {parseFloat(inv.amount_due || 0).toLocaleString('en-IN')}</td>
                         <td className="px-8 py-5">
                           <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
-                            ${inv.status === 'Paid' ? 'bg-emerald-100 text-emerald-600' : 
+                            ${inv.status === 'Paid' ? 'bg-blue-100 text-blue-600' : 
                               inv.status === 'Pending' ? 'bg-amber-100 text-amber-600' : 
                               'bg-rose-100 text-rose-600'}`}>
                             {inv.status}
@@ -864,7 +864,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                         <td className="px-8 py-5 text-sm font-black text-slate-900">₹ {parseFloat(pmt.amount).toLocaleString('en-IN')}</td>
                         <td className="px-8 py-5">
                           <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
-                            ${pmt.status === 'RECEIVED' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                            ${pmt.status === 'RECEIVED' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
                             {pmt.status}
                           </span>
                         </td>
@@ -909,7 +909,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                     <div className="absolute left-0 top-1 w-8 h-8 rounded-xl bg-white border-2 border-slate-100 group-hover:border-blue-500 group-hover:scale-110 transition-all flex items-center justify-center z-10 shadow-sm">
                       <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]
                         ${activity.type === 'Meeting' ? 'bg-indigo-500' :
-                          activity.type === 'Call' ? 'bg-emerald-500' :
+                          activity.type === 'Call' ? 'bg-blue-500' :
                           activity.type === 'Email' ? 'bg-amber-500' :
                           activity.type === 'Document' ? 'bg-rose-500' : 'bg-blue-500'}`}>
                       </div>
@@ -918,7 +918,7 @@ const ClientDetails = ({ clientId, onBack, onTenderClick }) => {
                       <div className="flex items-center gap-3 mb-1">
                         <span className={`text-[10px] font-black uppercase tracking-widest
                           ${activity.type === 'Meeting' ? 'text-indigo-600' :
-                            activity.type === 'Call' ? 'text-emerald-600' :
+                            activity.type === 'Call' ? 'text-blue-600' :
                             activity.type === 'Email' ? 'text-amber-600' :
                             activity.type === 'Document' ? 'text-rose-600' : 'text-blue-600'}`}>
                           {activity.type}

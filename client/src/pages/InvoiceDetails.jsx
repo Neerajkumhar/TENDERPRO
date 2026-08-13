@@ -158,7 +158,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
             <h2 className="text-2xl font-black tracking-tight text-slate-900 uppercase italic">Invoice Details</h2>
             <div className="mt-1 flex items-center gap-3">
               <span className="text-sm font-bold text-slate-400 tracking-widest">{invoice.invoiceNumber || invoice.id.slice(0,8)}</span>
-              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white'}`}>
                 {invoice.status}
               </span>
             </div>
@@ -182,7 +182,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
         </div>
         <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Paid Amount</p>
-          <p className="text-2xl font-black text-emerald-600 italic">₹{toNumber(invoice.paid_amount).toLocaleString('en-IN')}</p>
+          <p className="text-2xl font-black text-blue-600 italic">₹{toNumber(invoice.paid_amount).toLocaleString('en-IN')}</p>
         </div>
         <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Balance Due</p>
@@ -223,7 +223,7 @@ const InvoiceDetails = ({ invoiceId, onBack }) => {
                   <p className="text-lg font-black text-slate-800">{invoice.invoiceNumber || invoice.id.slice(0,8)}</p>
                   <div className="pt-2 flex flex-col items-start md:items-end gap-1">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
-                    <span className={`px-4 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{invoice.status}</span>
+                    <span className={`px-4 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest ${invoice.status === 'Paid' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white'}`}>{invoice.status}</span>
                   </div>
                 </div>
               </div>

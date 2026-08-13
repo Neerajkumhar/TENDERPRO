@@ -229,7 +229,7 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
   };
 
   const pieData = [
-    { name: 'Present', value: attendanceStats.present, color: '#10b981' },
+    { name: 'Present', value: attendanceStats.present, color: '#3b82f6' },
     { name: 'Absent', value: attendanceStats.absent, color: '#f43f5e' },
     { name: 'On Leave', value: attendanceStats.onLeave, color: '#f59e0b' }
   ].filter(d => d.value > 0);
@@ -237,7 +237,7 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
   const displayPieData = pieData.length > 0 ? pieData : [{ name: 'No Data', value: 1, color: '#e2e8f0' }];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-8 gap-4">
         <button 
@@ -289,7 +289,7 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
               
               <div className="mt-4 flex items-center justify-center gap-2">
                 <div className={`px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-sm ${
-                  member.status === 'Active' ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-amber-500 text-white shadow-amber-200'
+                  member.status === 'Active' ? 'bg-blue-500 text-white shadow-blue-200' : 'bg-amber-500 text-white shadow-amber-200'
                 }`}>
                   {member.status}
                 </div>
@@ -306,7 +306,7 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
                 <div className="p-3 sm:p-4 bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-100">
                   <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Reliability</p>
                   <div className="flex items-center justify-center gap-1">
-                    <CheckCircle2 className="text-emerald-500" size={14} />
+                    <CheckCircle2 className="text-blue-500" size={14} />
                     <span className="text-base sm:text-lg font-black text-slate-900">98%</span>
                   </div>
                 </div>
@@ -323,7 +323,7 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
                   </div>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 rounded-xl sm:rounded-2xl group hover:bg-white hover:shadow-xl hover:shadow-blue-100 transition-all border border-transparent hover:border-blue-100">
-                  <div className="p-2 bg-white rounded-lg sm:rounded-xl shadow-sm text-emerald-600">
+                  <div className="p-2 bg-white rounded-lg sm:rounded-xl shadow-sm text-blue-600">
                     <Phone size={16} />
                   </div>
                   <div>
@@ -405,8 +405,8 @@ const MemberDetails = ({ memberId, onBack, departments, user, onSendMessage }) =
 
               {/* Stats Grid */}
               <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-emerald-50/50 border border-emerald-100/50 group hover:bg-emerald-50 transition-all">
-                    <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Present</p>
+                 <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-blue-50/50 border border-blue-100/50 group hover:bg-blue-50 transition-all">
+                    <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1">Present</p>
                     <div className="flex items-baseline gap-2">
                        <span className="text-2xl font-black text-slate-900">{attendanceStats.present}</span>
                        <span className="text-[10px] font-bold text-slate-400 uppercase">Days</span>

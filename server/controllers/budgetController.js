@@ -2,7 +2,7 @@ const Budget = require('../models/Budget');
 
 const defaultBudgets = [
   { name: 'Logistics Expansion', department: 'OPERATIONS', status: 'ON TRACK', allocated: 150000, trend: '+2.4%', color: 'bg-blue-600', fiscalYear: '2024-25', period: 'ANNUAL', threshold: 80 },
-  { name: 'Digital Ad Spend', department: 'MARKETING', status: 'ON TRACK', allocated: 85000, trend: '+1.2%', color: 'bg-emerald-500', fiscalYear: '2024-25', period: 'ANNUAL', threshold: 80 },
+  { name: 'Digital Ad Spend', department: 'MARKETING', status: 'ON TRACK', allocated: 85000, trend: '+1.2%', color: 'bg-blue-500', fiscalYear: '2024-25', period: 'ANNUAL', threshold: 80 },
   { name: 'Core Infrastructure R&D', department: 'R&D', status: 'OVER BUDGET', allocated: 120000, trend: '+5.8%', color: 'bg-rose-500', fiscalYear: '2024-25', period: 'ANNUAL', threshold: 80 },
   { name: 'Recruitment Drive', department: 'HUMAN RESOURCES', status: 'ON TRACK', allocated: 45000, trend: '+0.5%', color: 'bg-amber-500', fiscalYear: '2024-25', period: 'ANNUAL', threshold: 80 },
   { name: 'Cloud Server Upgrades', department: 'IT INFRASTRUCTURE', status: 'UNDER BUDGET', allocated: 90000, trend: '-1.1%', color: 'bg-indigo-500', fiscalYear: '2024-25', period: 'ANNUAL', threshold: 80 },

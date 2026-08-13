@@ -204,7 +204,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
     { id: 'To Do', label: 'TO DO', color: 'blue' },
     { id: 'In Progress', label: 'IN PROGRESS', color: 'blue' },
     { id: 'Review', label: 'REVIEW', color: 'purple' },
-    { id: 'Completed', label: 'DONE', color: 'emerald' },
+    { id: 'Completed', label: 'DONE', color: 'blue' },
   ];
 
   const getFilteredTasks = () => {
@@ -235,19 +235,19 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
   const totalTasks = getFilteredTasks().length || 1;
   const stats = [
     { label: 'TO DO', value: getTasksByStatus('To Do').length, percent: `${Math.round((getTasksByStatus('To Do').length / totalTasks) * 100)}% OF TOTAL`, icon: null, color: 'bg-blue-600', light: 'bg-blue-50' },
-    { label: 'IN PROGRESS', value: getTasksByStatus('In Progress').length, percent: `${Math.round((getTasksByStatus('In Progress').length / totalTasks) * 100)}% OF TOTAL`, icon: Clock, color: 'bg-emerald-500', light: 'bg-emerald-50' },
+    { label: 'IN PROGRESS', value: getTasksByStatus('In Progress').length, percent: `${Math.round((getTasksByStatus('In Progress').length / totalTasks) * 100)}% OF TOTAL`, icon: Clock, color: 'bg-blue-500', light: 'bg-blue-50' },
     { label: 'REVIEW', value: getTasksByStatus('Review').length, percent: `${Math.round((getTasksByStatus('Review').length / totalTasks) * 100)}% OF TOTAL`, icon: Eye, color: 'bg-purple-600', light: 'bg-purple-50' },
     { label: 'DUE TODAY', value: getTasksDueToday(), percent: `${Math.round((getTasksDueToday() / totalTasks) * 100)}% OF TOTAL`, icon: Calendar, color: 'bg-orange-500', light: 'bg-orange-50' },
-    { label: 'COMPLETED', value: getTasksByStatus('Completed').length, percent: `${Math.round((getTasksByStatus('Completed').length / totalTasks) * 100)}% OF TOTAL`, icon: CheckCircle2, color: 'bg-emerald-500', light: 'bg-emerald-50' },
+    { label: 'COMPLETED', value: getTasksByStatus('Completed').length, percent: `${Math.round((getTasksByStatus('Completed').length / totalTasks) * 100)}% OF TOTAL`, icon: CheckCircle2, color: 'bg-blue-500', light: 'bg-blue-50' },
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full overflow-x-hidden relative">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-6 sm:space-y-10 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full overflow-x-hidden relative">
       
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className={`bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-500 ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
+          <div key={i} className={`bg-white p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-500 ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}>
             <div className="flex justify-between items-start mb-4 sm:mb-6">
                <div className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${stat.light} ${stat.color.replace('bg-', 'text-')} shadow-sm`}>
                   {stat.label === 'TO DO' ? <ClipboardListIcon size={20} /> : <stat.icon size={20} />}
@@ -314,7 +314,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                          col.id === 'To Do' ? 'bg-blue-600' : 
                          col.id === 'In Progress' ? 'bg-orange-500' : 
                          col.id === 'Review' ? 'bg-purple-600' : 
-                         'bg-emerald-500'
+                         'bg-blue-500'
                        }`}></div>
                        <span className="text-[11px] font-black text-slate-800 tracking-[0.2em] uppercase">{col.label}</span>
                        <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-black">{getTasksByStatus(col.id).length}</span>
@@ -342,14 +342,14 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                       <div className={`absolute top-0 left-0 right-0 h-1 ${
                          task.priority === 'High' || task.priority === 'HIGH' ? 'bg-rose-500' : 
                          task.priority === 'Medium' || task.priority === 'MEDIUM' ? 'bg-orange-500' : 
-                         'bg-emerald-500'
+                         'bg-blue-500'
                       }`}></div>
 
                       <div className="flex justify-between items-start mb-4">
                          <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-slate-50
                            ${task.priority === 'High' || task.priority === 'HIGH' ? 'text-rose-500' : 
                              task.priority === 'Medium' || task.priority === 'MEDIUM' ? 'text-orange-500' : 
-                             'text-emerald-500'}`}>
+                             'text-blue-500'}`}>
                            {task.priority}
                          </span>
                          <button className="text-slate-200 hover:text-slate-400 transition-colors">
@@ -370,7 +370,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                             <div className={`w-2 h-2 rounded-full shrink-0 ${
                               col.id === 'In Progress' ? 'bg-orange-500' : 
                               col.id === 'Review' ? 'bg-purple-600' : 
-                              col.id === 'Completed' ? 'bg-emerald-500' : 
+                              col.id === 'Completed' ? 'bg-blue-500' : 
                               'bg-blue-600'
                             }`}></div>
                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">
@@ -448,7 +448,7 @@ const TaskManagement = ({ user, members = [], onView, assignments = [], tenders 
                          <p className="text-[9px] font-bold text-slate-400 tracking-tight italic truncate">
                            {task.project || (task.tender?.title ? task.tender.title.substring(0, 15) : 'General Project')}
                          </p>
-                         <p className={`text-[8px] font-black uppercase tracking-widest ${task.status === 'Completed' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                         <p className={`text-[8px] font-black uppercase tracking-widest ${task.status === 'Completed' ? 'text-blue-500' : 'text-rose-500'}`}>
                             {task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'DUE SOON'}
                          </p>
                        </div>

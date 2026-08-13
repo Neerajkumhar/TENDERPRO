@@ -113,7 +113,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
     { label: 'Total Tenders', value: tenders.length, color: 'slate' },
     { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
     { label: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo' },
-    { label: 'Total Projects', value: assignments?.length || 0, color: 'emerald' },
+    { label: 'Total Projects', value: assignments?.length || 0, color: 'blue' },
     { label: 'Completed Projects', value: assignments?.filter(a => a.status === 'Completed').length || 0, color: 'teal' },
     { label: 'Completed Tenders', value: tenders.filter(t => t.status === 'Completed').length, color: 'amber' },
   ];
@@ -142,7 +142,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
 
   // 2. Budget Distribution by Status
   const budgetByStatus = [
-    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#10b981' }, // emerald-500
+    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#3b82f6' }, // blue-500
     { name: 'In Pipeline (Active)', value: tenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#6366f1' }, // indigo-500
     { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#f43f5e' }, // rose-500
     { name: 'Drafts', value: tenders.filter(t => t.status === 'Draft').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#94a3b8' } // slate-400
@@ -169,7 +169,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowLeaveModal(false)}></div>
         <div className="bg-white w-full max-w-4xl max-h-[85vh] rounded-2xl sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col text-left">
           {/* Modal Header */}
-          <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/30">
+          <div className="p-4 sm:p-5 lg:p-6 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/30">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="p-2 sm:p-3 bg-amber-500 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-amber-200">
                 <Coffee size={20} className="sm:w-6 sm:h-6" />
@@ -188,7 +188,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
           </div>
 
           {/* Modal Content */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 custom-scrollbar">
             {loadingLeaves ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -207,7 +207,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                     <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
                       <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm
                         ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : 
-                          request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 
+                          request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 
                           'bg-rose-500 text-white shadow-rose-100'}`}>
                         {request.status}
                       </span>
@@ -254,7 +254,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                       <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
                         <button 
                           onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')}
-                          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 bg-emerald-500 text-white rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 bg-blue-500 text-white rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                         >
                           <CheckCircle2 size={12} className="sm:w-3.5 sm:h-3.5" />
                           Approve
@@ -299,7 +299,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation Header */}
       <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-white p-4 sm:p-6 rounded-xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white gap-4">
         <div className="flex overflow-x-auto pb-1 lg:pb-0 gap-2 w-full lg:w-auto">
@@ -372,7 +372,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
 
           {/* Charts Row - Matching Image 2 */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-            <div className="lg:col-span-6 bg-white p-4 sm:p-6 lg:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-5 lg:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-6 sm:mb-8">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
@@ -387,8 +387,8 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                   <AreaChart data={outcomesData}>
                     <defs>
                       <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
@@ -404,7 +404,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                       labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#10b981" fill="url(#colorWon)" strokeWidth={3} />
+                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={3} />
                     <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={3} />
                     <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="5 5" />
                   </AreaChart>
@@ -412,13 +412,13 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white p-4 sm:p-6 lg:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-5 lg:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
               <div className="flex justify-between items-start mb-6 sm:mb-8">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total budget distribution by status</p>
                 </div>
-                <div className="p-2.5 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl sm:rounded-2xl shrink-0">
+                <div className="p-2.5 sm:p-3 bg-blue-50 text-blue-600 rounded-xl sm:rounded-2xl shrink-0">
                   <BarChart3 size={20} />
                 </div>
               </div>
@@ -510,7 +510,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                       <td className="px-8 py-6 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
                       <td className="px-8 py-6">
                         <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest w-fit shadow-sm
-                          ${tender.status === 'Won' ? 'bg-emerald-500 text-white' : 
+                          ${tender.status === 'Won' ? 'bg-blue-500 text-white' : 
                             tender.status === 'Active' ? 'bg-indigo-600 text-white' : 
                             'bg-amber-500 text-white'}`}>
                           {tender.status}
@@ -527,7 +527,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                     </tr>
                   )) : (
                     <tr>
-                       <td colSpan="5" className="px-8 py-20 text-center">
+                       <td colSpan="5" className="px-8 py-10 text-center">
                          <p className="text-slate-400 italic font-medium">
                            {user?.role === 'Tender Manager'
                              ? 'No tenders assigned to you yet. Ask your administrator to assign you as a manager on a tender.'
@@ -600,7 +600,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                       <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit
                         ${tender.status === 'Draft' ? 'bg-slate-100 text-slate-600' :
                           tender.status === 'Active' ? 'bg-blue-100 text-blue-600' :
-                            tender.status === 'Won' ? 'bg-emerald-100 text-emerald-600' :
+                            tender.status === 'Won' ? 'bg-blue-100 text-blue-600' :
                               'bg-amber-100 text-amber-600'}`}>
                         {tender.status}
                       </div>
@@ -628,7 +628,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="px-8 py-20 text-center">
+                    <td colSpan="7" className="px-8 py-10 text-center">
                       <p className="text-slate-400 italic font-medium">
                         {user?.role === 'Tender Manager'
                           ? 'No tenders are assigned to you. Contact your admin to be assigned as a tender manager.'

@@ -64,7 +64,7 @@ const Reports = () => {
   const pieData = [
     { name: 'IT', value: 1245, color: '#3b82f6' },
     { name: 'Construction', value: 879, color: '#f59e0b' },
-    { name: 'Consulting', value: 458, color: '#10b981' },
+    { name: 'Consulting', value: 458, color: '#3b82f6' },
     { name: 'Ifi service', value: 300, color: '#8b5cf6' },
     { name: 'Others', value: 163, color: '#e2e8f0' },
   ];
@@ -133,7 +133,7 @@ const Reports = () => {
   const timeframeOptions = ['Today', 'This Week', 'This Month', 'This Quarter', 'This Year'];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       {/* Header Area */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">

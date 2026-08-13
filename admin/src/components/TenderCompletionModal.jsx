@@ -100,11 +100,11 @@ const TenderCompletionModal = ({ tender, onClose, onSubmit }) => {
             {Object.keys(documentLabels).map((key) => (
               <div key={key} className="relative group">
                 <div className={`p-5 rounded-3xl border-2 border-dashed transition-all flex items-center justify-between ${
-                  files[key] ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200 group-hover:border-blue-300'
+                  files[key] ? 'bg-blue-50/50 border-blue-200' : 'bg-slate-50 border-slate-200 group-hover:border-blue-300'
                 }`}>
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-2xl shadow-sm ${
-                      files[key] ? 'bg-white text-emerald-500' : 'bg-white text-slate-400'
+                      files[key] ? 'bg-white text-blue-500' : 'bg-white text-slate-400'
                     }`}>
                       {files[key] ? <CheckCircle2 size={24} /> : <FileText size={24} />}
                     </div>
@@ -118,7 +118,7 @@ const TenderCompletionModal = ({ tender, onClose, onSubmit }) => {
 
                   <label className={`cursor-pointer px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                     files[key] 
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' 
+                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-100' 
                     : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-500 hover:text-blue-600 shadow-sm'
                   }`}>
                     {files[key] ? 'Change File' : 'Upload File'}

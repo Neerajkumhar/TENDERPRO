@@ -85,16 +85,16 @@ The project is organized into three main components:
    npm run dev
    ```
 
-3. Start the client portal:
+3. Start the client portal & website:
    ```bash
    cd client
    npm run dev
    ```
 
-The applications will typically be available at:
-- Server: `http://localhost:5000`
-- Admin: `http://localhost:5173` (or the next available port)
-- Client: `http://localhost:5174` (or the next available port)
+The applications are available at:
+- **Server API**: `http://localhost:5000`
+- **Client & Website Portal**: `http://localhost:5173`
+- **Admin Dashboard**: `http://localhost:5174`
 
 ## Deployment
 

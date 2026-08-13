@@ -268,7 +268,7 @@ const Approvals = ({ user }) => {
                   <div className="flex gap-3 mt-6 pt-4 border-t border-slate-50">
                     <button 
                       onClick={() => handleLeaveAction(request.id, 'Approved')}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                     >
                       <CheckCircle2 size={14} />
                       Approve
@@ -335,7 +335,7 @@ const Approvals = ({ user }) => {
                   <div className="flex gap-3 mt-6 pt-4 border-t border-slate-50">
                     <button 
                       onClick={() => handleExpenseAction(expense, 'APPROVED')}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                     >
                       <CheckCircle2 size={14} />
                       Approve
@@ -403,7 +403,7 @@ const Approvals = ({ user }) => {
                   <div className="flex gap-3 mt-6 pt-4 border-t border-slate-50">
                     <button 
                       onClick={() => handleDocRequestAction(request.id, 'Approved')}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                     >
                       <CheckCircle2 size={14} />
                       Approve
@@ -494,7 +494,7 @@ const Approvals = ({ user }) => {
                       <div className="flex gap-3">
                         <button 
                           onClick={() => handleTenderAction(tender.id, 'approve')}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                         >
                           <CheckCircle2 size={14} />
                           Approve

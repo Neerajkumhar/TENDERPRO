@@ -12,7 +12,7 @@ const mockChallans = [
 ];
 
 const statusClasses = {
-  DELIVERED: 'bg-emerald-500 text-white',
+  DELIVERED: 'bg-blue-500 text-white',
   'IN TRANSIT': 'bg-blue-500 text-white',
   PENDING: 'bg-amber-500 text-slate-900',
   CANCELLED: 'bg-rose-500 text-white'
@@ -799,7 +799,7 @@ const DeliveryChallan = () => {
               </div>
             </div>
 
-            <div className="relative z-0 p-4 sm:p-10 print:p-8 space-y-6 print:space-y-4 print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
+            <div className="relative z-0 p-4 sm:p-10 print:p-5 space-y-4 print:space-y-4 print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
               {/* WATERMARK */}
               {receiptConfig.logoSrc && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[-1] opacity-[0.1]">
@@ -853,7 +853,7 @@ const DeliveryChallan = () => {
                         <span className="font-black text-slate-400 uppercase tracking-widest">Date</span>
                         <span className="font-bold text-slate-900">{selected.dispatchDate || ''}</span>
                         <span className="font-black text-slate-400 uppercase tracking-widest">Status</span>
-                        <span className="font-black text-emerald-600 uppercase tracking-widest">{selected.status}</span>
+                        <span className="font-black text-blue-600 uppercase tracking-widest">{selected.status}</span>
                     </div>
                   </div>
                 </div>
@@ -1020,7 +1020,7 @@ const DeliveryChallan = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         {[
           { label: 'TOTAL CHALLANS', value: totalChallans, sub: 'ALL CONSIGNMENTS', icon: BarChart3, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'DELIVERED', value: deliveredCount, sub: 'COMPLETED TRANSITS', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+          { label: 'DELIVERED', value: deliveredCount, sub: 'COMPLETED TRANSITS', icon: CheckCircle2, color: 'text-blue-500', bg: 'bg-blue-50' },
           { label: 'IN TRANSIT', value: transitCount, sub: 'ACTIVE ON ROAD', icon: Truck, color: 'text-blue-500', bg: 'bg-blue-50' },
           { label: 'PENDING', value: pendingCount, sub: 'AWAITING DISPATCH', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
           { label: 'ITEMS DISPATCHED', value: totalItems, sub: 'UNIT COUNT TOTAL', icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-50' }

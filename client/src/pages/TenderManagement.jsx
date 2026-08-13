@@ -37,7 +37,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Won': return 'bg-emerald-100 text-emerald-600 border-emerald-200';
+      case 'Won': return 'bg-blue-100 text-blue-600 border-blue-200';
       case 'Lost': return 'bg-rose-100 text-rose-600 border-rose-200';
       case 'Active': return 'bg-blue-100 text-blue-600 border-blue-200';
       case 'Registered': return 'bg-indigo-100 text-indigo-600 border-indigo-200';

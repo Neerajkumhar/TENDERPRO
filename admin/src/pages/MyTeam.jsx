@@ -48,7 +48,7 @@ const MyTeam = ({ user, members = [] }) => {
 
   const stats = [
     { label: 'TOTAL MEMBERS', value: members.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'ACTIVE NOW', value: members.filter(m => m.status === 'Active').length, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'ACTIVE NOW', value: members.filter(m => m.status === 'Active').length, icon: CheckCircle2, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'ON LEAVE', value: members.filter(m => m.status === 'On Leave').length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
     { label: 'NEW REQUESTS', value: '0', icon: UserPlus, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
@@ -120,7 +120,7 @@ const MyTeam = ({ user, members = [] }) => {
                       {member.image ? <img src={member.image} className="w-full h-full object-cover" alt="" /> : member.name.charAt(0).toUpperCase()}
                    </div>
                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 border-4 border-white rounded-full
-                     ${member.status === 'Active' ? 'bg-emerald-500' : 
+                     ${member.status === 'Active' ? 'bg-blue-500' : 
                        member.status === 'Busy' ? 'bg-rose-500' : 
                        member.status === 'On Leave' ? 'bg-amber-500' : 'bg-slate-300'}`}>
                    </div>
@@ -134,7 +134,7 @@ const MyTeam = ({ user, members = [] }) => {
                       {/* Dual Unread Badges */}
                       <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
                         {unreadCounts[member.id] > 0 && (
-                          <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                          <div className="min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
                             {unreadCounts[member.id]}
                           </div>
                         )}

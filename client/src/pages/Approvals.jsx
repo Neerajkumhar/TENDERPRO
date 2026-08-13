@@ -82,7 +82,7 @@ const Approvals = ({ user }) => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
@@ -183,7 +183,7 @@ const Approvals = ({ user }) => {
                   <div className="flex gap-3 mt-6 pt-4 border-t border-slate-50">
                     <button 
                       onClick={() => handleLeaveAction(request.id, 'Approved')}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                     >
                       <CheckCircle2 size={14} />
                       Approve
@@ -250,7 +250,7 @@ const Approvals = ({ user }) => {
                   <div className="flex gap-3 mt-6 pt-4 border-t border-slate-50">
                     <button 
                       onClick={() => handleExpenseAction(expense, 'APPROVED')}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                     >
                       <CheckCircle2 size={14} />
                       Approve

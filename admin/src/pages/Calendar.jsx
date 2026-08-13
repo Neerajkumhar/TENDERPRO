@@ -117,7 +117,7 @@ const CalendarPage = () => {
 
       reminders.forEach(r => {
         let color = '#a855f7';
-        if (r.type === 'Meeting') color = '#10b981';
+        if (r.type === 'Meeting') color = '#3b82f6';
         if (r.type === 'Review') color = '#f59e0b';
         if (r.type === 'Event') color = '#93c5fd';
         allEvents.push({
@@ -273,7 +273,7 @@ const CalendarPage = () => {
     { label: 'Tender Events', color: '#3b82f6' },
     { label: 'Submission Deadlines', color: '#ef4444' },
     { label: 'Bid Reviews', color: '#f59e0b' },
-    { label: 'Meetings', color: '#10b981' },
+    { label: 'Meetings', color: '#3b82f6' },
     { label: 'Reminders', color: '#a855f7' },
     { label: 'Approval Dates', color: '#93c5fd' },
   ];

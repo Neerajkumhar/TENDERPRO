@@ -178,7 +178,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
           </div>
 
           {/* Modal Content */}
-          <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
             {loadingLeaves ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -197,7 +197,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     <div className="absolute top-6 right-6">
                       <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm
                         ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : 
-                          request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 
+                          request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 
                           'bg-rose-500 text-white shadow-rose-100'}`}>
                         {request.status}
                       </span>
@@ -244,7 +244,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                       <div className="flex gap-3 mt-6">
                         <button 
                           onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                          className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
                         >
                           <CheckCircle2 size={14} />
                           Approve
@@ -294,7 +294,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
       { label: 'TOTAL TENDERS', value: tenders.length, color: 'slate' },
       { label: 'ACTIVE BIDS', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
       { label: 'SUBMITTED', value: tenders.filter(t => t.status === 'Submitted').length, color: 'indigo' },
-      { label: 'WON', value: tenders.filter(t => t.status === 'Won' || t.status === 'Completed').length, color: 'emerald' },
+      { label: 'WON', value: tenders.filter(t => t.status === 'Won' || t.status === 'Completed').length, color: 'blue' },
       { label: 'LOST', value: tenders.filter(t => t.status === 'Lost' || t.status === 'Due').length, color: 'rose' },
       { label: 'APPROVAL PENDING', value: tenders.filter(t => t.status === 'Review' || t.status === 'Draft' || !t.status).length, color: 'amber' },
     ];
@@ -322,7 +322,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
     const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
 
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8 animate-in fade-in duration-700 bg-[#fbfcfd]">
+      <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 lg:space-y-6 animate-in fade-in duration-700 bg-[#fbfcfd]">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Tender Overview</h1>
@@ -391,8 +391,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                 <BarChart3 size={20} />
               </div>
             </div>
-            <div className="flex items-center h-[300px] gap-8">
-               <div className="flex-1 space-y-4">
+            <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[300px] gap-6 sm:gap-8">
+               <div className="w-full sm:flex-1 space-y-4">
                   {categoryData.map((cat, i) => (
                     <div key={i} className="space-y-1">
                       <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -404,7 +404,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     </div>
                   ))}
                </div>
-               <div className="w-1/2 h-full relative flex items-center justify-center">
+               <div className="w-full sm:w-1/2 h-[220px] sm:h-full relative flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <PieChart>
                       <Pie
@@ -467,11 +467,11 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     </td>
                     <td className="px-8 py-6">
                       <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest w-fit
-                        ${tender.status === 'Won' || tender.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 
+                        ${tender.status === 'Won' || tender.status === 'Completed' ? 'bg-blue-50 text-blue-600' : 
                           tender.status === 'Lost' || tender.status === 'Due' ? 'bg-rose-50 text-rose-600' :
                           tender.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
                           'bg-indigo-50 text-indigo-600'}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${tender.status === 'Won' || tender.status === 'Completed' ? 'bg-emerald-500' : tender.status === 'Lost' || tender.status === 'Due' ? 'bg-rose-500' : tender.status === 'Active' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
+                        <div className={`w-1.5 h-1.5 rounded-full ${tender.status === 'Won' || tender.status === 'Completed' ? 'bg-blue-500' : tender.status === 'Lost' || tender.status === 'Due' ? 'bg-rose-500' : tender.status === 'Active' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
                         {tender.status || 'DRAFT'}
                       </div>
                     </td>
@@ -484,7 +484,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
+                    <td colSpan="7" className="px-8 py-10 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
                   </tr>
                 )}
               </tbody>
@@ -507,7 +507,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   const stats = [
     { label: 'Total Projects', value: departmentProjects.length, subtext: 'Assigned', color: 'slate' },
     { label: 'Active Tasks', value: departmentTasks.filter(t => t.status !== 'Completed' && t.status !== 'Done').length, subtext: 'In Progress', color: 'blue' },
-    { label: 'Done Tasks', value: departmentTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, subtext: 'Completed', color: 'emerald' },
+    { label: 'Done Tasks', value: departmentTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, subtext: 'Completed', color: 'blue' },
     { label: 'Team Size', value: members.filter(m => m.departmentId === user.departmentId).length, subtext: 'Members', color: 'slate' },
     { label: 'High Priority', value: departmentTasks.filter(t => t.priority === 'High' || t.priority === 'Critical').length, subtext: 'Critical', color: 'rose', hasAlert: true },
   ];
@@ -515,7 +515,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
   const departmentMembers = members.filter(m => m.departmentId === user.departmentId);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in duration-700 bg-[#f8fafc] min-h-full">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
@@ -536,7 +536,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
+          <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative group hover:shadow-xl transition-all duration-500">
             {stat.hasAlert && stat.value > 0 && (
               <div className="absolute top-4 right-4 w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 animate-pulse">
                 <AlertTriangle size={12} />
@@ -581,7 +581,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     </td>
                     <td className="px-4 sm:px-8 py-4 sm:py-6">
                       <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest
-                        ${item.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 
+                        ${item.status === 'Completed' ? 'bg-blue-100 text-blue-600' : 
                           item.status === 'In Progress' ? 'bg-blue-100 text-blue-600' : 
                           'bg-amber-100 text-amber-600'}`}>
                         {item.status}
@@ -605,7 +605,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                 );
               }) : (
                 <tr>
-                  <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">No projects assigned to your department.</td>
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 italic font-medium">No projects assigned to your department.</td>
                 </tr>
               )}
             </tbody>
@@ -639,10 +639,10 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                           {member.name[0]}
                         </div>
                       )}
-                      <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full shadow-sm ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                      <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full shadow-sm ${member.status === 'Active' ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
                       
                       {unreadCounts[member.id] > 0 && (
-                        <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce z-10">
+                        <div className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-blue-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce z-10">
                           {unreadCounts[member.id]}
                         </div>
                       )}
@@ -656,7 +656,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                   
                   <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                     <div 
-                      className={`h-full rounded-full transition-all duration-1000 ease-out ${workload > 75 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : workload > 50 ? 'bg-blue-600' : 'bg-emerald-500'}`} 
+                      className={`h-full rounded-full transition-all duration-1000 ease-out ${workload > 75 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : workload > 50 ? 'bg-blue-600' : 'bg-blue-500'}`} 
                       style={{width: `${workload}%`}}
                     ></div>
                   </div>
@@ -691,7 +691,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                   <Pie
                     data={[
                       { name: 'In Progress', value: departmentProjects.filter(p => p.status === 'In Progress').length, color: '#3b82f6' },
-                      { name: 'Completed', value: departmentProjects.filter(p => p.status === 'Completed').length, color: '#10b981' },
+                      { name: 'Completed', value: departmentProjects.filter(p => p.status === 'Completed').length, color: '#3b82f6' },
                       { name: 'Pending', value: departmentProjects.filter(p => p.status === 'Pending').length, color: '#f59e0b' }
                     ]}
                     cx="50%"
@@ -702,7 +702,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     dataKey="value"
                   >
                     <Cell fill="#3b82f6" stroke="none" />
-                    <Cell fill="#10b981" stroke="none" />
+                    <Cell fill="#3b82f6" stroke="none" />
                     <Cell fill="#f59e0b" stroke="none" />
                   </Pie>
                   <Tooltip 
@@ -718,7 +718,7 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
             <div className="w-full md:w-1/2 space-y-4">
                {[
                  { label: 'In Progress', count: departmentProjects.filter(p => p.status === 'In Progress').length, color: 'blue' },
-                 { label: 'Completed', count: departmentProjects.filter(p => p.status === 'Completed').length, color: 'emerald' },
+                 { label: 'Completed', count: departmentProjects.filter(p => p.status === 'Completed').length, color: 'blue' },
                  { label: 'Pending', count: departmentProjects.filter(p => p.status === 'Pending').length, color: 'amber' }
                ].map((item, i) => (
                  <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">

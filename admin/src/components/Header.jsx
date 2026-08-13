@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Plus, ChevronDown, Command, Menu, LogOut, User, MessageSquare } from 'lucide-react';
+import { Search, Bell, Plus, ChevronDown, Command, Menu, LogOut, User, MessageSquare, Sun, Moon } from 'lucide-react';
 
-const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogout, onOpenMessages, onNotificationClick }) => {
+const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogout, onOpenMessages, onNotificationClick, onSimulateTrialExpiry, isSubscriptionActive, isTrialExpired }) => {
   const [showDropdownMenu, setShowDropdownMenu] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -10,12 +10,13 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
   const [lastTotalUnread, setLastTotalUnread] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchUnread = async () => {
       if (!user?.id) return;
       try {
-        // Fetch received unread
         const resReceived = await fetch('/api/messages/' + user.id + '/unread');
         let receivedTotal = 0;
         if (resReceived.ok) {
@@ -32,7 +33,6 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           setLastTotalUnread(receivedTotal);
         }
 
-        // Fetch sent unread
         const resSent = await fetch('/api/messages/' + user.id + '/sent-unread');
         if (resSent.ok) {
           const data = await resSent.json();
@@ -56,7 +56,6 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
         const res = await fetch(`/api/notifications/${user.id}?panel=admin`);
         if (res.ok) {
           const data = await res.json();
-          // Filter out read notifications so they don't reappear on refresh
           setNotifications(data.filter(n => !n.isRead));
         }
       } catch (err) {
@@ -80,7 +79,6 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id })
       });
-      // Remove the notification entirely from the list once clicked
       setNotifications(prev => prev.filter(n => n.id !== notif.id));
       
       let redirectUrl = notif.actionUrl;
@@ -117,67 +115,95 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
     }
   };
 
-  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
-
+  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length || 6;
   const displayTotal = totalUnread;
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-[40]">
+    <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-[40]">
+      {/* Left side: Hamburger menu & Global Search input with shortcut badge */}
       <div className="flex items-center gap-4 flex-1">
         <button 
           onClick={toggleMobileMenu}
-          className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+          className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
+          title="Toggle Menu"
         >
-          <Menu size={24} />
+          <Menu size={20} />
         </button>
+
+        <div className="relative max-w-md w-full hidden sm:block">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text"
+            placeholder="Search anything..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-20 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-blue-500 focus:bg-white transition"
+          />
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 bg-slate-200/70 border border-slate-300/50 rounded text-[10px] font-mono text-slate-500">
+            Ctrl + /
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Right side actions */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* New Tender Action Button */}
+        {user?.role !== 'Super Admin' && (
+          <button 
+            onClick={onCreateTender}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-xl text-xs font-semibold transition-colors shadow-sm shadow-blue-200"
+          >
+            <Plus size={16} />
+            <span className="hidden lg:block">New Tender</span>
+            <div className="hidden lg:block w-px h-4 bg-white/20 mx-1"></div>
+            <ChevronDown size={14} className="hidden lg:block" />
+          </button>
+        )}
+
+        {/* Theme Toggle Button */}
         <button 
-          onClick={onCreateTender}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-200"
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+          title="Toggle Theme"
         >
-          <Plus size={18} />
-          <span className="hidden lg:block">New Tender</span>
-          <div className="hidden lg:block w-px h-4 bg-white/20 mx-1"></div>
-          <ChevronDown size={14} className="hidden lg:block" />
+          {isDarkMode ? <Moon size={18} /> : <Sun size={18} />}
         </button>
 
+        {/* Messages Button */}
         <button 
           onClick={onOpenMessages}
-          className="relative p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+          className="relative p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+          title="Messages"
         >
-          <MessageSquare size={20} />
+          <MessageSquare size={18} />
           {displayTotal > 0 && (
-            <span className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce ${totalUnread > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+            <span className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce ${totalUnread > 0 ? 'bg-blue-500' : 'bg-amber-500'}`}>
               {displayTotal > 99 ? '99+' : displayTotal}
             </span>
           )}
         </button>
 
+        {/* Notifications Dropdown Button */}
         <div className="relative">
           <button 
             onClick={() => { setShowNotificationsDropdown(!showNotificationsDropdown); setShowDropdownMenu(false); }}
-            className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all"
+            className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+            title="Notifications"
           >
-            <Bell size={20} />
-            {unreadNotificationsCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">
-                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
-              </span>
-            )}
+            <Bell size={18} />
+            <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center rounded-full border border-white shadow-xs">
+              {unreadNotificationsCount}
+            </span>
           </button>
 
           {showNotificationsDropdown && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotificationsDropdown(false)}></div>
               <div className="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto top-16 sm:top-auto mt-2 w-auto sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[80vh] sm:max-h-none flex flex-col">
-                <div className="px-3 py-2 sm:px-4 sm:py-2 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
-                    {unreadNotificationsCount > 0 && (
-                      <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{unreadNotificationsCount} new</span>
-                    )}
+                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">{unreadNotificationsCount} new</span>
                   </div>
                   {notifications.length > 0 && (
                     <button 
@@ -190,16 +216,16 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
                 </div>
                 <div className="max-h-[60vh] sm:max-h-[300px] overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <div className="p-3 sm:p-4 text-center text-sm text-slate-500">No notifications</div>
+                    <div className="p-4 text-center text-xs text-slate-500">No new notifications</div>
                   ) : (
                     notifications.map(notif => (
                       <div 
                         key={notif.id} 
                         onClick={() => markNotificationAsRead(notif)}
-                        className={`px-3 py-2 sm:px-4 sm:py-3 border-b border-slate-50 cursor-pointer transition-colors hover:bg-slate-50 ${notif.isRead ? 'opacity-60' : 'bg-blue-50/30'}`}
+                        className={`px-4 py-3 border-b border-slate-50 cursor-pointer transition-colors hover:bg-slate-50 ${notif.isRead ? 'opacity-60' : 'bg-blue-50/30'}`}
                       >
-                        <p className="text-sm text-slate-700 font-medium mb-1 line-clamp-2">{notif.message}</p>
-                        <p className="text-xs text-slate-400 font-mono">
+                        <p className="text-xs text-slate-700 font-medium mb-1 line-clamp-2">{notif.message}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">
                           {new Date(notif.createdAt).toLocaleDateString()} {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </p>
                       </div>
@@ -211,49 +237,50 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           )}
         </div>
 
-        <div className="h-8 w-px bg-slate-200 mx-2"></div>
+        <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
+        {/* User Account Menu */}
         <div className="relative">
           <button 
             onClick={() => setShowDropdownMenu(!showDropdownMenu)}
-            className="flex items-center gap-3 p-1 pl-2 hover:bg-slate-50 rounded-lg transition-all group"
+            className="flex items-center gap-3 p-1 hover:bg-slate-100 rounded-xl transition-all group"
             title="Account Menu"
           >
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-semibold text-slate-800 leading-tight">{user?.name || 'Admin'}</p>
-              <p className="text-[11px] text-slate-500 uppercase tracking-widest font-black line-clamp-1 max-w-[120px]">
-                {user?.role || 'Admin'} {user?.department ? ' • ' + user.department : ''}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                {(user?.name ? user.name[0] : 'S')}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div className="text-left hidden sm:block">
+              <p className="text-xs font-bold text-slate-800 leading-tight">{user?.name || 'Super Admin'}</p>
+              <p className="text-[10px] text-slate-400 font-medium">
+                {user?.role || 'Super Admin'}
               </p>
             </div>
-            <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm text-indigo-700 font-bold">
-                {(user?.name ? user.name[0] : 'A')}
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
-            </div>
-            <ChevronDown size={16} className={'text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ' + (showDropdownMenu ? 'rotate-180' : '')} />
+            <ChevronDown size={14} className={'text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ' + (showDropdownMenu ? 'rotate-180' : '')} />
           </button>
 
           {showDropdownMenu && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowDropdownMenu(false)}></div>
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 p-8 z-50 animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 animate-in fade-in zoom-in-95 duration-200 space-y-1">
                 <button 
                   onClick={() => { onProfileClick(); setShowDropdownMenu(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 rounded-2xl transition-all text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-all text-left text-xs font-bold text-slate-700"
                 >
-                  <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
-                    <User size={18} />
-                  </div>
-                  <span className="text-sm font-black text-slate-700 tracking-tight">View Profile Settings</span>
+                  <User size={16} className="text-blue-600" />
+                  <span>Profile Settings</span>
                 </button>
 
-                <div className="h-px bg-slate-100 my-6 mx-2"></div>
-                <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-rose-50 text-rose-500 rounded-2xl transition-all text-left group">
-                  <div className="p-2 bg-rose-50 text-rose-500 rounded-xl group-hover:bg-white transition-all">
-                    <LogOut size={16} />
-                  </div>
-                  <span className="text-sm font-black tracking-tight">Logout Session</span>
+                <div className="h-px bg-slate-100 my-2"></div>
+                
+                <button 
+                  onClick={onLogout} 
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-rose-50 text-rose-500 rounded-xl transition-all text-left text-xs font-bold"
+                >
+                  <LogOut size={16} />
+                  <span>Logout Session</span>
                 </button>
               </div>
             </>

@@ -124,6 +124,15 @@ async function initializeDatabase() {
           departmentId: dept.id
         });
 
+        // Create Super Admin user
+        await User.create({
+          name: 'Super Admin',
+          email: 'superadmin@vagwiin.com',
+          password: '12345678',
+          role: 'Super Admin',
+          departmentId: dept.id
+        });
+
         // Create Tender Manager user
         await User.create({
           name: 'Tender Manager User',

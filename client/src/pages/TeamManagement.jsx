@@ -38,7 +38,7 @@ import {
 
 const statsData = [
   { label: 'Total Team', value: '42', trend: '+ 2', isUp: true, color: 'blue', icon: Users },
-  { label: 'Active Now', value: '38', trend: '92%', isUp: true, color: 'emerald', icon: UserCheck },
+  { label: 'Active Now', value: '38', trend: '92%', isUp: true, color: 'blue', icon: UserCheck },
   { label: 'Departments', value: '6', trend: 'Global', isUp: true, color: 'indigo', icon: Building2 },
   { label: 'On Leave', value: '4', trend: '- 1', isUp: false, color: 'amber', icon: Clock },
 ];
@@ -176,7 +176,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
   });
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in duration-700">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -208,7 +208,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: 'Total Team', value: teamMembers.length, trend: '+ 2', isUp: true, color: 'blue', icon: Users },
-          { label: 'Active Now', value: teamMembers.filter(m => m.status === 'Active').length, trend: '92%', isUp: true, color: 'emerald', icon: UserCheck },
+          { label: 'Active Now', value: teamMembers.filter(m => m.status === 'Active').length, trend: '92%', isUp: true, color: 'blue', icon: UserCheck },
           { label: 'Departments', value: departments.length, trend: 'Global', isUp: true, color: 'indigo', icon: Building2 },
           { label: 'On Leave', value: teamMembers.filter(m => m.status === 'On Leave').length, trend: '- 1', isUp: false, color: 'amber', icon: Clock },
         ].map((stat, i) => (
@@ -218,7 +218,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               <div className={`p-1.5 sm:p-2 rounded-lg bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all`}>
                 <stat.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
               </div>
-              <div className={`text-[8px] sm:text-[10px] font-black ${stat.isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <div className={`text-[8px] sm:text-[10px] font-black ${stat.isUp ? 'text-blue-600' : 'text-rose-600'}`}>
                 {stat.trend}
               </div>
             </div>
@@ -271,7 +271,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                 <tbody className="divide-y divide-slate-50">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="6" className="py-20 text-center font-black text-slate-400">Loading directory...</td>
+                      <td colSpan="6" className="py-10 text-center font-black text-slate-400">Loading directory...</td>
                     </tr>
                   ) : filteredMembers.map((member) => (
                     <tr 
@@ -293,7 +293,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                             {/* Dual Unread Badges */}
                             <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
                               {unreadCounts[member.id] > 0 && (
-                                <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                                <div className="min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
                                   {unreadCounts[member.id]}
                                 </div>
                               )}
@@ -315,9 +315,9 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                       </td>
                       <td className="px-6 py-4">
                         <div className={`flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider ${
-                          member.status === 'Active' ? 'text-emerald-600' : 'text-amber-600'
+                          member.status === 'Active' ? 'text-blue-600' : 'text-amber-600'
                         }`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                          <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'Active' ? 'bg-blue-500' : 'bg-amber-500'}`}></div>
                           <span className="hidden sm:inline">{member.status || 'Active'}</span>
                         </div>
                       </td>
@@ -478,7 +478,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
                           <User size={18} />
                         </div>
                       )}
-                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full flex items-center justify-center">
                         <CheckCircle2 className="text-white" size={8} />
                       </div>
                     </div>
@@ -518,7 +518,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateDept} className="p-6 sm:p-8 space-y-6">
+            <form onSubmit={handleCreateDept} className="p-6 sm:p-5 space-y-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dept Name</label>
                 <input 
@@ -531,7 +531,7 @@ const TeamManagement = ({ onMemberClick, departments, fetchDepartments }) => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Theme Color</label>
                 <div className="flex flex-wrap gap-3">
-                  {['#3b82f6', '#10b981', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'].map(color => (
+                  {['#3b82f6', '#3b82f6', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'].map(color => (
                     <label key={color} className="relative cursor-pointer group">
                       <input type="radio" name="color" value={color} className="sr-only peer" defaultChecked={color === '#3b82f6'} />
                       <div className="w-8 h-8 rounded-lg transition-all peer-checked:ring-4 ring-offset-2 ring-slate-200" style={{ backgroundColor: color }}></div>

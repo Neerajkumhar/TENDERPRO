@@ -130,7 +130,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
               <span className={`px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider
                 ${category.status === 'ON TRACK' ? 'bg-blue-600 text-white' : 
                   category.status === 'OVER BUDGET' ? 'bg-rose-500 text-white' : 
-                  'bg-emerald-505 text-white'}`}>
+                  'bg-blue-500 text-white'}`}>
                 {category.status}
               </span>
             </div>
@@ -166,7 +166,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
         </div>
 
         <div className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
-          <div className="p-2.5 rounded-xl bg-emerald-50/50 text-emerald-500 mb-3">
+          <div className="p-2.5 rounded-xl bg-blue-50/50 text-blue-500 mb-3">
             <TrendingUp size={16} />
           </div>
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Total Spent</span>
@@ -181,7 +181,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
             </div>
             <div className="text-right">
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Current Trend</span>
-              <div className={`flex items-center justify-end gap-1 text-[10px] font-bold ${category.trend.startsWith('+') ? 'text-rose-500' : 'text-emerald-500'}`}>
+              <div className={`flex items-center justify-end gap-1 text-[10px] font-bold ${category.trend.startsWith('+') ? 'text-rose-500' : 'text-blue-500'}`}>
                 <ArrowUpRight size={12} className={category.trend.startsWith('-') ? 'rotate-90' : ''} />
                 <span>{category.trend} This Month</span>
               </div>
@@ -275,7 +275,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
                   <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800">{trx.description}</td>
                   <td className="px-5 sm:px-8 py-4">
                     <span className={`px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider
-                      ${trx.status === 'Completed' ? 'bg-emerald-555 text-white' : 
+                      ${trx.status === 'Completed' ? 'bg-blue-500 text-white' : 
                         trx.status === 'Pending' ? 'bg-amber-555 text-white' : 
                         'bg-blue-555 text-white'}`}>
                       {trx.status}

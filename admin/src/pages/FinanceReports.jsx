@@ -121,7 +121,7 @@ const FinanceReports = () => {
              <h3 className="text-xl font-black text-slate-900 tracking-tight mb-2">{stat.value}</h3>
              {stat.change && (
                <div className={`flex items-center gap-1 text-[9px] font-black uppercase
-                 ${stat.up ? 'text-emerald-500' : 'text-rose-500'}`}>
+                 ${stat.up ? 'text-blue-500' : 'text-rose-500'}`}>
                   {stat.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                   <span>{stat.change} change</span>
                </div>
@@ -225,12 +225,12 @@ const FinanceReports = () => {
                        <td className="py-7 text-[11px] font-bold text-slate-400 uppercase tracking-widest italic leading-tight max-w-[200px]">"{row.desc}"</td>
                        <td className="py-7 text-sm font-black text-slate-900">{row.planned}</td>
                        <td className="py-7 text-sm font-black text-slate-900">{row.actual}</td>
-                       <td className={`py-7 text-[11px] font-black tracking-tight ${row.variance.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'}`}>
+                       <td className={`py-7 text-[11px] font-black tracking-tight ${row.variance.startsWith('+') ? 'text-blue-500' : 'text-rose-500'}`}>
                           {row.variance}
                        </td>
                        <td className="py-7">
                           <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] shadow-sm
-                            ${row.status === 'ON TRACK' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                            ${row.status === 'ON TRACK' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>
                              {row.status}
                           </span>
                        </td>

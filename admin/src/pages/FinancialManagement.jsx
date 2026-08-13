@@ -52,7 +52,7 @@ const budgetVsExpenseData = [
 
 const categoryData = [
   { name: 'Salaries', value: 35, color: '#3b82f6' },
-  { name: 'Marketing', value: 20, color: '#10b981' },
+  { name: 'Marketing', value: 20, color: '#3b82f6' },
   { name: 'Infrastructure', value: 25, color: '#f59e0b' },
   { name: 'Operations', value: 20, color: '#6366f1' },
 ];
@@ -60,7 +60,7 @@ const categoryData = [
 const alerts = [
   { type: 'Financial Warning', message: 'Budget overspend Acme Corp.', time: '1 hour ago', color: 'rose' },
   { type: 'Financial Warning', message: 'Unusual expense spike in Marketing.', time: '2 hours ago', color: 'amber' },
-  { type: 'Approval', message: 'Expense claim ₹5,000 approved.', time: '4 hours ago', color: 'emerald' },
+  { type: 'Approval', message: 'Expense claim ₹5,000 approved.', time: '4 hours ago', color: 'blue' },
   { type: 'Approval', message: 'New invoice generated for TechCorp.', time: '5 hours ago', color: 'blue' },
 ];
 
@@ -353,7 +353,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
   const statsData = [
     { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString('en-IN')}`, trend: 'Updated', isUp: true, color: 'blue', icon: IndianRupee },
     { label: 'Total Expenses', value: `₹${stats.totalExpenses.toLocaleString('en-IN')}`, trend: 'Live', isUp: false, color: 'rose', icon: TrendingDown },
-    { label: 'Net Profit', value: `₹${stats.netProfit.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'emerald', icon: TrendingUp },
+    { label: 'Net Profit', value: `₹${stats.netProfit.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'blue', icon: TrendingUp },
     { label: 'Cash Flow', value: `₹${stats.cashFlow.toLocaleString('en-IN')}`, trend: 'Stable', isUp: true, color: 'indigo', icon: Wallet },
     { label: 'Budget Used', value: getBudgetUsed(), trend: 'On track', isUp: true, color: 'amber', icon: FileText, isProgress: true },
     { label: 'Pending Invoices', value: String(stats.pendingCount), trend: 'Real', isUp: false, color: 'orange', icon: Clock },
@@ -374,7 +374,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         type = 'Financial Warning';
         message = `Invoice for ${inv.client} is Overdue!`;
       } else if (inv.status === 'Paid') {
-        color = 'emerald';
+        color = 'blue';
         type = 'Approval';
         message = `Payment of ₹${parseFloat(inv.amount || 0).toLocaleString('en-IN')} received from ${inv.client}.`;
       }
@@ -423,7 +423,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       </div>
 
       <div className="grid grid-cols-12 gap-6 sm:gap-8">
-        <div className="col-span-12 xl:col-span-8 card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
+        <div className="col-span-12 xl:col-span-8 card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
             <div>
               <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Revenue vs Expense</h3>
@@ -435,7 +435,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue (Billed)</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200"></span>
+                <span className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></span>
                 <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -453,8 +453,8 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -488,7 +488,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 <Area 
                   type="monotone" 
                   dataKey="payment" 
-                  stroke="#10b981" 
+                  stroke="#3b82f6" 
                   strokeWidth={3} 
                   fillOpacity={1} 
                   fill="url(#colorPay)" 
@@ -505,7 +505,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-4 card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative">
+        <div className="col-span-12 xl:col-span-4 card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 relative">
           <div className="flex justify-between items-center mb-6 sm:mb-8">
             <div>
               <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase">Recent Alerts</h3>
@@ -547,7 +547,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         </div>
 
         <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-          <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/30">
+          <div className="p-4 sm:p-5 lg:p-6 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/30">
             <div>
               <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Invoice Status Table</h3>
               <p className="text-xs text-slate-500 font-medium mt-1">Detailed log of recent financial transactions</p>
@@ -623,7 +623,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                       ₹{parseFloat(inv.amount || 0).toLocaleString('en-IN')}
                     </td>
                     <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
-                      <div className={`w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm whitespace-nowrap ${inv.status === 'Paid' ? 'bg-emerald-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
+                      <div className={`w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm whitespace-nowrap ${inv.status === 'Paid' ? 'bg-blue-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
                     </td>
                     <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
                       <div className="flex items-center justify-center gap-2">
@@ -638,7 +638,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="6" className="px-8 py-20 text-center text-slate-400 italic font-medium">No invoices found.</td>
+                    <td colSpan="6" className="px-8 py-10 text-center text-slate-400 italic font-medium">No invoices found.</td>
                   </tr>
                 )}
               </tbody>
@@ -732,7 +732,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
                 <div className="space-y-2 text-left">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
-                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-blue-200 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
                     <input 
                       type="file" 
                       className="absolute inset-0 opacity-0 cursor-pointer" 
@@ -742,8 +742,8 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                       <Loader2 className="animate-spin text-blue-500" size={24} />
                     ) : formData.attachment ? (
                       <>
-                        <CheckCircle2 className="text-emerald-500" size={24} />
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Document Uploaded</p>
+                        <CheckCircle2 className="text-blue-500" size={24} />
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Document Uploaded</p>
                       </>
                     ) : (
                       <>

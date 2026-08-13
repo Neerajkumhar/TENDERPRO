@@ -38,6 +38,19 @@ import InvoiceDetails from './pages/InvoiceDetails'
 import ExpenseDetails from './pages/ExpenseDetails'
 import Approvals from './pages/Approvals'
 import CompletedTenders from './pages/CompletedTenders'
+import SuperAdminDashboard from './pages/SuperAdminDashboard'
+import Organizations from './pages/Organizations'
+import UsersPage from './pages/UsersPage'
+import RolesAndPermissions from './pages/RolesAndPermissions'
+import SubscriptionPlans from './pages/SubscriptionPlans'
+import SubscriptionsPage from './pages/SubscriptionsPage'
+import PaymentsPage from './pages/PaymentsPage'
+import InvoicesPage from './pages/InvoicesPage'
+import RevenuePage from './pages/RevenuePage'
+import ModulesPage from './pages/ModulesPage'
+import SettingsPage from './pages/SettingsPage'
+import PublicWebsite from './pages/PublicWebsite'
+import TrialExpiredGate from './components/TrialExpiredGate'
 
 function App() {
   const checkUrlAuth = () => {
@@ -48,8 +61,8 @@ function App() {
     if (urlToken && urlUser) {
       try {
         const parsedUser = JSON.parse(decodeURIComponent(urlUser));
-        // Only accept Admin users on the admin panel to avoid loops
-        if (parsedUser.role === 'Admin') {
+        // Accept Admin and Super Admin users on the admin panel
+        if (parsedUser.role === 'Admin' || parsedUser.role === 'Super Admin') {
           localStorage.setItem('token', urlToken);
           localStorage.setItem('user', JSON.stringify(parsedUser));
           
@@ -78,6 +91,7 @@ function App() {
       case 'Project Manager': return 'Dashboard';
       case 'Finance Manager': return 'Financial Management';
       case 'Core Team': return 'Member Dashboard';
+      case 'Super Admin': return 'Super Admin Dashboard';
       case 'Admin': return 'Dashboard';
       default: return 'Dashboard';
     }
@@ -102,9 +116,45 @@ function App() {
 
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialToken);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState(initialUser);
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [messagesActiveChatId, setMessagesActiveChatId] = useState(null);
+
+  // 3-Day Trial & Subscription State
+  const [preSelectedPlan, setPreSelectedPlan] = useState(() => localStorage.getItem('preSelectedPlan') || 'Business Plan');
+  const [subscriptionActive, setSubscriptionActive] = useState(() => localStorage.getItem('subscriptionActive') === 'true');
+  const [isTrialExpiredSimulated, setIsTrialExpiredSimulated] = useState(() => localStorage.getItem('isTrialExpiredSimulated') === 'true');
+
+  const checkIsTrialExpired = () => {
+    if (subscriptionActive) return false;
+    if (isTrialExpiredSimulated) return true;
+    const startDate = localStorage.getItem('trialStartDate');
+    if (!startDate) return false;
+    const elapsedDays = (new Date() - new Date(startDate)) / (1000 * 60 * 60 * 24);
+    return elapsedDays >= 3;
+  };
+
+  const isTrialExpired = checkIsTrialExpired();
+
+  const handleSimulateTrialExpiry = () => {
+    if (isTrialExpiredSimulated || isTrialExpired) {
+      localStorage.removeItem('isTrialExpiredSimulated');
+      setIsTrialExpiredSimulated(false);
+    } else {
+      localStorage.setItem('isTrialExpiredSimulated', 'true');
+      setIsTrialExpiredSimulated(true);
+    }
+  };
+
+  const handlePaymentSuccess = (planName) => {
+    localStorage.setItem('subscriptionActive', 'true');
+    localStorage.setItem('preSelectedPlan', planName);
+    localStorage.removeItem('isTrialExpiredSimulated');
+    setSubscriptionActive(true);
+    setPreSelectedPlan(planName);
+    setIsTrialExpiredSimulated(false);
+  };
 
   const [previousTab, setPreviousTab] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -125,7 +175,7 @@ function App() {
   const [editTenderData, setEditTenderData] = useState(null)
 
   useEffect(() => {
-    if (isAuthenticated && user?.role !== 'Admin') {
+    if (isAuthenticated && !['Admin', 'Super Admin'].includes(user?.role)) {
       const token = localStorage.getItem('token');
       // Clear admin-side local storage first so we don't end up in redirect loops
       localStorage.removeItem('token');
@@ -134,6 +184,15 @@ function App() {
       window.location.href = `${import.meta.env.VITE_CLIENT_URL || 'http://localhost:5173'}/?token=${token}&user=${encodedUser}`;
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false);
+      setUser({});
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
@@ -211,12 +270,14 @@ function App() {
   };
 
   useEffect(() => {
-    fetchDepartments();
-    fetchTenders();
-    fetchClients();
-    fetchAssignments();
-    fetchMembers();
-  }, []);
+    if (isAuthenticated) {
+      fetchDepartments();
+      fetchTenders();
+      fetchClients();
+      fetchAssignments();
+      fetchMembers();
+    }
+  }, [isAuthenticated]);
 
   const handleSaveTender = async (tenderData) => {
     try {
@@ -359,7 +420,7 @@ function App() {
       sessionId: userData.sessionId,
       createdAt: userData.createdAt
     };
-    if (userData.role !== 'Admin') {
+    if (!['Admin', 'Super Admin'].includes(userData.role)) {
       // Clear admin-side local storage first so we don't end up in redirect loops
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -373,7 +434,38 @@ function App() {
   };
 
   if (!isAuthenticated) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+    if (showLoginModal) {
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans">
+          <div className="bg-[#080C14] px-6 py-3.5 border-b border-slate-800 flex items-center justify-between text-xs font-bold text-slate-300">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-black">TENDER</span>
+              <span className="text-blue-500 font-black">PRO</span>
+              <span className="text-[10px] bg-blue-600/30 text-blue-300 px-2 py-0.5 rounded-md font-mono">SUPER ADMIN PORTAL</span>
+            </div>
+            <button 
+              onClick={() => setShowLoginModal(false)}
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition flex items-center gap-1.5 shadow-xs"
+            >
+              <span>← Back to Website</span>
+            </button>
+          </div>
+          <Login onLoginSuccess={handleLoginSuccess} />
+        </div>
+      );
+    }
+    return <PublicWebsite onNavigateLogin={() => setShowLoginModal(true)} onNavigateSignup={() => setShowLoginModal(true)} />;
+  }
+
+  // 3-Day Trial Expired Gate check
+  if (isTrialExpired && !subscriptionActive) {
+    return (
+      <TrialExpiredGate 
+        user={user}
+        preSelectedPlan={preSelectedPlan}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    );
   }
 
   return (
@@ -415,13 +507,19 @@ function App() {
             }
           }}
           onProfileClick={() => setActiveTab('Profile')}
-          user={user}
-          onLogout={handleLogout}
+          user={user} 
           onOpenMessages={() => setIsMessagesOpen(!isMessagesOpen)}
+          onLogout={handleLogout} 
           onNotificationClick={(url) => setActiveTab(url)}
+          onSimulateTrialExpiry={handleSimulateTrialExpiry}
+          isSubscriptionActive={subscriptionActive}
+          isTrialExpired={isTrialExpired}
         />
 
         <main className="flex-1 overflow-y-auto print:overflow-visible">
+          {activeTab === 'Public Website' && (
+            <PublicWebsite />
+          )}
           {activeTab === 'Dashboard' && (
             <Dashboard
               user={user}
@@ -475,7 +573,40 @@ function App() {
               onView={handleTenderClick}
             />
           )}
-          {activeTab === 'Client Management' && ['Admin', 'Tender Manager'].includes(user.role) && (
+          {activeTab === 'Super Admin Dashboard' && (
+            <SuperAdminDashboard currentUser={user} />
+          )}
+          {activeTab === 'Roles & Permissions' && (
+            <RolesAndPermissions />
+          )}
+          {activeTab === 'Organizations' && (
+            <Organizations />
+          )}
+          {activeTab === 'Users' && (
+            <UsersPage />
+          )}
+          {activeTab === 'Subscription Plans' && (
+            <SubscriptionPlans />
+          )}
+          {activeTab === 'Subscriptions' && (
+            <SubscriptionsPage />
+          )}
+          {activeTab === 'Payments' && (
+            <PaymentsPage />
+          )}
+          {activeTab === 'Invoices' && (
+            <InvoicesPage />
+          )}
+          {activeTab === 'Revenue' && (
+            <RevenuePage />
+          )}
+          {activeTab === 'Modules' && (
+            <ModulesPage />
+          )}
+          {activeTab === 'Settings' && (
+            <SettingsPage />
+          )}
+          {activeTab === 'Client Management' && ['Admin', 'Super Admin', 'Tender Manager'].includes(user.role) && (
             <ClientManagement
               clients={clients}
               tenders={tenders}
@@ -486,7 +617,7 @@ function App() {
               }}
             />
           )}
-          {activeTab === 'Client Details' && ['Admin', 'Tender Manager'].includes(user.role) && (
+          {activeTab === 'Client Details' && ['Admin', 'Super Admin', 'Tender Manager'].includes(user.role) && (
             <ClientDetails
               clientId={selectedClientId}
               onBack={(deletedId, action) => {
@@ -515,7 +646,7 @@ function App() {
           {activeTab === 'Create Project' && (
             <CreateProject
               onCancel={() => {
-                setActiveTab(user.role === 'Admin' ? 'Project Management' : 'Projects');
+                setActiveTab((user.role === 'Admin' || user.role === 'Super Admin') ? 'Project Management' : 'Projects');
               }}
               onSave={async (data) => {
                 try {
@@ -547,7 +678,7 @@ function App() {
                   if (response.ok) {
                     await fetchAssignments();
                     alert('Project initialized successfully!');
-                    setActiveTab(user.role === 'Admin' ? 'Project Management' : 'Projects');
+                    setActiveTab((user.role === 'Admin' || user.role === 'Super Admin') ? 'Project Management' : 'Projects');
                   } else {
                     const err = await response.json();
                     alert(`Failed to save project: ${err.message}`);
@@ -728,7 +859,7 @@ function App() {
               departments={departments}
             />
           )}
-          {!['Dashboard', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Completed Tenders', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Challan Management', 'Tender Details', 'Task Details', 'Approvals'].includes(activeTab) && (
+          {!['Dashboard', 'Super Admin Dashboard', 'Organizations', 'Users', 'Roles & Permissions', 'Subscription Plans', 'Subscriptions', 'Modules', 'Notifications', 'Support Tickets', 'Activity Log', 'Bids', 'Calendar', 'Tender Dashboard', 'Tender Management', 'Completed Tenders', 'Client Management', 'Client Details', 'Project Management', 'Project Details', 'Financial Management', 'Invoices', 'Invoice Details', 'Payments', 'Expenses', 'Expense Details', 'Budget', 'Team Management', 'Member Profile', 'Projects', 'Reports', 'Settings', 'Create Tender', 'Edit Tender', 'Profile', 'Member Dashboard', 'Task Management', 'Tasks', 'Create Project', 'Project Team', 'Attendance', 'Team Attendance', 'Messages', 'Finance Reports', 'Challan Management', 'Tender Details', 'Task Details', 'Approvals'].includes(activeTab) && (
             <div className="flex items-center justify-center h-full text-slate-400">
               <div className="text-center">
                 <h2 className="text-2xl font-bold">{activeTab} Page</h2>

@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const sequelize = require('../config/db');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -9,26 +10,45 @@ const generateToken = (id) => {
 
 exports.initAdmin = async (req, res) => {
   try {
+    // 1. Standard Admin
     const adminEmail = 'vikash@vagwiin.com';
     const adminPass = '12345678';
-    const adminName = 'Vikash';
+    const adminName = 'Vikash Kumar';
 
-    const existingUser = await User.findOne({ where: { email: adminEmail } });
-    if (existingUser) {
-      existingUser.password = adminPass;
-      existingUser.role = 'Admin';
-      await existingUser.save();
-      return res.json({ message: 'Admin user updated successfully' });
+    let existingAdmin = await User.findOne({ where: sequelize.where(sequelize.fn('LOWER', sequelize.col('email')), adminEmail) });
+    if (existingAdmin) {
+      existingAdmin.password = adminPass;
+      existingAdmin.role = 'Admin';
+      await existingAdmin.save();
+    } else {
+      await User.create({
+        name: adminName,
+        email: adminEmail,
+        password: adminPass,
+        role: 'Admin'
+      });
     }
 
-    await User.create({
-      name: adminName,
-      email: adminEmail,
-      password: adminPass,
-      role: 'Admin'
-    });
+    // 2. Super Admin
+    const superAdminEmail = 'superadmin@vagwiin.com';
+    const superAdminPass = '12345678';
+    const superAdminName = 'Super Admin';
 
-    res.json({ message: 'Admin user created successfully' });
+    let existingSuper = await User.findOne({ where: sequelize.where(sequelize.fn('LOWER', sequelize.col('email')), superAdminEmail) });
+    if (existingSuper) {
+      existingSuper.password = superAdminPass;
+      existingSuper.role = 'Super Admin';
+      await existingSuper.save();
+    } else {
+      await User.create({
+        name: superAdminName,
+        email: superAdminEmail,
+        password: superAdminPass,
+        role: 'Super Admin'
+      });
+    }
+
+    res.json({ message: 'Admin and Super Admin users initialized successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -37,13 +57,19 @@ exports.initAdmin = async (req, res) => {
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
 
-    const userExists = await User.findOne({ where: { email } });
+    const cleanEmail = email.trim().toLowerCase();
+    const userExists = await User.findOne({
+      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('email')), cleanEmail)
+    });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email: cleanEmail, password });
 
     res.status(201).json({
       id: user.id,
@@ -62,7 +88,15 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({
+      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('email')), cleanEmail)
+    });
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }

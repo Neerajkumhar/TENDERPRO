@@ -120,7 +120,7 @@ const CreateProject = ({ onCancel, onSave, clients = [], tenders = [] }) => {
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black transition-all shrink-0 ${activeStep === step.id
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                    : activeStep > step.id ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' : 'bg-slate-100 text-slate-400'
+                    : activeStep > step.id ? 'bg-blue-500 text-white shadow-lg shadow-blue-100' : 'bg-slate-100 text-slate-400'
                     }`}>
                     {activeStep > step.id ? <CheckSquare size={16} /> : step.id}
                   </div>
@@ -270,7 +270,7 @@ const CreateProject = ({ onCancel, onSave, clients = [], tenders = [] }) => {
             {activeStep === 4 && (
               <div className="bg-white p-4 sm:p-6 lg:p-10 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl shadow-slate-200/40 space-y-6 lg:space-y-10">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-100">
+                  <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-100">
                     <IndianRupee size={24} />
                   </div>
                   <div>

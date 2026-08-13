@@ -145,7 +145,7 @@ const Attendance = ({ user }) => {
     const totalUsers = totalUsersSet.size || 12;
 
     return [
-      { label: "PRESENT TODAY", value: `${totalPresent} Members`, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
+      { label: "PRESENT TODAY", value: `${totalPresent} Members`, icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "ACTIVE ONLINE", value: `${activeOnlineCount} Online`, icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "LATE TODAY", value: `${totalLate} Late`, icon: AlertCircle, color: "text-rose-500", bg: "bg-rose-50" },
       { label: "ON-TIME RATE", value: `${onTimeRate}%`, icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
@@ -391,7 +391,7 @@ const Attendance = ({ user }) => {
           <Clock size={20} className="text-blue-400 animate-pulse" />
           <div className="flex flex-col">
             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">REAL TIME TIMER</span>
-            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-emerald-400 font-mono">
+            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-blue-400 font-mono">
               {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </span>
           </div>
@@ -616,7 +616,7 @@ const Attendance = ({ user }) => {
                                 <td className="py-6 text-sm font-black text-slate-900">{record.work}</td>
                                 <td className="py-6">
                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
-                                     record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                                     record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                                    }`}>
                                       {record.status}
                                     </span>
@@ -643,12 +643,12 @@ const Attendance = ({ user }) => {
                                                  : new Date(item.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                                              </span>
                                              <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                                               item.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                                               item.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                                              }`}>{item.status}</span>
                                            </div>
                                            <div className="flex justify-between items-center text-xs font-bold text-slate-700">
                                              <div className="flex items-center gap-1.5">
-                                               <span className="text-emerald-500">In:</span>
+                                               <span className="text-blue-500">In:</span>
                                                <span>{item.in}</span>
                                              </div>
                                              <div className="flex items-center gap-1.5">
@@ -720,7 +720,7 @@ const Attendance = ({ user }) => {
                          
                          {presenceCount > 0 ? (
                            <div className="flex flex-col items-center mt-1">
-                             <span className="bg-emerald-50 px-1 rounded text-[7px] font-black text-emerald-600 uppercase tracking-tighter leading-none">
+                             <span className="bg-blue-50 px-1 rounded text-[7px] font-black text-blue-600 uppercase tracking-tighter leading-none">
                                {presenceCount} P
                              </span>
                            </div>

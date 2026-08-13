@@ -55,13 +55,13 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, onCreateProject,
   const statsData = [
     { label: 'Total Tenders', value: tenders.length, trend: '100%', isUp: true, color: 'slate', icon: Briefcase },
     { label: 'Active Tenders', value: tenders.filter(t => t.status === 'Active' || t.status === 'Registered').length, trend: 'Active', isUp: true, color: 'blue', icon: TrendingUp },
-    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, trend: 'Won', isUp: true, color: 'emerald', icon: CheckCircle2 },
+    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, trend: 'Won', isUp: true, color: 'blue', icon: CheckCircle2 },
     { label: 'Total Budget', value: `₹${(tenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0) / 10000000).toFixed(2)}Cr`, trend: 'Valuation', isUp: true, color: 'blue', icon: IndianRupee },
   ];
 
   const projectStatusData = [
     { name: 'Active', value: tenders.filter(t => t.status === 'Active').length, color: '#3b82f6' },
-    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: '#10b981' },
+    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: '#3b82f6' },
     { name: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: '#8b5cf6' },
     { name: 'Other', value: tenders.filter(t => !['Active', 'Won', 'Registered'].includes(t.status)).length, color: '#94a3b8' },
   ].filter(d => d.value > 0);
@@ -71,7 +71,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, onCreateProject,
     start: (new Date(t.createdAt).getMonth() + (new Date(t.createdAt).getDate() / 30)),
     duration: 2 + Math.random() * 4,
     progress: t.status === 'Won' ? 100 : t.status === 'Active' ? 40 : 10,
-    color: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5],
+    color: ['#3b82f6', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5],
     milestones: [1, 2], // Dummy milestones for visualization
     status: t.status
   }));
@@ -149,7 +149,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, onCreateProject,
               <div className={`p-3 rounded-2xl bg-slate-50 text-slate-600 group-hover:bg-blue-600 group-hover:text-white transition-all`}>
                 <stat.icon size={24} />
               </div>
-              <div className={`flex items-center gap-1 text-xs font-black ${stat.isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+              <div className={`flex items-center gap-1 text-xs font-black ${stat.isUp ? 'text-blue-500' : 'text-rose-500'}`}>
                 {stat.isUp ? <TrendingUp size={12} /> : <TrendingUp size={12} className="rotate-180" />}
                 {stat.trend || '12%'}
               </div>
@@ -198,7 +198,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, onCreateProject,
                     </td>
                     <td className="px-6 py-4 font-mono text-sm font-bold text-slate-700">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${tender.status === 'Won' || tender.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${tender.status === 'Won' || tender.status === 'Active' ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'
                         }`}>
                         {tender.status}
                       </span>
@@ -267,7 +267,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, onCreateProject,
                         {task.deadline ? new Date(task.deadline).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${task.status === 'Completed' ? 'bg-emerald-500 text-white' :
+                        <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${task.status === 'Completed' ? 'bg-blue-500 text-white' :
                             task.status === 'In Progress' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-400'
                           }`}>
                           {task.status}

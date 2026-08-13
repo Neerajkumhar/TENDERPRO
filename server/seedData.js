@@ -10,7 +10,7 @@ const seed = async () => {
     // Create Departments
     const depts = [
       { name: 'Technical', color: '#3b82f6', description: 'Technical and Engineering department' },
-      { name: 'Finance', color: '#10b981', description: 'Financial and Accounts department' },
+      { name: 'Finance', color: '#3b82f6', description: 'Financial and Accounts department' },
       { name: 'Legal', color: '#6366f1', description: 'Legal and Compliance department' },
       { name: 'Operations', color: '#f59e0b', description: 'Operations and Logistics department' }
     ];

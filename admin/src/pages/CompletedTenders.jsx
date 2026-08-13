@@ -23,25 +23,25 @@ const CompletedTenders = ({ onView, tenders = [], clients = [] }) => {
   );
 
   return (
-    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 space-y-4 sm:space-y-8 animate-in fade-in duration-700">
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <CheckCircle2 className="text-emerald-500 flex-shrink-0" size={32} />
+            <CheckCircle2 className="text-blue-500 flex-shrink-0" size={32} />
             Completed Tenders
           </h1>
           <p className="text-slate-500 mt-1 font-medium italic">Review and verify finalized tender completion documents.</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="relative group w-full md:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
             <input 
               type="text" 
               placeholder="Search finalized tenders..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 transition-all w-full md:w-64 shadow-sm focus:ring-4 focus:ring-emerald-50"
+              className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all w-full md:w-64 shadow-sm focus:ring-4 focus:ring-blue-50"
             />
           </div>
         </div>
@@ -62,13 +62,13 @@ const CompletedTenders = ({ onView, tenders = [], clients = [] }) => {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {completedTenders.length > 0 ? completedTenders.map((tender, i) => (
-                <tr key={tender.id || i} className="hover:bg-emerald-50/30 transition-all cursor-pointer group">
+                <tr key={tender.id || i} className="hover:bg-blue-50/30 transition-all cursor-pointer group">
                   <td className="px-8 py-5 text-xs font-bold text-slate-400">#{tender.id?.substring(0, 8)}</td>
                   <td className="px-8 py-5 text-sm font-black text-slate-800">{tender.title}</td>
                   <td className="px-8 py-5 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
                   <td className="px-8 py-5">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-                      tender.completionStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700' :
+                      tender.completionStatus === 'Approved' ? 'bg-blue-100 text-blue-700' :
                       tender.completionStatus === 'Submitted' ? 'bg-blue-100 text-blue-700' :
                       'bg-slate-100 text-slate-700'
                     }`}>
@@ -81,7 +81,7 @@ const CompletedTenders = ({ onView, tenders = [], clients = [] }) => {
                   <td className="px-8 py-5 text-center">
                     <button 
                       onClick={(e) => { e.stopPropagation(); onView(tender.id); }}
-                      className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all inline-flex items-center gap-2"
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all inline-flex items-center gap-2"
                       title="Review Completion Docs"
                     >
                       <Eye size={16} />

@@ -107,7 +107,7 @@ const Bids = () => {
                   <div className="space-y-1.5">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Dept: {bid.dept}</p>
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Deadline: {bid.deadline}</p>
-                    <p className="text-[11px] font-bold text-emerald-500 uppercase tracking-widest">Status: {bid.status}</p>
+                    <p className="text-[11px] font-bold text-blue-500 uppercase tracking-widest">Status: {bid.status}</p>
                   </div>
                 </div>
               ))}
@@ -136,7 +136,7 @@ const Bids = () => {
                     </div>
                   </div>
                   <div className="px-6 py-4 bg-slate-50 border-t border-slate-50 flex justify-between items-center group-hover:bg-blue-50/30 transition-all">
-                     <CheckCircle2 size={16} className="text-slate-300 group-hover:text-emerald-500" />
+                     <CheckCircle2 size={16} className="text-slate-300 group-hover:text-blue-500" />
                      <Edit2 size={16} className="text-slate-300 group-hover:text-blue-500" />
                   </div>
                 </div>
@@ -176,7 +176,7 @@ const Bids = () => {
                            <td className="px-4 py-5 text-[11px] font-bold text-slate-400">{item.date}</td>
                            <td className="px-4 py-5">
                               <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest
-                                ${item.status === 'Won' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                                ${item.status === 'Won' ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'}`}>
                                  {item.status}
                               </span>
                            </td>

@@ -250,9 +250,9 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
     switch (s) {
       case 'won':
       case 'completed': 
-        return 'bg-emerald-600 text-white shadow-lg shadow-emerald-100';
+        return 'bg-blue-600 text-white shadow-lg shadow-blue-100';
       case 'paid': 
-        return 'bg-emerald-500 text-white shadow-lg shadow-emerald-50';
+        return 'bg-blue-500 text-white shadow-lg shadow-blue-50';
       case 'lost': return 'bg-rose-600 text-white shadow-lg shadow-rose-100';
       case 'active': return 'bg-blue-600 text-white shadow-lg shadow-blue-100';
       case 'registered': return 'bg-indigo-600 text-white shadow-lg shadow-indigo-100';
@@ -336,7 +336,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
     readinessScore = Math.round((checklists.filter(c => c.checked).length / checklists.length) * 100);
   }
 
-  const radialData = [{ name: 'Readiness', uv: readinessScore, fill: readinessScore === 100 ? '#10b981' : '#3b82f6' }];
+  const radialData = [{ name: 'Readiness', uv: readinessScore, fill: readinessScore === 100 ? '#3b82f6' : '#3b82f6' }];
 
   return (
     <div className="p-4 md:p-8 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-8 overflow-x-hidden">
@@ -403,7 +403,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
             </div>
             {tender.client?.status && (
               <span className={`ml-auto px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${
-                tender.client.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
+                tender.client.status === 'Active' ? 'bg-blue-100 text-blue-700' :
                 tender.client.status === 'Lead'   ? 'bg-blue-100 text-blue-700' :
                 tender.client.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
                 'bg-slate-100 text-slate-500'
@@ -465,7 +465,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
               label: 'Tender Budget (INR)',
               value: formatCurrency(tender.budget),
               icon: IndianRupee,
-              color: 'emerald'
+              color: 'blue'
             },
             {
               label: 'Submission Deadline',
@@ -524,7 +524,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         {/* Readiness Gauge (Span 1) */}
         <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col items-center relative">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2 w-full">
-            <ShieldCheck size={16} className="text-emerald-500" />
+            <ShieldCheck size={16} className="text-blue-500" />
             <span>Compliance Score</span>
           </h3>
           <div className="w-full flex-1 min-h-[220px]">
@@ -590,7 +590,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                       </span>
                     </div>
                     <span className={`shrink-0 px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-md ${
-                      project.status === 'Completed' ? 'bg-emerald-100 text-emerald-600' : 
+                      project.status === 'Completed' ? 'bg-blue-100 text-blue-600' : 
                       project.status === 'In Progress' ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-600'
                     }`}>
                       {project.status}
@@ -635,7 +635,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         {/* Financial Rules (Span 1) */}
         <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-            <DollarSign size={20} className="text-emerald-500" />
+            <DollarSign size={20} className="text-blue-500" />
             <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Financial Rules</h2>
           </div>
           <div className="space-y-4 flex-1">
@@ -721,7 +721,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                         const reqStatus = docRequests.find(r => r.tenderId === tender.id && r.documentName === fileName)?.status;
                         if (reqStatus === 'Approved') {
                           return (
-                            <a href={doc.url} download={fileName} target="_blank" rel="noreferrer" className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors">
+                            <a href={doc.url} download={fileName} target="_blank" rel="noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
                               <Download size={14} />
                             </a>
                           );
@@ -753,7 +753,7 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
               <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center justify-between">
                 <span>Completion Documents</span>
                 {tender.completionStatus === 'Approved' && (
-                  <span className="px-2 py-1 bg-emerald-100 text-emerald-600 rounded-md">Verified</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-md">Verified</span>
                 )}
                 {tender.completionStatus === 'Submitted' && (
                   <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-md">Under Review</span>
@@ -787,10 +787,10 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
                   
                   return (
                     <div key={key} className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between ${
-                      hasFile ? 'bg-emerald-50/30 border-emerald-100' : 'bg-slate-50 border-dashed border-slate-200'
+                      hasFile ? 'bg-blue-50/30 border-blue-100' : 'bg-slate-50 border-dashed border-slate-200'
                     }`}>
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`p-2 rounded-xl shrink-0 ${hasFile ? 'bg-emerald-100 text-emerald-500' : 'bg-white shadow-sm text-slate-400'}`}>
+                        <div className={`p-2 rounded-xl shrink-0 ${hasFile ? 'bg-blue-100 text-blue-500' : 'bg-white shadow-sm text-slate-400'}`}>
                           {hasFile ? <CheckCircle2 size={16} /> : <FileText size={16} />}
                         </div>
                         <div className="min-w-0">
@@ -839,16 +839,16 @@ const TenderDetails = ({ tenderId, onBack, onEdit, onDelete, onProjectClick, use
         {/* Assurance Checklist (Span 1) */}
         <div className="lg:col-span-1 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex flex-col">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-            <CheckCircle2 size={20} className="text-emerald-500" />
+            <CheckCircle2 size={20} className="text-blue-500" />
             <h2 className="text-xl font-black text-[#1e293b] tracking-tight">Checklist</h2>
           </div>
           <div className="flex flex-col gap-3 flex-1 overflow-y-auto">
             {displayChecklist.map((item, idx) => (
               <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border ${
-                item.checked ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'
+                item.checked ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50 border-slate-100'
               }`}>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                  item.checked ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
+                  item.checked ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-400'
                 }`}>
                   <CheckCircle2 size={12} />
                 </div>

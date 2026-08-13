@@ -255,7 +255,7 @@ const Budget = () => {
 
   const stats = [
     { label: 'TOTAL BUDGET', value: `₹${totalAllocated.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `FISCAL YEAR: ${selectedFY}`, icon: Wallet, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'TOTAL SPENT', value: `₹${totalSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${overallUtilizationRate}% OF TOTAL UTILIZED`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'TOTAL SPENT', value: `₹${totalSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${overallUtilizationRate}% OF TOTAL UTILIZED`, icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'REMAINING', value: `₹${totalRemaining.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'AVAILABLE BALANCE', icon: PieChart, color: 'text-purple-600', bg: 'bg-purple-50' },
     { label: 'OVER BUDGET', value: String(criticalCount), sub: 'CRITICAL ATTENTION', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
     { label: 'SAVINGS GOAL', value: `${savingsRate}%`, sub: 'REAL-TIME SAVINGS RATE', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50' },
@@ -352,7 +352,7 @@ const Budget = () => {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <Target size={14} className="text-emerald-500" />
+                      <Target size={14} className="text-blue-500" />
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Budget Status</span>
                     </div>
                     <div className="grid grid-cols-2 gap-1.5">
@@ -433,7 +433,7 @@ const Budget = () => {
                   <div className={`absolute top-0 left-0 w-full h-1 ${
                     stat.status === 'ON TRACK' ? 'bg-blue-600' : 
                     stat.status === 'OVER BUDGET' ? 'bg-rose-500' : 
-                    'bg-emerald-500'
+                    'bg-blue-500'
                   }`}></div>
                   
                   <div className="flex justify-between items-start mb-4 pt-1">
@@ -441,7 +441,7 @@ const Budget = () => {
                       <span className={`inline-block px-2.5 py-0.5 mb-2 rounded-full text-[8.5px] font-black uppercase tracking-wide ${
                         stat.status === 'ON TRACK' ? 'bg-blue-50 text-blue-600' : 
                         stat.status === 'OVER BUDGET' ? 'bg-rose-50 text-rose-600' : 
-                        'bg-emerald-50 text-emerald-600'
+                        'bg-blue-50 text-blue-600'
                       }`}>
                         {stat.status}
                       </span>
@@ -539,7 +539,7 @@ const Budget = () => {
                           <span className={`px-2.5 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider transition-all
                             ${cat.status === 'ON TRACK' ? 'bg-blue-600 text-white' : 
                               cat.status === 'OVER BUDGET' ? 'bg-rose-500 text-white' : 
-                              'bg-emerald-500 text-white'}`}>
+                              'bg-blue-500 text-white'}`}>
                             {cat.status}
                           </span>
                         </td>
@@ -557,7 +557,7 @@ const Budget = () => {
                           </div>
                         </td>
                         <td className="px-5 sm:px-8 py-4">
-                          <div className={`flex items-center gap-1 text-[9px] font-bold ${cat.trend.startsWith('+') ? 'text-rose-500' : 'text-emerald-500'}`}>
+                          <div className={`flex items-center gap-1 text-[9px] font-bold ${cat.trend.startsWith('+') ? 'text-rose-500' : 'text-blue-500'}`}>
                             <ArrowUpRight size={12} className={cat.trend.startsWith('-') ? 'rotate-90' : ''} />
                             {cat.trend}
                           </div>
@@ -709,7 +709,7 @@ const Budget = () => {
       {/* Floating Toast Message */}
       {showToast && (
         <div className="fixed bottom-8 right-8 z-[200] bg-slate-900/90 backdrop-blur-md border border-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping"></div>
           <span className="text-xs font-black uppercase tracking-widest">{toastMessage}</span>
         </div>
       )}

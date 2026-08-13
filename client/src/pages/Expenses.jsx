@@ -219,7 +219,7 @@ const Expenses = ({ onViewExpense, user }) => {
 
   const stats = [
     { label: 'TOTAL EXPENSES', value: totalCount.toString(), icon: FileText, color: 'text-slate-600' },
-    { label: 'APPROVED', value: approvedCount.toString(), icon: CheckCircle2, color: 'text-emerald-500' },
+    { label: 'APPROVED', value: approvedCount.toString(), icon: CheckCircle2, color: 'text-blue-500' },
     { label: 'PENDING', value: pendingCount.toString(), icon: Clock, color: 'text-amber-500' },
     { label: 'REJECTED', value: rejectedCount.toString(), icon: XCircle, color: 'text-rose-500' },
     { label: 'RECURRING', value: '0', icon: RefreshCw, color: 'text-blue-500' },
@@ -227,7 +227,7 @@ const Expenses = ({ onViewExpense, user }) => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen relative text-left">
+    <div className="p-4 sm:p-5 lg:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen relative text-left">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 sm:mb-10 gap-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic uppercase">EXPENSES</h1>
@@ -305,7 +305,7 @@ const Expenses = ({ onViewExpense, user }) => {
                     <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-500 uppercase">{expense.vendor}</td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-bold text-slate-400">{expense.date}</td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6 text-xs sm:text-sm font-black text-slate-900 text-right">₹{parseFloat(expense.amount).toLocaleString('en-IN')}</td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-center"><span className={`px-2 sm:px-4 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${expense.status === 'APPROVED' ? 'bg-emerald-500 text-white' : expense.status === 'PENDING' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'}`}>{expense.status}</span></td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-6 text-center"><span className={`px-2 sm:px-4 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${expense.status === 'APPROVED' ? 'bg-blue-500 text-white' : expense.status === 'PENDING' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'}`}>{expense.status}</span></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-6 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => startEditExpense(expense)} className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit2 size={14} /></button>
@@ -315,7 +315,7 @@ const Expenses = ({ onViewExpense, user }) => {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="8" className="px-6 sm:px-8 py-20 text-center text-slate-400 font-bold italic">{isLoading ? 'Fetching data...' : 'No expenses recorded'}</td></tr>
+                <tr><td colSpan="8" className="px-6 sm:px-8 py-10 text-center text-slate-400 font-bold italic">{isLoading ? 'Fetching data...' : 'No expenses recorded'}</td></tr>
               )}
             </tbody>
           </table>
@@ -367,7 +367,7 @@ const Expenses = ({ onViewExpense, user }) => {
 
       {showToast && (
         <div className="fixed bottom-8 right-8 z-[200] bg-slate-900/90 backdrop-blur-md border border-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
-          <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+          <CheckCircle2 className="text-blue-500 shrink-0" size={20} />
           <span className="text-xs font-black uppercase tracking-widest">{toastMessage}</span>
         </div>
       )}

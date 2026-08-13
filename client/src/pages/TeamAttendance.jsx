@@ -187,7 +187,7 @@ const TeamAttendance = ({ user }) => {
       : 100;
 
     return [
-      { label: "PRESENT TODAY", value: `${totalPresent} Members`, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
+      { label: "PRESENT TODAY", value: `${totalPresent} Members`, icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "ACTIVE ONLINE", value: `${activeOnlineCount} Online`, icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "LATE TODAY", value: `${totalLate} Late`, icon: AlertCircle, color: "text-rose-500", bg: "bg-rose-50" },
       { label: "ON-TIME RATE", value: `${onTimeRate}%`, icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
@@ -436,10 +436,10 @@ const TeamAttendance = ({ user }) => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       
       {/* Premium Header */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 sm:p-6 lg:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 sm:p-5 lg:p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">Team Attendance Panel</h1>
           <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
@@ -450,7 +450,7 @@ const TeamAttendance = ({ user }) => {
           <Clock size={20} className="text-blue-400 animate-pulse" />
           <div className="flex flex-col">
             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">REAL TIME TIMER</span>
-            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-emerald-400 font-mono">
+            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-blue-400 font-mono">
               {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </span>
           </div>
@@ -564,7 +564,7 @@ const TeamAttendance = ({ user }) => {
       {/* Stats Panel */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
+          <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
              <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
              <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 sm:mb-4">{stat.label}</p>
              <div className="flex items-center justify-between">
@@ -677,7 +677,7 @@ const TeamAttendance = ({ user }) => {
                                 <td className="py-4 sm:py-6 px-4 text-sm font-black text-slate-900">{record.work}</td>
                                 <td className="py-4 sm:py-6 px-4">
                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
-                                     record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                                     record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                                    }`}>
                                       {record.status}
                                     </span>
@@ -704,12 +704,12 @@ const TeamAttendance = ({ user }) => {
                                                  : new Date(item.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                                              </span>
                                              <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                                               item.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                                               item.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                                              }`}>{item.status}</span>
                                            </div>
                                            <div className="flex justify-between items-center text-xs font-bold text-slate-700">
                                              <div className="flex items-center gap-1.5">
-                                               <span className="text-emerald-500">In:</span>
+                                               <span className="text-blue-500">In:</span>
                                                <span>{item.in}</span>
                                              </div>
                                              <div className="flex items-center gap-1.5">
@@ -785,7 +785,7 @@ const TeamAttendance = ({ user }) => {
                          
                          {presenceCount > 0 ? (
                            <div className="flex flex-col items-center mt-1">
-                             <span className="bg-emerald-50 px-1 rounded text-[7px] font-black text-emerald-600 uppercase tracking-tighter leading-none">
+                             <span className="bg-blue-50 px-1 rounded text-[7px] font-black text-blue-600 uppercase tracking-tighter leading-none">
                                {presenceCount} P
                              </span>
                            </div>

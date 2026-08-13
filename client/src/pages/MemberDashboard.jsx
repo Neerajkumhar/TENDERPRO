@@ -115,7 +115,7 @@ const MemberDashboard = ({ user }) => {
         <div className="xl:col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'TASKS TODAY', value: tasks.filter(t => t.deadline && new Date(t.deadline).toDateString() === new Date().toDateString()).length, trend: 'Daily Tasks', up: true, icon: ClipboardList, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'IN PROGRESS', value: tasks.filter(t => t.status === 'In Progress').length, trend: 'Active Work', up: true, icon: Clock, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+            { label: 'IN PROGRESS', value: tasks.filter(t => t.status === 'In Progress').length, trend: 'Active Work', up: true, icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50' },
             { label: 'DUE TASKS', value: tasks.filter(t => t.status !== 'Completed' && t.status !== 'Done' && t.deadline && new Date(t.deadline) < new Date()).length, trend: 'Needs Attention', up: false, icon: AlertCircle, color: 'text-rose-500', bg: 'bg-rose-50' },
             { label: 'COMPLETED', value: tasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, trend: 'All Time', up: true, icon: CheckCircle2, color: 'text-purple-500', bg: 'bg-purple-50' },
           ].map((stat, i) => (
@@ -131,8 +131,8 @@ const MemberDashboard = ({ user }) => {
                 <h3 className="text-3xl font-black text-slate-900 tracking-tighter mt-1">{stat.value}</h3>
               </div>
               <div className="mt-4 flex items-center gap-1.5">
-                {stat.up ? <TrendingUp size={14} className="text-emerald-500" /> : <TrendingDown size={14} className="text-rose-500" />}
-                <span className={`text-[10px] font-bold ${stat.up ? 'text-emerald-500' : 'text-rose-500'}`}>{stat.trend}</span>
+                {stat.up ? <TrendingUp size={14} className="text-blue-500" /> : <TrendingDown size={14} className="text-rose-500" />}
+                <span className={`text-[10px] font-bold ${stat.up ? 'text-blue-500' : 'text-rose-500'}`}>{stat.trend}</span>
               </div>
             </div>
           ))}
@@ -155,7 +155,7 @@ const MemberDashboard = ({ user }) => {
                   <Pie
                     data={[
                       { name: 'To Do', value: overviewTasks.filter(t => t.status === 'To Do' || t.status === 'Pending').length, color: '#3b82f6', percent: '29%' },
-                      { name: 'In Progress', value: overviewTasks.filter(t => t.status === 'In Progress').length, color: '#10b981', percent: '18%' },
+                      { name: 'In Progress', value: overviewTasks.filter(t => t.status === 'In Progress').length, color: '#3b82f6', percent: '18%' },
                       { name: 'Review', value: overviewTasks.filter(t => t.status === 'Review' || t.status === 'In Review').length, color: '#f59e0b', percent: '21%' },
                       { name: 'Done', value: overviewTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, color: '#8b5cf6', percent: '32%' },
                     ]}
@@ -166,7 +166,7 @@ const MemberDashboard = ({ user }) => {
                   >
                     {[
                       { color: '#3b82f6' },
-                      { color: '#10b981' },
+                      { color: '#3b82f6' },
                       { color: '#f59e0b' },
                       { color: '#8b5cf6' },
                     ].map((entry, index) => (
@@ -186,7 +186,7 @@ const MemberDashboard = ({ user }) => {
           <div className="grid grid-cols-2 gap-3 mt-8">
             {[
               { label: 'To Do', count: overviewTasks.filter(t => t.status === 'To Do' || t.status === 'Pending').length, color: 'bg-blue-500' },
-              { label: 'In Progress', count: overviewTasks.filter(t => t.status === 'In Progress').length, color: 'bg-emerald-500' },
+              { label: 'In Progress', count: overviewTasks.filter(t => t.status === 'In Progress').length, color: 'bg-blue-500' },
               { label: 'Review', count: overviewTasks.filter(t => t.status === 'Review' || t.status === 'In Review').length, color: 'bg-amber-500' },
               { label: 'Completed', count: overviewTasks.filter(t => t.status === 'Completed' || t.status === 'Done').length, color: 'bg-purple-500' },
             ].map((item, i) => (

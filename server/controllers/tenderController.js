@@ -226,7 +226,7 @@ exports.getReports = async (req, res) => {
     const categoryTotals = {
       'Government': { count: 0, budget: 0, color: '#3b82f6' },
       'Private': { count: 0, budget: 0, color: '#f59e0b' },
-      'PSU': { count: 0, budget: 0, color: '#10b981' },
+      'PSU': { count: 0, budget: 0, color: '#3b82f6' },
       'Non-Profit': { count: 0, budget: 0, color: '#8b5cf6' }
     };
 
@@ -268,7 +268,7 @@ exports.getReports = async (req, res) => {
     });
 
     const barData = [
-      { name: 'Met', value: metCount, color: '#10b981' },
+      { name: 'Met', value: metCount, color: '#3b82f6' },
       { name: 'Imminent', value: imminentCount, color: '#3b82f6' },
       { name: 'Missed', value: missedCount, color: '#f87171' }
     ];

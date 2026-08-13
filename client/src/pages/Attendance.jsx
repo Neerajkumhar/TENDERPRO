@@ -148,7 +148,7 @@ const Attendance = ({ user }) => {
     if (sessions.length === 0) {
       // Return high-fidelity mock starting stats
       return [
-        { label: "TODAY'S STATUS", value: "Present", icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
+        { label: "TODAY'S STATUS", value: "Present", icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
         { label: "CLOCK IN TIME", value: "09:02 AM", icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
         { label: "CLOCK OUT TIME", value: "06:05 PM", icon: Clock, color: "text-indigo-500", bg: "bg-indigo-50" },
         { label: "TOTAL HOURS", value: "9h 03m", icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
@@ -185,7 +185,7 @@ const Attendance = ({ user }) => {
     const lateSessions = sessions.filter(s => s.status === 'LATE');
 
     return [
-      { label: "TODAY'S STATUS", value: statusVal, icon: CheckCircle2, color: statusVal === "Present" ? "text-emerald-500" : "text-slate-400", bg: "bg-emerald-50" },
+      { label: "TODAY'S STATUS", value: statusVal, icon: CheckCircle2, color: statusVal === "Present" ? "text-blue-500" : "text-slate-400", bg: "bg-blue-50" },
       { label: "CLOCK IN TIME", value: clockInVal, icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
       { label: "CLOCK OUT TIME", value: clockOutVal, icon: Clock, color: "text-indigo-500", bg: "bg-indigo-50" },
       { label: "TOTAL HOURS", value: totalHoursVal, icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
@@ -324,7 +324,7 @@ const Attendance = ({ user }) => {
         out: s.out,
         work: formatMinutes(s.workMin),
         status: s.status,
-        sColor: s.status === 'LATE' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600',
+        sColor: s.status === 'LATE' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600',
         isSessionView: true,
         sessionNum: s.session
       }));
@@ -383,7 +383,7 @@ const Attendance = ({ user }) => {
           out: latestOut,
           work: formatMinutes(totalWork),
           status: hasLate ? 'LATE' : 'ON TIME',
-          sColor: hasLate ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600',
+          sColor: hasLate ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600',
           isSessionView: false,
           sessionNum: daySessions.length // Total session count for the day
         };
@@ -473,7 +473,7 @@ const Attendance = ({ user }) => {
           {/* Success State Overlay */}
           {leaveSubmitted ? (
             <div className="p-12 text-center flex flex-col items-center justify-center space-y-6 bg-white min-h-[450px]">
-              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center border border-emerald-100 shadow-md animate-bounce">
+              <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-[2rem] flex items-center justify-center border border-blue-100 shadow-md animate-bounce">
                 <CheckCircle2 size={40} />
               </div>
               <div className="space-y-2">
@@ -552,7 +552,7 @@ const Attendance = ({ user }) => {
                     setIsSubmittingLeave(false);
                   }
                 }}
-                className="p-8 space-y-6"
+                className="p-5 space-y-4"
               >
                 {/* Error Alert */}
                 {leaveError && (
@@ -649,7 +649,7 @@ const Attendance = ({ user }) => {
   }
 
   return (
-    <div className="p-4 sm:p-8 space-y-6 sm:space-y-10 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 space-y-4 sm:space-y-10 animate-in fade-in duration-700">
       {/* Premium Dynamic Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
@@ -662,7 +662,7 @@ const Attendance = ({ user }) => {
           <Clock size={20} className="text-blue-400 animate-pulse" />
           <div className="flex flex-col">
             <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">REAL TIME CLOCK</span>
-            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-emerald-400 font-mono">
+            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-blue-400 font-mono">
               {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </span>
           </div>
@@ -962,7 +962,7 @@ const Attendance = ({ user }) => {
                   <div key={request.id} className="p-6 bg-slate-50/50 border border-slate-100 rounded-[2rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:bg-white hover:shadow-xl transition-all duration-300">
                     <div className="flex items-center gap-6">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm 
-                        ${request.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' : 
+                        ${request.status === 'Approved' ? 'bg-blue-100 text-blue-600' : 
                           request.status === 'Rejected' ? 'bg-rose-100 text-rose-600' : 
                           'bg-amber-100 text-amber-600'}`}>
                         {request.status === 'Approved' ? <CheckCircle2 size={24} /> : 
@@ -983,7 +983,7 @@ const Attendance = ({ user }) => {
                     <div className="flex items-center gap-6 w-full md:w-auto">
                       <div className="flex-1 md:text-right">
                          <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm
-                          ${request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 
+                          ${request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 
                             request.status === 'Rejected' ? 'bg-rose-500 text-white shadow-rose-100' : 
                             'bg-amber-500 text-white shadow-amber-100'}`}>
                           {request.status}
@@ -1045,7 +1045,7 @@ const Attendance = ({ user }) => {
                          {dayTimes ? (
                            <div className="flex flex-col items-center mt-1 space-y-0.5">
                              {/* Clock In */}
-                             <span className="hidden sm:inline text-[7px] font-black text-emerald-600 uppercase tracking-tighter leading-none">
+                             <span className="hidden sm:inline text-[7px] font-black text-blue-600 uppercase tracking-tighter leading-none">
                                {dayTimes.in.replace(' AM', 'a').replace(' PM', 'p')}
                              </span>
                              {/* Clock Out */}
@@ -1053,7 +1053,7 @@ const Attendance = ({ user }) => {
                                {dayTimes.out.replace(' AM', 'a').replace(' PM', 'p')}
                              </span>
                              {/* Mobile Indicator Dot */}
-                             <span className="inline sm:hidden w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1"></span>
+                             <span className="inline sm:hidden w-1.5 h-1.5 rounded-full bg-blue-500 mt-1"></span>
                            </div>
                          ) : (
                            <div className="w-1 h-1 rounded-full bg-slate-200 mt-2"></div>
@@ -1077,7 +1077,7 @@ const Attendance = ({ user }) => {
                   </div>
                   <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                         <span className="text-slate-400">PRESENT DAYS</span>
                      </div>
                      <span className="text-slate-900">{summaryStats.present}</span>

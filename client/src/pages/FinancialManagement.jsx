@@ -46,7 +46,7 @@ import {
 
 const categoryData = [
   { name: 'Salaries', value: 35, color: '#3b82f6' },
-  { name: 'Marketing', value: 20, color: '#10b981' },
+  { name: 'Marketing', value: 20, color: '#3b82f6' },
   { name: 'Infrastructure', value: 25, color: '#f59e0b' },
   { name: 'Operations', value: 20, color: '#6366f1' },
 ];
@@ -310,7 +310,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
   const statsData = [
     { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'blue', icon: IndianRupee },
     { label: 'Total Expenses', value: `₹${stats.totalExpenses.toLocaleString('en-IN')}`, trend: 'Live', isUp: false, color: 'rose', icon: TrendingDown },
-    { label: 'Net Profit', value: `₹${stats.netProfit.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'emerald', icon: TrendingUp },
+    { label: 'Net Profit', value: `₹${stats.netProfit.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'blue', icon: TrendingUp },
     { label: 'Cash Flow', value: `₹${stats.cashFlow.toLocaleString('en-IN')}`, trend: 'Stable', isUp: true, color: 'indigo', icon: Wallet },
     { label: 'Budget Used', value: getBudgetUsed(), trend: 'Live', isUp: true, color: 'amber', icon: FileText },
     { label: 'Pending Invoices', value: String(stats.pendingCount), trend: 'Real', isUp: false, color: 'orange', icon: Clock },
@@ -333,7 +333,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
             </div>
             <button onClick={() => setShowLeaveModal(false)} className="p-3 hover:bg-white rounded-full text-slate-400 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100 shadow-sm"><X size={24} /></button>
           </div>
-          <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
             {loadingLeaves ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -348,7 +348,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {leaveRequests.map((request) => (
                   <div key={request.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-blue-100 transition-all group relative overflow-hidden">
-                    <div className="absolute top-6 right-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : request.status === 'Approved' ? 'bg-emerald-500 text-white shadow-emerald-100' : 'bg-rose-500 text-white shadow-rose-100'}`}>{request.status}</span></div>
+                    <div className="absolute top-6 right-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 'bg-rose-500 text-white shadow-rose-100'}`}>{request.status}</span></div>
                     <div className="flex items-start gap-4 mb-6"><div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xl border-2 border-white shadow-sm overflow-hidden shrink-0">{request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}</div><div className="min-w-0 pr-16"><h4 className="font-black text-slate-900 uppercase tracking-tight truncate">{request.User?.name}</h4><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{request.User?.role}</p></div></div>
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50"><div className="p-2 bg-white rounded-xl text-blue-500 shadow-sm"><Calendar size={16} /></div><div className="flex-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Duration</p><p className="text-xs font-black text-slate-700">{new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p></div></div>
@@ -356,7 +356,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                     </div>
                     {request.status === 'Pending' && (
                       <div className="flex gap-3 mt-6">
-                        <button onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all active:scale-95 shadow-lg shadow-emerald-100"><CheckCircle2 size={14} />Approve</button>
+                        <button onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-blue-100"><CheckCircle2 size={14} />Approve</button>
                         <button onClick={() => handleLeaveStatusUpdate(request.id, 'Rejected')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-white border border-rose-100 text-rose-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all active:scale-95 shadow-sm"><XCircle size={14} />Reject</button>
                       </div>
                     )}
@@ -420,12 +420,12 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
             <div><h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase tracking-wider">Revenue vs Expense</h3><p className="text-[10px] sm:text-xs text-slate-500 font-medium">Monthly financial comparison</p></div>
             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue (Billed)</span></div>
-              <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span></div>
+              <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span></div>
               <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-rose-500 rounded-full"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Expense</span></div>
             </div>
           </div>
           <div className="h-[250px] sm:h-[350px] w-full min-w-0">
-            <ResponsiveContainer width="100%" height="100%"><AreaChart data={revenueVsExpenseData}><defs><linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient><linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={10} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} /><Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}} /><Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" /><Area type="monotone" dataKey="payment" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorPay)" /><Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={2} fillOpacity={0} /></AreaChart></ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%"><AreaChart data={revenueVsExpenseData}><defs><linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient><linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={10} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} /><Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}} /><Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" /><Area type="monotone" dataKey="payment" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPay)" /><Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={2} fillOpacity={0} /></AreaChart></ResponsiveContainer>
           </div>
         </div>
 
@@ -448,11 +448,11 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-[10px] sm:text-xs font-bold text-slate-600">{inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : 'N/A'}</td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-xs sm:text-sm font-black text-slate-800 uppercase">{inv.client}</td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-xs sm:text-sm font-black text-slate-900 text-center italic">₹{parseFloat(inv.amount || 0).toLocaleString('en-IN')}</td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5"><div className={`w-fit px-2 sm:px-3 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm ${inv.status === 'Paid' ? 'bg-emerald-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div></td>
+                    <td className="px-6 sm:px-8 py-4 sm:py-5"><div className={`w-fit px-2 sm:px-3 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm ${inv.status === 'Paid' ? 'bg-blue-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div></td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-center"><MoreHorizontal size={18} className="mx-auto text-slate-400 group-hover:text-blue-500" /></td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="6" className="px-6 sm:px-8 py-20 text-center text-slate-400 italic font-bold">No transactions found.</td></tr>
+                  <tr><td colSpan="6" className="px-6 sm:px-8 py-10 text-center text-slate-400 italic font-bold">No transactions found.</td></tr>
                 )}
               </tbody>
             </table>
@@ -545,7 +545,7 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
 
                 <div className="space-y-2 text-left">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
-                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-blue-200 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
                     <input 
                       type="file" 
                       className="absolute inset-0 opacity-0 cursor-pointer" 
@@ -555,8 +555,8 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                       <Loader2 className="animate-spin text-blue-500" size={24} />
                     ) : formData.attachment ? (
                       <>
-                        <CheckCircle2 className="text-emerald-500" size={24} />
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Document Uploaded</p>
+                        <CheckCircle2 className="text-blue-500" size={24} />
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Document Uploaded</p>
                       </>
                     ) : (
                       <>

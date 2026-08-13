@@ -333,7 +333,7 @@ const Payments = () => {
 
   const stats = [
     { label: 'TOTAL PAYMENTS', value: String(totalCount), sub: 'ALL TIME RECORDS', icon: CreditCard, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'RECEIVED', value: String(receivedCount), sub: `₹${receivedAmountVal.toLocaleString('en-IN')}`, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'RECEIVED', value: String(receivedCount), sub: `₹${receivedAmountVal.toLocaleString('en-IN')}`, icon: CheckCircle2, color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'PENDING', value: String(pendingCount), sub: 'IN-FLIGHT TXNS', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
     { label: 'RECONCILED', value: `₹${receivedAmountVal.toLocaleString('en-IN')}`, sub: 'SYSTEM SYNCED', icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
@@ -474,7 +474,7 @@ const Payments = () => {
                     <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-bold text-slate-400">{tx.invoiceNumber}</td>
                     <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-bold text-slate-500">{tx.date}</td>
                     <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-900 text-right">₹{parseFloat(tx.amount).toLocaleString('en-IN')}</td>
-                    <td className="px-5 sm:px-8 py-4 text-center"><span className={`px-3 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider ${tx.status === 'RECEIVED' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{tx.status}</span></td>
+                    <td className="px-5 sm:px-8 py-4 text-center"><span className={`px-3 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider ${tx.status === 'RECEIVED' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white'}`}>{tx.status}</span></td>
                     <td className="px-5 sm:px-8 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1.5">
                          <button onClick={() => openEditModal(tx)} className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-all"><Edit2 size={15} /></button>
@@ -508,7 +508,7 @@ const Payments = () => {
                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Settlement Amount</p>
                  <p className="text-xl font-black text-slate-950">₹{parseFloat(selectedTransaction.amount).toLocaleString('en-IN')}</p>
                  <div className="mt-2 flex items-center justify-center gap-2">
-                   <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${selectedTransaction.status === 'RECEIVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>{selectedTransaction.status}</span>
+                   <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${selectedTransaction.status === 'RECEIVED' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>{selectedTransaction.status}</span>
                    <span className="text-[9px] font-bold text-slate-500">• {selectedTransaction.method}</span>
                  </div>
                </div>
@@ -620,7 +620,7 @@ const Payments = () => {
       <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} onExport={handleExportReport} title="Export Payments Report" />
       {showToast && (
         <div className="fixed bottom-6 right-6 z-[250] bg-slate-900/90 text-white backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-800 animate-in slide-in-from-bottom-5 duration-300">
-          <CheckCircle2 className="text-emerald-500 shrink-0" size={20} />
+          <CheckCircle2 className="text-blue-500 shrink-0" size={20} />
           <span className="text-xs font-black uppercase tracking-wider">{toastMessage}</span>
         </div>
       )}

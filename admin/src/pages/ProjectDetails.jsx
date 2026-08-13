@@ -31,7 +31,7 @@ import {
 } from 'recharts';
 
 const progressData = [
-  { name: 'Completed', value: 65, color: '#10b981' },
+  { name: 'Completed', value: 65, color: '#3b82f6' },
   { name: 'In Progress', value: 20, color: '#3b82f6' },
   { name: 'Pending', value: 10, color: '#f59e0b' },
   { name: 'Not Started', value: 5, color: '#94a3b8' },
@@ -177,7 +177,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
   const documents = Array.isArray(project.documents) ? project.documents : [];
 
   const activities = [
-    { text: `Tender "${project.title}" was registered`, user: 'System', date: new Date(project.createdAt).toLocaleString(), color: 'emerald' },
+    { text: `Tender "${project.title}" was registered`, user: 'System', date: new Date(project.createdAt).toLocaleString(), color: 'blue' },
     { text: `Last modified`, user: 'Admin User', date: new Date(project.updatedAt).toLocaleString(), color: 'blue' },
   ];
 
@@ -207,7 +207,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
   const tenderManager = getTenderManager();
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       {/* Header Area */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col xl:flex-row justify-between items-start gap-6">
@@ -226,7 +226,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest
                     ${(targetAssignment ? targetAssignment.status : project.status) === 'Active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 
-                      (targetAssignment ? targetAssignment.status : project.status) === 'Won' || (targetAssignment ? targetAssignment.status : project.status) === 'Completed' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
+                      (targetAssignment ? targetAssignment.status : project.status) === 'Won' || (targetAssignment ? targetAssignment.status : project.status) === 'Completed' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
                     {targetAssignment ? targetAssignment.status : project.status}
                   </span>
                 </div>
@@ -380,7 +380,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
               </div>
               <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
                 project.completionStatus === 'Submitted' ? 'bg-amber-100 text-amber-600' :
-                project.completionStatus === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
+                project.completionStatus === 'Approved' ? 'bg-blue-100 text-blue-600' :
                 'bg-rose-100 text-rose-600'
               }`}>
                 {project.completionStatus}
@@ -420,7 +420,7 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                 <button 
                   onClick={handleApproveDocs}
                   disabled={processingDocs}
-                  className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
                 >
                   <CheckCircle2 size={16} />
                   Approve Handover

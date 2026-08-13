@@ -71,7 +71,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Completed': return 'bg-emerald-100 text-emerald-600';
+      case 'Completed': return 'bg-blue-100 text-blue-600';
       case 'In Progress': return 'bg-amber-100 text-amber-600';
       case 'At Risk': return 'bg-rose-100 text-rose-600';
       default: return 'bg-slate-100 text-slate-600';
@@ -361,7 +361,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="8" className="px-8 py-20 text-center">
+                  <td colSpan="8" className="px-8 py-10 text-center">
                      <div className="flex flex-col items-center gap-3 text-center">
                         <Briefcase size={48} className="text-slate-200" />
                         <p className="text-slate-400 font-bold">No projects matching your view.</p>

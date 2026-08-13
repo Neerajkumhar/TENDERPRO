@@ -21,7 +21,7 @@ async function seed() {
     const departmentsData = [
       { name: 'Tendering & Procurement', color: 'blue', description: 'Handles all tender acquisitions and client bidding activities.' },
       { name: 'Technical', color: '#3b82f6', description: 'Technical design, estimation and engineering department.' },
-      { name: 'Finance', color: '#10b981', description: 'Financial planning, accounting, and cash flow management.' },
+      { name: 'Finance', color: '#3b82f6', description: 'Financial planning, accounting, and cash flow management.' },
       { name: 'Operations', color: '#f59e0b', description: 'Project operations, execution, and field logistics.' },
       { name: 'Legal', color: '#6366f1', description: 'Legal and regulatory compliance affairs.' }
     ];
@@ -39,6 +39,15 @@ async function seed() {
     // 2. Seed Users
     console.log('\n--- Seeding Users ---');
     const usersData = [
+      {
+        name: 'Super Admin',
+        email: 'superadmin@vagwiin.com',
+        password: '12345678',
+        role: 'Super Admin',
+        departmentId: departmentMap['Tendering & Procurement'].id,
+        phone: '9999999999',
+        status: 'Active'
+      },
       {
         name: 'Vikash Kumar',
         email: 'vikash@vagwiin.com',

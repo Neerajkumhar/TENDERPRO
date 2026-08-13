@@ -32,7 +32,7 @@ import {
 } from 'recharts';
 
 const progressData = [
-  { name: 'Completed', value: 65, color: '#10b981' },
+  { name: 'Completed', value: 65, color: '#3b82f6' },
   { name: 'In Progress', value: 20, color: '#3b82f6' },
   { name: 'Pending', value: 10, color: '#f59e0b' },
   { name: 'Not Started', value: 5, color: '#94a3b8' },
@@ -258,12 +258,12 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
   const documents = Array.isArray(project.documents) ? project.documents : [];
 
   const activities = [
-    { text: `Tender "${project.title}" was registered`, user: 'System', date: new Date(project.createdAt).toLocaleString(), color: 'emerald' },
+    { text: `Tender "${project.title}" was registered`, user: 'System', date: new Date(project.createdAt).toLocaleString(), color: 'blue' },
     { text: `Last modified`, user: 'Admin User', date: new Date(project.updatedAt).toLocaleString(), color: 'blue' },
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-6 sm:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Area */}
       <div className="flex flex-col gap-6 sm:gap-8">
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
@@ -285,7 +285,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest
                     ${project.status === 'Active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 
-                      project.status === 'Won' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
+                      project.status === 'Won' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
                     {project.status}
                   </span>
                   {assignment && (
@@ -317,7 +317,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
             { label: 'Project Budget', value: `₹${parseFloat(project.budget || 0).toLocaleString()}`, icon: IndianRupee, color: 'blue' },
-            { label: 'Tasks Finished', value: `${tasks.filter(t => t.status === 'Completed').length}/${tasks.length}`, icon: CheckCircle2, color: 'emerald' },
+            { label: 'Tasks Finished', value: `${tasks.filter(t => t.status === 'Completed').length}/${tasks.length}`, icon: CheckCircle2, color: 'blue' },
             { 
               label: 'Days Left', 
               value: (project?.submissionDate || assignment?.deadline) 
@@ -395,7 +395,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
                 <PieChart>
                   <Pie 
                     data={[
-                      { name: 'Completed', value: tasks.length === 0 ? 0 : tasks.filter(t => t.status === 'Completed').length, color: '#10b981' },
+                      { name: 'Completed', value: tasks.length === 0 ? 0 : tasks.filter(t => t.status === 'Completed').length, color: '#3b82f6' },
                       { name: 'Remaining', value: tasks.length === 0 ? 1 : tasks.length - tasks.filter(t => t.status === 'Completed').length, color: '#f1f5f9' }
                     ]} 
                     innerRadius={60} 
@@ -404,7 +404,7 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
                     dataKey="value"
                     stroke="none"
                   >
-                    <Cell fill="#10b981" />
+                    <Cell fill="#3b82f6" />
                     <Cell fill="#f1f5f9" />
                   </Pie>
                 </PieChart>
@@ -417,12 +417,12 @@ const ProjectDetails = ({ projectId, onBack, assignments = [], fetchAssignments,
               </div>
             </div>
             <div className="w-full space-y-3 sm:space-y-4">
-              <div className="flex items-center justify-between p-4 sm:p-5 bg-emerald-50 rounded-xl sm:rounded-[1.5rem] border border-emerald-100 shadow-sm">
+              <div className="flex items-center justify-between p-4 sm:p-5 bg-blue-50 rounded-xl sm:rounded-[1.5rem] border border-blue-100 shadow-sm">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
                   <span className="text-[10px] sm:text-xs font-black text-slate-700 uppercase tracking-tight">Active Team Tasks</span>
                 </div>
-                <span className="text-[10px] sm:text-xs font-black text-emerald-600">{tasks.filter(t => t.status !== 'Completed').length}</span>
+                <span className="text-[10px] sm:text-xs font-black text-blue-600">{tasks.filter(t => t.status !== 'Completed').length}</span>
               </div>
             </div>
           </div>

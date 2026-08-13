@@ -154,7 +154,7 @@ const Reports = () => {
   const categoryTotals = {
     'Government': { count: 0, budget: 0, color: '#3b82f6' },
     'Private': { count: 0, budget: 0, color: '#f59e0b' },
-    'PSU': { count: 0, budget: 0, color: '#10b981' },
+    'PSU': { count: 0, budget: 0, color: '#3b82f6' },
     'Non-Profit': { count: 0, budget: 0, color: '#8b5cf6' }
   };
 
@@ -196,7 +196,7 @@ const Reports = () => {
   });
 
   const barData = [
-    { name: 'Met', value: metCount, color: '#10b981' },
+    { name: 'Met', value: metCount, color: '#3b82f6' },
     { name: 'Imminent', value: imminentCount, color: '#3b82f6' },
     { name: 'Missed', value: missedCount, color: '#f87171' }
   ];
@@ -278,7 +278,7 @@ const Reports = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
       {/* Header Area - Matching Image 8 */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
@@ -482,14 +482,14 @@ const Reports = () => {
                              <td className="px-10 py-6">
                                 <div className="flex items-center gap-2">
                                    <div className={`w-2 h-2 rounded-full ${
-                                     tender.status === 'Won' ? 'bg-emerald-500' : (tender.status === 'Lost' ? 'bg-rose-500' : 'bg-blue-500')
+                                     tender.status === 'Won' ? 'bg-blue-500' : (tender.status === 'Lost' ? 'bg-rose-500' : 'bg-blue-500')
                                    }`}></div>
                                    <span className="text-xs font-bold text-slate-500">{tender.status}</span>
                                 </div>
                              </td>
                              <td className="px-10 py-6">
                                 <div className="flex items-center gap-2">
-                                   <div className={`w-2 h-2 rounded-full ${tender.winLoss === 'Won' ? 'bg-emerald-500' : (tender.winLoss === 'Lost' ? 'bg-rose-500' : 'bg-amber-500')}`}></div>
+                                   <div className={`w-2 h-2 rounded-full ${tender.winLoss === 'Won' ? 'bg-blue-500' : (tender.winLoss === 'Lost' ? 'bg-rose-500' : 'bg-amber-500')}`}></div>
                                    <span className="text-xs font-bold text-slate-500">{tender.winLoss}</span>
                                 </div>
                              </td>

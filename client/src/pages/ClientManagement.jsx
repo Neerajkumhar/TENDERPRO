@@ -112,7 +112,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
   const stats = [
     { label: 'TOTAL CLIENTS', value: totalClients, icon: Users, color: 'blue' },
     { label: 'TOTAL PIPELINE', value: formatIndianCurrency(totalPipeline), icon: TrendingUp, color: 'indigo' },
-    { label: 'ACTIVE TENDERS', value: activeTendersCount, icon: Briefcase, color: 'emerald' },
+    { label: 'ACTIVE TENDERS', value: activeTendersCount, icon: Briefcase, color: 'blue' },
     { label: 'COMPLETED TENDERS', value: completedTenders, icon: Trophy, color: 'amber' },
     { label: 'COMPLETED VALUE', value: formatIndianCurrency(completedTendersValue), icon: Star, color: 'rose' },
   ];
@@ -142,12 +142,12 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
       let status = 'INFO';
       let color = 'blue';
 
-      if (t.status === 'Won') { action = 'Tender Awarded'; status = 'SUCCESS'; color = 'emerald'; }
+      if (t.status === 'Won') { action = 'Tender Awarded'; status = 'SUCCESS'; color = 'blue'; }
       else if (t.status === 'Registered') { action = 'Tender Registered'; status = 'NEW'; color = 'blue'; }
       else if (t.status === 'Active') { action = 'Bid Submitted'; status = 'PENDING'; color = 'amber'; }
       else if (t.status === 'Lost') { action = 'Tender Lost'; status = 'FAILED'; color = 'rose'; }
       else if (t.status === 'Under Review') { action = 'Under Review'; status = 'ACTION REQUIRED'; color = 'rose'; }
-      else if (t.status === 'Completed') { action = 'Project Completed'; status = 'DONE'; color = 'emerald'; }
+      else if (t.status === 'Completed') { action = 'Project Completed'; status = 'DONE'; color = 'blue'; }
       else { status = t.status.toUpperCase(); }
       
       return {
@@ -161,7 +161,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
     });
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] pb-12">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] pb-12">
       {/* Header Area */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
         <div>
@@ -290,7 +290,7 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
                 </div>
               ))}
               {filteredClients.length === 0 && (
-                <div className="col-span-1 md:col-span-2 py-12 sm:py-20 text-center bg-white rounded-2xl sm:rounded-[2rem] border border-dashed border-slate-200 px-4">
+                <div className="col-span-1 md:col-span-2 py-12 sm:py-10 text-center bg-white rounded-2xl sm:rounded-[2rem] border border-dashed border-slate-200 px-4">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300">
                     <Users size={28} className="sm:w-8 sm:h-8" />
                   </div>

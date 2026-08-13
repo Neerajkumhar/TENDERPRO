@@ -68,7 +68,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
     { label: 'Total Tenders', value: tenders.length, color: 'slate' },
     { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
     { label: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo' },
-    { label: 'Total Projects', value: assignments?.length || 0, color: 'emerald' },
+    { label: 'Total Projects', value: assignments?.length || 0, color: 'blue' },
     { label: 'Completed Projects', value: assignments?.filter(a => a.status === 'Completed').length || 0, color: 'teal' },
     { label: 'Completed Tenders', value: tenders.filter(t => t.status === 'Completed').length, color: 'amber' },
   ];
@@ -97,7 +97,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
 
   // 2. Budget Distribution by Status
   const budgetByStatus = [
-    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#10b981' }, // emerald-500
+    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#3b82f6' }, // blue-500
     { name: 'In Pipeline (Active)', value: tenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#6366f1' }, // indigo-500
     { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#f43f5e' }, // rose-500
     { name: 'Drafts', value: tenders.filter(t => t.status === 'Draft').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#94a3b8' } // slate-400
@@ -118,7 +118,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
   const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-4 sm:p-5 space-y-4 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Tab Navigation Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white">
         <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
@@ -199,8 +199,8 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                   <AreaChart data={outcomesData}>
                     <defs>
                       <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
@@ -216,7 +216,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                       labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#10b981" fill="url(#colorWon)" strokeWidth={3} />
+                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={3} />
                     <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={3} />
                     <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="5 5" />
                   </AreaChart>
@@ -230,7 +230,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                   <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total budget distribution by status</p>
                 </div>
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                   <BarChart3 size={20} />
                 </div>
               </div>
@@ -322,7 +322,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                       <td className="px-8 py-6 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
                       <td className="px-8 py-6">
                         <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest w-fit shadow-sm
-                          ${tender.status === 'Won' ? 'bg-emerald-500 text-white' : 
+                          ${tender.status === 'Won' ? 'bg-blue-500 text-white' : 
                             tender.status === 'Active' ? 'bg-indigo-600 text-white' : 
                             'bg-amber-500 text-white'}`}>
                           {tender.status}
@@ -339,7 +339,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                     </tr>
                   )) : (
                     <tr>
-                       <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
+                       <td colSpan="5" className="px-8 py-10 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
                     </tr>
                   )}
                 </tbody>
@@ -394,7 +394,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                       <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit
                         ${tender.status === 'Draft' ? 'bg-slate-100 text-slate-600' :
                           tender.status === 'Active' ? 'bg-blue-100 text-blue-600' :
-                            tender.status === 'Won' ? 'bg-emerald-100 text-emerald-600' :
+                            tender.status === 'Won' ? 'bg-blue-100 text-blue-600' :
                               'bg-amber-100 text-amber-600'}`}>
                         {tender.status}
                       </div>
@@ -422,7 +422,7 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
+                    <td colSpan="7" className="px-8 py-10 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
                   </tr>
                 )}
               </tbody>

@@ -36,12 +36,12 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
   const mockTasksFallback = [
     { id: 'm1', title: 'FIX BUGS IN TASK MODULE', desc: 'RESOLVE REPORTED ISSUES', priority: 'HIGH', project: 'WEB APP', deadline: 'Tomorrow', status: 'To Do', pColor: 'text-rose-500' },
-    { id: 'm2', title: 'PREPARE MONTHLY REPORT', desc: 'COMPILE AND ANALYZE DATA', priority: 'LOW', project: 'REPORTING', deadline: 'May 20', status: 'To Do', pColor: 'text-emerald-500' },
+    { id: 'm2', title: 'PREPARE MONTHLY REPORT', desc: 'COMPILE AND ANALYZE DATA', priority: 'LOW', project: 'REPORTING', deadline: 'May 20', status: 'To Do', pColor: 'text-blue-500' },
     { id: 'm3', title: 'DESIGN NEW DASHBOARD LAYOUT', desc: 'CREATE WIREFRAMES AND MOCKUPS', priority: 'HIGH', project: 'WEBSITE REDESIGN', deadline: 'Today', status: 'In Progress', pColor: 'text-rose-500' },
     { id: 'm4', title: 'UPDATE USER DOCUMENTATION', desc: 'ADD NEW FEATURES AND EXAMPLES', priority: 'MEDIUM', project: 'DOCUMENTATION', deadline: 'Today', status: 'In Progress', pColor: 'text-orange-500' },
     { id: 'm5', title: 'REVIEW API INTEGRATION', desc: 'CHECK ENDPOINTS AND RESPONSES', priority: 'MEDIUM', project: 'MOBILE APP', deadline: 'Today', status: 'Review', pColor: 'text-orange-500' },
     { id: 'm6', title: 'UI/UX REVIEW', desc: 'REVIEW NEW USER FLOWS', priority: 'MEDIUM', project: 'WEBSITE REDESIGN', deadline: 'May 17', status: 'Review', pColor: 'text-orange-500' },
-    { id: 'm7', title: 'TEAM MEETING', desc: 'WEEKLY SYNC WITH THE TEAM', priority: 'LOW', project: 'GENERAL', deadline: 'Tomorrow', status: 'Completed', pColor: 'text-emerald-500' },
+    { id: 'm7', title: 'TEAM MEETING', desc: 'WEEKLY SYNC WITH THE TEAM', priority: 'LOW', project: 'GENERAL', deadline: 'Tomorrow', status: 'Completed', pColor: 'text-blue-500' },
   ];
 
   const handleFileUpload = async (file) => {
@@ -278,7 +278,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     switch (priority?.toUpperCase()) {
       case 'HIGH': return 'bg-rose-50 text-rose-500 border-rose-200';
       case 'MEDIUM': return 'bg-orange-50 text-orange-500 border-orange-200';
-      case 'LOW': return 'bg-emerald-50 text-emerald-500 border-emerald-200';
+      case 'LOW': return 'bg-blue-50 text-blue-500 border-blue-200';
       default: return 'bg-slate-50 text-slate-500 border-slate-200';
     }
   };
@@ -286,7 +286,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Completed': 
-      case 'Done': return 'bg-emerald-500 text-white';
+      case 'Done': return 'bg-blue-500 text-white';
       case 'In Progress': return 'bg-blue-500 text-white';
       case 'Review': 
       case 'In Review': return 'bg-purple-500 text-white';
@@ -323,7 +323,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
         <div className="flex items-center gap-3">
           {task.status === 'Completed' || task.status === 'Done' ? (
-            <button disabled className="flex items-center gap-2 px-6 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
+            <button disabled className="flex items-center gap-2 px-6 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
               <CheckCircle2 size={16} /> Completed
             </button>
           ) : user.role === 'Project Manager' ? (
@@ -371,12 +371,12 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
           </div>
 
           {/* Subtasks / Checklist */}
-          <div className="card p-4 sm:p-6 lg:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
+          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-emerald-500" /> Subtasks & Checklist
+                <CheckCircle2 size={16} className="text-blue-500" /> Subtasks & Checklist
               </h3>
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-lg">
                 {subtasks.length > 0 ? `${subtasks.filter(s => s.done).length}/${subtasks.length} Completed` : 'No Subtasks'}
               </span>
             </div>
@@ -391,7 +391,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                       checked={item.done}
                       onChange={() => toggleSubtask(item.id)}
                     />
-                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200 border border-slate-200'}`}>
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 mt-0.5 ${item.done ? 'bg-blue-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200 border border-slate-200'}`}>
                       <CheckCircle2 size={14} />
                     </div>
                     <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
@@ -523,7 +523,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                         target="_blank"
                         rel="noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="p-2 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100 flex items-center justify-center"
+                        className="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100 flex items-center justify-center"
                         title="Download Document"
                       >
                         <Download size={14} />
@@ -652,7 +652,7 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             </h3>
             <div className="space-y-4">
               <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 rounded-full bg-emerald-500"></div>
+                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500"></div>
                 <div>
                   <p className="text-xs font-bold text-slate-600">Task status changed to <span className="text-slate-900 font-black">In Progress</span></p>
                   <p className="text-[9px] font-bold text-slate-400 mt-0.5">YESTERDAY, 4:30 PM</p>

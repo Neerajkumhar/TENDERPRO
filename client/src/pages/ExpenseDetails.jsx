@@ -59,7 +59,7 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
   }
 
   const getStatusBadge = (status) => {
-    if (status === 'APPROVED') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    if (status === 'APPROVED') return 'bg-blue-100 text-blue-700 border-blue-200';
     if (status === 'REJECTED') return 'bg-rose-100 text-rose-700 border-rose-200';
     return 'bg-amber-100 text-amber-700 border-amber-200';
   };
@@ -86,7 +86,7 @@ const ExpenseDetails = ({ expenseId, onBack }) => {
   };
 
   const getStatusIcon = (status) => {
-    if (status === 'APPROVED') return <CheckCircle2 size={16} className="text-emerald-500" />;
+    if (status === 'APPROVED') return <CheckCircle2 size={16} className="text-blue-500" />;
     if (status === 'REJECTED') return <XCircle size={16} className="text-rose-500" />;
     return <Clock size={16} className="text-amber-500" />;
   };

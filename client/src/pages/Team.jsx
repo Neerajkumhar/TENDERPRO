@@ -51,7 +51,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
   );
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in duration-700">
       {/* Header Section */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase italic">Team Directory</h1>
@@ -107,12 +107,12 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                             <User size={20} className="sm:w-6 sm:h-6" />
                           </div>
                         )}
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white rounded-full ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white rounded-full ${member.status === 'Active' ? 'bg-blue-500' : 'bg-amber-500'}`}></div>
                         
                         {/* Dual Unread Badges */}
                         <div className="absolute -top-2 -right-2 flex flex-col gap-0.5 z-10">
                           {member.id && unreadCounts[member.id] > 0 && (
-                            <div className="min-w-[18px] h-[18px] px-1 bg-emerald-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
+                            <div className="min-w-[18px] h-[18px] px-1 bg-blue-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce" title="New messages received">
                               {unreadCounts[member.id]}
                             </div>
                           )}
@@ -146,7 +146,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                   </td>
                   <td className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
                     <span className={`px-3 sm:px-4 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-widest
-                      ${member.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                      ${member.status === 'Active' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>
                       {member.status || 'Active'}
                     </span>
                   </td>
@@ -163,7 +163,7 @@ const Team = ({ user, members = [], departments = [], onMemberClick }) => {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 italic font-medium">
                     No team members found in your department.
                   </td>
                 </tr>

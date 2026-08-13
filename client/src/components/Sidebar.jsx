@@ -159,7 +159,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed, isOpen,
                 {item.label}
               </span>
               {item.isMessaging && displayTotal > 0 && (
-                <span className={`ml-auto px-2 py-0.5 rounded-lg text-[10px] font-black transition-all ${isActive ? 'bg-white text-blue-600' : (totalUnread > 0 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100 animate-bounce' : 'bg-amber-500 text-white shadow-lg shadow-amber-100 animate-bounce')}`}>
+                <span className={`ml-auto px-2 py-0.5 rounded-lg text-[10px] font-black transition-all ${isActive ? 'bg-white text-blue-600' : (totalUnread > 0 ? 'bg-blue-500 text-white shadow-lg shadow-blue-100 animate-bounce' : 'bg-amber-500 text-white shadow-lg shadow-amber-100 animate-bounce')}`}>
                   {displayTotal > 99 ? '99+' : displayTotal}
                 </span>
               )}

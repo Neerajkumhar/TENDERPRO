@@ -69,7 +69,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
     { label: 'Total Tenders', value: tenders.length, color: 'slate' },
     { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
     { label: 'Submitted', value: tenders.filter(t => t.status === 'Submitted').length, color: 'indigo' },
-    { label: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: 'emerald' },
+    { label: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: 'blue' },
     { label: 'Lost', value: tenders.filter(t => t.status === 'Lost').length, color: 'rose' },
     { label: 'Approval Pending', value: tenders.filter(t => t.status === 'Pending').length, color: 'amber' },
   ];
@@ -279,7 +279,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                       <td className="px-8 py-6 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
                       <td className="px-8 py-6">
                         <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest w-fit shadow-sm
-                          ${tender.status === 'Won' ? 'bg-emerald-500 text-white' : 
+                          ${tender.status === 'Won' ? 'bg-blue-500 text-white' : 
                             tender.status === 'Active' ? 'bg-indigo-600 text-white' : 
                             'bg-amber-500 text-white'}`}>
                           {tender.status}
@@ -296,7 +296,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                     </tr>
                   )) : (
                     <tr>
-                       <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
+                       <td colSpan="5" className="px-8 py-10 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
                     </tr>
                   )}
                 </tbody>
@@ -351,7 +351,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                       <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit
                         ${tender.status === 'Draft' ? 'bg-slate-100 text-slate-600' :
                           tender.status === 'Active' ? 'bg-blue-100 text-blue-600' :
-                            tender.status === 'Won' ? 'bg-emerald-100 text-emerald-600' :
+                            tender.status === 'Won' ? 'bg-blue-100 text-blue-600' :
                               'bg-amber-100 text-amber-600'}`}>
                         {tender.status}
                       </div>
@@ -379,7 +379,7 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], setTenders, c
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
+                    <td colSpan="7" className="px-8 py-10 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
                   </tr>
                 )}
               </tbody>

@@ -66,13 +66,13 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
   const statsData = [
     { label: 'Total Tenders', value: tenders.length, trend: '100%', isUp: true, color: 'slate', icon: Briefcase },
     { label: 'Active Tenders', value: tenders.filter(t => t.status === 'Active' || t.status === 'Registered').length, trend: 'Active', isUp: true, color: 'blue', icon: TrendingUp },
-    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, trend: 'Won', isUp: true, color: 'emerald', icon: CheckCircle2 },
+    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, trend: 'Won', isUp: true, color: 'blue', icon: CheckCircle2 },
     { label: 'Total Budget', value: `₹${(tenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0) / 10000000).toFixed(2)}Cr`, trend: 'Valuation', isUp: true, color: 'blue', icon: IndianRupee },
   ];
 
   const projectStatusData = [
     { name: 'Active', value: tenders.filter(t => t.status === 'Active').length, color: '#3b82f6' },
-    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: '#10b981' },
+    { name: 'Won', value: tenders.filter(t => t.status === 'Won').length, color: '#3b82f6' },
     { name: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: '#8b5cf6' },
     { name: 'Other', value: tenders.filter(t => !['Active', 'Won', 'Registered'].includes(t.status)).length, color: '#94a3b8' },
   ].filter(d => d.value > 0);
@@ -82,7 +82,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
     start: (new Date(t.createdAt).getMonth() + (new Date(t.createdAt).getDate() / 30)),
     duration: 2 + Math.random() * 4,
     progress: t.status === 'Won' ? 100 : t.status === 'Active' ? 40 : 10,
-    color: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5],
+    color: ['#3b82f6', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'][i % 5],
     milestones: [1, 2], // Dummy milestones for visualization
     status: t.status
   }));
@@ -148,7 +148,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-700">
+    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in duration-700">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4 lg:gap-6">
         <div>
@@ -185,7 +185,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
               <div className="p-2 sm:p-3 rounded-2xl bg-slate-50 text-slate-600 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
                 <stat.icon size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <div className={`flex items-center gap-1 text-[10px] sm:text-xs font-black ${stat.isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+              <div className={`flex items-center gap-1 text-[10px] sm:text-xs font-black ${stat.isUp ? 'text-blue-500' : 'text-rose-500'}`}>
                 {stat.isUp ? <TrendingUp size={12} /> : <TrendingUp size={12} className="rotate-180" />}
                 {stat.trend || '12%'}
               </div>
@@ -266,7 +266,7 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                     </td>
                     <td className="px-4 py-3 sm:px-6 sm:py-4">
                       <span className={`px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${
-                        assignment.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' :
+                        assignment.status === 'Completed' ? 'bg-blue-50 text-blue-600' :
                         assignment.status === 'In Progress' ? 'bg-blue-50 text-blue-600' :
                         'bg-slate-50 text-slate-400'
                       }`}>

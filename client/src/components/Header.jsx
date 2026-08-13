@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, Plus, ChevronDown, Command, Menu, LogOut, ShieldCheck, User, MessageSquare } from 'lucide-react';
 
-const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogout, onOpenMessages, onNotificationClick }) => {
+const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogout, onOpenMessages, onNotificationClick, onSimulateTrialExpiry, isSubscriptionActive, isTrialExpired }) => {
   const [showDropdownMenu, setShowDropdownMenu] = useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -133,6 +133,30 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Trial Status Pill & Simulation Button */}
+        {!isSubscriptionActive && (
+          <div className="hidden sm:flex items-center gap-2">
+            <div className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border ${
+              isTrialExpired 
+                ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                : 'bg-blue-50 text-blue-700 border-blue-200'
+            }`}>
+              <span className="w-2 h-2 rounded-full bg-current animate-pulse"></span>
+              <span>{isTrialExpired ? '3-Day Trial Expired' : '⚡ 3-Day Trial Active'}</span>
+            </div>
+
+            {onSimulateTrialExpiry && (
+              <button 
+                type="button"
+                onClick={onSimulateTrialExpiry}
+                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 rounded-full text-[11px] font-black tracking-tight transition cursor-pointer shadow-xs"
+                title="Simulate 3-Day Trial Expiration to test plan selection and payment gate"
+              >
+                {isTrialExpired ? 'Reset Trial' : 'Simulate Expiry'}
+              </button>
+            )}
+          </div>
+        )}
         {['Core Team', 'Project Manager', 'Tender Manager', 'Finance Manager'].includes(user?.role) ? (
           <button 
             onClick={onOpenMessages}
@@ -140,7 +164,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
           >
             <MessageSquare size={20} />
             {displayTotal > 0 && (
-              <span className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce ${totalUnread > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+              <span className={`absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce ${totalUnread > 0 ? 'bg-blue-500' : 'bg-amber-500'}`}>
                 {displayTotal > 99 ? '99+' : displayTotal}
               </span>
             )}
@@ -231,7 +255,7 @@ const Header = ({ onCreateTender, toggleMobileMenu, onProfileClick, user, onLogo
               <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200 shadow-sm text-indigo-700 font-bold">
                 {(user?.name ? user.name[0] : 'U')}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 border-2 border-white rounded-full"></div>
             </div>
             <ChevronDown size={16} className={'text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ' + (showDropdownMenu ? 'rotate-180' : '')} />
           </button>

@@ -13,7 +13,7 @@ const mockChallans = [
 
 const billingClasses = {
   'Pending Billing': 'bg-amber-400 text-slate-900',
-  Invoiced: 'bg-emerald-500 text-white',
+  Invoiced: 'bg-blue-500 text-white',
   Draft: 'bg-slate-400 text-white'
 };
 
@@ -645,7 +645,7 @@ const InstallationChallan = () => {
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5 mb-8">
         {[
           { label: 'TOTAL CHALLANS', value: totalChallans, highlight: 'text-slate-900' },
-          { label: 'INVOICED', value: invoicedCount, highlight: 'text-emerald-600' },
+          { label: 'INVOICED', value: invoicedCount, highlight: 'text-blue-600' },
           { label: 'PENDING BILLING', value: pendingBillingCount, highlight: 'text-amber-600' },
           { label: 'DRAFT MODE', value: draftCount, highlight: 'text-slate-500' },
           { label: 'TOTAL INSTALLED VALUE', value: `₹${totalInstalledValue.toLocaleString()}`, highlight: 'text-slate-900' }
@@ -766,7 +766,7 @@ const InstallationChallan = () => {
               </div>
             </div>
 
-            <div className="relative z-0 p-4 sm:p-10 print:p-8 space-y-6 print:space-y-4 font-sans print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
+            <div className="relative z-0 p-4 sm:p-10 print:p-5 space-y-4 print:space-y-4 font-sans print:border-2 print:border-slate-800 print:h-[calc(100vh-10mm)] print:rounded-sm print:flex print:flex-col">
               {/* WATERMARK */}
               {receiptConfig.logoSrc && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[-1] opacity-[0.1]">
@@ -876,7 +876,7 @@ const InstallationChallan = () => {
                   </div>
                   <div className="flex flex-col sm:flex-row">
                     <span className="w-32 flex-shrink-0 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
-                    <span className="text-sm font-bold text-emerald-600 flex-1 sm:border-l sm:pl-4 border-slate-100">Completed</span>
+                    <span className="text-sm font-bold text-blue-600 flex-1 sm:border-l sm:pl-4 border-slate-100">Completed</span>
                   </div>
                 </div>
               </div>
@@ -912,7 +912,7 @@ const InstallationChallan = () => {
                         <td className="py-1.5 px-3 text-sm font-medium text-slate-700 text-center border-r border-slate-300">
                           {row.qty} <span className="text-xs text-slate-400 ml-1">{row.unit}</span>
                         </td>
-                        <td className="py-1.5 px-3 text-sm font-medium text-emerald-600 text-center border-r border-slate-300">{row.status || 'Installed'}</td>
+                        <td className="py-1.5 px-3 text-sm font-medium text-blue-600 text-center border-r border-slate-300">{row.status || 'Installed'}</td>
                         <td className="py-1.5 px-3 text-sm text-slate-600">{row.remarks || ''}</td>
                       </tr>
                     ))}

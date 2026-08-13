@@ -38,6 +38,8 @@ import TaskDetails from './pages/TaskDetails'
 import InvoiceDetails from './pages/InvoiceDetails'
 import ExpenseDetails from './pages/ExpenseDetails'
 import Approvals from './pages/Approvals'
+import PublicWebsite from './pages/PublicWebsite'
+import TrialExpiredGate from './components/TrialExpiredGate'
 
 function App() {
   const checkUrlAuth = () => {
@@ -100,9 +102,45 @@ function App() {
 
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialToken);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState(initialUser);
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [messagesActiveChatId, setMessagesActiveChatId] = useState(null);
+
+  // 3-Day Trial & Subscription State
+  const [preSelectedPlan, setPreSelectedPlan] = useState(() => localStorage.getItem('preSelectedPlan') || 'Business Plan');
+  const [subscriptionActive, setSubscriptionActive] = useState(() => localStorage.getItem('subscriptionActive') === 'true');
+  const [isTrialExpiredSimulated, setIsTrialExpiredSimulated] = useState(() => localStorage.getItem('isTrialExpiredSimulated') === 'true');
+
+  const checkIsTrialExpired = () => {
+    if (subscriptionActive) return false;
+    if (isTrialExpiredSimulated) return true;
+    const startDate = localStorage.getItem('trialStartDate');
+    if (!startDate) return false;
+    const elapsedDays = (new Date() - new Date(startDate)) / (1000 * 60 * 60 * 24);
+    return elapsedDays >= 3;
+  };
+
+  const isTrialExpired = checkIsTrialExpired();
+
+  const handleSimulateTrialExpiry = () => {
+    if (isTrialExpiredSimulated || isTrialExpired) {
+      localStorage.removeItem('isTrialExpiredSimulated');
+      setIsTrialExpiredSimulated(false);
+    } else {
+      localStorage.setItem('isTrialExpiredSimulated', 'true');
+      setIsTrialExpiredSimulated(true);
+    }
+  };
+
+  const handlePaymentSuccess = (planName) => {
+    localStorage.setItem('subscriptionActive', 'true');
+    localStorage.setItem('preSelectedPlan', planName);
+    localStorage.removeItem('isTrialExpiredSimulated');
+    setSubscriptionActive(true);
+    setPreSelectedPlan(planName);
+    setIsTrialExpiredSimulated(false);
+  };
 
   const [previousTab, setPreviousTab] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -132,6 +170,15 @@ function App() {
       window.location.href = `${import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'}/?token=${token}&user=${encodedUser}`;
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false);
+      setUser({});
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
@@ -214,12 +261,14 @@ function App() {
   };
 
   useEffect(() => {
-    fetchDepartments();
-    fetchTenders();
-    fetchClients();
-    fetchAssignments();
-    fetchMembers();
-  }, []);
+    if (isAuthenticated) {
+      fetchDepartments();
+      fetchTenders();
+      fetchClients();
+      fetchAssignments();
+      fetchMembers();
+    }
+  }, [isAuthenticated]);
 
   const handleSaveTender = async (tenderData) => {
     try {
@@ -374,7 +423,37 @@ function App() {
   };
 
   if (!isAuthenticated) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+    if (showLoginModal) {
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans">
+          <div className="bg-[#080C14] px-6 py-3.5 border-b border-slate-800 flex items-center justify-between text-xs font-bold text-slate-300">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setShowLoginModal(false)}>
+              <span className="text-white font-black">TENDER</span>
+              <span className="text-blue-500 font-black">PRO</span>
+            </div>
+            <button 
+              onClick={() => setShowLoginModal(false)}
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition flex items-center gap-1.5 shadow-xs"
+            >
+              <span>← Back to Website</span>
+            </button>
+          </div>
+          <Login onLoginSuccess={handleLoginSuccess} />
+        </div>
+      );
+    }
+    return <PublicWebsite onNavigateLogin={() => setShowLoginModal(true)} onNavigateSignup={() => setShowLoginModal(true)} />;
+  }
+
+  // 3-Day Trial Expired Gate check
+  if (isTrialExpired && !subscriptionActive) {
+    return (
+      <TrialExpiredGate 
+        user={user}
+        preSelectedPlan={preSelectedPlan}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    );
   }
 
   return (
@@ -420,9 +499,16 @@ function App() {
           onOpenMessages={() => setIsMessagesOpen(!isMessagesOpen)}
           onLogout={handleLogout} 
           onNotificationClick={(url) => setActiveTab(url)}
+          onSimulateTrialExpiry={handleSimulateTrialExpiry}
+          isSubscriptionActive={subscriptionActive}
+          isTrialExpired={isTrialExpired}
         />
 
         <main className="flex-1 overflow-y-auto print:overflow-visible">
+
+          {activeTab === 'Public Website' && (
+            <PublicWebsite />
+          )}
 
           {activeTab === 'Dashboard' && (
             <Dashboard

@@ -127,7 +127,7 @@ const Login = ({ onLoginSuccess }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-lg focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] outline-none transition-all placeholder:text-slate-400 text-sm"
-                  placeholder="jason.reed@company.co"
+                  placeholder="vikash@vagwiin.com"
                 />
               </div>
             </div>
@@ -156,7 +156,40 @@ const Login = ({ onLoginSuccess }) => {
               </div>
             </div>
 
-
+            {/* Quick Demo Credentials */}
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+              <span className="text-xs font-semibold text-slate-600 block uppercase tracking-wider">Quick Demo Login:</span>
+              <div className="grid grid-cols-2 gap-1.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setEmail('vikash@vagwiin.com'); setPassword('12345678'); setError(''); }}
+                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                >
+                  👤 Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('superadmin@vagwiin.com'); setPassword('12345678'); setError(''); }}
+                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                >
+                  ⚡ Super Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('manager@vagwiin.com'); setPassword('12345678'); setError(''); }}
+                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                >
+                  📋 Tender Mgr
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('finance@vagwiin.com'); setPassword('12345678'); setError(''); }}
+                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                >
+                  💰 Finance Mgr
+                </button>
+              </div>
+            </div>
 
             {error && (
               <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-start gap-2">
