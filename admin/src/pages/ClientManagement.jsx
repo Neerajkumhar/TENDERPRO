@@ -315,132 +315,143 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
         </div>
       </div>
 
-      {/* Add Client Modal */}
+      {/* Add Client Modal - Professional, 3-Column, Scroll-Free */}
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowAddModal(false)}></div>
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
-            <div className="p-5 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="p-2 sm:p-3 bg-blue-600 text-white rounded-xl sm:rounded-2xl shadow-lg shrink-0">
-                  <Plus size={20} className="sm:w-6 sm:h-6" />
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200 shrink-0">
+                  <Plus size={18} />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Register New Client</h2>
-                  <p className="hidden sm:block text-xs text-slate-500 font-medium italic">Add a new business partner to your directory.</p>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Register New Client</h2>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Add a new business partner to your directory</p>
                 </div>
               </div>
-              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400 shrink-0"><X size={20} /></button>
+              <button onClick={() => setShowAddModal(false)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-all text-slate-400 shrink-0"><X size={18} /></button>
             </div>
             
-            <form onSubmit={handleAddClient} className="p-6 sm:p-10 space-y-5 sm:space-y-6 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <form onSubmit={handleAddClient} className="p-5 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Name</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Company Name <span className="text-rose-500">*</span></label>
                   <input 
                     required
                     type="text" 
                     placeholder="e.g. Acme Corp"
                     value={newClient.name}
                     onChange={(e) => setNewClient({...newClient, name: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Name (Contact)</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Client Contact Name</label>
                   <input 
                     type="text" 
                     placeholder="e.g. John Doe"
                     value={newClient.manager}
                     onChange={(e) => setNewClient({...newClient, manager: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Industry</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Industry</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Construction"
                     value={newClient.industry}
                     onChange={(e) => setNewClient({...newClient, industry: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Location</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Location</label>
                   <input 
                     type="text" 
                     placeholder="City, Country"
                     value={newClient.location}
                     onChange={(e) => setNewClient({...newClient, location: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Address (Company)</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Company Address</label>
                   <input 
                     type="text" 
                     placeholder="e.g. 123 Business Rd"
                     value={newClient.address}
                     onChange={(e) => setNewClient({...newClient, address: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">GST Address (Company)</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">GST Address</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. 123 Business Rd"
+                    placeholder="e.g. GST Registered Address"
                     value={newClient.gstAddress}
                     onChange={(e) => setNewClient({...newClient, gstAddress: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Email Address</label>
                   <input 
                     type="email" 
-                    placeholder="client@email.com"
+                    placeholder="client@company.com"
                     value={newClient.email}
                     onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Phone Number</label>
                   <input 
                     type="text" 
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 98765 43210"
                     value={newClient.phone}
                     onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Firm Type</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Firm Type</label>
                   <select 
                     value={newClient.firmType}
                     onChange={(e) => setNewClient({...newClient, firmType: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none appearance-none cursor-pointer focus:border-blue-500"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none cursor-pointer focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all"
                   >
                     <option value="Private">Private</option>
                     <option value="Govt">Government</option>
                   </select>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pipeline Value (₹)</label>
+                <div className="space-y-1 sm:col-span-2 lg:col-span-3">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Estimated Pipeline Value (₹)</label>
                   <input 
                     type="number" 
-                    placeholder="Estimated Value"
+                    placeholder="Enter estimated value"
                     value={newClient.value}
                     onChange={(e) => setNewClient({...newClient, value: e.target.value})}
-                    className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all" 
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
                   />
                 </div>
               </div>
-              <div className="pt-4 sm:pt-6 flex flex-col xs:flex-row gap-3 sm:gap-4 shrink-0">
-                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 sm:py-4 text-slate-500 text-sm font-black uppercase tracking-widest hover:bg-slate-50 rounded-xl sm:rounded-2xl transition-all">Cancel</button>
-                <button type="submit" className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl sm:rounded-2xl text-sm font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all uppercase tracking-widest">Register Client</button>
+              <div className="pt-4 border-t border-slate-100 flex justify-end items-center gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddModal(false)} 
+                  className="px-5 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-extrabold shadow-md shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-wider"
+                >
+                  Register Client
+                </button>
               </div>
             </form>
           </div>
