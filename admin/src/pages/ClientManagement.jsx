@@ -246,104 +246,72 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
             <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
               <stat.icon size={16} />
             </div>
-            <div className="min-w-0 flex-1">
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">{stat.label}</p>
-               <h3 className="text-xl font-extrabold text-slate-900 tracking-tight truncate">{stat.value}</h3>
-            </div>
+             <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">{stat.label}</p>
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight truncate">{stat.value}</h3>
+             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        {/* Main Content: Active Clients Grid */}
-        <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-           <div className="flex justify-between items-center px-1">
-              <h3 className="text-[10px] sm:text-xs font-black text-slate-900 tracking-[0.2em] uppercase">ACTIVE CLIENTS</h3>
-              <button className="text-[9px] sm:text-[10px] font-black text-blue-600 tracking-widest uppercase hover:underline">View All</button>
-           </div>
-           
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {filteredClients.map((client, i) => (
-                <div 
-                  key={client.id || i} 
-                  onClick={() => onView(client.id)}
-                  className="bg-white p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 group hover:border-blue-200 hover:shadow-lg transition-all relative overflow-hidden cursor-pointer active:scale-[0.98] flex flex-col justify-between"
-                >
-                   <div>
-                     <div className="flex items-center sm:items-start gap-4 sm:gap-5 mb-4 sm:mb-6">
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center text-lg sm:text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
-                           {client.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                           <h4 className="text-sm sm:text-base font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">{client.name}</h4>
-                           {client.manager && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{client.manager}</p>}
-                           <p className="text-[10px] sm:text-xs font-bold text-slate-400 truncate">{client.industry || 'General'}</p>
-                        </div>
-                     </div>
-                     
-                     <div className="space-y-2.5 sm:space-y-3 mb-4 sm:mb-6">
-                        <div className="flex items-center gap-3 text-slate-500 min-w-0">
-                           <MapPin size={14} className="text-slate-300 shrink-0" />
-                           <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.location || 'Location N/A'}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-slate-500 min-w-0">
-                           <Mail size={14} className="text-slate-300 shrink-0" />
-                           <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.email || 'No Email'}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-slate-500 min-w-0">
-                           <Phone size={14} className="text-slate-300 shrink-0" />
-                           <span className="text-[10px] sm:text-[11px] font-bold truncate">{client.phone || 'No Phone'}</span>
-                        </div>
-                     </div>
-                   </div>
-                   
-                   <div className="flex justify-end items-end pt-4 sm:pt-5 border-t border-slate-50">
-                       <div className="text-right shrink-0 ml-4">
-                          <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 sm:mb-1">PIPELINE VALUE</p>
-                          <p className="text-base sm:text-lg font-black text-blue-600 whitespace-nowrap">
-                            {formatIndianCurrency(tenders.filter(t => t.clientId === client.id).reduce((sum, t) => sum + (parseFloat(t.budget) || 0), 0))}
-                          </p>
-                       </div>
-                    </div>
-                </div>
-              ))}
-              {filteredClients.length === 0 && (
-                <div className="col-span-1 md:col-span-2 py-12 sm:py-10 text-center bg-white rounded-2xl sm:rounded-[2rem] border border-dashed border-slate-200 px-4">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-50 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300">
-                    <Users size={28} className="sm:w-8 sm:h-8" />
-                  </div>
-                  <h4 className="text-sm sm:text-base text-slate-400 font-bold">No clients found matching your search</h4>
-                </div>
-              )}
-           </div>
+      <div className="space-y-4">
+        {/* Active Clients Section - Full Width & Minimized Cards */}
+        <div className="flex justify-between items-center px-1">
+          <h3 className="text-[10px] sm:text-xs font-extrabold text-slate-900 tracking-wider uppercase">ACTIVE CLIENTS</h3>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{filteredClients.length} {filteredClients.length === 1 ? 'Client' : 'Clients'}</span>
         </div>
-
-        {/* Sidebar: Recent Activity */}
-        <div className="lg:col-span-4">
-           <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-100 space-y-6 sm:space-y-8 sticky top-8">
-              <h3 className="text-[10px] sm:text-xs font-black text-slate-900 tracking-[0.2em] uppercase px-1">RECENT ACTIVITY</h3>
-              
-              <div className="space-y-6 sm:space-y-8">
-                 {recentActivity.length === 0 ? (
-                    <div className="text-center p-4">
-                      <p className="text-xs text-slate-400 font-bold">No recent activities found.</p>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+          {filteredClients.map((client, i) => (
+            <div 
+              key={client.id || i} 
+              onClick={() => onView(client.id)}
+              className="bg-white p-3.5 sm:p-4 rounded-xl shadow-xs border border-slate-100/90 group hover:border-blue-200 hover:shadow-md transition-all duration-300 relative overflow-hidden cursor-pointer active:scale-[0.98] flex flex-col justify-between"
+            >
+               <div>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
+                       {client.name.charAt(0)}
                     </div>
-                 ) : recentActivity.map((act, i) => (
-                   <div key={i} className="space-y-1.5 sm:space-y-2 group cursor-pointer px-1">
-                      <div className="flex justify-between items-start gap-4">
-                         <h5 className="text-xs sm:text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">{act.client}</h5>
-                         <span className={`shrink-0 px-2 sm:px-3 py-1 bg-${act.color}-50 text-${act.color}-600 rounded-lg text-[7px] sm:text-[8px] font-black uppercase tracking-widest`}>
-                            {act.status}
-                         </span>
-                      </div>
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 line-clamp-2">
-                         {act.action}: <span className="text-slate-800">{act.project}</span>
-                      </p>
-                      <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">{act.time}</p>
-                   </div>
-                 ))}
+                    <div className="min-w-0 flex-1">
+                       <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 group-hover:text-blue-600 transition-colors truncate">{client.name}</h4>
+                       {client.manager && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate">{client.manager}</p>}
+                       <p className="text-[9px] font-semibold text-slate-400 truncate">{client.industry || 'General'}</p>
+                    </div>
+                 </div>
+                 
+                 <div className="space-y-1.5 mb-3">
+                    <div className="flex items-center gap-2 text-slate-500 min-w-0">
+                       <MapPin size={12} className="text-slate-400 shrink-0" />
+                       <span className="text-[10px] font-bold truncate">{client.location || 'Location N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500 min-w-0">
+                       <Mail size={12} className="text-slate-400 shrink-0" />
+                       <span className="text-[10px] font-bold truncate">{client.email || 'No Email'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500 min-w-0">
+                       <Phone size={12} className="text-slate-400 shrink-0" />
+                       <span className="text-[10px] font-bold truncate">{client.phone || 'No Phone'}</span>
+                    </div>
+                 </div>
+               </div>
+               
+               <div className="flex justify-between items-center pt-2.5 border-t border-slate-50">
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">PIPELINE VALUE</span>
+                  <span className="text-xs sm:text-sm font-extrabold text-blue-600">
+                    {formatIndianCurrency(tenders.filter(t => t.clientId === client.id).reduce((sum, t) => sum + (parseFloat(t.budget) || 0), 0))}
+                  </span>
+               </div>
+            </div>
+          ))}
+          {filteredClients.length === 0 && (
+            <div className="col-span-full py-10 text-center bg-white rounded-xl border border-dashed border-slate-200 px-4">
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-300">
+                <Users size={22} />
               </div>
-           </div>
+              <h4 className="text-xs text-slate-400 font-bold">No clients found matching your search</h4>
+            </div>
+          )}
         </div>
       </div>
 
