@@ -182,169 +182,120 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
             ))}
           </div>
 
-          {/* Charts Row - Minimized Sleek Cards */}
+          {/* Charts & Recent Tenders Row - Side-by-Side */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Tender Activity Timeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bid outcomes over last 6 months</p>
+            
+            {/* Tender Activity Timeline Card */}
+            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Tender Activity Timeline</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bid outcomes over last 6 months</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <TrendingUp size={16} />
+                  </div>
                 </div>
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                  <TrendingUp size={16} />
+                <div className="h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                    <AreaChart data={outcomesData}>
+                      <defs>
+                        <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={5} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dx={-5} allowDecimals={false} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        itemStyle={{ fontSize: '11px', fontWeight: 700 }}
+                        labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}
+                      />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
+                      <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={2.5} />
+                      <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={2.5} />
+                      <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="4 4" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
-              </div>
-              <div className="h-[220px]">
-                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                  <AreaChart data={outcomesData}>
-                    <defs>
-                      <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={5} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dx={-5} allowDecimals={false} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                      itemStyle={{ fontSize: '11px', fontWeight: 700 }}
-                      labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}
-                    />
-                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={2.5} />
-                    <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={2.5} />
-                    <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="4 4" />
-                  </AreaChart>
-                </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Financial Pipeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Total budget distribution by status</p>
+            {/* Recent Tenders Card (Placed adjacent to Tender Activity Timeline Card) */}
+            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between overflow-hidden">
+              <div>
+                <div className="flex justify-between items-center mb-3 border-b border-slate-50 pb-3">
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Recent Tenders</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Latest bid activities</p>
+                  </div>
+                  <button 
+                    onClick={() => setActiveView('list')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold text-indigo-600 hover:bg-indigo-50 transition-all shadow-xs active:scale-95"
+                  >
+                    <span>View All</span>
+                    <ArrowRight size={12} />
+                  </button>
                 </div>
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                  <BarChart3 size={16} />
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[220px] gap-4 sm:gap-6">
-                 <div className="w-full sm:flex-1 space-y-3">
-                    {budgetByStatus.map((cat, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider" style={{ color: cat.color }}>
-                          <span>{cat.name}</span>
-                          <span className="text-slate-800 font-extrabold">{cat.name === 'No Data' ? '-' : formatCurrency(cat.value)}</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                           <div className="h-full rounded-full transition-all duration-1000" style={{width: `${totalBudgetValue > 0 ? (cat.value / totalBudgetValue) * 100 : 0}%`, backgroundColor: cat.color}}></div>
-                        </div>
-                      </div>
-                    ))}
-                 </div>
-                 <div className="w-full sm:w-1/2 h-[180px] sm:h-full relative flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                      <PieChart>
-                        <Pie
-                          data={budgetByStatus}
-                          innerRadius={50}
-                          outerRadius={70}
-                          paddingAngle={5}
-                          dataKey="value"
-                          stroke="none"
-                        >
-                          {budgetByStatus.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value) => formatCurrency(value)}
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                          itemStyle={{ fontSize: '11px', fontWeight: 700 }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">{totalBudgetValue > 0 ? formatCurrency(totalBudgetValue) : '₹0'}</span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Value</span>
-                    </div>
-                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Recent Tenders Section - ADDED AS REQUESTED */}
-          <div className="bg-white rounded-2xl sm:rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
-            <div className="p-4 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/20">
-               <div>
-                  <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase tracking-widest">Recent Tenders</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Latest bid activities and updates</p>
-               </div>
-               <button 
-                  onClick={() => setActiveView('list')}
-                  className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all shadow-sm active:scale-95 self-end sm:self-auto"
-                >
-                  View All
-                  <ArrowRight size={14} />
-               </button>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50">
+                        <th className="px-3 py-2">Tender</th>
+                        <th className="px-3 py-2">Client</th>
+                        <th className="px-3 py-2">Status</th>
+                        <th className="px-3 py-2">Value</th>
+                        <th className="px-3 py-2 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
+                        <tr key={tender.id || i} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                {tender.title?.charAt(0) || 'T'}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate max-w-[130px]">{tender.title}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-xs font-semibold text-slate-500 truncate max-w-[100px]">{getClientName(tender.clientId)}</td>
+                          <td className="px-3 py-2.5">
+                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider whitespace-nowrap
+                              ${tender.status === 'Won' ? 'bg-blue-50 text-blue-600' : 
+                                tender.status === 'Active' ? 'bg-indigo-50 text-indigo-600' : 
+                                'bg-amber-50 text-amber-600'}`}>
+                              {tender.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-xs font-extrabold text-slate-900 whitespace-nowrap">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
+                          <td className="px-3 py-2.5 text-center">
+                            <button onClick={() => onView(tender.id)} className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                              <Eye size={15} />
+                            </button>
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan="5" className="px-4 py-6 text-center text-slate-400 italic text-xs">No recent tenders found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-slate-50/30 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <th className="px-8 py-4">Tender Details</th>
-                    <th className="px-8 py-4">Client</th>
-                    <th className="px-8 py-4">Status</th>
-                    <th className="px-8 py-4">Value</th>
-                    <th className="px-8 py-4 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
-                    <tr key={tender.id || i} className="hover:bg-indigo-50/20 transition-all cursor-pointer group">
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                              {tender.title?.charAt(0) || 'T'}
-                           </div>
-                           <div>
-                              <p className="text-sm font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{tender.title}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">Ref: #{tender.id?.substring(0,8)}</p>
-                           </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
-                      <td className="px-8 py-6">
-                        <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest w-fit shadow-sm
-                          ${tender.status === 'Won' ? 'bg-blue-500 text-white' : 
-                            tender.status === 'Active' ? 'bg-indigo-600 text-white' : 
-                            'bg-amber-500 text-white'}`}>
-                          {tender.status}
-                        </div>
-                      </td>
-                      <td className="px-8 py-6 text-sm font-black text-slate-900">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
-                      <td className="px-8 py-6">
-                        <div className="flex justify-center">
-                           <button onClick={() => onView(tender.id)} className="p-2 hover:bg-indigo-100 text-indigo-600 rounded-xl transition-all">
-                              <Eye size={18} />
-                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )) : (
-                    <tr>
-                       <td colSpan="5" className="px-8 py-10 text-center text-slate-400 italic font-medium">No recent tenders found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+
           </div>
         </div>
       ) : (
