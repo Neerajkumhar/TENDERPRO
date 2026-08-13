@@ -306,46 +306,46 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
         </div>
       </div>
 
-      {/* New Project / Assign Work Modal */}
+      {/* New Project / Assign Work Modal - Professional & Scroll-Free */}
       {showProjectModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-5 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 p-4 sm:p-6 flex flex-col gap-4 animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                  <Briefcase size={20} />
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
+                  <Briefcase size={18} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Create New Project</h2>
-                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Initialize a new project assignment</p>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Create New Project</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Initialize a new project assignment</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowProjectModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
+                className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Title</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Title <span className="text-rose-500">*</span></label>
                 <input 
                   type="text" 
                   value={assignmentData.title}
                   onChange={(e) => setAssignmentData({ ...assignmentData, title: e.target.value })}
                   placeholder="e.g. Smart Transit System Upgrade"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Linked Tender <span className="text-rose-500">*</span></label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Linked Tender <span className="text-rose-500">*</span></label>
                 <select
                   value={assignmentData.tenderId}
                   onChange={(e) => setAssignmentData({ ...assignmentData, tenderId: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
                 >
                   <option value="">Select Tender</option>
                   {tenders.map(t => (
@@ -354,102 +354,97 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Department <span className="text-rose-500">*</span></label>
-                  <select
-                    value={assignmentData.departmentId}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, departmentId: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  >
-                    <option value="">Select Department</option>
-                    {departments?.map(d => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Manager</label>
-                  <select 
-                    value={assignmentData.assigneeId}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, assigneeId: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  >
-                    <option value="">Select Manager</option>
-                    {members?.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Status</label>
-                  <select 
-                    value={assignmentData.status}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, status: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Priority</label>
-                  <select 
-                    value={assignmentData.priority}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, priority: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="col-span-1 sm:col-span-2">
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Deadline</label>
-                  <input 
-                    type="date" 
-                    value={assignmentData.deadline}
-                    onChange={(e) => setAssignmentData({ ...assignmentData, deadline: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  />
-                </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Department <span className="text-rose-500">*</span></label>
+                <select
+                  value={assignmentData.departmentId}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, departmentId: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
+                >
+                  <option value="">Select Department</option>
+                  {departments?.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Description <span className="text-rose-500">*</span></label>
-                <textarea 
-                  rows="3"
-                  value={assignmentData.description}
-                  onChange={(e) => setAssignmentData({ ...assignmentData, description: e.target.value })}
-                  placeholder="Describe project details, scope, or requirements..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm resize-none"
-                  required
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Manager</label>
+                <select 
+                  value={assignmentData.assigneeId}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, assigneeId: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
+                >
+                  <option value="">Select Manager</option>
+                  {members?.filter(m => m.role === 'Project Manager').map(m => (
+                    <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Deadline</label>
+                <input 
+                  type="date" 
+                  value={assignmentData.deadline}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, deadline: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 mt-4 border-t border-slate-100 pt-5">
-                <button 
-                  type="button"
-                  onClick={() => setShowProjectModal(false)}
-                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all active:scale-95"
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Status</label>
+                <select 
+                  value={assignmentData.status}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, status: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
                 >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleAssignmentSubmit}
-                  className="px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200"
-                >
-                  Save Changes
-                </button>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
               </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Priority</label>
+                <select 
+                  value={assignmentData.priority}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, priority: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Description <span className="text-rose-500">*</span></label>
+                <textarea 
+                  rows="2"
+                  value={assignmentData.description}
+                  onChange={(e) => setAssignmentData({ ...assignmentData, description: e.target.value })}
+                  placeholder="Describe project details, scope, or requirements..."
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-xs resize-none"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2.5 border-t border-slate-100 pt-3">
+              <button 
+                type="button"
+                onClick={() => setShowProjectModal(false)}
+                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleAssignmentSubmit}
+                className="px-5 py-2 bg-[#1e293b] text-white rounded-xl text-xs font-extrabold hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200 uppercase tracking-wider"
+              >
+                Save Project
+              </button>
             </div>
           </div>
         </div>
