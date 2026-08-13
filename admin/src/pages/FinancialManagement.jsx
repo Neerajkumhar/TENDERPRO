@@ -423,29 +423,29 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-6 sm:gap-8">
-        <div className="col-span-12 xl:col-span-8 card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
+      <div className="grid grid-cols-12 gap-5">
+        <div className="col-span-12 xl:col-span-8 p-4 sm:p-5 bg-white border border-slate-100/90 rounded-xl shadow-xs relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
             <div>
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Revenue vs Expense</h3>
+              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Revenue vs Expense</h3>
               <p className="text-xs text-slate-500 font-medium">Monthly performance comparison</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 sm:gap-6">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue (Billed)</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Revenue (Billed)</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Payment (Cash)</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
-                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Expense</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expense</span>
               </div>
             </div>
           </div>
-          <div className="h-[280px] sm:h-[350px] w-full min-w-0">
+          <div className="h-[250px] sm:h-[290px] w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueVsExpenseData}>
                 <defs>
@@ -473,9 +473,9 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 />
                 <Tooltip 
                   contentStyle={{
-                    borderRadius: '16px',
+                    borderRadius: '12px',
                     border: 'none',
-                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
                   }}
                 />
                 <Area 
@@ -506,33 +506,35 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-4 card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 relative">
-          <div className="flex justify-between items-center mb-6 sm:mb-8">
-            <div>
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase">Recent Alerts</h3>
-              <p className="text-xs text-slate-500 font-medium">Automatic system monitors</p>
+        <div className="col-span-12 xl:col-span-4 p-4 sm:p-5 bg-white border border-slate-100/90 rounded-xl shadow-xs relative flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight uppercase">Recent Alerts</h3>
+                <p className="text-xs text-slate-500 font-medium">Automatic system monitors</p>
+              </div>
+              <button className="p-1.5 hover:bg-slate-50 rounded-xl transition-all"><MoreHorizontal size={18} className="text-slate-400" /></button>
             </div>
-            <button className="p-2 hover:bg-slate-50 rounded-xl transition-all"><MoreHorizontal size={20} className="text-slate-400" /></button>
-          </div>
-          <div className="space-y-4">
-            {displayAlerts.length > 0 ? (
-              displayAlerts.map((alert, i) => (
-                <div key={i} className={`flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-${alert.color}-50 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
-                  <div className={`p-2 rounded-xl bg-white text-${alert.color}-600 shadow-sm shadow-${alert.color}-100 group-hover:scale-110 transition-transform shrink-0`}>
-                    <AlertCircle size={18} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-2">
-                      <p className={`text-[10px] font-black text-${alert.color}-600 uppercase tracking-widest`}>{alert.type}</p>
-                      <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">{alert.time}</span>
+            <div className="space-y-3">
+              {displayAlerts.length > 0 ? (
+                displayAlerts.map((alert, i) => (
+                  <div key={i} className={`flex items-start gap-3 p-3 rounded-xl bg-${alert.color}-50/60 border border-${alert.color}-100/50 group hover:border-${alert.color}-200 transition-all`}>
+                    <div className={`p-1.5 rounded-lg bg-white text-${alert.color}-600 shadow-xs group-hover:scale-105 transition-transform shrink-0`}>
+                      <AlertCircle size={16} />
                     </div>
-                    <p className="text-xs font-bold text-slate-700 mt-0.5 truncate">{alert.message}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <p className={`text-[10px] font-extrabold text-${alert.color}-600 uppercase tracking-wider`}>{alert.type}</p>
+                        <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">{alert.time}</span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-700 mt-0.5 truncate">{alert.message}</p>
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-8 text-center text-slate-400 text-xs italic font-medium">No recent alerts.</div>
-            )}
+                ))
+              ) : (
+                <div className="py-6 text-center text-slate-400 text-xs italic font-medium">No recent alerts.</div>
+              )}
+            </div>
           </div>
           {displayAlerts.length > 0 && (
             <button 
@@ -540,18 +542,18 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                 setIsAlertsCleared(true);
                 localStorage.setItem('financeAlertsCleared', 'true');
               }}
-              className="w-full mt-6 py-4 border-2 border-slate-100 border-dashed rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-blue-200 hover:text-blue-500 transition-all"
+              className="w-full mt-4 py-2.5 border border-slate-200 border-dashed rounded-xl text-[10px] font-bold text-slate-400 uppercase tracking-wider hover:border-blue-300 hover:text-blue-600 transition-all"
             >
-              Clear
+              Clear Alerts
             </button>
           )}
         </div>
 
-        <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden">
-          <div className="p-4 sm:p-5 lg:p-6 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/30">
+        <div className="col-span-12 bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/20">
             <div>
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight">Invoice Status Table</h3>
-              <p className="text-xs text-slate-500 font-medium mt-1">Detailed log of recent financial transactions</p>
+              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Invoice Status Table</h3>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">Detailed log of recent financial transactions</p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
               <div className="relative group w-full sm:w-64">
