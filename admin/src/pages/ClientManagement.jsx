@@ -168,21 +168,21 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
       {/* Header Area */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">Client Directory</h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1 italic">Manage your corporate relationships and pipelines.</p>
+          <h1 className="text-lg sm:text-xl font-extrabold text-slate-800 tracking-tight">Client Directory</h1>
+          <p className="text-xs font-medium text-slate-500 mt-0.5">Manage your corporate relationships and pipelines.</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             {/* Search Bar - Grouped next to Filter */}
             <div className="relative group w-full sm:w-80 order-2 sm:order-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
               <input 
                 type="text" 
                 placeholder="Search name or industry..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-6 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm" 
+                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all shadow-xs" 
               />
             </div>
 

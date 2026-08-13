@@ -152,26 +152,26 @@ const ProjectManagement = ({ onProjectClick, onAssignmentClick, tenders, departm
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4 lg:gap-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Project Management</h1>
-          <p className="text-slate-500 mt-1 text-xs sm:text-sm font-medium italic">Track progress, timelines, and team allocation across all active projects.</p>
+          <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Project Management</h1>
+          <p className="text-slate-500 mt-0.5 text-xs font-medium">Track progress, timelines, and team allocation across all active projects.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
           <div className="relative group w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={15} />
             <input
               id="project-search"
               type="text"
               placeholder="Search projects..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-sm focus:ring-4 focus:ring-blue-50"
+              className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-500 transition-all shadow-xs focus:ring-2 focus:ring-blue-50"
             />
           </div>
           <button
             onClick={() => setShowProjectModal(true)}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg active:scale-95 uppercase tracking-widest whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-extrabold hover:bg-blue-600 transition-all shadow-md active:scale-95 uppercase tracking-wider whitespace-nowrap"
           >
-            <Briefcase size={18} />
+            <Briefcase size={15} />
             <span>New Project</span>
           </button>
         </div>

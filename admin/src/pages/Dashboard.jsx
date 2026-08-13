@@ -322,56 +322,56 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
     const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
 
     return (
-      <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 lg:space-y-6 animate-in fade-in duration-700 bg-[#fbfcfd]">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4">
+      <div className="p-4 sm:p-5 space-y-4 sm:space-y-5 animate-in fade-in duration-700 bg-[#fbfcfd]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">Tender Overview</h1>
-            <p className="text-slate-500 mt-1 font-medium italic text-xs sm:text-sm">Welcome back, {user.name}. Here is your global tender analytics.</p>
+            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Tender Overview</h1>
+            <p className="text-slate-500 mt-0.5 font-medium text-xs">Welcome back, {user.name}. Here is your global tender analytics.</p>
           </div>
-          <div className="flex gap-2 sm:gap-3 shrink-0">
+          <div className="flex gap-2 sm:gap-2.5 shrink-0">
              <button 
               onClick={() => setShowLeaveModal(true)}
-              className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 bg-amber-500 text-white rounded-xl text-[10px] sm:text-xs font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-extrabold hover:bg-amber-600 transition-all shadow-xs active:scale-95"
             >
-              <Coffee size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <Coffee size={14} />
               <span className="hidden sm:inline">Leave Requests</span>
               <span className="sm:hidden">Leaves</span>
             </button>
-             <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] sm:text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
-                <Calendar size={16} className="text-indigo-600 sm:w-[18px] sm:h-[18px]" />
+             <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 shadow-xs hover:bg-slate-50 transition-all">
+                <Calendar size={14} className="text-indigo-600" />
                 <span className="hidden sm:inline">Select Period</span>
-                <ChevronDown size={14} className="sm:w-4 sm:h-4" />
+                <ChevronDown size={13} />
              </button>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {statsData.map((stat, i) => (
-            <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 relative overflow-hidden hover:shadow-md hover:border-slate-200 transition-all duration-300">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 truncate">{stat.label}</p>
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
+            <div key={i} className="bg-white p-3 rounded-xl shadow-xs border border-slate-100/90 relative overflow-hidden hover:shadow-sm hover:border-slate-200 transition-all duration-300">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 truncate">{stat.label}</p>
+              <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-6 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-            <div className="flex justify-between items-start mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90">
+            <div className="flex justify-between items-start mb-5">
               <div>
-                <h3 className="text-base font-black text-slate-900 tracking-tight uppercase tracking-widest">TENDER PIPELINE</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">DISTRIBUTION ACROSS STAGES</p>
+                <h3 className="text-xs font-extrabold text-slate-900 tracking-tight uppercase tracking-wider">TENDER PIPELINE</h3>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">DISTRIBUTION ACROSS STAGES</p>
               </div>
-              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                <Target size={20} />
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                <Target size={16} />
               </div>
             </div>
-            <div className="h-[300px]">
+            <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <BarChart data={pipelineData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dy={10} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={6} />
                   <Tooltip cursor={{fill: '#f8fafc'}} />
-                  <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={40}>
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={32}>
                     {pipelineData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#8b5cf6' : '#a78bfa'} />
                     ))}
@@ -381,37 +381,37 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
             </div>
           </div>
 
-          <div className="lg:col-span-6 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-            <div className="flex justify-between items-start mb-8">
+          <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90">
+            <div className="flex justify-between items-start mb-5">
               <div>
-                <h3 className="text-base font-black text-slate-900 tracking-tight uppercase tracking-widest">VALUE BY CATEGORY</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">CATEGORICAL BREAKDOWN</p>
+                <h3 className="text-xs font-extrabold text-slate-900 tracking-tight uppercase tracking-wider">VALUE BY CATEGORY</h3>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">CATEGORICAL BREAKDOWN</p>
               </div>
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
-                <BarChart3 size={20} />
+              <div className="p-2 bg-purple-50 text-purple-600 rounded-xl">
+                <BarChart3 size={16} />
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[300px] gap-6 sm:gap-8">
-               <div className="w-full sm:flex-1 space-y-4">
+            <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[250px] gap-4 sm:gap-6">
+               <div className="w-full sm:flex-1 space-y-3">
                   {categoryData.map((cat, i) => (
                     <div key={i} className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase tracking-wider">
                         <span>{cat.name}</span>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                          <div className="h-full bg-indigo-500 rounded-full" style={{width: `${cat.value * 2}%`}}></div>
                       </div>
                     </div>
                   ))}
                </div>
-               <div className="w-full sm:w-1/2 h-[220px] sm:h-full relative flex items-center justify-center">
+               <div className="w-full sm:w-1/2 h-[180px] sm:h-full relative flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <PieChart>
                       <Pie
                         data={categoryData}
-                        innerRadius={60}
-                        outerRadius={85}
-                        paddingAngle={8}
+                        innerRadius={50}
+                        outerRadius={75}
+                        paddingAngle={6}
                         dataKey="value"
                       >
                         {categoryData.map((entry, index) => (
@@ -421,8 +421,8 @@ const Dashboard = ({ user, assignments = [], members = [], onProjectClick }) => 
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-3xl font-black text-slate-900 tracking-tighter">{tenders.length}</span>
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total</span>
+                    <span className="text-2xl font-extrabold text-slate-900 tracking-tight">{tenders.length}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
                   </div>
                </div>
             </div>
