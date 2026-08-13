@@ -182,19 +182,19 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
             ))}
           </div>
 
-          {/* Charts Row - Matching Image 2 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-            <div className="lg:col-span-6 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-sm border border-slate-50">
-              <div className="flex justify-between items-start mb-8">
+          {/* Charts Row - Minimized Sleek Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90">
+              <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bid outcomes over last 6 months</p>
+                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Tender Activity Timeline</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bid outcomes over last 6 months</p>
                 </div>
-                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                  <TrendingUp size={20} />
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <TrendingUp size={16} />
                 </div>
               </div>
-              <div className="h-[300px]">
+              <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                   <AreaChart data={outcomesData}>
                     <defs>
@@ -208,53 +208,53 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dx={-10} allowDecimals={false} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={5} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dx={-5} allowDecimals={false} />
                     <Tooltip 
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                      itemStyle={{ fontSize: '12px', fontWeight: 800 }}
-                      labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      itemStyle={{ fontSize: '11px', fontWeight: 700 }}
+                      labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}
                     />
-                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={3} />
-                    <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={3} />
-                    <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="5 5" />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
+                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={2.5} />
+                    <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={2.5} />
+                    <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="4 4" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-sm border border-slate-50">
-              <div className="flex justify-between items-start mb-8">
+            <div className="lg:col-span-6 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90">
+              <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total budget distribution by status</p>
+                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Financial Pipeline</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Total budget distribution by status</p>
                 </div>
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                  <BarChart3 size={20} />
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <BarChart3 size={16} />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[300px] gap-6 sm:gap-8">
-                 <div className="w-full sm:flex-1 space-y-4">
+              <div className="flex flex-col sm:flex-row items-center h-auto sm:h-[220px] gap-4 sm:gap-6">
+                 <div className="w-full sm:flex-1 space-y-3">
                     {budgetByStatus.map((cat, i) => (
                       <div key={i} className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest" style={{ color: cat.color }}>
+                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider" style={{ color: cat.color }}>
                           <span>{cat.name}</span>
-                          <span className="text-slate-800">{cat.name === 'No Data' ? '-' : formatCurrency(cat.value)}</span>
+                          <span className="text-slate-800 font-extrabold">{cat.name === 'No Data' ? '-' : formatCurrency(cat.value)}</span>
                         </div>
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                            <div className="h-full rounded-full transition-all duration-1000" style={{width: `${totalBudgetValue > 0 ? (cat.value / totalBudgetValue) * 100 : 0}%`, backgroundColor: cat.color}}></div>
                         </div>
                       </div>
                     ))}
                  </div>
-                 <div className="w-full sm:w-1/2 h-[200px] sm:h-full relative flex items-center justify-center">
+                 <div className="w-full sm:w-1/2 h-[180px] sm:h-full relative flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
                           data={budgetByStatus}
-                          innerRadius={65}
-                          outerRadius={90}
+                          innerRadius={50}
+                          outerRadius={70}
                           paddingAngle={5}
                           dataKey="value"
                           stroke="none"
@@ -265,14 +265,14 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
                         </Pie>
                         <Tooltip 
                           formatter={(value) => formatCurrency(value)}
-                          contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                          itemStyle={{ fontSize: '12px', fontWeight: 800 }}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          itemStyle={{ fontSize: '11px', fontWeight: 700 }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">{totalBudgetValue > 0 ? formatCurrency(totalBudgetValue) : '₹0'}</span>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Value</span>
+                      <span className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">{totalBudgetValue > 0 ? formatCurrency(totalBudgetValue) : '₹0'}</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Value</span>
                     </div>
                  </div>
               </div>
