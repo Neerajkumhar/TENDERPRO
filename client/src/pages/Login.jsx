@@ -159,34 +159,48 @@ const Login = ({ onLoginSuccess }) => {
             {/* Quick Demo Credentials */}
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
               <span className="text-xs font-semibold text-slate-600 block uppercase tracking-wider">Quick Demo Login:</span>
-              <div className="grid grid-cols-2 gap-1.5 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs">
                 <button
                   type="button"
                   onClick={() => { setEmail('vikash@vagwiin.com'); setPassword('12345678'); setError(''); }}
-                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                  className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate text-[11px]"
                 >
                   👤 Admin
                 </button>
                 <button
                   type="button"
                   onClick={() => { setEmail('superadmin@vagwiin.com'); setPassword('12345678'); setError(''); }}
-                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                  className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate text-[11px]"
                 >
                   ⚡ Super Admin
                 </button>
                 <button
                   type="button"
                   onClick={() => { setEmail('manager@vagwiin.com'); setPassword('12345678'); setError(''); }}
-                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                  className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate text-[11px]"
                 >
                   📋 Tender Mgr
                 </button>
                 <button
                   type="button"
                   onClick={() => { setEmail('finance@vagwiin.com'); setPassword('12345678'); setError(''); }}
-                  className="px-2.5 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate"
+                  className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate text-[11px]"
                 >
                   💰 Finance Mgr
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('pm@vagwiin.com'); setPassword('12345678'); setError(''); }}
+                  className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate text-[11px]"
+                >
+                  🏗️ Project Mgr
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('core@vagwiin.com'); setPassword('12345678'); setError(''); }}
+                  className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 rounded font-medium text-left transition-colors truncate text-[11px]"
+                >
+                  👥 Core Team
                 </button>
               </div>
             </div>

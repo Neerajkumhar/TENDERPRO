@@ -26,9 +26,9 @@ import ClientDetails from './ClientDetails';
 const formatIndianCurrency = (value) => {
   const num = parseInt(value || 0);
   if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)}Cr`;
-  if (num >= 100000) return `₹${(num / 100000).toFixed(2)}L`;
-  if (num >= 1000) return `₹${(num / 1000).toFixed(2)}K`;
-  return `₹${num}`;
+  if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+  if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
+  return `₹${num.toLocaleString('en-IN')}`;
 };
 
 const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) => {
@@ -96,8 +96,9 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
   };
 
   const filteredClients = clients.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         c.industry?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         c.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         c.location?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'All' || c.firmType === filterType;
     return matchesSearch && matchesFilter;
   });
@@ -113,342 +114,285 @@ const ClientManagement = ({ clients = [], tenders = [], setClients, onView }) =>
   const completedTendersValue = completedTendersList.reduce((sum, t) => sum + (parseFloat(t.budget) || 0), 0);
 
   const stats = [
-    { label: 'TOTAL CLIENTS', value: totalClients, icon: Users, color: 'blue' },
-    { label: 'TOTAL PIPELINE', value: formatIndianCurrency(totalPipeline), icon: TrendingUp, color: 'indigo' },
-    { label: 'ACTIVE TENDERS', value: activeTendersCount, icon: Briefcase, color: 'blue' },
-    { label: 'COMPLETED TENDERS', value: completedTenders, icon: Trophy, color: 'amber' },
-    { label: 'COMPLETED VALUE', value: formatIndianCurrency(completedTendersValue), icon: Star, color: 'rose' },
+    { label: 'TOTAL CLIENTS', value: totalClients, icon: Users, color: 'text-slate-800' },
+    { label: 'TOTAL PIPELINE', value: formatIndianCurrency(totalPipeline), icon: TrendingUp, color: 'text-blue-600' },
+    { label: 'ACTIVE TENDERS', value: activeTendersCount, icon: Briefcase, color: 'text-indigo-600' },
+    { label: 'COMPLETED TENDERS', value: completedTenders, icon: Trophy, color: 'text-teal-600' },
+    { label: 'COMPLETED VALUE', value: formatIndianCurrency(completedTendersValue), icon: Star, color: 'text-amber-600' },
   ];
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return `TODAY, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()}`;
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `YESTERDAY, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()}`;
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
-    }
-  };
-
-  const recentActivity = tenders
-    .filter(t => t.clientId)
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-    .slice(0, 4)
-    .map(t => {
-      const client = clients.find(c => c.id === t.clientId);
-      let action = 'Tender Updated';
-      let status = 'INFO';
-      let color = 'blue';
-
-      if (t.status === 'Won') { action = 'Tender Awarded'; status = 'SUCCESS'; color = 'blue'; }
-      else if (t.status === 'Registered') { action = 'Tender Registered'; status = 'NEW'; color = 'blue'; }
-      else if (t.status === 'Active') { action = 'Bid Submitted'; status = 'PENDING'; color = 'amber'; }
-      else if (t.status === 'Lost') { action = 'Tender Lost'; status = 'FAILED'; color = 'rose'; }
-      else if (t.status === 'Under Review') { action = 'Under Review'; status = 'ACTION REQUIRED'; color = 'rose'; }
-      else if (t.status === 'Completed') { action = 'Project Completed'; status = 'DONE'; color = 'blue'; }
-      else { status = t.status.toUpperCase(); }
-      
-      return {
-        client: client ? client.name : 'Unknown Client',
-        action: action,
-        project: t.title,
-        status: status,
-        time: formatTime(t.updatedAt),
-        color: color
-      };
-    });
-
   return (
-    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd] pb-12">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3 sm:space-y-3.5 animate-in fade-in duration-500">
       {/* Header Area */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
         <div>
-          <h1 className="text-lg sm:text-xl font-extrabold text-slate-800 tracking-tight">Client Directory</h1>
-          <p className="text-xs font-medium text-slate-500 mt-0.5">Manage your corporate relationships and pipelines.</p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Users className="text-blue-600" size={18} />
+            <span>Client Directory</span>
+          </h1>
+          <p className="text-[9px] text-slate-500 font-medium">Manage your corporate accounts, points of contact, and business relationships.</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            {/* Search Bar - Grouped next to Filter */}
-            <div className="relative group w-full sm:w-80 order-2 sm:order-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search name or industry..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all shadow-xs" 
-              />
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto order-1 sm:order-2">
-              {/* Filter Button */}
-              <div className="relative flex-1 sm:flex-none" ref={filterRef}>
-                <button 
-                  onClick={() => setShowFilter(!showFilter)}
-                  className={`w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all border shadow-sm ${
-                    showFilter || filterType !== 'All' 
-                      ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <Filter size={16} />
-                  <span>{filterType === 'All' ? 'Filter' : filterType}</span>
-                  <ChevronDown size={14} className={`transition-transform duration-300 ${showFilter ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Filter Dropdown */}
-                {showFilter && (
-                  <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">Firm Type</p>
-                    {['All', 'Private', 'Govt'].map((type) => (
-                      <button
-                        key={type}
-                        onClick={() => {
-                          setFilterType(type);
-                          setShowFilter(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                          filterType === type ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span>{type === 'Govt' ? 'Government' : type}</span>
-                        {filterType === type && <Check size={14} />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Add Button */}
-              <button 
-                onClick={() => setShowAddModal(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 whitespace-nowrap"
-              >
-                <Plus size={18} />
-                <span className="hidden xs:inline">Add Client</span>
-                <span className="xs:inline sm:hidden">Add</span>
-              </button>
-            </div>
+        <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
+          {/* Search Bar */}
+          <div className="relative flex-1 sm:w-56">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+            <input 
+              type="text" 
+              placeholder="Search name, industry..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all shadow-2xs" 
+            />
           </div>
+
+          {/* Filter Dropdown */}
+          <div className="relative" ref={filterRef}>
+            <button 
+              onClick={() => setShowFilter(!showFilter)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border shadow-2xs ${
+                showFilter || filterType !== 'All' 
+                  ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Filter size={12} />
+              <span>{filterType === 'All' ? 'Filter' : filterType}</span>
+              <ChevronDown size={11} className={`transition-transform duration-200 ${showFilter ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showFilter && (
+              <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-100 rounded-xl shadow-xl z-50 p-1 animate-in fade-in slide-in-from-top-1 text-left">
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">Firm Type</p>
+                {['All', 'Private', 'Govt'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      setFilterType(type);
+                      setShowFilter(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[10.5px] font-bold transition-all ${
+                      filterType === type ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span>{type === 'Govt' ? 'Government' : type}</span>
+                    {filterType === type && <Check size={12} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add Client Button */}
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-2xs active:scale-95 whitespace-nowrap"
+          >
+            <Plus size={13} />
+            <span>Add Client</span>
+          </button>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 flex items-center gap-3 hover:shadow-md hover:border-slate-200 transition-all duration-300">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-              <stat.icon size={16} />
+          <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex items-center gap-2.5 hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+            <div className="w-7 h-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <stat.icon size={13} />
             </div>
-             <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">{stat.label}</p>
-                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight truncate">{stat.value}</h3>
-             </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block truncate">{stat.label}</span>
+              <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block truncate leading-none mt-0.5">{stat.value}</span>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="space-y-4">
-        {/* Active Clients Section - Full Width & Minimized Cards */}
-        <div className="flex justify-between items-center px-1">
-          <h3 className="text-[10px] sm:text-xs font-extrabold text-slate-900 tracking-wider uppercase">ACTIVE CLIENTS</h3>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{filteredClients.length} {filteredClients.length === 1 ? 'Client' : 'Clients'}</span>
+      {/* Active Clients Grid */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center px-0.5">
+          <h3 className="text-[9.5px] font-bold text-slate-900 tracking-wider uppercase">Active Accounts</h3>
+          <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">{filteredClients.length} {filteredClients.length === 1 ? 'Client' : 'Clients'}</span>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
           {filteredClients.map((client, i) => (
             <div 
               key={client.id || i} 
               onClick={() => onView(client.id)}
-              className="bg-white p-3.5 sm:p-4 rounded-xl shadow-xs border border-slate-100/90 group hover:border-blue-200 hover:shadow-md transition-all duration-300 relative overflow-hidden cursor-pointer active:scale-[0.98] flex flex-col justify-between"
+              className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs group hover:border-slate-300 hover:shadow-xs transition-all duration-200 relative overflow-hidden cursor-pointer active:scale-[0.99] flex flex-col justify-between"
             >
-               <div>
-                 <div className="flex items-center gap-3 mb-3">
-                    <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
-                       {client.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                       <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 group-hover:text-blue-600 transition-colors truncate">{client.name}</h4>
-                       {client.manager && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate">{client.manager}</p>}
-                       <p className="text-[9px] font-semibold text-slate-400 truncate">{client.industry || 'General'}</p>
-                    </div>
-                 </div>
-                 
-                 <div className="space-y-1.5 mb-3">
-                    <div className="flex items-center gap-2 text-slate-500 min-w-0">
-                       <MapPin size={12} className="text-slate-400 shrink-0" />
-                       <span className="text-[10px] font-bold truncate">{client.location || 'Location N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500 min-w-0">
-                       <Mail size={12} className="text-slate-400 shrink-0" />
-                       <span className="text-[10px] font-bold truncate">{client.email || 'No Email'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500 min-w-0">
-                       <Phone size={12} className="text-slate-400 shrink-0" />
-                       <span className="text-[10px] font-bold truncate">{client.phone || 'No Phone'}</span>
-                    </div>
-                 </div>
-               </div>
-               
-               <div className="flex justify-between items-center pt-2.5 border-t border-slate-50">
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">PIPELINE VALUE</span>
-                  <span className="text-xs sm:text-sm font-extrabold text-blue-600">
-                    {formatIndianCurrency(tenders.filter(t => t.clientId === client.id).reduce((sum, t) => sum + (parseFloat(t.budget) || 0), 0))}
-                  </span>
-               </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-black group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
+                    {client.name?.charAt(0) || 'C'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-[11.5px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate leading-tight">{client.name}</h4>
+                    {client.manager && <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate mt-0.5">{client.manager}</p>}
+                    <p className="text-[8px] font-medium text-slate-400 truncate">{client.industry || 'General'}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-1 mb-2.5 text-slate-500">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <MapPin size={11} className="text-slate-400 shrink-0" />
+                    <span className="text-[9.5px] font-medium truncate">{client.location || 'Location N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Mail size={11} className="text-slate-400 shrink-0" />
+                    <span className="text-[9.5px] font-medium truncate">{client.email || 'No Email'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Phone size={11} className="text-slate-400 shrink-0" />
+                    <span className="text-[9.5px] font-medium truncate">{client.phone || 'No Phone'}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center pt-2 border-t border-slate-100/80">
+                <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider">PIPELINE VALUE</span>
+                <span className="text-[11px] font-extrabold text-blue-600">
+                  {formatIndianCurrency(tenders.filter(t => t.clientId === client.id).reduce((sum, t) => sum + (parseFloat(t.budget) || 0), 0))}
+                </span>
+              </div>
             </div>
           ))}
           {filteredClients.length === 0 && (
             <div className="col-span-full py-10 text-center bg-white rounded-xl border border-dashed border-slate-200 px-4">
-              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-300">
-                <Users size={22} />
+              <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center mx-auto mb-2 text-slate-300">
+                <Users size={16} />
               </div>
-              <h4 className="text-xs text-slate-400 font-bold">No clients found matching your search</h4>
+              <h4 className="text-[11px] text-slate-400 font-medium italic">No clients found matching your search</h4>
             </div>
           )}
         </div>
       </div>
 
-      {/* Add Client Modal - Professional, 3-Column, Scroll-Free */}
+      {/* Add Client Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowAddModal(false)}></div>
-          <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200 shrink-0">
-                  <Plus size={18} />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+                  <Plus size={13} />
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Register New Client</h2>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Add a new business partner to your directory</p>
+                  <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">Register New Client</h2>
+                  <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Add a new business partner to directory</p>
                 </div>
               </div>
-              <button onClick={() => setShowAddModal(false)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-all text-slate-400 shrink-0"><X size={18} /></button>
+              <button onClick={() => setShowAddModal(false)} className="p-1 hover:bg-slate-100 rounded text-slate-400 shrink-0"><X size={15} /></button>
             </div>
             
-            <form onSubmit={handleAddClient} className="p-5 sm:p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Company Name <span className="text-rose-500">*</span></label>
+            <form onSubmit={handleAddClient} className="p-3.5 sm:p-4 space-y-2.5 text-left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Company Name <span className="text-rose-500">*</span></label>
                   <input 
                     required
                     type="text" 
                     placeholder="e.g. Acme Corp"
                     value={newClient.name}
                     onChange={(e) => setNewClient({...newClient, name: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Client Contact Name</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Contact Person</label>
                   <input 
                     type="text" 
                     placeholder="e.g. John Doe"
                     value={newClient.manager}
                     onChange={(e) => setNewClient({...newClient, manager: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Industry</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Industry</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Construction"
                     value={newClient.industry}
                     onChange={(e) => setNewClient({...newClient, industry: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Location</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Location</label>
                   <input 
                     type="text" 
                     placeholder="City, Country"
                     value={newClient.location}
                     onChange={(e) => setNewClient({...newClient, location: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Company Address</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Company Address</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. 123 Business Rd"
+                    placeholder="123 Business Rd"
                     value={newClient.address}
                     onChange={(e) => setNewClient({...newClient, address: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">GST Address</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">GST Address</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. GST Registered Address"
+                    placeholder="GST Reg Address"
                     value={newClient.gstAddress}
                     onChange={(e) => setNewClient({...newClient, gstAddress: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Email Address</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
                   <input 
                     type="email" 
                     placeholder="client@company.com"
                     value={newClient.email}
                     onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Phone Number</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
                   <input 
                     type="text" 
                     placeholder="+91 98765 43210"
                     value={newClient.phone}
                     onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:bg-white" 
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Firm Type</label>
+                <div className="space-y-0.5">
+                  <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">Firm Type</label>
                   <select 
                     value={newClient.firmType}
                     onChange={(e) => setNewClient({...newClient, firmType: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none cursor-pointer focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none cursor-pointer focus:border-blue-500 focus:bg-white"
                   >
                     <option value="Private">Private</option>
                     <option value="Govt">Government</option>
                   </select>
                 </div>
-                <div className="space-y-1 sm:col-span-2 lg:col-span-3">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-0.5">Estimated Pipeline Value (₹)</label>
-                  <input 
-                    type="number" 
-                    placeholder="Enter estimated value"
-                    value={newClient.value}
-                    onChange={(e) => setNewClient({...newClient, value: e.target.value})}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all" 
-                  />
-                </div>
               </div>
-              <div className="pt-4 border-t border-slate-100 flex justify-end items-center gap-3">
+              <div className="pt-2.5 border-t border-slate-100 flex justify-end items-center gap-2">
                 <button 
                   type="button" 
                   onClick={() => setShowAddModal(false)} 
-                  className="px-5 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95"
+                  className="px-3.5 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-extrabold shadow-md shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-wider"
+                  className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-2xs hover:bg-blue-700 active:scale-95"
                 >
                   Register Client
                 </button>

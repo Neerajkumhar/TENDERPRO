@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Users, 
@@ -218,6 +218,52 @@ const Organizations = () => {
   const [planFilter, setPlanFilter] = useState('All Plans');
   const [moduleFilter, setModuleFilter] = useState('All Modules');
   const [selectedRowIds, setSelectedRowIds] = useState([]);
+
+  useEffect(() => {
+    const fetchOrgs = async () => {
+      try {
+        const res = await fetch('/api/clients');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const mapped = data.map((c, idx) => ({
+              id: c.id,
+              name: c.name,
+              domain: c.email ? c.email.split('@')[1] : `${c.name.toLowerCase().replace(/\s+/g, '')}.com`,
+              email: c.email || `contact@${c.name.toLowerCase().replace(/\s+/g, '')}.com`,
+              logoBg: idx % 2 === 0 ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white',
+              logoText: c.name.charAt(0).toUpperCase(),
+              plan: c.plan || (idx === 0 ? 'Enterprise' : idx === 1 ? 'Professional' : 'Business'),
+              planBadge: (idx === 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : idx === 1 ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-blue-50 text-blue-600 border-blue-100'),
+              module: 'Core',
+              activeUsers: (idx + 1) * 8,
+              totalUsers: (idx + 1) * 12,
+              status: c.status || 'Active',
+              statusStyle: 'text-blue-600 bg-blue-50 border-blue-200',
+              renewalDate: '15 Oct 2026',
+              renewalDays: 'in 62 days',
+              renewalStyle: 'text-blue-600',
+              revenue: `₹${((idx + 1) * 75000).toLocaleString('en-IN')}`,
+              createdOn: c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '12 Jan 2026',
+              phone: c.phone || '+91 98765 43210',
+              contactPerson: c.contactPerson || c.name,
+              address: c.address || 'India',
+              gstin: c.gstin || '29AAACB1234C1Z5',
+              billingCycle: 'Annual',
+              storageQuota: '250 GB',
+              storageUsed: '68 GB',
+              enabledModules: ['Tenders & Bids', 'Financials & Invoicing', 'Project Workspace', 'Delivery Challans'],
+              primaryAdminRole: 'Organization Admin'
+            }));
+            setOrganizations(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+      }
+    };
+    fetchOrgs();
+  }, []);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);

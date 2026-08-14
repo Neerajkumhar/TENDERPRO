@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   CreditCard, 
   CheckCircle2, 
@@ -187,6 +187,46 @@ const PaymentsPage = () => {
   const [methodFilter, setMethodFilter] = useState('All Payment Methods');
   const [amountRangeFilter, setAmountRangeFilter] = useState('All Amounts');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const [payRes, clientsRes] = await Promise.all([
+          fetch('/api/payments'),
+          fetch('/api/clients')
+        ]);
+        if (payRes.ok) {
+          const data = await payRes.json();
+          if (data && data.length > 0) {
+            const mapped = data.map((p, idx) => ({
+              id: p.id,
+              txnId: p.transactionId || `TXN_${98234710 + idx}`,
+              refId: p.referenceId || `PAY_${8829104 + idx}`,
+              organization: p.organization || p.clientName || 'BuildTech Pvt. Ltd.',
+              logoBg: idx % 2 === 0 ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white',
+              logoText: (p.organization || 'B').charAt(0).toUpperCase(),
+              subscriber: p.subscriber || 'John Doe',
+              email: p.email || 'billing@company.com',
+              plan: p.plan || 'Business Plan',
+              amount: `₹${Number(p.amount || 0).toLocaleString('en-IN')}`,
+              rawAmount: Number(p.amount || 0),
+              status: p.status === 'Completed' || p.status === 'Success' ? 'Success' : p.status || 'Success',
+              paymentMethod: p.method || 'VISA Credit Card',
+              methodSub: '•••• 4242',
+              date: p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '20 Jun 2026',
+              time: p.paymentDate ? new Date(p.paymentDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '10:30 AM',
+              invoiceNo: p.invoiceNumber || `INV-2026-${String(841 - idx).padStart(4, '0')}`,
+              gateway: p.gateway || 'Razorpay'
+            }));
+            setPaymentsList(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching payments:', err);
+      }
+    };
+    fetchPayments();
+  }, []);
   
   // Selection & Sorting
   const [selectedRowIds, setSelectedRowIds] = useState([]);

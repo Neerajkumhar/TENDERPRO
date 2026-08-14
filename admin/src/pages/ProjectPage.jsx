@@ -9,7 +9,10 @@ import {
   Briefcase,
   Edit2,
   Trash2,
-  X
+  X,
+  Calendar,
+  Clock,
+  Layers
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -18,6 +21,7 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [deletingProjectId, setDeletingProjectId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('All');
 
   // Date Filter States
   const [showDateFilter, setShowDateFilter] = useState(false);
@@ -40,14 +44,14 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
     }
     return String(item.assigneeId) === String(user.id);
   }).filter(item => {
-    // 1. Text Search Filter
     const query = searchQuery.toLowerCase();
     const matchesSearch = 
       (item.title && item.title.toLowerCase().includes(query)) ||
       item.tender?.title?.toLowerCase().includes(query) ||
       item.tender?.client?.name?.toLowerCase().includes(query);
 
-    // 2. Date Range Filter
+    const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
+
     let matchesDate = true;
     if (filterStartDate || filterEndDate) {
       const projectDate = new Date(item.createdAt);
@@ -66,15 +70,33 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       }
     }
 
-    return matchesSearch && matchesDate;
+    return matchesSearch && matchesStatus && matchesDate;
   });
+
+  const statsData = [
+    { label: 'Total Projects', value: assignments.length, color: 'text-slate-800' },
+    { label: 'In Progress', value: assignments.filter(a => a.status === 'In Progress').length, color: 'text-blue-600' },
+    { label: 'Completed', value: assignments.filter(a => a.status === 'Completed').length, color: 'text-teal-600' },
+    { label: 'Pending', value: assignments.filter(a => a.status === 'Pending').length, color: 'text-amber-500' },
+    { label: 'At Risk', value: assignments.filter(a => a.status === 'At Risk').length, color: 'text-rose-500' },
+    { 
+      label: 'Total Value', 
+      value: (() => {
+        const sum = assignments.reduce((acc, a) => acc + parseFloat(a.tender?.budget || 0), 0);
+        if (sum >= 10000000) return `₹${(sum / 10000000).toFixed(1)}Cr`;
+        if (sum >= 100000) return `₹${(sum / 100000).toFixed(1)}L`;
+        return `₹${sum.toLocaleString('en-IN')}`;
+      })(), 
+      color: 'text-slate-900' 
+    },
+  ];
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Completed': return 'bg-blue-100 text-blue-600';
-      case 'In Progress': return 'bg-amber-100 text-amber-600';
-      case 'At Risk': return 'bg-rose-100 text-rose-600';
-      default: return 'bg-slate-100 text-slate-600';
+      case 'Completed': return 'bg-blue-600 text-white';
+      case 'In Progress': return 'bg-blue-500 text-white';
+      case 'At Risk': return 'bg-rose-500 text-white';
+      default: return 'bg-amber-500 text-white';
     }
   };
 
@@ -105,7 +127,6 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       if (response.ok) {
         await fetchAssignments();
         setEditingProject(null);
-        alert('Project updated successfully!');
       } else {
         const err = await response.json();
         alert(`Failed to update project: ${err.message}`);
@@ -124,7 +145,6 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
       if (response.ok) {
         await fetchAssignments();
         setDeletingProjectId(null);
-        alert('Project deleted successfully!');
       } else {
         const err = await response.json();
         alert(`Failed to delete project: ${err.message}`);
@@ -143,8 +163,8 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
 
     const data = myProjects.map(item => {
       const budget = item.tender?.budget ? parseFloat(item.tender.budget) : 0;
-      const startDate = new Date(item.createdAt).toLocaleDateString('en-US');
-      const endDate = item.deadline ? new Date(item.deadline).toLocaleDateString('en-US') : 'N/A';
+      const startDate = new Date(item.createdAt).toLocaleDateString('en-IN');
+      const endDate = item.deadline ? new Date(item.deadline).toLocaleDateString('en-IN') : 'N/A';
       
       return {
         "Project Name": item.title || 'Untitled Project',
@@ -165,122 +185,153 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen">
-      {/* Header - Matching Image */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-10 gap-4 sm:gap-6">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3 sm:space-y-3.5 animate-in fade-in duration-500">
+      {/* Header Toolbar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#1e293b] tracking-tight">Projects</h1>
-          <p className="text-slate-500 mt-1 text-sm sm:text-base font-semibold">Manage and track all your active projects</p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Briefcase className="text-blue-600" size={18} />
+            <span>Project Management</span>
+          </h1>
+          <p className="text-[9px] text-slate-500 font-medium">Track timelines, budgets, and deliverables across all active projects.</p>
         </div>
-        <button 
-          onClick={onCreateProject}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#1e293b] text-white rounded-xl text-sm font-black transition-all hover:bg-slate-800 shadow-lg shadow-slate-200 active:scale-95"
-        >
-          <Plus size={20} />
-          <span>Create Project</span>
-        </button>
+
+        <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
+          <button 
+            onClick={handleDownloadExcel}
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-2xs"
+            title="Download Excel Report"
+          >
+            <Download size={12} />
+            <span>Export</span>
+          </button>
+
+          <button 
+            onClick={onCreateProject}
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-2xs active:scale-95"
+          >
+            <Plus size={13} />
+            <span>Create Project</span>
+          </button>
+        </div>
       </div>
 
-      {/* Tabs & Search Bar - Matching Image */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 border-b border-slate-200">
-        <div className="flex w-full md:w-auto">
-           <button className="px-4 py-4 text-[11px] font-black uppercase tracking-widest text-[#1e293b] border-b-2 border-[#1e293b] -mb-[2px] whitespace-nowrap">
-             All Projects
-           </button>
-        </div>
-        
-        <div className="flex items-center gap-3 w-full md:w-auto pb-4 md:pb-0">
-           <div className="relative flex-1 md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+      {/* Top 6 KPI Metric Cards */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+        {statsData.map((stat, i) => (
+          <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate">{stat.label}</span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">{stat.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Search & Filter Toolbar */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="p-2.5 sm:p-3 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 bg-slate-50/40">
+          <div>
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">Active Projects Ledger</h2>
+            <p className="text-[8.5px] text-slate-500 font-medium">Search and monitor assignment status</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {/* Search Input */}
+            <div className="relative flex-1 sm:w-56">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
               <input 
                 type="text" 
-                placeholder="Search projects..." 
+                placeholder="Search projects, clients..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-400 transition-all shadow-sm"
+                className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all shadow-2xs"
               />
-           </div>
-           <button 
-             onClick={() => setShowDateFilter(!showDateFilter)}
-             className={`p-2.5 border rounded-xl transition-all shadow-sm relative shrink-0 ${
-               (filterStartDate || filterEndDate)
-                 ? 'bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100'
-                 : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300'
-             }`}
-           >
-              <Filter size={20} />
+            </div>
+
+            {/* Status Filter */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-2.5 pr-6 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-2xs"
+              >
+                <option value="All">All Status</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="At Risk">At Risk</option>
+              </select>
+            </div>
+
+            {/* Date Filter Button */}
+            <button 
+              onClick={() => setShowDateFilter(!showDateFilter)}
+              className={`p-1.5 border rounded-lg transition-all shadow-2xs relative shrink-0 ${
+                (filterStartDate || filterEndDate)
+                  ? 'bg-blue-50 border-blue-200 text-blue-600'
+                  : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'
+              }`}
+              title="Date Range Filter"
+            >
+              <Filter size={13} />
               {(filterStartDate || filterEndDate) && (
-                <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-indigo-600 rounded-full border-2 border-white animate-pulse" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full border border-white" />
               )}
-           </button>
-           <button 
-             onClick={handleDownloadExcel}
-             className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all shadow-sm active:scale-95 shrink-0"
-             title="Download Excel Report"
-           >
-              <Download size={20} />
-           </button>
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Date Range Filter Panel */}
-      {showDateFilter && (
-        <div className="mb-6 p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl shadow-xl shadow-slate-100/50 flex flex-col items-stretch gap-5 animate-in slide-in-from-top-4 duration-300">
-           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-              <div>
-                 <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Projects Created From</label>
-                 <input 
-                   type="date"
-                   value={filterStartDate}
-                   onChange={(e) => setFilterStartDate(e.target.value)}
-                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                 />
-              </div>
-              <div>
-                 <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Projects Created To</label>
-                 <input 
-                   type="date"
-                   value={filterEndDate}
-                   onChange={(e) => setFilterEndDate(e.target.value)}
-                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                 />
-              </div>
-           </div>
-           <div className="flex gap-2 w-full sm:justify-end">
-              <button 
-                onClick={() => {
-                  setFilterStartDate('');
-                  setFilterEndDate('');
-                }}
-                className="flex-1 sm:flex-none px-5 py-2.5 border border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:bg-slate-50 hover:text-slate-700 transition-all active:scale-95"
-              >
-                 Reset
-              </button>
-              <button 
-                onClick={() => setShowDateFilter(false)}
-                className="flex-1 sm:flex-none px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200"
-              >
-                 Close
-              </button>
-           </div>
-        </div>
-      )}
+        {/* Date Filter Collapsible Popover */}
+        {showDateFilter && (
+          <div className="p-3 bg-slate-50/60 border-b border-slate-100 flex flex-wrap items-center gap-2 text-left animate-in fade-in duration-150">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">From:</span>
+              <input 
+                type="date"
+                value={filterStartDate}
+                onChange={(e) => setFilterStartDate(e.target.value)}
+                className="px-2 py-1 bg-white border border-slate-200 rounded-md text-[10.5px] font-semibold text-slate-700 outline-none focus:border-blue-500"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">To:</span>
+              <input 
+                type="date"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className="px-2 py-1 bg-white border border-slate-200 rounded-md text-[10.5px] font-semibold text-slate-700 outline-none focus:border-blue-500"
+              />
+            </div>
+            <button 
+              onClick={() => {
+                setFilterStartDate('');
+                setFilterEndDate('');
+              }}
+              className="px-2.5 py-1 text-[9.5px] font-bold text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-md transition-all"
+            >
+              Reset
+            </button>
+            <button 
+              onClick={() => setShowDateFilter(false)}
+              className="px-2.5 py-1 text-[9.5px] font-bold text-blue-600 bg-blue-50 border border-blue-100 rounded-md transition-all"
+            >
+              Done
+            </button>
+          </div>
+        )}
 
-      {/* Table Section - Matching Image Layout */}
-      <div className="bg-white rounded-xl shadow-xs border border-slate-100/90 overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left min-w-[1000px]">
+        {/* Table Section */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[900px]">
             <thead>
-              <tr className="bg-white text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                <th className="px-6 sm:px-8 py-6">Project Name</th>
-                <th className="px-6 sm:px-8 py-6">Tender</th>
-                <th className="px-6 sm:px-8 py-6">Tender Manager</th>
-                <th className="px-6 sm:px-8 py-6">Client</th>
-                <th className="px-6 sm:px-8 py-6">Start Date</th>
-                <th className="px-6 sm:px-8 py-6">End Date</th>
-                <th className="px-6 sm:px-8 py-6">Budget</th>
-                <th className="px-6 sm:px-8 py-6">Status</th>
-                <th className="px-6 sm:px-8 py-6 text-right">Actions</th>
+              <tr className="bg-slate-50/50 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-3.5 py-2">Project Name</th>
+                <th className="px-3.5 py-2">Tender Details</th>
+                <th className="px-3.5 py-2">Manager / Lead</th>
+                <th className="px-3.5 py-2">Client</th>
+                <th className="px-3.5 py-2">Timeline</th>
+                <th className="px-3.5 py-2 text-right">Budget (₹)</th>
+                <th className="px-3.5 py-2 text-center">Status</th>
+                <th className="px-3.5 py-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -288,85 +339,82 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
                 <tr 
                   key={item.id} 
                   onClick={() => onProjectClick(item.tenderId, item.id)}
-                  className="hover:bg-slate-50/50 transition-all cursor-pointer group"
+                  className="hover:bg-slate-50/70 transition-all cursor-pointer group"
                 >
-                  <td className="px-6 sm:px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
-                         <ChevronRight size={16} />
+                  <td className="px-3.5 py-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        {item.title?.charAt(0) || 'P'}
                       </div>
-                      <span className="text-sm font-black text-slate-700 group-hover:text-blue-600 transition-colors">
-                        {item.title || 'Untitled Project'}
-                      </span>
+                      <div className="min-w-0">
+                        <span className="text-[11px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate block max-w-[180px]">
+                          {item.title || 'Untitled Project'}
+                        </span>
+                        <span className="text-[8px] text-slate-400 uppercase truncate block">
+                          ID: #{item.id?.substring(0, 6)}
+                        </span>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.tender?.title || 'N/A'}</td>
-                  <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">
+                  <td className="px-3.5 py-2 text-[10.5px] font-medium text-slate-600 truncate max-w-[150px]">
+                    {item.tender?.title || 'N/A'}
+                  </td>
+                  <td className="px-3.5 py-2 text-[10.5px] font-medium text-slate-600 truncate max-w-[140px]">
                     {(() => {
                       const manager = tenders?.find(t => t.id === item.tenderId)?.teamMembers?.manager;
-                      return manager ? `${manager.name} (${manager.email})` : 'Unassigned';
+                      return manager ? manager.name : (item.assignee?.name || 'Unassigned');
                     })()}
                   </td>
-                  <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.tender?.client?.name || 'N/A'}</td>
-                  <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}</td>
-                  <td className="px-6 sm:px-8 py-6 text-sm font-bold text-slate-500">{item.deadline ? new Date(item.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</td>
-                  <td className="px-6 sm:px-8 py-6 text-sm font-black text-slate-900">₹{parseFloat(item.tender?.budget || 0).toLocaleString()}</td>
-                  <td className="px-6 sm:px-8 py-6">
-                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(item.status)}`}>
-                       {item.status}
-                     </span>
+                  <td className="px-3.5 py-2 text-[10.5px] font-semibold text-slate-600 truncate max-w-[130px]">
+                    {item.tender?.client?.name || 'N/A'}
                   </td>
-                  <td className="px-6 sm:px-8 py-6 text-right relative" onClick={(e) => e.stopPropagation()}>
-                     <button 
-                       onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
-                       className="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all active:scale-95"
-                     >
-                        <MoreHorizontal size={20} />
-                     </button>
-
-                     {activeMenuId === item.id && (
-                       <>
-                         <div className="fixed inset-0 z-40" onClick={() => setActiveMenuId(null)} />
-                         <div className="absolute right-8 top-16 bg-white border border-slate-150 rounded-xl shadow-xl py-2 w-48 text-left z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <button 
-                              onClick={() => {
-                                setEditingProject(item);
-                                setEditTitle(item.title || '');
-                                setEditManager(item.assigneeId || '');
-                                setEditStatus(item.status || 'Pending');
-                                setEditPriority(item.priority || 'Medium');
-                                setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
-                                setEditDescription(item.description || '');
-                                setActiveMenuId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 text-sm font-bold transition-all"
-                            >
-                               <Edit2 size={16} className="text-slate-400" />
-                               <span>Edit Project</span>
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setDeletingProjectId(item.id);
-                                setActiveMenuId(null);
-                              }}
-                              className="w-full px-4 py-2.5 text-rose-600 hover:bg-rose-50/50 flex items-center gap-2.5 text-sm font-bold transition-all"
-                            >
-                               <Trash2 size={16} className="text-rose-500" />
-                               <span>Delete Project</span>
-                            </button>
-                         </div>
-                       </>
-                     )}
+                  <td className="px-3.5 py-2 text-[10px] font-medium text-slate-500">
+                    {new Date(item.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - {item.deadline ? new Date(item.deadline).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: '2-digit' }) : 'N/A'}
+                  </td>
+                  <td className="px-3.5 py-2 text-[11px] font-extrabold text-slate-900 text-right">
+                    ₹{parseFloat(item.tender?.budget || 0).toLocaleString('en-IN')}
+                  </td>
+                  <td className="px-3.5 py-2 text-center">
+                    <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-2xs ${getStatusColor(item.status)}`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="px-3.5 py-2 text-center" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-center gap-1">
+                      <button 
+                        onClick={() => {
+                          setEditingProject(item);
+                          setEditTitle(item.title || '');
+                          setEditManager(item.assigneeId || '');
+                          setEditStatus(item.status || 'Pending');
+                          setEditPriority(item.priority || 'Medium');
+                          setEditDeadline(item.deadline ? item.deadline.split('T')[0] : '');
+                          setEditDescription(item.description || '');
+                        }}
+                        title="Edit Project"
+                        className="p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm('Delete this project?')) {
+                            setDeletingProjectId(item.id);
+                            handleDelete();
+                          }
+                        }}
+                        title="Delete Project"
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="8" className="px-8 py-10 text-center">
-                     <div className="flex flex-col items-center gap-3 text-center">
-                        <Briefcase size={48} className="text-slate-200" />
-                        <p className="text-slate-400 font-bold">No projects matching your view.</p>
-                        <p className="text-[10px] text-slate-300 uppercase font-black tracking-widest">User: {user.name}</p>
-                     </div>
+                  <td colSpan="8" className="px-4 py-12 text-center text-slate-400 italic text-xs font-medium">
+                    No projects found matching your search.
                   </td>
                 </tr>
               )}
@@ -377,165 +425,93 @@ const ProjectPage = ({ onProjectClick, assignments = [], user = {}, members = []
 
       {/* Edit Project Modal */}
       {editingProject && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                  <Briefcase size={20} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Edit Project</h2>
-                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Modify project parameters</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setEditingProject(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
-              >
-                <X size={18} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-150 border border-slate-100">
+            <div className="p-3 sm:p-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Edit Project</h3>
+              <button onClick={() => setEditingProject(null)} className="p-1 text-slate-400 hover:text-slate-600 rounded">
+                <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleEditSubmit} className="p-3 sm:p-3.5 space-y-2.5 text-left text-xs">
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Title</label>
+                <label className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">Project Title</label>
                 <input 
                   type="text" 
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="e.g. Smart Transit System Upgrade"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Linked Tender</label>
-                <div className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-bold text-slate-500 shadow-sm">
-                  {editingProject.tender?.title || 'N/A'}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Manager</label>
-                  <select 
-                    value={editManager}
-                    onChange={(e) => setEditManager(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  >
-                    <option value="">Select Manager</option>
-                    {members.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Deadline</label>
-                  <input 
-                    type="date" 
-                    value={editDeadline}
-                    onChange={(e) => setEditDeadline(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Status</label>
+                  <label className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</label>
                   <select 
                     value={editStatus}
                     onChange={(e) => setEditStatus(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                   >
                     <option value="Pending">Pending</option>
                     <option value="In Progress">In Progress</option>
                     <option value="Completed">Completed</option>
+                    <option value="At Risk">At Risk</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Priority</label>
+                  <label className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">Priority</label>
                   <select 
                     value={editPriority}
                     onChange={(e) => setEditPriority(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
                     <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Description</label>
+                <label className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">Deadline</label>
+                <input 
+                  type="date" 
+                  value={editDeadline}
+                  onChange={(e) => setEditDeadline(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
                 <textarea 
-                  rows="3"
+                  rows={3}
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Describe project details, scope, or requirements..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm resize-none"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 resize-none"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-3 mt-4 border-t border-slate-100 pt-5">
+              <div className="flex gap-2 pt-2 border-t border-slate-100">
                 <button 
                   type="button"
                   onClick={() => setEditingProject(null)}
-                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all active:scale-95"
+                  className="flex-1 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-[9.5px] font-bold uppercase tracking-wider hover:bg-slate-200"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200"
+                  className="flex-1 py-1.5 bg-blue-600 text-white rounded-lg text-[9.5px] font-bold uppercase tracking-wider hover:bg-blue-700 shadow-2xs"
                 >
                   Save Changes
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deletingProjectId && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300">
-            <div className="flex items-center gap-3.5 text-rose-600">
-              <div className="p-3 bg-rose-50 rounded-xl">
-                <Trash2 size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-slate-900 tracking-tight">Delete Project</h3>
-                <p className="text-xs font-semibold text-rose-500 mt-0.5">Confirm permanent removal</p>
-              </div>
-            </div>
-
-            <p className="text-slate-500 text-sm font-semibold leading-relaxed">
-              Are you sure you want to permanently delete this project? This will remove all associated scopes and resource team settings. This action cannot be undone.
-            </p>
-
-            <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-              <button 
-                type="button"
-                onClick={() => setDeletingProjectId(null)}
-                className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all active:scale-95"
-              >
-                Cancel
-              </button>
-              <button 
-                type="button"
-                onClick={handleDelete}
-                className="px-6 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-black hover:bg-rose-700 transition-all active:scale-95 shadow-md shadow-rose-100"
-              >
-                Delete Permanent
-              </button>
-            </div>
           </div>
         </div>
       )}

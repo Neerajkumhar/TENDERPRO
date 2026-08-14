@@ -42,21 +42,6 @@ import {
   Pie
 } from 'recharts';
 
-const budgetVsExpenseData = [
-  { name: 'Tech', budget: 800, expense: 700 },
-  { name: 'Marketing', budget: 500, expense: 450 },
-  { name: 'Ops', budget: 700, expense: 750 },
-  { name: 'Data', budget: 900, expense: 850 },
-  { name: 'Sales', budget: 650, expense: 700 },
-];
-
-const categoryData = [
-  { name: 'Salaries', value: 35, color: '#3b82f6' },
-  { name: 'Marketing', value: 20, color: '#3b82f6' },
-  { name: 'Infrastructure', value: 25, color: '#f59e0b' },
-  { name: 'Operations', value: 20, color: '#6366f1' },
-];
-
 const FinancialManagement = ({ onInvoiceClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -248,12 +233,12 @@ const FinancialManagement = ({ onInvoiceClick }) => {
 
     if (format === 'pdf') {
       const doc = new jsPDF();
-      doc.setFontSize(20);
+      doc.setFontSize(16);
       doc.setTextColor(15, 23, 42);
-      doc.text("TenderPro Financial Summary Report", 14, 22);
-      doc.setFontSize(10);
+      doc.text("TenderPro Financial Summary Report", 14, 20);
+      doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
-      doc.text(`Period: ${startDate} to ${endDate}`, 14, 30);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 27);
       
       const invoiceData = filteredData.map(inv => {
         let displayDate = 'N/A';
@@ -274,12 +259,12 @@ const FinancialManagement = ({ onInvoiceClick }) => {
       });
 
       autoTable(doc, {
-        startY: 40,
+        startY: 34,
         head: [["Invoice ID", "Date", "Client", "Amount", "Status"]],
         body: invoiceData,
         theme: 'grid',
         headStyles: { fillColor: [59, 130, 246] },
-        styles: { fontSize: 9 }
+        styles: { fontSize: 8 }
       });
 
       doc.save(`${filename}.pdf`);
@@ -345,84 +330,86 @@ const FinancialManagement = ({ onInvoiceClick }) => {
     { label: 'Total Expenses', value: `₹${stats.totalExpenses.toLocaleString('en-IN')}`, trend: 'Live', isUp: false, color: 'rose', icon: TrendingDown },
     { label: 'Net Profit', value: `₹${stats.netProfit.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'blue', icon: TrendingUp },
     { label: 'Cash Flow', value: `₹${stats.cashFlow.toLocaleString('en-IN')}`, trend: 'Stable', isUp: true, color: 'indigo', icon: Wallet },
-    { label: 'Budget Used', value: getBudgetUsed(), trend: 'On track', isUp: true, color: 'amber', icon: FileText, isProgress: true },
+    { label: 'Budget Used', value: getBudgetUsed(), trend: 'On track', isUp: true, color: 'amber', icon: FileText },
     { label: 'Pending Invoices', value: String(stats.pendingCount), trend: 'Real', isUp: false, color: 'orange', icon: Clock },
     { label: 'Paid Invoices', value: String(stats.paidCount), trend: 'Real', isUp: true, color: 'blue', icon: CheckCircle2 },
     { label: 'Outstanding Dues', value: `₹${stats.outstandingDues.toLocaleString('en-IN')}`, trend: 'Live', isUp: true, color: 'rose', icon: AlertCircle },
   ];
 
-
-
   return (
-    <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] text-left space-y-6 sm:space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 text-left">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] text-left space-y-3.5 sm:space-y-4 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2.5 text-left">
         <div>
-          <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Financial Overview</h1>
-          <p className="text-[9px] sm:text-[10px] text-slate-500 mt-1 font-medium italic uppercase tracking-widest">Track revenue, expenses, and overall financial health.</p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Financial Overview</h1>
+          <p className="text-[9px] text-slate-500 font-medium">Track revenue, expenses, and overall financial health.</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => setIsExportModalOpen(true)}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-2xs active:scale-95 cursor-pointer"
           >
-            <Download size={14} />
+            <Download size={13} />
             <span>Export Report</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-3">
+      {/* Top 8 KPI Mini-Cards */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-4 xl:grid-cols-8 gap-2 sm:gap-2.5">
         {statsData.map((stat, i) => (
-          <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between hover:shadow-md hover:border-slate-200 transition-all duration-300 relative overflow-hidden">
-            <div className="flex justify-between items-center mb-2 w-full">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                <stat.icon size={16} />
+          <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200 relative overflow-hidden">
+            <div className="flex justify-between items-center mb-1.5 w-full">
+              <div className="w-6 h-6 rounded-md bg-blue-50/80 border border-blue-100/80 flex items-center justify-center text-blue-600 shrink-0">
+                <stat.icon size={13} />
               </div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">
                 {stat.trend}
               </div>
             </div>
             <div className="w-full">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate w-full">{stat.label}</p>
-              <h3 className="text-base font-extrabold text-slate-900 tracking-tight truncate w-full">{stat.value}</h3>
+              <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate w-full">{stat.label}</p>
+              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight truncate w-full">{stat.value}</h3>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-5">
-        <div className="col-span-12 lg:col-span-5 xl:col-span-4 p-4 sm:p-5 bg-white border border-slate-100/90 rounded-xl shadow-xs relative overflow-hidden">
-          <div className="flex flex-col justify-between items-start gap-3 mb-6">
+      {/* Main Charts and Invoices Table */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-4">
+        {/* Revenue vs Expense Chart */}
+        <div className="col-span-12 lg:col-span-5 xl:col-span-4 p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs relative overflow-hidden flex flex-col justify-between">
+          <div className="flex flex-col justify-between items-start gap-2 mb-3">
             <div>
-              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Revenue vs Expense</h3>
-              <p className="text-xs text-slate-500 font-medium">Monthly performance comparison</p>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">Revenue vs Expense</h3>
+              <p className="text-[10px] text-slate-500 font-medium">Monthly performance comparison</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Revenue</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Revenue</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></span>
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Payment</span>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Payment</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expense</span>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
+                <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Expense</span>
               </div>
             </div>
           </div>
-          <div className="h-[250px] sm:h-[290px] w-full min-w-0">
+          <div className="h-[200px] sm:h-[220px] w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueVsExpenseData}>
+              <AreaChart data={revenueVsExpenseData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/>
                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#60a5fa" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -430,34 +417,36 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}}
-                  dy={10}
+                  tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 600}}
+                  dy={5}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}}
+                  tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 600}}
                 />
                 <Tooltip 
                   contentStyle={{
-                    borderRadius: '12px',
+                    borderRadius: '8px',
                     border: 'none',
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    fontSize: '11px',
+                    padding: '8px 12px'
                   }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="revenue" 
                   stroke="#2563eb" 
-                  strokeWidth={3} 
+                  strokeWidth={2} 
                   fillOpacity={1} 
                   fill="url(#colorRev)" 
                 />
                 <Area 
                   type="monotone" 
                   dataKey="payment" 
-                  stroke="#3b82f6" 
-                  strokeWidth={3} 
+                  stroke="#60a5fa" 
+                  strokeWidth={2} 
                   fillOpacity={1} 
                   fill="url(#colorPay)" 
                 />
@@ -465,7 +454,7 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   type="monotone" 
                   dataKey="expense" 
                   stroke="#f43f5e" 
-                  strokeWidth={2} 
+                  strokeWidth={1.5} 
                   fillOpacity={0} 
                 />
               </AreaChart>
@@ -473,41 +462,42 @@ const FinancialManagement = ({ onInvoiceClick }) => {
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-7 xl:col-span-8 bg-white border border-slate-100/90 rounded-xl shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-50 flex flex-col lg:flex-row gap-4 justify-between lg:items-center bg-slate-50/20">
+        {/* Invoice Status Table Card */}
+        <div className="col-span-12 lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-xl shadow-2xs overflow-hidden flex flex-col justify-between">
+          <div className="p-3 sm:p-3.5 border-b border-slate-100 flex flex-col sm:flex-row gap-2.5 justify-between sm:items-center bg-slate-50/40">
             <div>
-              <h3 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">Invoice Status Table</h3>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">Detailed log of recent financial transactions</p>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">Invoice Status Table</h3>
+              <p className="text-[10px] text-slate-500 font-medium">Recent transactions and billing logs</p>
             </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-              <div className="relative group w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative group flex-1 sm:w-52">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={14} />
                 <input 
                   type="text" 
                   placeholder="Search client or ID..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-500 transition-all shadow-sm" 
+                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all shadow-2xs" 
                 />
               </div>
               
-              <div className="relative flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto" ref={filterRef}>
+              <div className="relative flex items-center gap-1.5" ref={filterRef}>
                 <button 
                   onClick={() => setShowFilterPopover(!showFilterPopover)}
-                  className={`p-2.5 rounded-xl border transition-all shadow-sm active:scale-95 flex items-center justify-center ${showFilterPopover || filterStatus !== 'All' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400'}`}
+                  className={`p-1.5 rounded-lg border transition-all shadow-2xs active:scale-95 flex items-center justify-center ${showFilterPopover || filterStatus !== 'All' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300'}`}
                 >
-                  <Filter size={18} />
+                  <Filter size={14} />
                 </button>
                 <button 
                   onClick={() => setIsModalOpen(true)}
-                  className="flex-1 sm:flex-initial bg-slate-900 text-white px-6 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-slate-200 hover:bg-blue-600 transition-all uppercase tracking-widest text-center"
+                  className="bg-slate-900 text-white px-3.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs hover:bg-blue-600 transition-all uppercase tracking-wider text-center active:scale-95"
                 >
                   Generate Invoice
                 </button>
 
                 {showFilterPopover && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">Filter Status</p>
+                  <div className="absolute right-0 top-full mt-1.5 w-40 bg-white border border-slate-100 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">Filter Status</p>
                     {['All', 'Paid', 'Pending', 'Overdue'].map((status) => (
                       <button
                         key={status}
@@ -515,10 +505,10 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                           setFilterStatus(status);
                           setShowFilterPopover(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${filterStatus === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${filterStatus === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                       >
                         <span>{status}</span>
-                        {filterStatus === status && <Check size={14} />}
+                        {filterStatus === status && <Check size={12} />}
                       </button>
                     ))}
                   </div>
@@ -527,45 +517,46 @@ const FinancialManagement = ({ onInvoiceClick }) => {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[850px]">
+            <table className="w-full text-left min-w-[700px]">
               <thead>
-                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">ID</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">Date</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">Client</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-center">Amount</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">Status</th>
-                  <th className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-center">Actions</th>
+                <tr className="bg-slate-50/50 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                  <th className="px-3.5 py-2">ID</th>
+                  <th className="px-3.5 py-2">Date</th>
+                  <th className="px-3.5 py-2">Client</th>
+                  <th className="px-3.5 py-2 text-center">Amount</th>
+                  <th className="px-3.5 py-2">Status</th>
+                  <th className="px-3.5 py-2 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredInvoices.length > 0 ? filteredInvoices.map((inv, i) => (
                   <tr key={i} className="hover:bg-blue-50/30 transition-all group">
-                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-xs font-bold text-slate-400">{inv.invoiceNumber || inv.id}</td>
-                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-xs font-bold text-slate-600 whitespace-nowrap">
+                    <td className="px-3.5 py-2 text-[10px] font-bold text-slate-400">{inv.invoiceNumber || inv.id.slice(0, 8)}</td>
+                    <td className="px-3.5 py-2 text-[10.5px] font-medium text-slate-600 whitespace-nowrap">
                       {inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : 'N/A'}
                     </td>
-                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-sm font-black text-slate-800">{inv.client}</td>
-                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5 text-sm font-black text-slate-900 text-center italic whitespace-nowrap">
+                    <td className="px-3.5 py-2 text-[11px] font-bold text-slate-800">{inv.client}</td>
+                    <td className="px-3.5 py-2 text-[11px] font-bold text-slate-900 text-center whitespace-nowrap">
                       ₹{parseFloat(inv.amount || 0).toLocaleString('en-IN')}
                     </td>
-                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
-                      <div className={`w-fit px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm whitespace-nowrap ${inv.status === 'Paid' ? 'bg-blue-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
+                    <td className="px-3.5 py-2">
+                      <div className={`w-fit px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-2xs whitespace-nowrap ${inv.status === 'Paid' ? 'bg-blue-500 text-white' : inv.status === 'Pending' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
                     </td>
-                    <td className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="px-3.5 py-2">
+                      <div className="flex items-center justify-center">
                         <button 
                           onClick={() => onInvoiceClick && onInvoiceClick(inv.id)}
-                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                          title="View Details"
                         >
-                          <MoreHorizontal size={18} />
+                          <MoreHorizontal size={15} />
                         </button>
                       </div>
                     </td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="6" className="px-8 py-10 text-center text-slate-400 italic font-medium">No invoices found.</td>
+                    <td colSpan="6" className="px-4 py-8 text-center text-slate-400 italic text-xs font-medium">No invoices found.</td>
                   </tr>
                 )}
               </tbody>
@@ -574,21 +565,27 @@ const FinancialManagement = ({ onInvoiceClick }) => {
         </div>
       </div>
 
+      {/* Generate Invoice Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-white w-full max-w-xl rounded-2xl sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col max-h-[90vh]">
-            <div className="p-5 sm:p-10 overflow-y-auto custom-scrollbar">
-              <div className="flex justify-between items-center mb-8">
-                <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Generate New Invoice</h2><p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Add billing & transaction logging</p></div>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><XCircle size={24} /></button>
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs animate-in fade-in" onClick={() => setIsModalOpen(false)}></div>
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-center mb-5">
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Generate New Invoice</h2>
+                  <p className="text-[9px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">Add billing & transaction logging</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400">
+                  <XCircle size={20} />
+                </button>
               </div>
-              <form onSubmit={handleCreateInvoice} className="space-y-6 text-left">
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Client</label>
+              <form onSubmit={handleCreateInvoice} className="space-y-4 text-left">
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Select Client</label>
                   <select 
                     required
-                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                     value={formData.client} 
                     onChange={(e) => setFormData({...formData, client: e.target.value})}
                   >
@@ -597,10 +594,10 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   </select>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Tender</label>
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Select Tender</label>
                   <select 
-                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                     value={formData.tenderId} 
                     onChange={(e) => {
                       const t = tenders.find(t => t.id === e.target.value);
@@ -625,31 +622,31 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Value (₹)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 text-left">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Tender Value (₹)</label>
                     <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
                       <input 
                         type="text" 
                         disabled
                         placeholder="0.00" 
-                        className="w-full pl-10 pr-5 py-3.5 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-black opacity-70" 
+                        className="w-full pl-7 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 opacity-75" 
                         value={formData.tenderValue} 
                         readOnly
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                  <div className="space-y-1 text-left">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Billing Amount (₹)</label>
                     <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
                       <input 
                         type="number" 
                         required
                         placeholder="0.00" 
-                        className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                        className="w-full pl-7 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                         value={formData.amount} 
                         onChange={(e) => setFormData({...formData, amount: e.target.value})} 
                       />
@@ -657,33 +654,35 @@ const FinancialManagement = ({ onInvoiceClick }) => {
                   </div>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
-                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-blue-200 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Upload Invoice Document</label>
+                  <div className={`relative border border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center gap-2 ${formData.attachment ? 'border-blue-300 bg-blue-50/50' : 'border-slate-200 bg-slate-50 hover:border-blue-300'}`}>
                     <input 
                       type="file" 
                       className="absolute inset-0 opacity-0 cursor-pointer" 
                       onChange={(e) => handleFileUpload(e.target.files[0])}
                     />
                     {isUploading ? (
-                      <Loader2 className="animate-spin text-blue-500" size={24} />
+                      <Loader2 className="animate-spin text-blue-500" size={20} />
                     ) : formData.attachment ? (
                       <>
-                        <CheckCircle2 className="text-blue-500" size={24} />
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Document Uploaded</p>
+                        <CheckCircle2 className="text-blue-500" size={20} />
+                        <p className="text-[9px] font-bold text-blue-600 uppercase tracking-wider">Document Uploaded</p>
                       </>
                     ) : (
                       <>
-                        <UploadCloud className="text-slate-400" size={24} />
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Click or drag to upload</p>
+                        <UploadCloud className="text-slate-400" size={20} />
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Click or drag file to upload</p>
                       </>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2 text-left">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest">Cancel</button>
-                  <button type="submit" disabled={isUploading} className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95 disabled:opacity-50">
+                <div className="flex gap-2.5 pt-2 sticky bottom-0 bg-white pb-1">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-slate-200 transition-all">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={isUploading} className="flex-[2] py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-xs active:scale-95 disabled:opacity-50">
                     {isUploading ? 'Uploading...' : 'Generate Invoice'}
                   </button>
                 </div>

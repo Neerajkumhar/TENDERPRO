@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   FileText, 
   CheckCircle2, 
@@ -231,6 +231,58 @@ const InvoicesPage = () => {
   const [cycleFilter, setCycleFilter] = useState('All Billing Cycles');
   const [amountRangeFilter, setAmountRangeFilter] = useState('All Amounts');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const [invRes, clientsRes] = await Promise.all([
+          fetch('/api/invoices'),
+          fetch('/api/clients')
+        ]);
+        if (invRes.ok) {
+          const data = await invRes.json();
+          if (data && data.length > 0) {
+            const mapped = data.map((inv, idx) => {
+              const rawAmt = Number(inv.amount || 34999);
+              const subtotalNum = Math.round(rawAmt / 1.18);
+              const taxNum = rawAmt - subtotalNum;
+              return {
+                id: inv.id,
+                invoiceNo: inv.invoiceNumber || `INV-2026-${String(841 - idx).padStart(4, '0')}`,
+                refId: `REF-${98234710 + idx}`,
+                organization: inv.organization || inv.clientName || 'BuildTech Pvt. Ltd.',
+                domain: (inv.organization || 'buildtech').toLowerCase().replace(/\s+/g, '') + '.com',
+                logoBg: idx % 2 === 0 ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white',
+                logoText: (inv.organization || 'B').charAt(0).toUpperCase(),
+                address: inv.address || '42, Industrial Area, Sector 62, Noida, UP 201301',
+                gstin: inv.gstin || '09AAACB1234C1Z5',
+                plan: inv.plan || (idx % 2 === 0 ? 'Business Plan' : 'Enterprise Plan'),
+                planBadge: idx % 2 === 0 ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-amber-50 text-amber-700 border-amber-200',
+                billingCycle: inv.billingCycle || (idx % 2 === 0 ? 'Monthly' : 'Annual'),
+                invoiceDate: inv.issueDate ? new Date(inv.issueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '15 Aug 2026',
+                dueDate: inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '25 Aug 2026',
+                status: inv.status || 'Paid',
+                subtotal: `₹${subtotalNum.toLocaleString('en-IN')}`,
+                tax: `₹${taxNum.toLocaleString('en-IN')} (18% GST)`,
+                amount: `₹${rawAmt.toLocaleString('en-IN')}`,
+                rawAmount: rawAmt,
+                lineItems: inv.items && inv.items.length > 0 ? inv.items : [
+                  { desc: `${inv.plan || 'Business Plan'} Subscription`, qty: 1, rate: `₹${subtotalNum.toLocaleString('en-IN')}`, total: `₹${subtotalNum.toLocaleString('en-IN')}` }
+                ],
+                paymentMethod: inv.status === 'Paid' ? 'VISA •••• 4242' : 'Invoice Outstanding',
+                txnId: `TXN-${98234710 + idx}`
+              };
+            });
+            setInvoicesList(mapped);
+            if (mapped.length > 0) setSelectedInvoiceId(mapped[0].id);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching invoices:', err);
+      }
+    };
+    fetchInvoices();
+  }, []);
   
   // Selection & Sorting
   const [selectedRowIds, setSelectedRowIds] = useState([1]);

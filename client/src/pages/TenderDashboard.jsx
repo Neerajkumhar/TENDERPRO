@@ -24,7 +24,10 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  User as UserIcon
+  User as UserIcon,
+  Plus,
+  Award,
+  Zap
 } from 'lucide-react';
 import {
   AreaChart,
@@ -110,12 +113,12 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
   );
 
   const statsData = [
-    { label: 'Total Tenders', value: tenders.length, color: 'slate' },
-    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
-    { label: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo' },
-    { label: 'Total Projects', value: assignments?.length || 0, color: 'blue' },
-    { label: 'Completed Projects', value: assignments?.filter(a => a.status === 'Completed').length || 0, color: 'teal' },
-    { label: 'Completed Tenders', value: tenders.filter(t => t.status === 'Completed').length, color: 'amber' },
+    { label: 'Total Tenders', value: tenders.length, color: 'text-slate-800' },
+    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'text-blue-600' },
+    { label: 'Registered', value: tenders.filter(t => t.status === 'Registered' || t.status === 'Submitted').length, color: 'text-blue-500' },
+    { label: 'Total Projects', value: assignments?.length || 0, color: 'text-indigo-600' },
+    { label: 'Completed Projects', value: assignments?.filter(a => a.status === 'Completed').length || 0, color: 'text-teal-600' },
+    { label: 'Completed Tenders', value: tenders.filter(t => t.status === 'Completed' || t.status === 'Won').length, color: 'text-amber-500' },
   ];
 
   // 1. Tender Outcomes Over Time (Last 6 Months)
@@ -136,134 +139,133 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
       name: `${monthNames[month]}`,
       Won: monthTenders.filter(t => t.status === 'Won').length,
       Lost: monthTenders.filter(t => t.status === 'Lost').length,
-      Active: monthTenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).length,
+      Active: monthTenders.filter(t => ['Active', 'Registered', 'Submitted', 'Under Review'].includes(t.status)).length,
     });
   }
 
-  // 2. Budget Distribution by Status
-  const budgetByStatus = [
-    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#3b82f6' }, // blue-500
-    { name: 'In Pipeline (Active)', value: tenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#6366f1' }, // indigo-500
-    { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#f43f5e' }, // rose-500
-    { name: 'Drafts', value: tenders.filter(t => t.status === 'Draft').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#94a3b8' } // slate-400
-  ].filter(item => item.value > 0);
-
-  if (budgetByStatus.length === 0) {
-    budgetByStatus.push({ name: 'No Data', value: 1, color: '#f1f5f9' });
-  }
-
+  // 2. Rich Financial Pipeline Data & Stage Calculations
   const formatCurrency = (val) => {
-    if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)}Cr`;
+    if (!val || isNaN(val)) return '₹0';
+    if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)}Cr`;
     if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
-    return `₹${val.toLocaleString()}`;
+    return `₹${val.toLocaleString('en-IN')}`;
   };
 
-  const totalBudgetValue = budgetByStatus.reduce((acc, item) => item.name !== 'No Data' ? acc + item.value : acc, 0);
+  const wonTenders = tenders.filter(t => t.status === 'Won');
+  const activeTenders = tenders.filter(t => t.status === 'Active');
+  const reviewTenders = tenders.filter(t => ['Registered', 'Submitted', 'Under Review'].includes(t.status));
+  const pendingTenders = tenders.filter(t => t.status === 'Pending' || t.status === 'Draft');
+  const lostTenders = tenders.filter(t => t.status === 'Lost');
 
-  const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  const wonVal = wonTenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0);
+  const activeVal = activeTenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0);
+  const reviewVal = reviewTenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0);
+  const pendingVal = pendingTenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0);
+  const lostVal = lostTenders.reduce((acc, t) => acc + parseFloat(t.budget || 0), 0);
+
+  const totalBudgetValue = wonVal + activeVal + reviewVal + pendingVal + lostVal;
+  const avgBidValue = tenders.length > 0 ? (totalBudgetValue / tenders.length) : 0;
+  const resolvedCount = wonTenders.length + lostTenders.length;
+  const winRate = resolvedCount > 0 
+    ? Math.round((wonTenders.length / resolvedCount) * 100) 
+    : (tenders.length > 0 ? Math.round((wonTenders.length / tenders.length) * 100) : 0);
+
+  const budgetBreakdown = [
+    { name: 'Won', label: 'Secured (Won)', count: wonTenders.length, value: wonVal, color: '#2563eb' },
+    { name: 'Active', label: 'In Bidding', count: activeTenders.length, value: activeVal, color: '#3b82f6' },
+    { name: 'Review', label: 'Under Review', count: reviewTenders.length, value: reviewVal, color: '#6366f1' },
+    { name: 'Pending', label: 'Draft / Pending', count: pendingTenders.length, value: pendingVal, color: '#f59e0b' },
+    { name: 'Lost', label: 'Lost / Closed', count: lostTenders.length, value: lostVal, color: '#f43f5e' },
+  ].filter(item => item.value > 0 || item.count > 0);
+
+  const chartData = budgetBreakdown.length > 0 ? budgetBreakdown : [{ name: 'No Data', label: 'No Data', value: 1, color: '#f1f5f9' }];
+
+  const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
 
   function renderLeaveModal() {
     if (!showLeaveModal) return null;
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowLeaveModal(false)}></div>
-        <div className="bg-white w-full max-w-4xl max-h-[85vh] rounded-2xl sm:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col text-left">
+        <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs" onClick={() => setShowLeaveModal(false)}></div>
+        <div className="bg-white w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col text-left border border-slate-100">
           {/* Modal Header */}
-          <div className="p-4 sm:p-5 lg:p-6 border-b border-slate-50 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-slate-50/30">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 bg-amber-500 text-white rounded-xl sm:rounded-2xl shadow-lg shadow-amber-200">
-                <Coffee size={20} className="sm:w-6 sm:h-6" />
+          <div className="p-3 sm:p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-amber-500 text-white rounded-lg shadow-2xs">
+                <Coffee size={14} />
               </div>
               <div>
-                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight uppercase">Team Leave Requests</h2>
-                <p className="text-[10px] sm:text-xs text-slate-500 font-medium italic">Review and manage your department's time-off applications</p>
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight">Team Leave Requests</h2>
+                <p className="text-[9px] text-slate-500 font-medium">Department time-off applications</p>
               </div>
             </div>
             <button 
               onClick={() => setShowLeaveModal(false)}
-              className="p-2 sm:p-3 hover:bg-white rounded-full text-slate-400 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100 shadow-sm self-end sm:self-auto"
+              className="p-1 hover:bg-slate-100 rounded-full text-slate-400"
             >
-              <X size={20} className="sm:w-6 sm:h-6" />
+              <X size={16} />
             </button>
           </div>
 
           {/* Modal Content */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 custom-scrollbar">
             {loadingLeaves ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="font-black text-[10px] uppercase tracking-widest">Fetching applications...</p>
+              <div className="flex flex-col items-center justify-center py-10 text-slate-400 space-y-2">
+                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="font-bold text-[9px] uppercase tracking-wider">Fetching applications...</p>
               </div>
             ) : leaveRequests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4 opacity-50">
-                <Coffee size={64} strokeWidth={1} />
-                <p className="font-black text-[10px] uppercase tracking-widest">No pending leave requests found</p>
+              <div className="flex flex-col items-center justify-center py-10 text-slate-400 space-y-2 opacity-50">
+                <Coffee size={32} strokeWidth={1.5} />
+                <p className="font-bold text-[9px] uppercase tracking-wider">No pending leave requests found</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {leaveRequests.map((request) => (
-                  <div key={request.id} className="bg-white border border-slate-100 rounded-xl sm:rounded-[2rem] p-4 sm:p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-blue-100 transition-all group relative overflow-hidden">
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-                      <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm
-                        ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : 
-                          request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 
-                          'bg-rose-500 text-white shadow-rose-100'}`}>
-                        {request.status}
-                      </span>
-                    </div>
-
-                    <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-lg sm:text-xl border-2 border-white shadow-sm overflow-hidden shrink-0">
-                        {request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}
-                      </div>
-                      <div className="min-w-0 pr-16">
-                        <h4 className="font-black text-slate-900 uppercase tracking-tight truncate text-xs sm:text-sm">{request.User?.name}</h4>
-                        <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{request.User?.role}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100/50">
-                        <div className="p-1.5 sm:p-2 bg-white rounded-lg sm:rounded-xl text-blue-500 shadow-sm shrink-0">
-                          <Calendar size={14} className="sm:w-4 sm:h-4" />
+                  <div key={request.id} className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200 overflow-hidden shrink-0">
+                            {request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-slate-900 uppercase tracking-tight truncate text-[11px]">{request.User?.name}</h4>
+                            <p className="text-[8.5px] font-semibold text-slate-400 uppercase tracking-wider">{request.User?.role}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Duration</p>
-                          <p className="text-[11px] sm:text-xs font-black text-slate-700 truncate">
-                            {new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </p>
-                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shrink-0
+                          ${request.status === 'Pending' ? 'bg-amber-500 text-white' : 
+                            request.status === 'Approved' ? 'bg-blue-600 text-white' : 
+                            'bg-rose-500 text-white'}`}>
+                          {request.status}
+                        </span>
                       </div>
 
-                      <div className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-100/50">
-                        <div className="p-1.5 sm:p-2 bg-white rounded-lg sm:rounded-xl text-amber-500 shadow-sm shrink-0">
-                          <AlertCircle size={14} className="sm:w-4 sm:h-4" />
+                      <div className="space-y-1.5 text-[10px]">
+                        <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-1.5 text-slate-600">
+                          <Calendar size={11} className="text-blue-500 shrink-0" />
+                          <span className="font-semibold">{new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Type & Reason</p>
-                          <p className="text-[11px] sm:text-xs font-bold text-slate-600 italic line-clamp-2">
-                            <span className="text-slate-900 font-black not-italic">{request.leaveType}: </span>
-                            "{request.reason || 'No reason provided'}"
-                          </p>
+                        <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100 flex items-start gap-1.5 text-slate-600">
+                          <AlertCircle size={11} className="text-amber-500 shrink-0 mt-0.5" />
+                          <span className="line-clamp-2"><span className="font-bold text-slate-800">{request.leaveType}:</span> {request.reason || 'No reason'}</span>
                         </div>
                       </div>
                     </div>
 
                     {request.status === 'Pending' && (
-                      <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
+                      <div className="flex gap-1.5 mt-2.5 pt-2 border-t border-slate-100">
                         <button 
                           onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')}
-                          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 bg-blue-500 text-white rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
+                          className="flex-1 py-1 bg-blue-600 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-2xs"
                         >
-                          <CheckCircle2 size={12} className="sm:w-3.5 sm:h-3.5" />
                           Approve
                         </button>
                         <button 
                           onClick={() => handleLeaveStatusUpdate(request.id, 'Rejected')}
-                          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 bg-white border border-rose-100 text-rose-500 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all shadow-sm active:scale-95"
+                          className="flex-1 py-1 bg-white border border-rose-200 text-rose-600 rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-rose-50 transition-all shadow-2xs"
                         >
-                          <XCircle size={12} className="sm:w-3.5 sm:h-3.5" />
                           Reject
                         </button>
                       </div>
@@ -275,23 +277,14 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
           </div>
 
           {/* Modal Footer */}
-          <div className="p-4 sm:p-6 border-t border-slate-50 bg-slate-50/30 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center px-6 sm:px-10">
-             <div className="flex items-center gap-3 sm:gap-4">
-                <div className="flex -space-x-3">
-                   {[1,2,3].map(i => (
-                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm overflow-hidden">
-                         <UserIcon size={14} />
-                      </div>
-                   ))}
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{leaveRequests.filter(r => r.status === 'Pending').length} Pending Reviews</p>
-             </div>
-             <button 
+          <div className="p-2.5 sm:p-3 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center px-4">
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{leaveRequests.filter(r => r.status === 'Pending').length} Pending Reviews</span>
+            <button 
               onClick={() => setShowLeaveModal(false)}
-              className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-slate-900 text-white rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95"
-             >
-               Close Panel
-             </button>
+              className="px-3.5 py-1.5 bg-slate-900 text-white rounded-lg text-[9.5px] font-bold uppercase tracking-wider hover:bg-blue-600 transition-all shadow-2xs"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -299,318 +292,322 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
   }
 
   return (
-    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Tab Navigation Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center bg-white p-4 sm:p-6 rounded-xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white gap-4">
-        <div className="flex overflow-x-auto pb-1 lg:pb-0 gap-2 w-full lg:w-auto">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3.5 sm:space-y-4 animate-in fade-in duration-500">
+      {/* View Switcher & Date Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/80 shadow-2xs gap-2">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
           <button 
             onClick={() => setActiveView('overview')}
-            className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 ${
-              activeView === 'overview' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+              activeView === 'overview' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-500 hover:bg-slate-50'
             }`}
           >
-            <LayoutDashboard size={16} />
-            Overview Dashboard
+            <LayoutDashboard size={13} />
+            <span>Overview Dashboard</span>
           </button>
           <button 
             onClick={() => setActiveView('list')}
-            className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 ${
-              activeView === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+              activeView === 'list' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-500 hover:bg-slate-50'
             }`}
           >
-            <FileText size={16} />
-            Tenders Master List
+            <FileText size={13} />
+            <span>Tenders Master List</span>
           </button>
         </div>
-        <div className="flex flex-wrap sm:flex-nowrap gap-3 relative w-full lg:w-auto" ref={datePickerRef}>
-           <button 
+        <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto justify-end" ref={datePickerRef}>
+          <button 
             onClick={() => setShowLeaveModal(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-amber-600 transition-all shadow-2xs active:scale-95"
           >
-            <Coffee size={18} />
+            <Coffee size={13} />
             <span>Leave Requests</span>
           </button>
-           <button 
+          <button 
             onClick={() => setShowDatePicker(!showDatePicker)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
-           >
-              <Calendar size={14} className="text-indigo-600" />
-              <span>{new Date(selectedDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
-              <ChevronDown size={12} className={`transition-transform duration-300 ${showDatePicker ? 'rotate-180' : ''}`} />
-           </button>
- 
-           {showDatePicker && (
-              <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2 duration-200 text-left">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Select Date</label>
-                  <input 
-                    type="date" 
-                    value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      setShowDatePicker(false);
-                    }}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400"
-                  />
-                </div>
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 uppercase tracking-wider hover:bg-slate-100 transition-all active:scale-95"
+          >
+            <Calendar size={12} className="text-blue-600" />
+            <span>{new Date(selectedDate).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</span>
+            <ChevronDown size={11} className={`transition-transform duration-200 ${showDatePicker ? 'rotate-180' : ''}`} />
+          </button>
+
+          {showDatePicker && (
+            <div className="absolute right-0 top-full mt-1.5 p-3 bg-white border border-slate-100 rounded-xl shadow-xl z-50 w-56 animate-in fade-in slide-in-from-top-1 text-left">
+              <div className="space-y-1.5">
+                <label className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">Select Date</label>
+                <input 
+                  type="date" 
+                  value={selectedDate}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value);
+                    setShowDatePicker(false);
+                  }}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none focus:border-blue-500"
+                />
               </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
 
       {activeView === 'overview' ? (
-        <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
-          {/* Stats Grid - Matching Image 2 */}
-          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+        <div className="space-y-3.5 sm:space-y-4 animate-in fade-in duration-300">
+          {/* Top 6 KPI Metric Cards */}
+          <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
             {statsData.map((stat, i) => (
-              <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-[2rem] shadow-sm border border-slate-50 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value}</h3>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</p>
+              <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+                <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate">{stat.label}</span>
+                <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">{stat.value}</span>
               </div>
             ))}
           </div>
 
-          {/* Charts Row - Matching Image 2 */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-            <div className="lg:col-span-6 bg-white p-4 sm:p-5 lg:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
-              <div className="flex justify-between items-start mb-6 sm:mb-8">
+          {/* 3 Cards Placed in the Same Plane (Row) with Minimized Horizontal Pipeline Card */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5 items-stretch">
+            {/* Card 1: Tender Activity Timeline (5 Cols) */}
+            <div className="lg:col-span-5 bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col justify-between min-h-[380px]">
+              <div className="flex justify-between items-center mb-3">
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Tender Activity Timeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bid outcomes over last 6 months</p>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Tender Activity Timeline</h3>
+                  <p className="text-[8.5px] font-medium text-slate-400 uppercase tracking-wider">Bid outcomes over last 6 months</p>
                 </div>
-                <div className="p-2.5 sm:p-3 bg-indigo-50 text-indigo-600 rounded-xl sm:rounded-2xl shrink-0">
-                  <TrendingUp size={20} />
+                <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <TrendingUp size={13} />
                 </div>
               </div>
-              <div className="h-[250px] sm:h-[300px]">
-                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                  <AreaChart data={outcomesData}>
+              <div className="h-[290px] sm:h-[310px] w-full mt-auto">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={outcomesData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                      <linearGradient id="colorWonClient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
                         <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                       </linearGradient>
-                      <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                      <linearGradient id="colorActiveClient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25}/>
                         <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}} dx={-10} allowDecimals={false} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                      itemStyle={{ fontSize: '12px', fontWeight: 800 }}
-                      labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}
-                    />
-                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={3} />
-                    <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={3} />
-                    <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="5 5" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 8.5, fontWeight: 700}} dy={3} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 8.5, fontWeight: 700}} allowDecimals={false} />
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '10px', fontWeight: 600 }} />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '8.5px', fontWeight: 700, textTransform: 'uppercase' }} />
+                    <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWonClient)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActiveClient)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.05} strokeWidth={1.5} strokeDasharray="3 3" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-white p-4 sm:p-5 lg:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-50">
-              <div className="flex justify-between items-start mb-6 sm:mb-8">
+            {/* Card 2: Financial Pipeline (Slimmer Minimized Width: 3 Cols with Richer Insights) */}
+            <div className="lg:col-span-3 bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col justify-between min-h-[380px]">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-1.5">
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight uppercase tracking-wider">Financial Pipeline</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total budget distribution by status</p>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Financial Pipeline</h3>
+                  <p className="text-[8px] font-medium text-slate-400 uppercase tracking-wider">Budget &amp; Stage Analytics</p>
                 </div>
-                <div className="p-2.5 sm:p-3 bg-blue-50 text-blue-600 rounded-xl sm:rounded-2xl shrink-0">
-                  <BarChart3 size={20} />
+                <div className="w-5.5 h-5.5 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <BarChart3 size={12} />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 h-auto sm:h-[300px] w-full">
-                 <div className="w-full sm:flex-1 space-y-4">
-                    {budgetByStatus.map((cat, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest" style={{ color: cat.color }}>
-                          <span>{cat.name}</span>
-                          <span className="text-slate-800">{cat.name === 'No Data' ? '-' : formatCurrency(cat.value)}</span>
+
+              {/* Mini Quick Metrics Strip */}
+              <div className="grid grid-cols-2 gap-1.5 my-1">
+                <div className="p-1.5 rounded-lg bg-slate-50/80 border border-slate-100 flex flex-col justify-between">
+                  <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block">Avg Ticket</span>
+                  <span className="text-[10.5px] font-extrabold text-slate-800 tracking-tight leading-tight">{formatCurrency(avgBidValue)}</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-blue-50/50 border border-blue-100/60 flex flex-col justify-between">
+                  <span className="text-[7.5px] font-bold text-blue-500 uppercase tracking-wider block">Win Ratio</span>
+                  <span className="text-[10.5px] font-extrabold text-blue-600 tracking-tight leading-tight">{winRate}%</span>
+                </div>
+              </div>
+              
+              {/* Donut Chart Centered */}
+              <div className="w-full h-[115px] relative flex items-center justify-center my-0.5">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      innerRadius={36}
+                      outerRadius={50}
+                      paddingAngle={3}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '10px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-1">
+                  <span className="text-[11px] font-extrabold text-slate-900 leading-tight truncate max-w-[65px]">{totalBudgetValue > 0 ? formatCurrency(totalBudgetValue) : '₹0'}</span>
+                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tight">Total Volume</span>
+                </div>
+              </div>
+
+              {/* Detailed Stage Ledger */}
+              <div className="space-y-1.5 w-full pt-1.5 border-t border-slate-100/80 mt-auto">
+                {budgetBreakdown.map((cat, i) => {
+                  const pct = totalBudgetValue > 0 ? Math.round((cat.value / totalBudgetValue) * 100) : 0;
+                  return (
+                    <div key={i} className="space-y-0.5">
+                      <div className="flex justify-between items-center text-[8.5px] font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-1 min-w-0 truncate">
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }}></div>
+                          <span className="truncate text-slate-700">{cat.label}</span>
+                          <span className="text-[7px] font-bold bg-slate-100 px-1 py-0.2 rounded text-slate-500 shrink-0">
+                            {cat.count}
+                          </span>
                         </div>
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                           <div className="h-full rounded-full transition-all duration-1000" style={{width: `${totalBudgetValue > 0 ? (cat.value / totalBudgetValue) * 100 : 0}%`, backgroundColor: cat.color}}></div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-slate-900 font-extrabold">{formatCurrency(cat.value)}</span>
+                          <span className="text-[7.5px] text-slate-400 font-medium">({pct}%)</span>
                         </div>
                       </div>
-                    ))}
-                 </div>
-                 <div className="w-full sm:w-1/2 h-[220px] sm:h-full relative flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                      <PieChart>
-                        <Pie
-                          data={budgetByStatus}
-                          innerRadius={65}
-                          outerRadius={90}
-                          paddingAngle={5}
-                          dataKey="value"
-                          stroke="none"
-                        >
-                          {budgetByStatus.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value) => formatCurrency(value)}
-                          contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                          itemStyle={{ fontSize: '12px', fontWeight: 800 }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">{totalBudgetValue > 0 ? formatCurrency(totalBudgetValue) : '₹0'}</span>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Value</span>
+                      <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: cat.color }}></div>
+                      </div>
                     </div>
-                 </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          {/* Recent Tenders Section - ADDED AS REQUESTED */}
-          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-50 overflow-hidden animate-in slide-in-from-bottom-4 duration-700">
-            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/20">
-               <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase tracking-widest">Recent Tenders</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Latest bid activities and updates</p>
-               </div>
-               <button 
+            {/* Card 3: Recent Tenders (4 Cols) */}
+            <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex flex-col justify-between min-h-[380px] overflow-hidden">
+              <div className="p-3 sm:p-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40 shrink-0">
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Recent Tenders</h3>
+                  <p className="text-[8.5px] font-medium text-slate-400 uppercase tracking-wider">Latest bid activities</p>
+                </div>
+                <button 
                   onClick={() => setActiveView('list')}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all shadow-sm active:scale-95"
+                  className="flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-200 rounded-md text-[8.5px] font-bold text-blue-600 hover:bg-blue-50 transition-all shadow-2xs"
                 >
-                  View All
-                  <ArrowRight size={14} />
-               </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left min-w-[800px]">
-                <thead>
-                  <tr className="bg-slate-50/30 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <th className="px-8 py-4">Tender Details</th>
-                    <th className="px-8 py-4">Client</th>
-                    <th className="px-8 py-4">Status</th>
-                    <th className="px-8 py-4">Value</th>
-                    <th className="px-8 py-4 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
-                    <tr key={tender.id || i} className="hover:bg-indigo-50/20 transition-all cursor-pointer group">
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                              {tender.title?.charAt(0) || 'T'}
-                           </div>
-                           <div>
-                              <p className="text-sm font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{tender.title}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">Ref: #{tender.id?.substring(0,8)}</p>
-                           </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
-                      <td className="px-8 py-6">
-                        <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest w-fit shadow-sm
-                          ${tender.status === 'Won' ? 'bg-blue-500 text-white' : 
-                            tender.status === 'Active' ? 'bg-indigo-600 text-white' : 
-                            'bg-amber-500 text-white'}`}>
+                  <span>View All</span>
+                  <ArrowRight size={10} />
+                </button>
+              </div>
+
+              <div className="divide-y divide-slate-50 overflow-y-auto h-[290px] sm:h-[310px] max-h-[310px] custom-scrollbar flex-1">
+                {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
+                  <div key={tender.id || i} className="p-2.5 hover:bg-slate-50/80 transition-all flex items-center justify-between gap-2 cursor-pointer group" onClick={() => onView(tender.id)}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-[10px] shrink-0">
+                        {tender.title?.charAt(0) || 'T'}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10.5px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate leading-tight">{tender.title}</p>
+                        <p className="text-[8px] text-slate-400 uppercase truncate mt-0.5">{getClientName(tender.clientId)} • Ref: #{tender.id?.substring(0,6)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0 text-right">
+                      <div>
+                        <span className={`inline-block px-1.5 py-0.2 rounded text-[7.5px] font-bold uppercase tracking-tight ${
+                          tender.status === 'Won' ? 'bg-blue-50 text-blue-600' : 
+                          tender.status === 'Active' ? 'bg-indigo-50 text-indigo-600' : 
+                          'bg-amber-50 text-amber-600'
+                        }`}>
                           {tender.status}
-                        </div>
-                      </td>
-                      <td className="px-8 py-6 text-sm font-black text-slate-900">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
-                      <td className="px-8 py-6">
-                        <div className="flex justify-center">
-                           <button onClick={() => onView(tender.id)} className="p-2 hover:bg-indigo-100 text-indigo-600 rounded-xl transition-all">
-                              <Eye size={18} />
-                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )) : (
-                    <tr>
-                       <td colSpan="5" className="px-8 py-10 text-center">
-                         <p className="text-slate-400 italic font-medium">
-                           {user?.role === 'Tender Manager'
-                             ? 'No tenders assigned to you yet. Ask your administrator to assign you as a manager on a tender.'
-                             : 'No recent tenders found.'}
-                         </p>
-                       </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                        </span>
+                        <p className="text-[10px] font-extrabold text-slate-900 leading-tight mt-0.5">₹{parseFloat(tender.budget || 0).toLocaleString('en-IN')}</p>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); onView(tender.id); }} className="p-1 hover:bg-slate-100 text-slate-400 hover:text-blue-600 rounded transition-all">
+                        <Eye size={12} />
+                      </button>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="p-6 text-center text-slate-400 italic text-xs font-medium flex items-center justify-center h-full">
+                    No recent tenders found.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       ) : (
         /* Active Tenders Master List */
-        <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-slate-50/30">
-            <h3 className="font-black text-slate-900 text-xl tracking-tight uppercase tracking-[0.1em]">Tenders Master List</h3>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <div className="relative group w-full sm:w-auto">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
+        <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden animate-in fade-in duration-300">
+          <div className="p-3 sm:p-3.5 border-b border-slate-100 flex flex-wrap gap-2 items-center justify-between bg-slate-50/40">
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">Tenders Master List</h3>
+              <p className="text-[9px] text-slate-500 font-medium">All recorded tenders in the system.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
                 <input 
                   type="text" 
                   placeholder="Search title or client..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-full sm:w-64 shadow-sm" 
+                  className="pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all w-52 shadow-2xs" 
                 />
               </div>
               {user?.role !== 'Tender Manager' && (
                 <button 
                   onClick={onCreate}
-                  className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 text-center"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-2xs active:scale-95"
                 >
-                  Add New Tender
+                  <Plus size={13} />
+                  <span>Add Tender</span>
                 </button>
               )}
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[900px]">
+            <table className="w-full text-left min-w-[800px]">
               <thead>
-                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  <th className="px-8 py-4">ID</th>
-                  <th className="px-8 py-4">Tender Title</th>
-                  <th className="px-8 py-4">Client</th>
-                  <th className="px-8 py-4">Status</th>
-                  <th className="px-8 py-4">Due Date</th>
-                  <th className="px-8 py-4">Value (₹)</th>
-                  <th className="px-8 py-4 text-center">Actions</th>
+                <tr className="bg-slate-50/50 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                  <th className="px-3.5 py-2">ID</th>
+                  <th className="px-3.5 py-2">Tender Title</th>
+                  <th className="px-3.5 py-2">Client</th>
+                  <th className="px-3.5 py-2">Status</th>
+                  <th className="px-3.5 py-2">Due Date</th>
+                  <th className="px-3.5 py-2 text-right">Value (₹)</th>
+                  <th className="px-3.5 py-2 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredTenders.length > 0 ? filteredTenders.map((tender, i) => (
-                  <tr key={tender.id || i} className="hover:bg-indigo-50/30 transition-all group" onClick={() => onView(tender.id)}>
-                    <td className="px-8 py-5 text-xs font-bold text-slate-400">#{tender.id?.substring(0, 8)}</td>
-                    <td className="px-8 py-5">
+                  <tr key={tender.id || i} className="hover:bg-slate-50/70 transition-all cursor-pointer group" onClick={() => onView(tender.id)}>
+                    <td className="px-3.5 py-2 text-[10px] font-bold text-blue-600">#{tender.id?.substring(0, 8)}</td>
+                    <td className="px-3.5 py-2">
                       <span 
                         onClick={(e) => {
                           e.stopPropagation();
                           onView(tender.id);
                         }}
-                        className="text-sm font-black text-slate-800 hover:text-indigo-600 cursor-pointer hover:underline transition-colors"
+                        className="text-[11px] font-bold text-slate-800 hover:text-blue-600 cursor-pointer hover:underline transition-colors"
                       >
                         {tender.title}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
-                    <td className="px-8 py-5">
-                      <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit
+                    <td className="px-3.5 py-2 text-[10.5px] font-medium text-slate-600">{getClientName(tender.clientId)}</td>
+                    <td className="px-3.5 py-2">
+                      <div className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider w-fit shadow-2xs
                         ${tender.status === 'Draft' ? 'bg-slate-100 text-slate-600' :
-                          tender.status === 'Active' ? 'bg-blue-100 text-blue-600' :
-                            tender.status === 'Won' ? 'bg-blue-100 text-blue-600' :
-                              'bg-amber-100 text-amber-600'}`}>
+                          tender.status === 'Active' ? 'bg-blue-500 text-white' :
+                            tender.status === 'Won' ? 'bg-blue-600 text-white' :
+                              'bg-amber-500 text-white'}`}>
                         {tender.status}
                       </div>
                     </td>
-                    <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.submissionDate ? new Date(tender.submissionDate).toLocaleDateString() : 'No Date'}</td>
-                    <td className="px-8 py-5 text-sm font-black text-slate-900">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
-                    <td className="px-8 py-5">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => onView(tender.id)} className="p-1.5 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors"><Eye size={16} /></button>
-                        <button onClick={() => onEdit(tender)} className="p-1.5 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors"><Edit2 size={16} /></button>
+                    <td className="px-3.5 py-2 text-[10px] font-medium text-slate-500">{tender.submissionDate ? new Date(tender.submissionDate).toLocaleDateString('en-IN') : 'No Date'}</td>
+                    <td className="px-3.5 py-2 text-[11px] font-extrabold text-slate-900 text-right">₹{parseFloat(tender.budget || 0).toLocaleString('en-IN')}</td>
+                    <td className="px-3.5 py-2">
+                      <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => onView(tender.id)} className="p-1 hover:bg-slate-100 text-slate-400 hover:text-blue-600 rounded-md transition-colors" title="View"><Eye size={13} /></button>
+                        <button onClick={() => onEdit(tender)} className="p-1 hover:bg-slate-100 text-slate-400 hover:text-blue-600 rounded-md transition-colors" title="Edit"><Edit2 size={13} /></button>
                         <button onClick={() => {
                           if(window.confirm('Delete this tender?')) {
                             fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
@@ -622,19 +619,13 @@ const TenderDashboard = ({ onView, onEdit, onCreate, tenders = [], assignments =
                                 }
                               });
                           }
-                        }} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                        }} className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-md transition-colors" title="Delete"><Trash2 size={13} /></button>
                       </div>
                     </td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="px-8 py-10 text-center">
-                      <p className="text-slate-400 italic font-medium">
-                        {user?.role === 'Tender Manager'
-                          ? 'No tenders are assigned to you. Contact your admin to be assigned as a tender manager.'
-                          : 'No tenders found matching your search.'}
-                      </p>
-                    </td>
+                    <td colSpan="7" className="px-4 py-8 text-center text-slate-400 italic text-xs font-medium">No tenders found matching your search.</td>
                   </tr>
                 )}
               </tbody>

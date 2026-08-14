@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Building2, 
   CheckCircle2, 
@@ -186,6 +186,52 @@ const SubscriptionsPage = () => {
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [cycleFilter, setCycleFilter] = useState('All Billing Cycles');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        const [clientsRes, invRes] = await Promise.all([
+          fetch('/api/clients'),
+          fetch('/api/invoices')
+        ]);
+        if (clientsRes.ok) {
+          const clientsData = await clientsRes.json();
+          if (clientsData && clientsData.length > 0) {
+            const mapped = clientsData.map((c, idx) => {
+              const plan = c.plan || (idx % 3 === 0 ? 'Business Plan' : idx % 3 === 1 ? 'Professional Plan' : 'Enterprise Plan');
+              const cycle = c.billingCycle || (idx % 2 === 0 ? 'Monthly' : 'Annual');
+              const numAmt = plan.includes('Enterprise') ? 149999 : plan.includes('Professional') ? 69999 : 34999;
+              return {
+                id: c.id,
+                organization: c.name,
+                domain: c.email ? c.email.split('@')[1] : `${c.name.toLowerCase().replace(/\s+/g, '')}.com`,
+                logoBg: idx % 2 === 0 ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white',
+                logoText: c.name.charAt(0).toUpperCase(),
+                plan: plan,
+                planBadge: plan.includes('Enterprise') ? 'bg-amber-50 text-amber-700 border-amber-200' : plan.includes('Professional') ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-blue-50 text-blue-600 border-blue-100',
+                status: c.status || 'Active',
+                statusStyle: c.status === 'Past Due' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-emerald-600 bg-emerald-50 border-emerald-200',
+                billingCycle: cycle,
+                nextRenewalDate: '15 Oct 2026',
+                renewalDays: 'in 62 days',
+                mrr: `₹${numAmt.toLocaleString('en-IN')}`,
+                amount: cycle === 'Monthly' ? `₹${numAmt.toLocaleString('en-IN')} / mo` : `₹${(numAmt * 12).toLocaleString('en-IN')} / yr`,
+                numericAmount: cycle === 'Monthly' ? numAmt : numAmt * 12,
+                startedOn: c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '15 Oct 2025',
+                contactEmail: c.email || 'billing@company.com',
+                contactPerson: c.contactPerson || c.name,
+                phone: c.phone || '+91 98765 43210'
+              };
+            });
+            setSubscriptions(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching subscriptions:', err);
+      }
+    };
+    fetchSubscriptions();
+  }, []);
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
 

@@ -10,16 +10,18 @@ import {
   User, 
   Download, 
   ChevronLeft, 
-  ChevronRight,
-  MoreVertical,
-  CheckCircle2,
-  AlertCircle,
-  Coffee,
+  ChevronRight, 
+  CheckCircle2, 
+  AlertCircle, 
+  Coffee, 
   CalendarDays,
-  Users
+  Plus,
+  X,
+  FileText,
+  Send
 } from 'lucide-react';
 
-const Attendance = ({ user }) => {
+const Attendance = ({ user = {} }) => {
   const [view, setView] = useState('MONTH');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
@@ -27,9 +29,20 @@ const Attendance = ({ user }) => {
   const [endDate, setEndDate] = useState('2026-05-31');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const datePickerRef = useRef(null);
 
-  // Expanded rows state to toggle details for specific user + date rows
+  // Leave Form State
+  const [leaveFormData, setLeaveFormData] = useState({
+    leaveType: 'Annual Leave',
+    startDate: '',
+    endDate: '',
+    reason: ''
+  });
+  const [submittingLeave, setSubmittingLeave] = useState(false);
+  const [leaveSuccessMsg, setLeaveSuccessMsg] = useState('');
+
+  // Expanded rows state
   const [expandedRows, setExpandedRows] = useState({});
   const toggleRow = (userId, date) => {
     const key = `${userId}_${date}`;
@@ -52,7 +65,6 @@ const Attendance = ({ user }) => {
   const [rawRecords, setRawRecords] = useState([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
 
-  // Close date picker popover on outside click
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (datePickerRef.current && !datePickerRef.current.contains(e.target)) {
@@ -63,17 +75,12 @@ const Attendance = ({ user }) => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Fetch all global attendance records dynamically
   const fetchAllAttendance = async () => {
     try {
       const res = await fetch(`/api/auth/attendance/all/records`);
       if (res.ok) {
         const data = await res.json();
-        // Map backend model format to UI structure
         const formatted = data.map((item, idx) => {
-          const dateStr = item.date;
-          
-          // Format times beautifully
           const formatTime = (isoString) => {
             if (!isoString) return '--';
             const date = new Date(isoString);
@@ -91,7 +98,7 @@ const Attendance = ({ user }) => {
             email: item.User?.email || '',
             role: item.User?.role || 'Core Team',
             joiningDate: item.User?.createdAt || '2026-05-14',
-            date: dateStr,
+            date: item.date,
             session: idx + 1,
             in: inTimeStr,
             out: outTimeStr,
@@ -116,54 +123,84 @@ const Attendance = ({ user }) => {
     fetchAllAttendance();
   }, []);
 
-  // Compute daily stats summary for all members
+  const handleApplyLeave = async (e) => {
+    e.preventDefault();
+    if (!leaveFormData.startDate || !leaveFormData.endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+    setSubmittingLeave(true);
+    try {
+      const response = await fetch('/api/leave-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user?.id || 1,
+          leaveType: leaveFormData.leaveType,
+          startDate: leaveFormData.startDate,
+          endDate: leaveFormData.endDate,
+          reason: leaveFormData.reason
+        })
+      });
+      if (response.ok) {
+        setLeaveSuccessMsg('Leave request submitted successfully!');
+        setTimeout(() => {
+          setLeaveSuccessMsg('');
+          setIsLeaveModalOpen(false);
+          setLeaveFormData({
+            leaveType: 'Annual Leave',
+            startDate: '',
+            endDate: '',
+            reason: ''
+          });
+        }, 1200);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to submit leave request');
+      }
+    } catch (err) {
+      console.error('Failed to submit leave request:', err);
+      alert('Error submitting leave request');
+    } finally {
+      setSubmittingLeave(false);
+    }
+  };
+
   const getGlobalStats = () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const todayRecords = rawRecords.filter(r => r.date === todayStr);
 
-    // 1. Total checked-in present members today
     const uniquePresentToday = new Set(todayRecords.map(r => r.userId));
     const totalPresent = uniquePresentToday.size;
-
-    // 2. Active online right now (checked in today but has not checked out yet)
     const activeOnlineCount = todayRecords.filter(r => r.in !== '--' && r.out === '--').length;
-
-    // 3. Late arrivals count today
     const uniqueLateToday = new Set(todayRecords.filter(r => r.status === 'LATE').map(r => r.userId));
     const totalLate = uniqueLateToday.size;
 
-    // 4. On Time Rate today
     const onTimeRate = totalPresent > 0 
       ? Math.round(((totalPresent - totalLate) / totalPresent) * 100)
       : 100;
 
-    // 5. Total system leaves pending review
-    const pendingLeaves = 5;
-
-    // 6. Total active users in the dataset
     const totalUsersSet = new Set(rawRecords.map(r => r.userId));
     const totalUsers = totalUsersSet.size || 12;
 
     return [
-      { label: "PRESENT TODAY", value: `${totalPresent} Members`, icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
-      { label: "ACTIVE ONLINE", value: `${activeOnlineCount} Online`, icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
-      { label: "LATE TODAY", value: `${totalLate} Late`, icon: AlertCircle, color: "text-rose-500", bg: "bg-rose-50" },
-      { label: "ON-TIME RATE", value: `${onTimeRate}%`, icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
-      { label: "PENDING LEAVES", value: `${pendingLeaves} Requests`, icon: Coffee, color: "text-amber-500", bg: "bg-amber-50" },
-      { label: "TOTAL MEMBERS", value: `${totalUsers} Registered`, icon: User, color: "text-indigo-500", bg: "bg-indigo-50" },
+      { label: "PRESENT TODAY", value: `${totalPresent}`, subtext: "Checked In", icon: CheckCircle2, color: "text-blue-600", light: "bg-blue-50" },
+      { label: "ACTIVE ONLINE", value: `${activeOnlineCount}`, subtext: "In Session", icon: Clock, color: "text-amber-500", light: "bg-amber-50" },
+      { label: "LATE TODAY", value: `${totalLate}`, subtext: "Delayed", icon: AlertCircle, color: "text-rose-500", light: "bg-rose-50" },
+      { label: "ON-TIME RATE", value: `${onTimeRate}%`, subtext: "Compliance", icon: CalendarDays, color: "text-blue-600", light: "bg-blue-50" },
+      { label: "PENDING LEAVES", value: `5`, subtext: "To Review", icon: Coffee, color: "text-amber-500", light: "bg-amber-50" },
+      { label: "TOTAL MEMBERS", value: `${totalUsers}`, subtext: "Registered", icon: User, color: "text-indigo-500", light: "bg-indigo-50" },
     ];
   };
 
   const stats = getGlobalStats();
 
-  // Helper to format minutes to "Xh Ym"
   const formatMinutes = (minutes) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}h ${String(m).padStart(2, '0')}m`;
   };
 
-  // Helper to get daily presence summaries for calendar display (showing count of present members)
   const getDayPresenceCount = (dayNum) => {
     const targetDate = `2026-05-${String(dayNum).padStart(2, '0')}`;
     const dayRecords = rawRecords.filter(r => r.date === targetDate);
@@ -171,11 +208,9 @@ const Attendance = ({ user }) => {
     return uniqueUserIds.size;
   };
 
-  // Process and compute layout rows depending on DAY view vs. WEEK/MONTH views
   const processedRecords = (() => {
     let filtered = [...rawRecords];
 
-    // Filter by name, email, or role query if present
     if (searchQuery) {
       filtered = filtered.filter(r => 
         r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -194,7 +229,6 @@ const Attendance = ({ user }) => {
         return Math.abs(recordDay - selectedDay) <= 3;
       });
     } else {
-      // MONTH view date range filter
       rangeFiltered = filtered.filter(r => {
         const sDate = new Date(r.date);
         const start = new Date(startDate);
@@ -203,7 +237,6 @@ const Attendance = ({ user }) => {
       });
     }
 
-    // Group by userId so there is exactly one row per employee in the table
     const userGroups = {};
     rangeFiltered.forEach(r => {
       if (!userGroups[r.userId]) {
@@ -217,7 +250,6 @@ const Attendance = ({ user }) => {
       const earliestRecord = [...userRecords].sort((a, b) => new Date(a.joiningDate) - new Date(b.joiningDate))[0] || {};
       
       if (view === 'DAY') {
-        // DAY view: Group sessions on this single day
         const earliest = [...userRecords].sort((a, b) => {
           if (!a.inTimeRaw) return 1;
           if (!b.inTimeRaw) return -1;
@@ -239,8 +271,8 @@ const Attendance = ({ user }) => {
           email: earliestRecord.email,
           role: earliestRecord.role,
           date: earliestRecord.date,
-          in: earliest.in,
-          out: latest.out || '--',
+          in: earliest?.in || '--',
+          out: latest?.out || '--',
           work: formatMinutes(totalWork),
           status: hasLate ? 'LATE' : 'ON TIME',
           sessionNum: userRecords.length,
@@ -248,7 +280,6 @@ const Attendance = ({ user }) => {
           type: 'DAY'
         };
       } else {
-        // WEEK or MONTH view: Group by date to form DAYS for dropdown list
         const daysMap = {};
         userRecords.forEach(r => {
           if (!daysMap[r.date]) daysMap[r.date] = [];
@@ -275,8 +306,8 @@ const Attendance = ({ user }) => {
 
           return {
             date: dateStr,
-            in: earliest.in,
-            out: latest.out || '--',
+            in: earliest?.in || '--',
+            out: latest?.out || '--',
             work: formatMinutes(totalWork),
             status: hasLate ? 'LATE' : 'ON TIME',
             sessionNum: sessions.length
@@ -294,11 +325,11 @@ const Attendance = ({ user }) => {
           email: earliestRecord.email,
           role: earliestRecord.role,
           date: view === 'WEEK' ? 'Active Week' : 'Active Month',
-          in: dayRows[0]?.in || '--', // Recent check-in
-          out: dayRows[0]?.out || '--', // Recent check-out
+          in: dayRows[0]?.in || '--',
+          out: dayRows[0]?.out || '--',
           work: formatMinutes(totalWorkAllDays),
           status: latePercentage > 0 ? `${latePercentage}% LATE` : 'ON TIME',
-          sessionNum: totalDaysCount, // present days count
+          sessionNum: totalDaysCount,
           allSessions: dayRows,
           type: 'RANGE'
         };
@@ -306,7 +337,6 @@ const Attendance = ({ user }) => {
     }).sort((a, b) => a.name.localeCompare(b.name));
   })();
 
-  // CSV Report Exporter
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -317,11 +347,11 @@ const Attendance = ({ user }) => {
     });
 
     if (exportData.length === 0) {
-      alert("No attendance records found for the selected time period.");
+      alert("No attendance records found for the selected period.");
       return;
     }
 
-    const filename = `Global_Attendance_${startDate}_to_${endDate}`;
+    const filename = `Attendance_${startDate}_to_${endDate}`;
 
     if (format === 'csv') {
       const csvRows = [
@@ -354,111 +384,143 @@ const Attendance = ({ user }) => {
       XLSX.writeFile(workbook, `${filename}.xlsx`);
     } else if (format === 'pdf') {
       const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text("Global Attendance Report", 14, 20);
-      doc.setFontSize(10);
-      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      doc.setFontSize(14);
+      doc.text("Attendance Report", 14, 15);
+      doc.setFontSize(9);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 22);
       
       const rows = exportData.map(r => [r.name, r.date, r.in, r.out, r.status]);
       autoTable(doc, {
-        startY: 35,
+        startY: 26,
         head: [["Name", "Date", "In", "Out", "Status"]],
         body: rows,
+        styles: { fontSize: 8 }
       });
       doc.save(`${filename}.pdf`);
     }
   };
 
   const formatRangeText = (start, end) => {
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const options = { month: 'short', day: 'numeric' };
     const sStr = new Date(start).toLocaleDateString('en-US', options);
     const eStr = new Date(end).toLocaleDateString('en-US', options);
     return `${sStr} - ${eStr}`.toUpperCase();
   };
 
   return (
-    <div className="p-8 space-y-10 animate-in fade-in duration-700">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-3.5 animate-in fade-in duration-500 bg-[#f8fafc] min-h-screen text-left overflow-x-hidden">
       
-      {/* Premium Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      {/* Header Area */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
-          <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Global Attendance Sheets</h1>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-            Company-wide real-time tracking, login logs auditing, and visual attendance charts
-          </p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Clock size={16} className="text-blue-600" />
+            <span>Attendance Log & Records</span>
+          </h1>
+          <p className="text-[9px] text-slate-500 font-medium">Real-time attendance logs, session breakdown, and shift times</p>
         </div>
-        <div className="flex items-center gap-4 bg-slate-900 px-6 py-4 rounded-2xl text-white shadow-lg shrink-0 border border-slate-800">
-          <Clock size={20} className="text-blue-400 animate-pulse" />
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">REAL TIME TIMER</span>
-            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-blue-400 font-mono">
-              {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-            </span>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsLeaveModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-2xs active:scale-95 transition-all cursor-pointer"
+          >
+            <Plus size={12} />
+            <span>Apply Leave</span>
+          </button>
+          <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg text-white shadow-2xs shrink-0">
+            <Clock size={13} className="text-blue-400 animate-pulse" />
+            <div className="flex flex-col">
+              <span className="text-[7px] font-bold text-slate-400 uppercase tracking-wider leading-none">Live Time</span>
+              <span className="text-[10.5px] font-extrabold tracking-wider leading-none mt-0.5 text-blue-400 font-mono">
+                {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Header Actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="relative w-full max-w-md group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={20} />
+      {/* Top 6 KPI Stats */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+        {stats.map((stat, i) => {
+          const IconComp = stat.icon;
+          return (
+            <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block truncate">{stat.label}</span>
+                <div className={`p-1 rounded ${stat.light} ${stat.color}`}>
+                  <IconComp size={11} />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between mt-auto">
+                <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">{stat.value}</span>
+                <span className="text-[7.5px] font-bold text-slate-400 uppercase">{stat.subtext}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Header Search & View Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
           <input 
             type="text" 
-            placeholder="Search member name, email, or role..."
-            className="w-full pl-16 pr-8 py-5 bg-white border border-slate-100 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:shadow-xl focus:shadow-blue-500/5 transition-all"
+            placeholder="Search member, email..."
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500 shadow-2xs"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {/* Active Date Range Trigger */}
           <div className="relative" ref={datePickerRef}>
             <button 
               onClick={() => setShowDatePicker(!showDatePicker)}
-              className="flex items-center gap-3 bg-white hover:bg-slate-50 transition-colors px-6 py-4 rounded-[1.5rem] border border-slate-100 shadow-sm text-xs font-black text-slate-600 uppercase tracking-widest cursor-pointer"
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-[10px] font-bold text-slate-700 uppercase tracking-wider cursor-pointer"
             >
-               <CalendarIcon size={18} className="text-blue-500" />
+               <CalendarIcon size={12} className="text-blue-500" />
                <span>{formatRangeText(startDate, endDate)}</span>
             </button>
 
             {/* Popover */}
             {showDatePicker && (
-              <div className="absolute right-0 mt-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-[60] w-80 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-50">
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Configure Date Window</h4>
-                  <span className="text-[9px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">Filter</span>
+              <div className="absolute right-0 mt-1.5 p-3 bg-white border border-slate-200 rounded-xl shadow-xl z-50 w-72 space-y-2 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                  <span className="text-xs font-bold text-slate-900 uppercase">Filter Window</span>
+                  <span className="text-[7.5px] font-bold text-blue-600 uppercase bg-blue-50 px-1.5 py-0.5 rounded">Range</span>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Start Date</label>
+                    <label className="text-[8px] font-bold text-slate-400 uppercase block mb-0.5">Start Date</label>
                     <input 
                       type="date" 
                       value={startDate} 
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                      className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">End Date</label>
+                    <label className="text-[8px] font-bold text-slate-400 uppercase block mb-0.5">End Date</label>
                     <input 
                       type="date" 
                       value={endDate} 
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                      className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-50">
+                <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100">
                   <button 
                     onClick={() => {
                       setStartDate('2026-05-14');
                       setEndDate('2026-05-19');
                       setShowDatePicker(false);
                     }}
-                    className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
+                    className="py-1 bg-slate-50 hover:bg-slate-100 text-[8px] font-bold text-slate-600 rounded uppercase tracking-wider"
                   >
                     Last 7 Days
                   </button>
@@ -468,7 +530,7 @@ const Attendance = ({ user }) => {
                       setEndDate('2026-05-31');
                       setShowDatePicker(false);
                     }}
-                    className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
+                    className="py-1 bg-slate-50 hover:bg-slate-100 text-[8px] font-bold text-slate-600 rounded uppercase tracking-wider"
                   >
                     This Month
                   </button>
@@ -476,22 +538,22 @@ const Attendance = ({ user }) => {
 
                 <button 
                   onClick={() => setShowDatePicker(false)}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-[9px] font-black text-white rounded-xl uppercase tracking-widest transition-all shadow-md active:scale-95"
+                  className="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-[9px] font-bold text-white rounded-lg uppercase tracking-wider transition-all shadow-2xs"
                 >
-                  Apply Filter Window
+                  Apply Filter
                 </button>
               </div>
             )}
           </div>
 
           {/* View Tab Selector */}
-          <div className="flex bg-white p-1 rounded-2xl border border-slate-50 shadow-sm">
+          <div className="flex bg-white p-0.5 rounded-lg border border-slate-200 shadow-2xs">
              {['MONTH', 'WEEK', 'DAY'].map(t => (
                 <button 
                   key={t}
                   onClick={() => setView(t)}
-                  className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer
-                    ${view === t ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer
+                    ${view === t ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   {t}
                 </button>
@@ -500,74 +562,49 @@ const Attendance = ({ user }) => {
         </div>
       </div>
 
-      {/* Stats Panel */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
-             <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
-             <div className="flex items-center justify-between">
-                <span className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</span>
-             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Grid split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
+      {/* Main Grid Split */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5">
         
-        {/* Attendance Log Table */}
-        <div className="lg:col-span-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm">
-            <div className="flex justify-between items-center mb-10 px-2">
-               <div className="flex flex-col">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">GLOBAL ATTENDANCE LOG ({view})</h3>
-                  <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1.5">
-                    {processedRecords.length} records matching the current layout window
-                  </p>
+        {/* Attendance Log Table (Span 8) */}
+        <div className="lg:col-span-8 bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+               <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Attendance Log ({view})</h3>
+                  <p className="text-[8.5px] text-slate-500 font-medium">{processedRecords.length} records matching current view</p>
                </div>
                <button 
                  onClick={() => setIsExportModalOpen(true)}
-                 className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
+                 className="flex items-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-700 uppercase tracking-wider cursor-pointer transition-all shadow-2xs"
                >
-                  <Download size={16} />
-                  <span>EXPORT REPORT</span>
+                  <Download size={11} />
+                  <span>Export</span>
                </button>
             </div>
 
             <div className="overflow-x-auto">
-               <table className="w-full">
+               <table className="w-full text-left">
                   <thead>
-                     <tr className="border-b border-slate-50">
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">TEAM MEMBER</th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                          {view === 'DAY' ? 'DATE' : 'RANGE'}
-                        </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                          {view === 'DAY' ? 'LOGINS' : 'DAYS PRESENT'}
-                        </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                          {view === 'DAY' ? 'IN-TIME' : 'RECENT IN'}
-                        </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                          {view === 'DAY' ? 'OUT-TIME' : 'RECENT OUT'}
-                        </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                          {view === 'DAY' ? 'WORKED' : 'TOTAL WORKED'}
-                        </th>
-                        <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">STATUS</th>
+                     <tr className="border-b border-slate-100 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th className="py-2 px-2">Member</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'Date' : 'Range'}</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'Logins' : 'Days'}</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'In' : 'Recent In'}</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'Out' : 'Recent Out'}</th>
+                        <th className="py-2 px-2">Worked</th>
+                        <th className="py-2 px-2">Status</th>
                      </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-slate-100 text-xs">
                      {loadingRecords ? (
                        <tr>
-                         <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic animate-pulse">
-                           Querying MySQL Database logs...
+                         <td colSpan="7" className="py-6 text-center text-xs font-bold uppercase text-slate-400 tracking-wider animate-pulse">
+                           Loading Attendance Logs...
                          </td>
                        </tr>
                      ) : processedRecords.length === 0 ? (
                        <tr>
-                         <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
-                           No attendance records logged for this day
+                         <td colSpan="7" className="py-6 text-center text-xs font-bold uppercase text-slate-400 tracking-wider">
+                           No attendance records found for this period
                          </td>
                        </tr>
                      ) : (
@@ -578,44 +615,44 @@ const Attendance = ({ user }) => {
                          return (
                            <React.Fragment key={i}>
                              <tr 
-                               className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
+                               className="hover:bg-slate-50/70 transition-colors cursor-pointer"
                                onClick={() => toggleRow(record.userId, record.date)}
                              >
-                                <td className="py-6">
-                                   <div className="flex items-center gap-4">
-                                      <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-white shadow-sm transition-all group-hover:scale-110">
+                                <td className="py-2 px-2">
+                                   <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-[9px] font-bold shrink-0">
                                          {initial}
                                       </div>
-                                      <div className="flex flex-col">
-                                         <div className="flex items-center gap-2">
-                                           <span className="text-sm font-black text-slate-800 uppercase tracking-tight hover:text-blue-600 transition-colors">
+                                      <div className="min-w-0">
+                                         <div className="flex items-center gap-1">
+                                           <span className="text-[11px] font-bold text-slate-800 uppercase truncate max-w-[120px]">
                                              {record.name}
                                            </span>
-                                           <span className="text-[7px] text-blue-500 font-bold bg-blue-50 px-1.5 py-0.5 rounded-md leading-none animate-bounce">
+                                           <span className="text-[7px] text-blue-500 font-bold bg-blue-50 px-1 py-0.2 rounded leading-none">
                                              {isExpanded ? '▲' : '▼'}
                                            </span>
                                          </div>
-                                         <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{record.role}</span>
+                                         <span className="text-[7.5px] font-medium text-slate-400 uppercase truncate block">{record.role}</span>
                                       </div>
                                    </div>
                                 </td>
-                                <td className="py-6 text-sm font-bold text-slate-500">
+                                <td className="py-2 px-2 text-[10.5px] font-medium text-slate-600">
                                   {record.type === 'DAY' 
-                                    ? new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                    ? new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                     : `${new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                                 </td>
-                                <td className="py-6 text-sm font-black text-slate-600">
-                                  <span className="bg-slate-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-700">
+                                  <span className="bg-slate-50 px-1.5 py-0.5 rounded uppercase text-[8.5px] font-bold">
                                     {record.type === 'DAY' 
                                       ? `${record.sessionNum} ${record.sessionNum === 1 ? 'Login' : 'Logins'}`
                                       : `${record.sessionNum} ${record.sessionNum === 1 ? 'Day' : 'Days'}`}
                                   </span>
                                 </td>
-                                <td className="py-6 text-sm font-black text-slate-900">{record.in}</td>
-                                <td className="py-6 text-sm font-black text-slate-900">{record.out}</td>
-                                <td className="py-6 text-sm font-black text-slate-900">{record.work}</td>
-                                <td className="py-6">
-                                   <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-800">{record.in}</td>
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-800">{record.out}</td>
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-800">{record.work}</td>
+                                <td className="py-2 px-2">
+                                   <span className={`px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase ${
                                      record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                                    }`}>
                                       {record.status}
@@ -623,44 +660,36 @@ const Attendance = ({ user }) => {
                                 </td>
                              </tr>
 
-                             {/* Dropdown Session Details Section */}
+                             {/* Dropdown Session Details */}
                              {isExpanded && (
                                <tr className="bg-slate-50/50">
-                                 <td colSpan="7" className="p-6 border-l-4 border-blue-500">
-                                   <div className="space-y-4 animate-in slide-in-from-top-1 duration-300">
-                                     <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest italic">
+                                 <td colSpan="7" className="p-2.5 border-l-2 border-blue-500">
+                                   <div className="space-y-2 animate-in fade-in duration-200">
+                                     <span className="text-[8px] font-bold text-blue-600 uppercase tracking-wider block">
                                        {record.type === 'DAY' 
-                                         ? `Detailed Login / Logout Session Logs for ${record.name} on ${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-                                         : `Daily Attendance Breakdown for ${record.name} during this ${view === 'WEEK' ? 'Week' : 'Month'}`}
-                                     </div>
-                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                         ? `Session Logs for ${record.name} on ${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                                         : `Daily Breakdown for ${record.name} (${view === 'WEEK' ? 'Week' : 'Month'})`}
+                                     </span>
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                        {record.allSessions.map((item, idx) => (
-                                         <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
-                                           <div className="flex items-center justify-between border-b border-slate-50 pb-2">
-                                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                         <div key={idx} className="bg-white p-2 rounded-lg border border-slate-100 shadow-2xs space-y-1">
+                                           <div className="flex items-center justify-between border-b border-slate-50 pb-1">
+                                             <span className="text-[8px] font-bold text-slate-400 uppercase">
                                                {record.type === 'DAY' 
                                                  ? `Session #${idx + 1}`
-                                                 : new Date(item.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                                                 : new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                              </span>
-                                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
+                                             <span className={`px-1 rounded text-[7px] font-bold uppercase ${
                                                item.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                                              }`}>{item.status}</span>
                                            </div>
-                                           <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                                             <div className="flex items-center gap-1.5">
-                                               <span className="text-blue-500">In:</span>
-                                               <span>{item.in}</span>
-                                             </div>
-                                             <div className="flex items-center gap-1.5">
-                                               <span className="text-rose-500">Out:</span>
-                                               <span>{item.out}</span>
-                                             </div>
+                                           <div className="flex justify-between items-center text-[10px] font-medium text-slate-700">
+                                             <span>In: <strong className="text-slate-900">{item.in}</strong></span>
+                                             <span>Out: <strong className="text-slate-900">{item.out}</strong></span>
                                            </div>
-                                           <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between pt-1">
-                                             <span>{record.type === 'DAY' ? 'WORK HOURS' : `WORKED (${item.sessionNum} ${item.sessionNum === 1 ? 'Login' : 'Logins'})`}</span>
-                                             <span className="text-slate-700 font-bold">
-                                               {item.work}
-                                             </span>
+                                           <div className="text-[8px] font-semibold text-slate-400 uppercase flex items-center justify-between pt-0.5">
+                                             <span>Worked</span>
+                                             <span className="text-slate-800 font-bold">{item.work}</span>
                                            </div>
                                          </div>
                                        ))}
@@ -678,18 +707,18 @@ const Attendance = ({ user }) => {
             </div>
         </div>
 
-        {/* Dynamic Sidebar Calendar */}
-        <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-sm flex flex-col items-center">
-               <div className="flex justify-between items-center w-full mb-10 px-2">
-                  <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronLeft size={20} /></button>
-                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">MAY 2026</span>
-                  <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronRight size={20} /></button>
+        {/* Dynamic Sidebar Calendar (Span 4) */}
+        <div className="lg:col-span-4 space-y-3">
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col items-center">
+               <div className="flex justify-between items-center w-full mb-2 px-1">
+                  <button className="p-1 rounded hover:bg-slate-50 text-slate-400"><ChevronLeft size={14} /></button>
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">MAY 2026</span>
+                  <button className="p-1 rounded hover:bg-slate-50 text-slate-400"><ChevronRight size={14} /></button>
                </div>
 
-               <div className="grid grid-cols-7 gap-y-8 w-full">
+               <div className="grid grid-cols-7 gap-y-2 w-full text-center">
                   {['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].map(d => (
-                    <span key={d} className="text-center text-[9px] font-black text-slate-300 uppercase tracking-widest">{d}</span>
+                    <span key={d} className="text-[7.5px] font-bold text-slate-400 uppercase">{d}</span>
                   ))}
                   
                   {Array.from({ length: 31 }).map((_, i) => {
@@ -706,58 +735,167 @@ const Attendance = ({ user }) => {
                           setStartDate(`2026-05-${padDay}`);
                           setEndDate(`2026-05-${padDay}`);
                         }}
-                        className={`flex flex-col items-center p-2 rounded-2xl group cursor-pointer border transition-all ${
+                        className={`flex flex-col items-center p-1 rounded-lg group cursor-pointer border transition-all ${
                           isSelected 
-                            ? 'bg-blue-50 border-blue-200 shadow-sm scale-105' 
+                            ? 'bg-blue-50 border-blue-300' 
                             : 'bg-white border-transparent hover:bg-slate-50'
                         }`}
                       >
-                         <span className={`text-xs font-black transition-all ${
-                           isSelected ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'
+                         <span className={`text-[10px] font-bold leading-none ${
+                           isSelected ? 'text-blue-600' : 'text-slate-600'
                          }`}>
                            {dayNum}
                          </span>
                          
                          {presenceCount > 0 ? (
-                           <div className="flex flex-col items-center mt-1">
-                             <span className="bg-blue-50 px-1 rounded text-[7px] font-black text-blue-600 uppercase tracking-tighter leading-none">
-                               {presenceCount} P
-                             </span>
-                           </div>
+                           <span className="bg-blue-50 px-1 rounded text-[6.5px] font-bold text-blue-600 leading-tight mt-0.5">
+                             {presenceCount}P
+                           </span>
                          ) : (
-                           <div className="w-1 h-1 rounded-full bg-slate-200 mt-2"></div>
+                           <div className="w-1 h-1 rounded-full bg-slate-200 mt-1"></div>
                          )}
                       </div>
                     );
                   })}
                </div>
 
-               <div className="mt-12 w-full pt-8 border-t border-slate-50 space-y-4">
-                  <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
-                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <span className="text-slate-400">CALENDAR LEGEND</span>
-                     </div>
-                     <span className="text-slate-900 font-bold"># P = Present Members</span>
+               <div className="mt-3 w-full pt-2 border-t border-slate-100 flex items-center justify-between text-[7.5px] font-bold uppercase text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                     <span>Legend</span>
                   </div>
+                  <span className="text-slate-600 font-semibold">#P = Present Count</span>
                </div>
             </div>
 
-            <div className="bg-slate-900 p-8 rounded-[3rem] text-white overflow-hidden relative group cursor-pointer hover:scale-[1.02] transition-all">
-               <div className="absolute -right-4 -bottom-4 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Coffee size={120} />
-               </div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">GLOBAL LEAVE REVIEWER</p>
-               <h4 className="text-xl font-black tracking-tight uppercase leading-tight mb-6">Review pending system leave applications.</h4>
+            <div className="bg-slate-900 p-3 rounded-xl text-white space-y-1.5 relative overflow-hidden">
+               <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block">Apply For Leave</span>
+               <h4 className="text-xs font-bold uppercase leading-tight">Submit your time-off request for supervisor review</h4>
                <button 
-                 onClick={() => setView('MONTH')}
-                 className="px-6 py-2.5 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-xl cursor-pointer"
+                 onClick={() => setIsLeaveModalOpen(true)}
+                 className="px-2.5 py-1 bg-white text-slate-900 rounded-lg text-[8.5px] font-bold uppercase tracking-wider hover:bg-blue-600 hover:text-white transition-all shadow-2xs cursor-pointer"
                >
-                  OPEN REQUESTS
+                  Apply Leave
                </button>
             </div>
         </div>
       </div>
+      
+      {/* Apply Leave Request Modal */}
+      {isLeaveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
+            <div className="px-3.5 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg text-white bg-blue-600 shadow-2xs">
+                  <FileText size={13} />
+                </div>
+                <div>
+                  <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Apply Leave Request</h2>
+                  <p className="text-[8px] text-slate-400 font-medium">Submit time-off details for authorization</p>
+                </div>
+              </div>
+              <button onClick={() => setIsLeaveModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded">
+                <X size={15} />
+              </button>
+            </div>
+
+            <form onSubmit={handleApplyLeave} className="p-3.5 space-y-2.5 text-xs">
+              {/* Leave Balance Chips */}
+              <div className="grid grid-cols-3 gap-1.5">
+                <div className="p-1.5 rounded-lg bg-blue-50/50 border border-blue-100 text-center">
+                  <span className="text-[7.5px] font-bold text-blue-600 uppercase block">Annual Leave</span>
+                  <span className="text-xs font-extrabold text-slate-900">12 Days</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-amber-50/50 border border-amber-100 text-center">
+                  <span className="text-[7.5px] font-bold text-amber-600 uppercase block">Sick Leave</span>
+                  <span className="text-xs font-extrabold text-slate-900">7 Days</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-indigo-50/50 border border-indigo-100 text-center">
+                  <span className="text-[7.5px] font-bold text-indigo-600 uppercase block">Casual Leave</span>
+                  <span className="text-xs font-extrabold text-slate-900">5 Days</span>
+                </div>
+              </div>
+
+              {leaveSuccessMsg && (
+                <div className="p-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-lg text-center">
+                  {leaveSuccessMsg}
+                </div>
+              )}
+
+              <div>
+                <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Leave Type</label>
+                <select 
+                  required
+                  value={leaveFormData.leaveType}
+                  onChange={(e) => setLeaveFormData({ ...leaveFormData, leaveType: e.target.value })}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="Annual Leave">Annual Leave</option>
+                  <option value="Sick Leave">Sick Leave</option>
+                  <option value="Casual Leave">Casual Leave</option>
+                  <option value="Maternity Leave">Maternity / Paternity Leave</option>
+                  <option value="Unpaid Leave">Unpaid Leave</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Start Date</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={leaveFormData.startDate}
+                    onChange={(e) => setLeaveFormData({ ...leaveFormData, startDate: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">End Date</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={leaveFormData.endDate}
+                    onChange={(e) => setLeaveFormData({ ...leaveFormData, endDate: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Reason / Justification</label>
+                <textarea 
+                  required
+                  rows={2}
+                  value={leaveFormData.reason}
+                  onChange={(e) => setLeaveFormData({ ...leaveFormData, reason: e.target.value })}
+                  placeholder="Provide details about your leave application..."
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500 resize-none h-16"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => setIsLeaveModalOpen(false)}
+                  className="px-3 py-1.5 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider hover:bg-slate-100 rounded-lg"
+                >
+                  Discard
+                </button>
+                <button 
+                  type="submit"
+                  disabled={submittingLeave}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[9.5px] font-bold uppercase tracking-wider shadow-2xs hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  <Send size={10} />
+                  <span>{submittingLeave ? 'Submitting...' : 'Submit Request'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <ExportModal 
         isOpen={isExportModalOpen} 
         onClose={() => setIsExportModalOpen(false)} 

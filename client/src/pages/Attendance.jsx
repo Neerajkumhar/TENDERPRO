@@ -10,30 +10,47 @@ import {
   User, 
   Download, 
   ChevronLeft, 
-  ChevronRight,
-  MoreVertical,
-  CheckCircle2,
-  AlertCircle,
-  Coffee,
+  ChevronRight, 
+  CheckCircle2, 
+  AlertCircle, 
+  Coffee, 
   CalendarDays,
-  XCircle,
-  Clock3
+  Plus,
+  X,
+  FileText,
+  Send
 } from 'lucide-react';
 
-const Attendance = ({ user }) => {
+const Attendance = ({ user = {} }) => {
   const [view, setView] = useState('MONTH');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
-  const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
-  });
-  const [endDate, setEndDate] = useState(() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
-  });
+  const [startDate, setStartDate] = useState('2026-05-01');
+  const [endDate, setEndDate] = useState('2026-05-31');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const datePickerRef = useRef(null);
+
+  // Leave Form State
+  const [leaveFormData, setLeaveFormData] = useState({
+    leaveType: 'Annual Leave',
+    startDate: '',
+    endDate: '',
+    reason: ''
+  });
+  const [submittingLeave, setSubmittingLeave] = useState(false);
+  const [leaveSuccessMsg, setLeaveSuccessMsg] = useState('');
+
+  // Expanded rows state
+  const [expandedRows, setExpandedRows] = useState({});
+  const toggleRow = (userId, date) => {
+    const key = `${userId}_${date}`;
+    setExpandedRows(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   // Live ticking clock state
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -45,41 +62,9 @@ const Attendance = ({ user }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Leave Request Form States
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [leaveType, setLeaveType] = useState('Annual Leave');
-  const [leaveStart, setLeaveStart] = useState('');
-  const [leaveEnd, setLeaveEnd] = useState('');
-  const [leaveReason, setLeaveReason] = useState('');
-  const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
-  const [leaveSubmitted, setLeaveSubmitted] = useState(false);
-  const [leaveError, setLeaveError] = useState('');
-  const [userLeaveRequests, setUserLeaveRequests] = useState([]);
-  const [loadingLeaves, setLoadingLeaves] = useState(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [rawRecords, setRawRecords] = useState([]);
+  const [loadingRecords, setLoadingRecords] = useState(true);
 
-  const fetchUserLeaveRequests = async () => {
-    if (!user?.id) return;
-    setLoadingLeaves(true);
-    try {
-      const res = await fetch(`/api/leave-requests/user/${user.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setUserLeaveRequests(data);
-      }
-    } catch (err) {
-      console.error("Error fetching leave requests:", err);
-    } finally {
-      setLoadingLeaves(false);
-    }
-  };
-
-
-
-  const [sessions, setSessions] = useState([]);
-  const [loadingSessions, setLoadingSessions] = useState(true);
-
-  // Close picker on outside click
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (datePickerRef.current && !datePickerRef.current.contains(e.target)) {
@@ -90,330 +75,288 @@ const Attendance = ({ user }) => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Fetch real backend login/logout sessions dynamically
-  useEffect(() => {
-    const fetchRealAttendance = async () => {
-      if (!user?.id) {
-        setLoadingSessions(false);
-        return;
+  const fetchAllAttendance = async () => {
+    try {
+      const res = await fetch(`/api/auth/attendance/all/records`);
+      if (res.ok) {
+        const data = await res.json();
+        const formatted = data.map((item, idx) => {
+          const formatTime = (isoString) => {
+            if (!isoString) return '--';
+            const date = new Date(isoString);
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          };
+
+          const inTimeStr = formatTime(item.inTime);
+          const outTimeStr = formatTime(item.outTime);
+          const workHoursText = item.workMin ? `${Math.floor(item.workMin / 60)}h ${String(item.workMin % 60).padStart(2, '0')}m` : '--';
+
+          return {
+            id: item.id,
+            userId: item.userId,
+            name: item.User?.name || 'Unknown Member',
+            email: item.User?.email || '',
+            role: item.User?.role || 'Core Team',
+            joiningDate: item.User?.createdAt || '2026-05-14',
+            date: item.date,
+            session: idx + 1,
+            in: inTimeStr,
+            out: outTimeStr,
+            inTimeRaw: item.inTime,
+            outTimeRaw: item.outTime,
+            workMin: item.workMin || 0,
+            work: workHoursText,
+            status: item.status || 'ON TIME'
+          };
+        });
+
+        setRawRecords(formatted);
       }
-      try {
-        const res = await fetch(`/api/auth/attendance/${user.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          // Map backend model format to UI sessions structure
-          const formatted = data.map((item, idx) => {
-            const dateStr = item.date;
-            
-            // Format times beautifully
-            const formatTime = (isoString) => {
-              if (!isoString) return '--';
-              const date = new Date(isoString);
-              return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-            };
-
-            const inTimeStr = formatTime(item.inTime);
-            const outTimeStr = formatTime(item.outTime);
-            const workHoursText = item.workMin ? `${Math.floor(item.workMin / 60)}h ${String(item.workMin % 60).padStart(2, '0')}m` : '--';
-
-            return {
-              date: dateStr,
-              session: idx + 1,
-              in: inTimeStr,
-              out: outTimeStr,
-              workMin: item.workMin || 0,
-              work: workHoursText,
-              status: item.status || 'ON TIME'
-            };
-          });
-
-          setSessions(formatted);
-        }
-      } catch (err) {
-        console.error("Error loading real database sessions:", err);
-      } finally {
-        setLoadingSessions(false);
-      }
-    };
-
-    fetchRealAttendance();
-    fetchUserLeaveRequests();
-  }, [user?.id]);
-
-  // Parse stats from real database logs, falling back to mock values if no database records exist
-  const getDynamicStats = () => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const todayRealSessions = sessions.filter(s => s.date === todayStr);
-
-    if (sessions.length === 0) {
-      // Return high-fidelity mock starting stats
-      return [
-        { label: "TODAY'S STATUS", value: "Present", icon: CheckCircle2, color: "text-blue-500", bg: "bg-blue-50" },
-        { label: "CLOCK IN TIME", value: "09:02 AM", icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
-        { label: "CLOCK OUT TIME", value: "06:05 PM", icon: Clock, color: "text-indigo-500", bg: "bg-indigo-50" },
-        { label: "TOTAL HOURS", value: "9h 03m", icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
-        { label: "LATE COUNT", value: "2", icon: AlertCircle, color: "text-rose-500", bg: "bg-rose-50" },
-        { label: "LEAVE BALANCE", value: "18 days", icon: User, color: "text-amber-500", bg: "bg-amber-50" },
-      ];
+    } catch (err) {
+      console.error("Error loading global attendance:", err);
+    } finally {
+      setLoadingRecords(false);
     }
+  };
 
-    const hasRealToday = todayRealSessions.length > 0;
-    
-    // Sort today's sessions by in-time
-    const parseTime = (tStr) => {
-      if (!tStr || tStr === '--') return 0;
-      const [time, period] = tStr.split(' ');
-      let [h, m] = time.split(':').map(Number);
-      if (period === 'PM' && h !== 12) h += 12;
-      if (period === 'AM' && h === 12) h = 0;
-      return h * 60 + m;
-    };
+  useEffect(() => {
+    fetchAllAttendance();
+  }, []);
 
-    const sortedToday = [...todayRealSessions].sort((a, b) => parseTime(a.in) - parseTime(b.in));
+  const handleApplyLeave = async (e) => {
+    e.preventDefault();
+    if (!leaveFormData.startDate || !leaveFormData.endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+    setSubmittingLeave(true);
+    try {
+      const response = await fetch('/api/leave-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user?.id || 1,
+          leaveType: leaveFormData.leaveType,
+          startDate: leaveFormData.startDate,
+          endDate: leaveFormData.endDate,
+          reason: leaveFormData.reason
+        })
+      });
+      if (response.ok) {
+        setLeaveSuccessMsg('Leave request submitted successfully!');
+        setTimeout(() => {
+          setLeaveSuccessMsg('');
+          setIsLeaveModalOpen(false);
+          setLeaveFormData({
+            leaveType: 'Annual Leave',
+            startDate: '',
+            endDate: '',
+            reason: ''
+          });
+        }, 1200);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to submit leave request');
+      }
+    } catch (err) {
+      console.error('Failed to submit leave request:', err);
+      alert('Error submitting leave request');
+    } finally {
+      setSubmittingLeave(false);
+    }
+  };
 
-    const clockInVal = hasRealToday ? sortedToday[0].in : "--";
-    const clockOutVal = (hasRealToday && sortedToday[sortedToday.length - 1].out !== '--') 
-      ? sortedToday[sortedToday.length - 1].out 
-      : "--";
+  const getGlobalStats = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayRecords = rawRecords.filter(r => r.date === todayStr);
 
-    const totalMinutes = todayRealSessions.reduce((acc, curr) => acc + (curr.workMin || 0), 0);
-    const totalHoursVal = hasRealToday 
-      ? `${Math.floor(totalMinutes / 60)}h ${String(totalMinutes % 60).padStart(2, '0')}m`
-      : "--";
+    const uniquePresentToday = new Set(todayRecords.map(r => r.userId));
+    const totalPresent = uniquePresentToday.size;
+    const activeOnlineCount = todayRecords.filter(r => r.in !== '--' && r.out === '--').length;
+    const uniqueLateToday = new Set(todayRecords.filter(r => r.status === 'LATE').map(r => r.userId));
+    const totalLate = uniqueLateToday.size;
 
-    const statusVal = hasRealToday ? "Present" : "Absent";
-    const lateSessions = sessions.filter(s => s.status === 'LATE');
+    const onTimeRate = totalPresent > 0 
+      ? Math.round(((totalPresent - totalLate) / totalPresent) * 100)
+      : 100;
+
+    const totalUsersSet = new Set(rawRecords.map(r => r.userId));
+    const totalUsers = totalUsersSet.size || 12;
 
     return [
-      { label: "TODAY'S STATUS", value: statusVal, icon: CheckCircle2, color: statusVal === "Present" ? "text-blue-500" : "text-slate-400", bg: "bg-blue-50" },
-      { label: "CLOCK IN TIME", value: clockInVal, icon: Clock, color: "text-blue-500", bg: "bg-blue-50" },
-      { label: "CLOCK OUT TIME", value: clockOutVal, icon: Clock, color: "text-indigo-500", bg: "bg-indigo-50" },
-      { label: "TOTAL HOURS", value: totalHoursVal, icon: CalendarDays, color: "text-purple-500", bg: "bg-purple-50" },
-      { label: "LATE COUNT", value: lateSessions.length.toString(), icon: AlertCircle, color: "text-rose-500", bg: "bg-rose-50" },
-      { label: "LEAVE BALANCE", value: "18 days", icon: User, color: "text-amber-500", bg: "bg-amber-50" },
+      { label: "PRESENT TODAY", value: `${totalPresent}`, subtext: "Checked In", icon: CheckCircle2, color: "text-blue-600", light: "bg-blue-50" },
+      { label: "ACTIVE ONLINE", value: `${activeOnlineCount}`, subtext: "In Session", icon: Clock, color: "text-amber-500", light: "bg-amber-50" },
+      { label: "LATE TODAY", value: `${totalLate}`, subtext: "Delayed", icon: AlertCircle, color: "text-rose-500", light: "bg-rose-50" },
+      { label: "ON-TIME RATE", value: `${onTimeRate}%`, subtext: "Compliance", icon: CalendarDays, color: "text-blue-600", light: "bg-blue-50" },
+      { label: "PENDING LEAVES", value: `5`, subtext: "To Review", icon: Coffee, color: "text-amber-500", light: "bg-amber-50" },
+      { label: "TOTAL MEMBERS", value: `${totalUsers}`, subtext: "Registered", icon: User, color: "text-indigo-500", light: "bg-indigo-50" },
     ];
   };
 
-  const stats = getDynamicStats();
+  const stats = getGlobalStats();
 
-  const getDaySessionTimes = (dayNum) => {
-    const currYear = new Date().getFullYear();
-    const currMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-    const targetDate = `${currYear}-${currMonth}-${String(dayNum).padStart(2, '0')}`;
-    const dayRecords = [...sessions].filter(s => s.date === targetDate);
-    
-    if (dayRecords.length === 0) return null;
-
-    // Filter out sessions that occur BEFORE the teammate's real joining date!
-    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const jDateOnly = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
-    const sParts = targetDate.split('-');
-    const sDateOnly = new Date(parseInt(sParts[0], 10), parseInt(sParts[1], 10) - 1, parseInt(sParts[2], 10));
-    
-    if (sDateOnly < jDateOnly) return null;
-
-    const parseTime = (tStr) => {
-      if (!tStr || tStr === '--') return 9999;
-      const [time, period] = tStr.split(' ');
-      let [h, m] = time.split(':').map(Number);
-      if (period === 'PM' && h !== 12) h += 12;
-      if (period === 'AM' && h === 12) h = 0;
-      return h * 60 + m;
-    };
-
-    const sortedByIn = [...dayRecords].sort((a, b) => parseTime(a.in) - parseTime(b.in));
-    const sortedByOut = [...dayRecords].sort((a, b) => parseTime(a.out) - parseTime(b.out));
-
-    return {
-      in: sortedByIn[0]?.in || '--',
-      out: sortedByOut[sortedByOut.length - 1]?.out || '--'
-    };
-  };
-
-  const getDynamicStatsSummary = () => {
-    // 1. Get all unique dates with attendance records
-    const allRecords = [...sessions];
-    
-    // Filter out sessions that occur BEFORE the teammate's real joining date!
-    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const jDateOnly = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
-
-    const filteredRecords = allRecords.filter(r => {
-      const parts = r.date.split('-');
-      const rDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-      return rDate >= jDateOnly;
-    });
-
-    const uniquePresentDates = new Set(filteredRecords.map(r => r.date));
-    const presentDaysCount = uniquePresentDates.size;
-
-    // 2. Calculate absent days starting from joining date up to today (May 19th)
-    const today = new Date();
-    const tDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-    let absentDaysCount = 0;
-    
-    // Iterate from joining date up to today (inclusive)
-    let iterDate = new Date(jDateOnly);
-    while (iterDate <= tDateOnly) {
-      const dayOfWeek = iterDate.getDay();
-      // Only count weekdays (Mon-Fri) as potential working days
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        const year = iterDate.getFullYear();
-        const month = String(iterDate.getMonth() + 1).padStart(2, '0');
-        const day = String(iterDate.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        
-        // If they did not attend on this weekday, they were absent!
-        if (!uniquePresentDates.has(dateStr)) {
-          absentDaysCount++;
-        }
-      }
-      iterDate.setDate(iterDate.getDate() + 1);
-    }
-
-    return {
-      present: presentDaysCount,
-      absent: absentDaysCount
-    };
-  };
-
-  const summaryStats = getDynamicStatsSummary();
-
-  // Resolve self identity dynamically
-  const selfName = user?.name || "Sarah Jensen";
-  const selfInitial = selfName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-
-  // Helper to format minutes to "Xh Ym"
   const formatMinutes = (minutes) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}h ${String(m).padStart(2, '0')}m`;
   };
 
-  // Process and compute layout rows depending on DAY view vs. WEEK/MONTH views
+  const getDayPresenceCount = (dayNum) => {
+    const targetDate = `2026-05-${String(dayNum).padStart(2, '0')}`;
+    const dayRecords = rawRecords.filter(r => r.date === targetDate);
+    const uniqueUserIds = new Set(dayRecords.map(r => r.userId));
+    return uniqueUserIds.size;
+  };
+
   const processedRecords = (() => {
-    let baseSessions = [...sessions];
+    let filtered = [...rawRecords];
 
-    // Logically filter out mock database sessions prior to the user's actual joining date
-    const joiningDate = user?.createdAt ? new Date(user.createdAt) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const jDateOnly = new Date(joiningDate.getFullYear(), joiningDate.getMonth(), joiningDate.getDate());
+    if (searchQuery) {
+      filtered = filtered.filter(r => 
+        r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.role.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-    baseSessions = baseSessions.filter(s => {
-      const sParts = s.date.split('-');
-      const sDateOnly = new Date(parseInt(sParts[0], 10), parseInt(sParts[1], 10) - 1, parseInt(sParts[2], 10));
-      return sDateOnly >= jDateOnly;
+    let rangeFiltered = filtered;
+    if (view === 'DAY') {
+      const targetDate = `2026-05-${String(selectedDay).padStart(2, '0')}`;
+      rangeFiltered = filtered.filter(r => r.date === targetDate);
+    } else if (view === 'WEEK') {
+      rangeFiltered = filtered.filter(r => {
+        const recordDay = parseInt(r.date.split('-')[2], 10);
+        return Math.abs(recordDay - selectedDay) <= 3;
+      });
+    } else {
+      rangeFiltered = filtered.filter(r => {
+        const sDate = new Date(r.date);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return sDate >= start && sDate <= end;
+      });
+    }
+
+    const userGroups = {};
+    rangeFiltered.forEach(r => {
+      if (!userGroups[r.userId]) {
+        userGroups[r.userId] = [];
+      }
+      userGroups[r.userId].push(r);
     });
 
-    // Filter by Search Query if present
-    if (searchQuery) {
-      baseSessions = baseSessions.filter(() => selfName.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
+    return Object.keys(userGroups).map(userId => {
+      const userRecords = userGroups[userId];
+      const earliestRecord = [...userRecords].sort((a, b) => new Date(a.joiningDate) - new Date(b.joiningDate))[0] || {};
+      
+      if (view === 'DAY') {
+        const earliest = [...userRecords].sort((a, b) => {
+          if (!a.inTimeRaw) return 1;
+          if (!b.inTimeRaw) return -1;
+          return new Date(a.inTimeRaw) - new Date(b.inTimeRaw);
+        })[0];
 
-    if (view === 'DAY') {
-      // In DAY view: Show each individual login session for the selected day
-      const currYear = new Date().getFullYear();
-      const currMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-      const targetDate = `${currYear}-${currMonth}-${String(selectedDay).padStart(2, '0')}`;
-      const daySessions = baseSessions.filter(s => s.date === targetDate);
-      return daySessions.map(s => ({
-        name: selfName,
-        initial: selfInitial,
-        date: s.date,
-        in: s.in,
-        out: s.out,
-        work: formatMinutes(s.workMin),
-        status: s.status,
-        sColor: s.status === 'LATE' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600',
-        isSessionView: true,
-        sessionNum: s.session
-      }));
-    } else {
-      // WEEK & MONTH views: Aggregate all login sessions for a single day into one single day row
-      let filteredSessions = baseSessions;
-      if (view === 'WEEK') {
-        filteredSessions = baseSessions.filter(s => {
-          const recordDay = parseInt(s.date.split('-')[2], 10);
-          return Math.abs(recordDay - selectedDay) <= 3;
-        });
-      } else {
-        // MONTH view date range filter
-        filteredSessions = baseSessions.filter(s => {
-          const sDate = new Date(s.date);
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          return sDate >= start && sDate <= end;
-        });
-      }
+        const latest = [...userRecords].sort((a, b) => {
+          if (!a.outTimeRaw) return 1;
+          if (!b.outTimeRaw) return -1;
+          return new Date(b.outTimeRaw) - new Date(a.outTimeRaw);
+        })[0];
 
-      // Group sessions of the same day together
-      const grouped = {};
-      filteredSessions.forEach(s => {
-        if (!grouped[s.date]) grouped[s.date] = [];
-        grouped[s.date].push(s);
-      });
-
-      const sortedDates = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
-
-      return sortedDates.map(dateStr => {
-        const daySessions = grouped[dateStr];
-
-        // Parse time helper to sort times for earliest and latest bounds
-        const parseTime = (tStr) => {
-          const [time, period] = tStr.split(' ');
-          let [h, m] = time.split(':').map(Number);
-          if (period === 'PM' && h !== 12) h += 12;
-          if (period === 'AM' && h === 12) h = 0;
-          return h * 60 + m;
-        };
-
-        const sortedByIn = [...daySessions].sort((a, b) => parseTime(a.in) - parseTime(b.in));
-        const sortedByOut = [...daySessions].sort((a, b) => parseTime(a.out) - parseTime(b.out));
-
-        const earliestIn = sortedByIn[0]?.in || '--';
-        const latestOut = sortedByOut[sortedByOut.length - 1]?.out || '--';
-        const totalWork = daySessions.reduce((sum, curr) => sum + curr.workMin, 0);
-        const hasLate = daySessions.some(s => s.status === 'LATE');
+        const totalWork = userRecords.reduce((sum, curr) => sum + curr.workMin, 0);
+        const hasLate = userRecords.some(s => s.status === 'LATE');
 
         return {
-          name: selfName,
-          initial: selfInitial,
-          date: dateStr,
-          in: earliestIn,
-          out: latestOut,
+          userId: earliestRecord.userId,
+          name: earliestRecord.name,
+          email: earliestRecord.email,
+          role: earliestRecord.role,
+          date: earliestRecord.date,
+          in: earliest?.in || '--',
+          out: latest?.out || '--',
           work: formatMinutes(totalWork),
           status: hasLate ? 'LATE' : 'ON TIME',
-          sColor: hasLate ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600',
-          isSessionView: false,
-          sessionNum: daySessions.length // Total session count for the day
+          sessionNum: userRecords.length,
+          allSessions: userRecords.map(u => ({ ...u, sessionNum: 1 })),
+          type: 'DAY'
         };
-      });
-    }
+      } else {
+        const daysMap = {};
+        userRecords.forEach(r => {
+          if (!daysMap[r.date]) daysMap[r.date] = [];
+          daysMap[r.date].push(r);
+        });
+
+        const sortedDates = Object.keys(daysMap).sort((a, b) => new Date(b) - new Date(a));
+        const dayRows = sortedDates.map(dateStr => {
+          const sessions = daysMap[dateStr];
+          const earliest = [...sessions].sort((a, b) => {
+            if (!a.inTimeRaw) return 1;
+            if (!b.inTimeRaw) return -1;
+            return new Date(a.inTimeRaw) - new Date(b.inTimeRaw);
+          })[0];
+
+          const latest = [...sessions].sort((a, b) => {
+            if (!a.outTimeRaw) return 1;
+            if (!b.outTimeRaw) return -1;
+            return new Date(b.outTimeRaw) - new Date(a.outTimeRaw);
+          })[0];
+
+          const totalWork = sessions.reduce((sum, curr) => sum + curr.workMin, 0);
+          const hasLate = sessions.some(s => s.status === 'LATE');
+
+          return {
+            date: dateStr,
+            in: earliest?.in || '--',
+            out: latest?.out || '--',
+            work: formatMinutes(totalWork),
+            status: hasLate ? 'LATE' : 'ON TIME',
+            sessionNum: sessions.length
+          };
+        });
+
+        const totalWorkAllDays = userRecords.reduce((sum, curr) => sum + curr.workMin, 0);
+        const lateDaysCount = dayRows.filter(d => d.status === 'LATE').length;
+        const totalDaysCount = dayRows.length;
+        const latePercentage = totalDaysCount > 0 ? Math.round((lateDaysCount / totalDaysCount) * 100) : 0;
+
+        return {
+          userId: earliestRecord.userId,
+          name: earliestRecord.name,
+          email: earliestRecord.email,
+          role: earliestRecord.role,
+          date: view === 'WEEK' ? 'Active Week' : 'Active Month',
+          in: dayRows[0]?.in || '--',
+          out: dayRows[0]?.out || '--',
+          work: formatMinutes(totalWorkAllDays),
+          status: latePercentage > 0 ? `${latePercentage}% LATE` : 'ON TIME',
+          sessionNum: totalDaysCount,
+          allSessions: dayRows,
+          type: 'RANGE'
+        };
+      }
+    }).sort((a, b) => a.name.localeCompare(b.name));
   })();
 
-  // Direct CSV Export capability
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
-    // Use base records for full historical export
-    const baseRecords = [...sessions];
-    const exportData = baseRecords.filter(r => {
+    const exportData = rawRecords.filter(r => {
       const rDate = new Date(r.date);
       return rDate >= start && rDate <= end;
     });
 
     if (exportData.length === 0) {
-      alert("No attendance records found for the selected time period.");
+      alert("No attendance records found for the selected period.");
       return;
     }
 
-    const filename = `Attendance_Report_${startDate}_to_${endDate}`;
+    const filename = `Attendance_${startDate}_to_${endDate}`;
 
     if (format === 'csv') {
       const csvRows = [
-        ['Teammate Name', 'Date', 'Clock In', 'Clock Out', 'Status'],
-        ...exportData.map(r => [selfName, r.date, r.in, r.out, r.status])
+        ['Member Name', 'Member Email', 'Role', 'Date', 'Clock In', 'Clock Out', 'Status'],
+        ...exportData.map(r => [r.name, r.email, r.role, r.date, r.in, r.out, r.status])
       ];
       const csvContent = csvRows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -427,7 +370,9 @@ const Attendance = ({ user }) => {
       URL.revokeObjectURL(url);
     } else if (format === 'xlsx') {
       const exportRows = exportData.map(r => ({
-        "Name": selfName,
+        "Name": r.name,
+        "Email": r.email,
+        "Role": r.role,
         "Date": r.date,
         "Clock In": r.in,
         "Clock Out": r.out,
@@ -439,311 +384,153 @@ const Attendance = ({ user }) => {
       XLSX.writeFile(workbook, `${filename}.xlsx`);
     } else if (format === 'pdf') {
       const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text("Attendance Report", 14, 20);
-      doc.setFontSize(10);
-      doc.text(`Name: ${selfName}`, 14, 28);
-      doc.text(`Period: ${startDate} to ${endDate}`, 14, 34);
+      doc.setFontSize(14);
+      doc.text("Attendance Report", 14, 15);
+      doc.setFontSize(9);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 22);
       
-      const rows = exportData.map(r => [r.date, r.in, r.out, r.status]);
+      const rows = exportData.map(r => [r.name, r.date, r.in, r.out, r.status]);
       autoTable(doc, {
-        startY: 40,
-        head: [["Date", "Clock In", "Clock Out", "Status"]],
+        startY: 26,
+        head: [["Name", "Date", "In", "Out", "Status"]],
         body: rows,
+        styles: { fontSize: 8 }
       });
       doc.save(`${filename}.pdf`);
     }
   };
 
-  // Convert dates to human readable string format
   const formatRangeText = (start, end) => {
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const options = { month: 'short', day: 'numeric' };
     const sStr = new Date(start).toLocaleDateString('en-US', options);
     const eStr = new Date(end).toLocaleDateString('en-US', options);
     return `${sStr} - ${eStr}`.toUpperCase();
   };
 
-  function renderLeaveModal() {
-    if (!showLeaveModal) return null;
-    return (
-      <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300">
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => { if (!isSubmittingLeave) setShowLeaveModal(false); }}></div>
-        <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-          
-          {/* Success State Overlay */}
-          {leaveSubmitted ? (
-            <div className="p-12 text-center flex flex-col items-center justify-center space-y-6 bg-white min-h-[450px]">
-              <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-[2rem] flex items-center justify-center border border-blue-100 shadow-md animate-bounce">
-                <CheckCircle2 size={40} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Request Submitted!</h3>
-                <p className="text-xs text-slate-400 font-medium max-w-xs mx-auto text-center">
-                  Your leave request for <span className="font-black text-slate-800">{leaveType}</span> has been logged and forwarded to your manager for approval.
-                </p>
-              </div>
-              <button 
-                onClick={() => {
-                  setLeaveSubmitted(false);
-                  setShowLeaveModal(false);
-                  setLeaveStart('');
-                  setLeaveEnd('');
-                  setLeaveReason('');
-                  fetchUserLeaveRequests();
-                }}
-                className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95 cursor-pointer"
-              >
-                Return to Dashboard
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Modal Header */}
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shadow-sm">
-                    <Coffee size={18} />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-black text-slate-900 tracking-tight uppercase">Request Time Off</h2>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Submit request for manager review</p>
-                  </div>
-                </div>
-                <button 
-                  type="button"
-                  onClick={() => setShowLeaveModal(false)}
-                  className="p-2 bg-white hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm cursor-pointer"
-                >
-                  <ChevronRight size={18} className="rotate-45" />
-                </button>
-              </div>
-
-              {/* Modal Form Body */}
-              <form 
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (!user?.id) return;
-                  setIsSubmittingLeave(true);
-                  setLeaveError('');
-                  try {
-                    const response = await fetch('/api/leave-requests', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        userId: user.id,
-                        leaveType,
-                        startDate: leaveStart,
-                        endDate: leaveEnd,
-                        reason: leaveReason
-                      })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                      setLeaveSubmitted(true);
-                    } else {
-                      setLeaveError(data.message || data.error || 'Failed to submit leave request');
-                    }
-                  } catch (err) {
-                    console.error('Failed to submit leave request:', err);
-                    setLeaveError('Network error. Please try again later.');
-                  } finally {
-                    setIsSubmittingLeave(false);
-                  }
-                }}
-                className="p-5 space-y-4"
-              >
-                {/* Error Alert */}
-                {leaveError && (
-                  <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-in fade-in zoom-in-95">
-                    <AlertCircle size={18} className="shrink-0" />
-                    <p className="text-xs font-bold uppercase tracking-tight">{leaveError}</p>
-                  </div>
-                )}
-
-                {/* Leave Type Selector */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Category</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: 'Annual Leave', desc: 'Vacation time' },
-                      { label: 'Sick Leave', desc: 'Medical emergency' },
-                      { label: 'Casual Leave', desc: 'Personal errands' },
-                      { label: 'Unpaid Leave', desc: 'Special exceptions' },
-                    ].map((item) => (
-                      <div 
-                        key={item.label}
-                        onClick={() => setLeaveType(item.label)}
-                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between hover:scale-[1.02]
-                          ${leaveType === item.label 
-                            ? 'border-blue-500 bg-blue-50/20 text-blue-600 hover:border-blue-500' 
-                            : 'border-slate-100 bg-slate-50/50 text-slate-600 hover:border-slate-200'
-                          }`}
-                      >
-                        <span className="text-xs font-black uppercase tracking-tight">{item.label}</span>
-                        <span className="text-[9px] font-bold text-slate-400 mt-1">{item.desc}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Date Selection Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
-                    <input 
-                      type="date" 
-                      required
-                      value={leaveStart}
-                      onChange={(e) => setLeaveStart(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
-                    <input 
-                      type="date" 
-                      required
-                      value={leaveEnd}
-                      onChange={(e) => setLeaveEnd(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
-                    />
-                  </div>
-                </div>
-
-                {/* Reason Textarea */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reason / Description</label>
-                  <textarea 
-                    required
-                    placeholder="Please explain the reason for your time-off request..."
-                    rows={3}
-                    value={leaveReason}
-                    onChange={(e) => setLeaveReason(e.target.value)}
-                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400 resize-none"
-                  ></textarea>
-                </div>
-
-                {/* Submit Button */}
-                <button 
-                  type="submit"
-                  disabled={isSubmittingLeave}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-100 hover:shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
-                >
-                  {isSubmittingLeave ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      <span>Logging Request...</span>
-                    </>
-                  ) : (
-                    <span>Submit Request</span>
-                  )}
-                </button>
-              </form>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-4 sm:p-5 space-y-4 sm:space-y-10 animate-in fade-in duration-700">
-      {/* Premium Dynamic Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-3.5 animate-in fade-in duration-500 bg-[#f8fafc] min-h-screen text-left overflow-x-hidden">
+      
+      {/* Header Area */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
-          <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Attendance Dashboard</h1>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-            Real-time checking, login session tracking, and leave management
-          </p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Clock size={16} className="text-blue-600" />
+            <span>Attendance Log & Records</span>
+          </h1>
+          <p className="text-[9px] text-slate-500 font-medium">Real-time attendance logs, session breakdown, and shift times</p>
         </div>
-        <div className="flex items-center gap-4 bg-slate-900 px-6 py-4 rounded-2xl text-white shadow-lg shrink-0 border border-slate-800">
-          <Clock size={20} className="text-blue-400 animate-pulse" />
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">REAL TIME CLOCK</span>
-            <span className="text-xs font-black tracking-widest leading-none mt-1.5 text-blue-400 font-mono">
-              {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-            </span>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsLeaveModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-2xs active:scale-95 transition-all cursor-pointer"
+          >
+            <Plus size={12} />
+            <span>Apply Leave</span>
+          </button>
+          <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg text-white shadow-2xs shrink-0">
+            <Clock size={13} className="text-blue-400 animate-pulse" />
+            <div className="flex flex-col">
+              <span className="text-[7px] font-bold text-slate-400 uppercase tracking-wider leading-none">Live Time</span>
+              <span className="text-[10.5px] font-extrabold tracking-wider leading-none mt-0.5 text-blue-400 font-mono">
+                {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Header Actions */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="relative w-full lg:max-w-md group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={20} />
+      {/* Top 6 KPI Stats */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+        {stats.map((stat, i) => {
+          const IconComp = stat.icon;
+          return (
+            <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block truncate">{stat.label}</span>
+                <div className={`p-1 rounded ${stat.light} ${stat.color}`}>
+                  <IconComp size={11} />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between mt-auto">
+                <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">{stat.value}</span>
+                <span className="text-[7.5px] font-bold text-slate-400 uppercase">{stat.subtext}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Header Search & View Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
           <input 
             type="text" 
-            placeholder="Search for attendance or records"
-            className="w-full pl-16 pr-8 py-5 bg-white border border-slate-100 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-500 focus:shadow-xl focus:shadow-blue-500/5 transition-all"
+            placeholder="Search member, email..."
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500 shadow-2xs"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full lg:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {/* Active Date Range Trigger */}
           <div className="relative" ref={datePickerRef}>
             <button 
               onClick={() => setShowDatePicker(!showDatePicker)}
-              className="flex items-center gap-3 bg-white hover:bg-slate-50 transition-colors px-6 py-4 rounded-[1.5rem] border border-slate-100 shadow-sm text-xs font-black text-slate-600 uppercase tracking-widest cursor-pointer"
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-[10px] font-bold text-slate-700 uppercase tracking-wider cursor-pointer"
             >
-               <CalendarIcon size={18} className="text-blue-500" />
+               <CalendarIcon size={12} className="text-blue-500" />
                <span>{formatRangeText(startDate, endDate)}</span>
             </button>
 
-            {/* Premium Date Range Popover */}
+            {/* Popover */}
             {showDatePicker && (
-              <div className="absolute right-0 mt-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-[60] w-80 max-w-[calc(100vw-2rem)] space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-50">
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Configure Date Window</h4>
-                  <span className="text-[9px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">Filter</span>
+              <div className="absolute right-0 mt-1.5 p-3 bg-white border border-slate-200 rounded-xl shadow-xl z-50 w-72 space-y-2 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                  <span className="text-xs font-bold text-slate-900 uppercase">Filter Window</span>
+                  <span className="text-[7.5px] font-bold text-blue-600 uppercase bg-blue-50 px-1.5 py-0.5 rounded">Range</span>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Start Date</label>
+                    <label className="text-[8px] font-bold text-slate-400 uppercase block mb-0.5">Start Date</label>
                     <input 
                       type="date" 
                       value={startDate} 
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                      className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">End Date</label>
+                    <label className="text-[8px] font-bold text-slate-400 uppercase block mb-0.5">End Date</label>
                     <input 
                       type="date" 
                       value={endDate} 
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                      className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-50">
+                <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100">
                   <button 
                     onClick={() => {
-                      const end = new Date();
-                      const start = new Date(end);
-                      start.setDate(start.getDate() - 7);
-                      setStartDate(start.toISOString().split('T')[0]);
-                      setEndDate(end.toISOString().split('T')[0]);
+                      setStartDate('2026-05-14');
+                      setEndDate('2026-05-19');
                       setShowDatePicker(false);
                     }}
-                    className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
+                    className="py-1 bg-slate-50 hover:bg-slate-100 text-[8px] font-bold text-slate-600 rounded uppercase tracking-wider"
                   >
                     Last 7 Days
                   </button>
                   <button 
                     onClick={() => {
-                      const d = new Date();
-                      setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]);
-                      setEndDate(new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]);
+                      setStartDate('2026-05-01');
+                      setEndDate('2026-05-31');
                       setShowDatePicker(false);
                     }}
-                    className="py-2.5 bg-slate-50 hover:bg-slate-100 text-[9px] font-black text-slate-600 rounded-lg uppercase tracking-widest transition-all"
+                    className="py-1 bg-slate-50 hover:bg-slate-100 text-[8px] font-bold text-slate-600 rounded uppercase tracking-wider"
                   >
                     This Month
                   </button>
@@ -751,22 +538,22 @@ const Attendance = ({ user }) => {
 
                 <button 
                   onClick={() => setShowDatePicker(false)}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-[9px] font-black text-white rounded-xl uppercase tracking-widest transition-all shadow-md active:scale-95"
+                  className="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-[9px] font-bold text-white rounded-lg uppercase tracking-wider transition-all shadow-2xs"
                 >
-                  Apply Filter Window
+                  Apply Filter
                 </button>
               </div>
             )}
           </div>
 
           {/* View Tab Selector */}
-          <div className="flex bg-white p-1 rounded-2xl border border-slate-50 shadow-sm">
+          <div className="flex bg-white p-0.5 rounded-lg border border-slate-200 shadow-2xs">
              {['MONTH', 'WEEK', 'DAY'].map(t => (
                 <button 
                   key={t}
                   onClick={() => setView(t)}
-                  className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer
-                    ${view === t ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer
+                    ${view === t ? 'bg-slate-900 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   {t}
                 </button>
@@ -775,345 +562,345 @@ const Attendance = ({ user }) => {
         </div>
       </div>
 
-      {/* Summary Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-white p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 group relative overflow-hidden">
-             <div className={`absolute top-0 left-0 w-1 h-full ${stat.color.replace('text', 'bg')} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
-             <div className="flex items-center justify-between">
-                <span className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</span>
-             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
+      {/* Main Grid Split */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5">
         
-        {/* Main Attendance List */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[3.5rem] border border-slate-50 shadow-sm">
-              <div className="flex justify-between items-center mb-10 px-2">
-                <div className="flex flex-col">
-                    <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">DAILY VIEW ({view})</h3>
-                    {view === 'DAY' && (
-                      <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest mt-1.5">
-                        {processedRecords.length} Dashboard {processedRecords.length === 1 ? 'Login' : 'Logins'} Today
-                      </p>
-                    )}
-                </div>
-                <button 
-                  onClick={() => setIsExportModalOpen(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest cursor-pointer transition-all shadow-sm"
-                >
-                    <Download size={16} />
-                    <span>EXPORT REPORT</span>
-                </button>
-              </div>
-
-              {/* Mobile/Tablet Card View - Visible on screens smaller than lg */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
-                {processedRecords.length === 0 ? (
-                  <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-8 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
-                    No attendance records found matching this window
-                  </div>
-                ) : (
-                  processedRecords.map((record, i) => (
-                    <div 
-                      key={i}
-                      className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:border-blue-200 transition-all"
-                    >
-                      {/* Top Row: User initial avatar + Name + Status */}
-                      <div className="flex justify-between items-start gap-3 mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100 shadow-sm shrink-0">
-                            {record.initial}
-                          </div>
-                          <div>
-                            <span className="text-sm font-black text-slate-800 uppercase tracking-tight block">
-                              {record.name}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-400">
-                              {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shrink-0 ${record.sColor}`}>
-                          {record.status}
-                        </span>
-                      </div>
-
-                      {/* Middle row: Times & Session Details */}
-                      <div className="border-t border-b border-slate-50 py-3 my-1 space-y-2">
-                        <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">Logins:</span>
-                          <span className="text-slate-700">
-                            {view === 'DAY' ? `Session #${record.sessionNum}` : `${record.sessionNum} ${record.sessionNum === 1 ? 'Login' : 'Logins'}`}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">In-Time / Out-Time:</span>
-                          <span className="text-slate-700">{record.in} - {record.out}</span>
-                        </div>
-                        <div className="flex justify-between text-xs font-bold">
-                          <span className="text-slate-400">{view === 'DAY' ? 'Session Work' : 'Total Work'}:</span>
-                          <span className="text-slate-700">{record.work}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Desktop Table View - Visible on screens lg and up */}
-              <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-50">
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">NAME</th>
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">DATE</th>
-                          {view === 'DAY' ? (
-                            <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">SESSION</th>
-                          ) : (
-                            <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">TOTAL LOGINS</th>
-                          )}
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">IN-TIME</th>
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">OUT-TIME</th>
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">{view === 'DAY' ? 'SESSION WORK' : 'TOTAL WORK'}</th>
-                          <th className="text-left pb-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">STATUS</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {processedRecords.length === 0 ? (
-                        <tr>
-                          <td colSpan="7" className="py-12 text-center text-xs font-black uppercase text-slate-400 tracking-widest italic">
-                            No attendance records found matching this window
-                          </td>
-                        </tr>
-                      ) : (
-                        processedRecords.map((record, i) => (
-                          <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
-                              <td className="py-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 border border-white shadow-sm transition-all group-hover:scale-110">
-                                      {record.initial}
-                                    </div>
-                                    <span className="text-sm font-black text-slate-800 uppercase tracking-tight">{record.name}</span>
-                                </div>
-                              </td>
-                              <td className="py-6 text-sm font-bold text-slate-500">
-                                {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                              </td>
-                              {view === 'DAY' ? (
-                                <td className="py-6 text-sm font-black text-blue-600">
-                                  <span className="bg-blue-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
-                                    Session #{record.sessionNum}
-                                  </span>
-                                </td>
-                              ) : (
-                                <td className="py-6 text-sm font-black text-slate-600">
-                                  <span className="bg-slate-50 px-3 py-1.5 rounded-xl uppercase tracking-widest text-[9px] font-black">
-                                    {record.sessionNum} {record.sessionNum === 1 ? 'Login' : 'Logins'}
-                                  </span>
-                                </td>
-                              )}
-                              <td className="py-6 text-sm font-black text-slate-900">{record.in}</td>
-                              <td className="py-6 text-sm font-black text-slate-900">{record.out}</td>
-                              <td className="py-6 text-sm font-black text-slate-900">{record.work}</td>
-                              <td className="py-6">
-                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${record.sColor}`}>
-                                    {record.status}
-                                  </span>
-                              </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                </table>
-              </div>
-          </div>
-
-          {/* User's Leave Requests History */}
-          <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[3.5rem] border border-slate-100 shadow-sm">
-            <div className="flex justify-between items-center mb-8 px-2">
-              <div className="flex flex-col">
-                <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">My Leave Requests</h3>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1.5">
-                  Track the status of your time-off applications
-                </p>
-              </div>
-              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
-                <Coffee size={20} />
-              </div>
+        {/* Attendance Log Table (Span 8) */}
+        <div className="lg:col-span-8 bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+               <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Attendance Log ({view})</h3>
+                  <p className="text-[8.5px] text-slate-500 font-medium">{processedRecords.length} records matching current view</p>
+               </div>
+               <button 
+                 onClick={() => setIsExportModalOpen(true)}
+                 className="flex items-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-700 uppercase tracking-wider cursor-pointer transition-all shadow-2xs"
+               >
+                  <Download size={11} />
+                  <span>Export</span>
+               </button>
             </div>
 
-            <div className="space-y-4">
-              {loadingLeaves ? (
-                <div className="flex flex-col items-center justify-center py-10 text-slate-400 space-y-3">
-                  <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="font-black text-[9px] uppercase tracking-widest">Loading history...</p>
-                </div>
-              ) : userLeaveRequests.length === 0 ? (
-                <div className="py-12 text-center text-xs font-black uppercase text-slate-300 tracking-widest italic border-2 border-dashed border-slate-50 rounded-[2rem]">
-                  No leave applications found
-                </div>
-              ) : (
-                userLeaveRequests.map((request) => (
-                  <div key={request.id} className="p-6 bg-slate-50/50 border border-slate-100 rounded-[2rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:bg-white hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-center gap-6">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm 
-                        ${request.status === 'Approved' ? 'bg-blue-100 text-blue-600' : 
-                          request.status === 'Rejected' ? 'bg-rose-100 text-rose-600' : 
-                          'bg-amber-100 text-amber-600'}`}>
-                        {request.status === 'Approved' ? <CheckCircle2 size={24} /> : 
-                         request.status === 'Rejected' ? <XCircle size={24} /> : 
-                         <Clock3 size={24} />}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{request.leaveType}</h4>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                            <CalendarIcon size={12} className="text-blue-500" />
-                            {new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+            <div className="overflow-x-auto">
+               <table className="w-full text-left">
+                  <thead>
+                     <tr className="border-b border-slate-100 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th className="py-2 px-2">Member</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'Date' : 'Range'}</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'Logins' : 'Days'}</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'In' : 'Recent In'}</th>
+                        <th className="py-2 px-2">{view === 'DAY' ? 'Out' : 'Recent Out'}</th>
+                        <th className="py-2 px-2">Worked</th>
+                        <th className="py-2 px-2">Status</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                     {loadingRecords ? (
+                       <tr>
+                         <td colSpan="7" className="py-6 text-center text-xs font-bold uppercase text-slate-400 tracking-wider animate-pulse">
+                           Loading Attendance Logs...
+                         </td>
+                       </tr>
+                     ) : processedRecords.length === 0 ? (
+                       <tr>
+                         <td colSpan="7" className="py-6 text-center text-xs font-bold uppercase text-slate-400 tracking-wider">
+                           No attendance records found for this period
+                         </td>
+                       </tr>
+                     ) : (
+                       processedRecords.map((record, i) => {
+                         const initial = record.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+                         const key = `${record.userId}_${record.date}`;
+                         const isExpanded = !!expandedRows[key];
+                         return (
+                           <React.Fragment key={i}>
+                             <tr 
+                               className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                               onClick={() => toggleRow(record.userId, record.date)}
+                             >
+                                <td className="py-2 px-2">
+                                   <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-[9px] font-bold shrink-0">
+                                         {initial}
+                                      </div>
+                                      <div className="min-w-0">
+                                         <div className="flex items-center gap-1">
+                                           <span className="text-[11px] font-bold text-slate-800 uppercase truncate max-w-[120px]">
+                                             {record.name}
+                                           </span>
+                                           <span className="text-[7px] text-blue-500 font-bold bg-blue-50 px-1 py-0.2 rounded leading-none">
+                                             {isExpanded ? '▲' : '▼'}
+                                           </span>
+                                         </div>
+                                         <span className="text-[7.5px] font-medium text-slate-400 uppercase truncate block">{record.role}</span>
+                                      </div>
+                                   </div>
+                                </td>
+                                <td className="py-2 px-2 text-[10.5px] font-medium text-slate-600">
+                                  {record.type === 'DAY' 
+                                    ? new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                    : `${new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                                </td>
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-700">
+                                  <span className="bg-slate-50 px-1.5 py-0.5 rounded uppercase text-[8.5px] font-bold">
+                                    {record.type === 'DAY' 
+                                      ? `${record.sessionNum} ${record.sessionNum === 1 ? 'Login' : 'Logins'}`
+                                      : `${record.sessionNum} ${record.sessionNum === 1 ? 'Day' : 'Days'}`}
+                                  </span>
+                                </td>
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-800">{record.in}</td>
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-800">{record.out}</td>
+                                <td className="py-2 px-2 text-[10.5px] font-bold text-slate-800">{record.work}</td>
+                                <td className="py-2 px-2">
+                                   <span className={`px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase ${
+                                     record.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+                                   }`}>
+                                      {record.status}
+                                    </span>
+                                </td>
+                             </tr>
 
-                    <div className="flex items-center gap-6 w-full md:w-auto">
-                      <div className="flex-1 md:text-right">
-                         <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm
-                          ${request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 
-                            request.status === 'Rejected' ? 'bg-rose-500 text-white shadow-rose-100' : 
-                            'bg-amber-500 text-white shadow-amber-100'}`}>
-                          {request.status}
-                        </span>
-                        {request.managerComment && (
-                          <p className="text-[9px] font-bold text-slate-400 mt-2 italic">"{request.managerComment}"</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+                             {/* Dropdown Session Details */}
+                             {isExpanded && (
+                               <tr className="bg-slate-50/50">
+                                 <td colSpan="7" className="p-2.5 border-l-2 border-blue-500">
+                                   <div className="space-y-2 animate-in fade-in duration-200">
+                                     <span className="text-[8px] font-bold text-blue-600 uppercase tracking-wider block">
+                                       {record.type === 'DAY' 
+                                         ? `Session Logs for ${record.name} on ${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                                         : `Daily Breakdown for ${record.name} (${view === 'WEEK' ? 'Week' : 'Month'})`}
+                                     </span>
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                       {record.allSessions.map((item, idx) => (
+                                         <div key={idx} className="bg-white p-2 rounded-lg border border-slate-100 shadow-2xs space-y-1">
+                                           <div className="flex items-center justify-between border-b border-slate-50 pb-1">
+                                             <span className="text-[8px] font-bold text-slate-400 uppercase">
+                                               {record.type === 'DAY' 
+                                                 ? `Session #${idx + 1}`
+                                                 : new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                             </span>
+                                             <span className={`px-1 rounded text-[7px] font-bold uppercase ${
+                                               item.status.includes('LATE') ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+                                             }`}>{item.status}</span>
+                                           </div>
+                                           <div className="flex justify-between items-center text-[10px] font-medium text-slate-700">
+                                             <span>In: <strong className="text-slate-900">{item.in}</strong></span>
+                                             <span>Out: <strong className="text-slate-900">{item.out}</strong></span>
+                                           </div>
+                                           <div className="text-[8px] font-semibold text-slate-400 uppercase flex items-center justify-between pt-0.5">
+                                             <span>Worked</span>
+                                             <span className="text-slate-800 font-bold">{item.work}</span>
+                                           </div>
+                                         </div>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 </td>
+                               </tr>
+                             )}
+                           </React.Fragment>
+                         );
+                       })
+                     )}
+                  </tbody>
+               </table>
             </div>
-          </div>
         </div>
 
-        {/* Calendar Sidebar */}
-        <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] lg:rounded-[3.5rem] border border-slate-55 shadow-sm flex flex-col items-center">
-               <div className="flex justify-between items-center w-full mb-10 px-2">
-                  <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronLeft size={20} /></button>
-                  <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">{new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</span>
-                  <button className="p-2 rounded-xl hover:bg-slate-50 text-slate-300 transition-colors"><ChevronRight size={20} /></button>
+        {/* Dynamic Sidebar Calendar (Span 4) */}
+        <div className="lg:col-span-4 space-y-3">
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col items-center">
+               <div className="flex justify-between items-center w-full mb-2 px-1">
+                  <button className="p-1 rounded hover:bg-slate-50 text-slate-400"><ChevronLeft size={14} /></button>
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">MAY 2026</span>
+                  <button className="p-1 rounded hover:bg-slate-50 text-slate-400"><ChevronRight size={14} /></button>
                </div>
 
-               <div className="grid grid-cols-7 gap-y-8 w-full">
+               <div className="grid grid-cols-7 gap-y-2 w-full text-center">
                   {['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].map(d => (
-                    <span key={d} className="text-center text-[9px] font-black text-slate-300 uppercase tracking-widest">{d}</span>
+                    <span key={d} className="text-[7.5px] font-bold text-slate-400 uppercase">{d}</span>
                   ))}
                   
-                  {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() }).map((_, i) => {
+                  {Array.from({ length: 31 }).map((_, i) => {
                     const dayNum = i + 1;
                     const isSelected = dayNum === selectedDay;
-                    const dayTimes = getDaySessionTimes(dayNum);
+                    const presenceCount = getDayPresenceCount(dayNum);
+                    
                     return (
                       <div 
                         key={i} 
                         onClick={() => {
                           setSelectedDay(dayNum);
-                          // Sync active start/end date context for convenience
                           const padDay = String(dayNum).padStart(2, '0');
-                          const currYear = new Date().getFullYear();
-                          const currMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-                          setStartDate(`${currYear}-${currMonth}-${padDay}`);
-                          setEndDate(`${currYear}-${currMonth}-${padDay}`);
+                          setStartDate(`2026-05-${padDay}`);
+                          setEndDate(`2026-05-${padDay}`);
                         }}
-                        className={`flex flex-col items-center p-1 sm:p-2 rounded-2xl group cursor-pointer border transition-all ${
+                        className={`flex flex-col items-center p-1 rounded-lg group cursor-pointer border transition-all ${
                           isSelected 
-                            ? 'bg-blue-50 border-blue-200 shadow-sm scale-105' 
+                            ? 'bg-blue-50 border-blue-300' 
                             : 'bg-white border-transparent hover:bg-slate-50'
                         }`}
                       >
-                         <span className={`text-[10px] sm:text-xs font-black transition-all ${
-                           isSelected ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'
+                         <span className={`text-[10px] font-bold leading-none ${
+                           isSelected ? 'text-blue-600' : 'text-slate-600'
                          }`}>
                            {dayNum}
                          </span>
                          
-                         {dayTimes ? (
-                           <div className="flex flex-col items-center mt-1 space-y-0.5">
-                             {/* Clock In */}
-                             <span className="hidden sm:inline text-[7px] font-black text-blue-600 uppercase tracking-tighter leading-none">
-                               {dayTimes.in.replace(' AM', 'a').replace(' PM', 'p')}
-                             </span>
-                             {/* Clock Out */}
-                             <span className="hidden sm:inline text-[7px] font-black text-rose-500 uppercase tracking-tighter leading-none">
-                               {dayTimes.out.replace(' AM', 'a').replace(' PM', 'p')}
-                             </span>
-                             {/* Mobile Indicator Dot */}
-                             <span className="inline sm:hidden w-1.5 h-1.5 rounded-full bg-blue-500 mt-1"></span>
-                           </div>
+                         {presenceCount > 0 ? (
+                           <span className="bg-blue-50 px-1 rounded text-[6.5px] font-bold text-blue-600 leading-tight mt-0.5">
+                             {presenceCount}P
+                           </span>
                          ) : (
-                           <div className="w-1 h-1 rounded-full bg-slate-200 mt-2"></div>
+                           <div className="w-1 h-1 rounded-full bg-slate-200 mt-1"></div>
                          )}
                       </div>
                     );
                   })}
                </div>
 
-               <div className="mt-12 w-full pt-8 border-t border-slate-50 space-y-4">
-                  <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
-                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <span className="text-slate-400">JOINING DATE</span>
-                     </div>
-                     <span className="text-slate-900">
-                       {user?.createdAt 
-                         ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-                         : 'MAY 1, 2026'}
-                     </span>
+               <div className="mt-3 w-full pt-2 border-t border-slate-100 flex items-center justify-between text-[7.5px] font-bold uppercase text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                     <span>Legend</span>
                   </div>
-                  <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
-                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <span className="text-slate-400">PRESENT DAYS</span>
-                     </div>
-                     <span className="text-slate-900">{summaryStats.present}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
-                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-                        <span className="text-slate-400">ABSENT DAYS</span>
-                     </div>
-                     <span className="text-slate-900">{summaryStats.absent}</span>
-                  </div>
+                  <span className="text-slate-600 font-semibold">#P = Present Count</span>
                </div>
             </div>
 
-            <div className="bg-slate-900 p-8 rounded-[3rem] text-white overflow-hidden relative group cursor-pointer hover:scale-[1.02] transition-all">
-               <div className="absolute -right-4 -bottom-4 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Coffee size={120} />
-               </div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">LEAVE REQUEST</p>
-               <h4 className="text-xl font-black tracking-tight uppercase leading-tight mb-6">Plan your next time off.</h4>
+            <div className="bg-slate-900 p-3 rounded-xl text-white space-y-1.5 relative overflow-hidden">
+               <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider block">Apply For Leave</span>
+               <h4 className="text-xs font-bold uppercase leading-tight">Submit your time-off request for supervisor review</h4>
                <button 
-                 onClick={() => setShowLeaveModal(true)}
-                 className="px-6 py-2.5 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-xl cursor-pointer"
+                 onClick={() => setIsLeaveModalOpen(true)}
+                 className="px-2.5 py-1 bg-white text-slate-900 rounded-lg text-[8.5px] font-bold uppercase tracking-wider hover:bg-blue-600 hover:text-white transition-all shadow-2xs cursor-pointer"
                >
-                  APPLY NOW
+                  Apply Leave
                </button>
             </div>
         </div>
       </div>
+      
+      {/* Apply Leave Request Modal */}
+      {isLeaveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col">
+            <div className="px-3.5 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg text-white bg-blue-600 shadow-2xs">
+                  <FileText size={13} />
+                </div>
+                <div>
+                  <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Apply Leave Request</h2>
+                  <p className="text-[8px] text-slate-400 font-medium">Submit time-off details for authorization</p>
+                </div>
+              </div>
+              <button onClick={() => setIsLeaveModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded">
+                <X size={15} />
+              </button>
+            </div>
 
-      {renderLeaveModal()}
+            <form onSubmit={handleApplyLeave} className="p-3.5 space-y-2.5 text-xs">
+              {/* Leave Balance Chips */}
+              <div className="grid grid-cols-3 gap-1.5">
+                <div className="p-1.5 rounded-lg bg-blue-50/50 border border-blue-100 text-center">
+                  <span className="text-[7.5px] font-bold text-blue-600 uppercase block">Annual Leave</span>
+                  <span className="text-xs font-extrabold text-slate-900">12 Days</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-amber-50/50 border border-amber-100 text-center">
+                  <span className="text-[7.5px] font-bold text-amber-600 uppercase block">Sick Leave</span>
+                  <span className="text-xs font-extrabold text-slate-900">7 Days</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-indigo-50/50 border border-indigo-100 text-center">
+                  <span className="text-[7.5px] font-bold text-indigo-600 uppercase block">Casual Leave</span>
+                  <span className="text-xs font-extrabold text-slate-900">5 Days</span>
+                </div>
+              </div>
+
+              {leaveSuccessMsg && (
+                <div className="p-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-lg text-center">
+                  {leaveSuccessMsg}
+                </div>
+              )}
+
+              <div>
+                <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Leave Type</label>
+                <select 
+                  required
+                  value={leaveFormData.leaveType}
+                  onChange={(e) => setLeaveFormData({ ...leaveFormData, leaveType: e.target.value })}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="Annual Leave">Annual Leave</option>
+                  <option value="Sick Leave">Sick Leave</option>
+                  <option value="Casual Leave">Casual Leave</option>
+                  <option value="Maternity Leave">Maternity / Paternity Leave</option>
+                  <option value="Unpaid Leave">Unpaid Leave</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Start Date</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={leaveFormData.startDate}
+                    onChange={(e) => setLeaveFormData({ ...leaveFormData, startDate: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">End Date</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={leaveFormData.endDate}
+                    onChange={(e) => setLeaveFormData({ ...leaveFormData, endDate: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Reason / Justification</label>
+                <textarea 
+                  required
+                  rows={2}
+                  value={leaveFormData.reason}
+                  onChange={(e) => setLeaveFormData({ ...leaveFormData, reason: e.target.value })}
+                  placeholder="Provide details about your leave application..."
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500 resize-none h-16"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => setIsLeaveModalOpen(false)}
+                  className="px-3 py-1.5 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider hover:bg-slate-100 rounded-lg"
+                >
+                  Discard
+                </button>
+                <button 
+                  type="submit"
+                  disabled={submittingLeave}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[9.5px] font-bold uppercase tracking-wider shadow-2xs hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  <Send size={10} />
+                  <span>{submittingLeave ? 'Submitting...' : 'Submit Request'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <ExportModal 
         isOpen={isExportModalOpen} 
         onClose={() => setIsExportModalOpen(false)} 
         onExport={handleExportReport}
-        title="Export Attendance Report"
+        title="Export Global Attendance"
       />
     </div>
   );

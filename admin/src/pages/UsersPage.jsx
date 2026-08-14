@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   UserCheck, 
@@ -177,6 +177,43 @@ const UsersPage = () => {
     status: 'Active'
   });
 
+  const fetchRealUsers = async () => {
+    try {
+      const res = await fetch('/api/members');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const mapped = data.map((u, idx) => {
+            const initials = u.name ? u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+            return {
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              avatarBg: idx % 2 === 0 ? 'bg-gradient-to-tr from-blue-600 to-indigo-600 text-white' : 'bg-gradient-to-tr from-rose-500 to-pink-600 text-white',
+              initials: initials,
+              organization: u.organization || 'BuildTech Pvt. Ltd.',
+              role: u.role || 'User',
+              roleBadge: u.role === 'Super Admin' ? 'bg-purple-50 text-purple-600 border-purple-100' : u.role === 'Admin' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-100 text-slate-700 border-slate-200',
+              status: u.status || 'Active',
+              statusStyle: u.status === 'Inactive' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-blue-600 bg-blue-50 border-blue-200',
+              lastLoginDate: u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '20 Jun 2026',
+              lastLoginTime: u.lastLogin ? new Date(u.lastLogin).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '10:30 AM',
+              joinedOn: u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '20 May 2026',
+              phone: u.phone || '+91 98765 43210'
+            };
+          });
+          setUsersList(mapped);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching users:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRealUsers();
+  }, []);
+
   // No-op toast (Notification toast banner removed per request)
   const showToast = () => {};
 
@@ -203,9 +240,27 @@ const UsersPage = () => {
     setStatusFilter('All Status');
   };
 
-  const handleAddUser = (e) => {
+  const handleAddUser = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password || 'Password123!',
+          role: formData.role
+        })
+      });
+      if (response.ok) {
+        fetchRealUsers();
+      }
+    } catch (err) {
+      console.error('Error adding user:', err);
+    }
 
     const initials = formData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
@@ -231,9 +286,23 @@ const UsersPage = () => {
     setFormData({ name: '', email: '', organization: 'BuildTech Pvt. Ltd.', role: 'User', password: '', status: 'Active' });
   };
 
-  const handleUpdateUser = (e) => {
+  const handleUpdateUser = async (e) => {
     e.preventDefault();
     if (!selectedUser) return;
+
+    try {
+      await fetch(`/api/members/${selectedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          role: formData.role,
+          status: formData.status
+        })
+      });
+    } catch (err) {
+      console.error('Error updating user:', err);
+    }
 
     const updated = usersList.map(u => {
       if (u.id === selectedUser.id) {

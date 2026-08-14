@@ -158,6 +158,28 @@ async function initializeDatabase() {
         }
       });
 
+      // Ensure Project Manager user exists
+      await User.findOrCreate({
+        where: { email: 'pm@vagwiin.com' },
+        defaults: {
+          name: 'Project Manager User',
+          password: '12345678',
+          role: 'Project Manager',
+          departmentId: dept.id
+        }
+      });
+
+      // Ensure Core Team user exists
+      await User.findOrCreate({
+        where: { email: 'core@vagwiin.com' },
+        defaults: {
+          name: 'Core Team Member',
+          password: '12345678',
+          role: 'Core Team',
+          departmentId: dept.id
+        }
+      });
+
       // Ensure default client exists
       const [defaultClient] = await Client.findOrCreate({
         where: { email: 'jda@rajasthan.gov.in' },

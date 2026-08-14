@@ -5,7 +5,7 @@ import {
   Search,
   Filter,
   Eye,
-  Edit3,
+  Edit2,
   Calendar,
   Briefcase,
   IndianRupee,
@@ -13,14 +13,19 @@ import {
   TrendingUp,
   XCircle,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from 'lucide-react';
 
 const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, clients = [], user }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
 
-
+  const getClientName = (id) => {
+    const client = clients?.find(c => c.id === id);
+    return client ? client.name : 'Unknown Client';
+  };
 
   // Filtering logic
   const filteredTenders = tenders.filter(tender => {
@@ -28,107 +33,144 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
       tender.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tender.reference?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tender.client?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getClientName(tender.clientId)?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tender.category?.toLowerCase().includes(searchQuery.toLowerCase());
       
     const matchesStatus = statusFilter === 'All' || tender.status === statusFilter;
+    const matchesCategory = categoryFilter === 'All' || tender.category === categoryFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesCategory;
   });
+
+  const statsData = [
+    { label: 'Total Tenders', value: tenders.length, color: 'text-slate-800' },
+    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'text-blue-600' },
+    { label: 'Submitted', value: tenders.filter(t => t.status === 'Submitted' || t.status === 'Registered').length, color: 'text-blue-500' },
+    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, color: 'text-blue-600' },
+    { label: 'Lost Bids', value: tenders.filter(t => t.status === 'Lost').length, color: 'text-rose-500' },
+    { label: 'Under Review', value: tenders.filter(t => t.status === 'Under Review' || t.status === 'Pending').length, color: 'text-amber-500' },
+  ];
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Won': return 'bg-blue-100 text-blue-600 border-blue-200';
-      case 'Lost': return 'bg-rose-100 text-rose-600 border-rose-200';
-      case 'Active': return 'bg-blue-100 text-blue-600 border-blue-200';
-      case 'Registered': return 'bg-indigo-100 text-indigo-600 border-indigo-200';
-      case 'Draft': return 'bg-slate-100 text-slate-500 border-slate-200';
-      default: return 'bg-slate-100 text-slate-500 border-slate-200';
+      case 'Won': return 'bg-blue-600 text-white';
+      case 'Active': return 'bg-blue-500 text-white';
+      case 'Registered': return 'bg-indigo-500 text-white';
+      case 'Under Review': return 'bg-amber-500 text-white';
+      case 'Lost': return 'bg-rose-500 text-white';
+      case 'Draft': return 'bg-slate-200 text-slate-700';
+      default: return 'bg-slate-100 text-slate-600';
     }
   };
 
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'Government': return 'bg-amber-50 text-amber-700 border-amber-100';
-      case 'Private': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-      case 'PSU': return 'bg-purple-50 text-purple-700 border-purple-100';
-      default: return 'bg-slate-50 text-slate-700 border-slate-100';
+      case 'Government': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'Private': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'PSU': return 'bg-purple-50 text-purple-700 border-purple-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-screen space-y-6 sm:space-y-8 lg:space-y-10">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3 sm:space-y-3.5 animate-in fade-in duration-500">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
         <div>
-          <h1 className="text-3xl font-black text-[#1e293b] tracking-tight">Tenders Management</h1>
-          <p className="text-slate-500 mt-1 font-semibold">Register and manage won or upcoming client tenders in real-time</p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <FileText className="text-blue-600" size={18} />
+            <span>Tenders Management</span>
+          </h1>
+          <p className="text-[9px] text-slate-500 font-medium">Track, manage, and review all tender applications and contracts.</p>
         </div>
         {user?.role !== 'Tender Manager' && (
           <button 
             onClick={onCreate}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-xl shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-2xs active:scale-95"
           >
-            <Plus size={16} />
-            <span>Register New Tender</span>
+            <Plus size={13} />
+            <span>Register Tender</span>
           </button>
         )}
       </div>
 
-
+      {/* Top 6 KPI Metric Cards */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+        {statsData.map((stat, i) => (
+          <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate">{stat.label}</span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">{stat.value}</span>
+          </div>
+        ))}
+      </div>
 
       {/* Filters & Tenders Table Container */}
-      <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         {/* Table Toolbar */}
-        <div className="p-4 sm:p-8 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 bg-slate-50/20">
+        <div className="p-2.5 sm:p-3 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 bg-slate-50/40">
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">Active Tender Portfolio</h2>
-            <p className="text-xs text-slate-400 font-medium">Search and filter registered contracts</p>
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">Active Tender Portfolio</h2>
+            <p className="text-[8.5px] text-slate-500 font-medium">Search and filter registered contracts</p>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+          <div className="flex flex-wrap items-center gap-1.5">
             {/* Search Input */}
-            <div className="relative flex-1 lg:w-80 w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="relative flex-1 sm:w-56">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
               <input 
                 type="text" 
                 placeholder="Search title, client, ref..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-400 transition-all shadow-sm"
+                className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all shadow-2xs"
               />
             </div>
 
             {/* Status Filter */}
-            <div className="relative w-full sm:w-auto">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+            <div className="relative">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full sm:w-auto pl-12 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 outline-none appearance-none cursor-pointer focus:border-blue-400 transition-all shadow-sm"
+                className="pl-2.5 pr-6 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-2xs"
               >
-                <option value="All">All Statuses</option>
+                <option value="All">All Status</option>
                 <option value="Registered">Registered</option>
                 <option value="Active">Active</option>
+                <option value="Under Review">Under Review</option>
                 <option value="Won">Won</option>
                 <option value="Lost">Lost</option>
                 <option value="Draft">Draft</option>
               </select>
             </div>
+
+            {/* Category Filter */}
+            <div className="relative">
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="pl-2.5 pr-6 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-2xs"
+              >
+                <option value="All">All Categories</option>
+                <option value="Government">Government</option>
+                <option value="Private">Private</option>
+                <option value="PSU">PSU</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Table content */}
+        {/* Table Content */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[900px]">
+          <table className="w-full text-left min-w-[850px]">
             <thead>
-              <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50">
-                <th className="px-8 py-6">Tender Details</th>
-                <th className="px-8 py-6">Client</th>
-                <th className="px-8 py-6">Category</th>
-                <th className="px-8 py-6">Submission Date</th>
-                <th className="px-8 py-6">Budget</th>
-                <th className="px-8 py-6">Status</th>
-                <th className="px-8 py-6 text-right">Actions</th>
+              <tr className="bg-slate-50/50 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-3.5 py-2">Tender Details</th>
+                <th className="px-3.5 py-2">Client</th>
+                <th className="px-3.5 py-2">Category</th>
+                <th className="px-3.5 py-2">Submission Date</th>
+                <th className="px-3.5 py-2 text-right">Budget (₹)</th>
+                <th className="px-3.5 py-2 text-center">Status</th>
+                <th className="px-3.5 py-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -136,38 +178,41 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
                 filteredTenders.map((tender) => (
                   <tr 
                     key={tender.id} 
-                    className="hover:bg-slate-50/50 transition-all cursor-pointer group"
+                    className="hover:bg-slate-50/70 transition-all cursor-pointer group"
                     onClick={() => onView(tender.id)}
                   >
-                    <td className="px-8 py-6">
-                      <div>
-                        <p 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onView(tender.id);
-                          }}
-                          className="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors leading-tight cursor-pointer hover:underline"
-                        >
-                          {tender.title}
-                        </p>
-                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
-                          REF: {tender.reference || 'N/A'}
-                        </p>
+                    <td className="px-3.5 py-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                          {tender.title?.charAt(0) || 'T'}
+                        </div>
+                        <div className="min-w-0">
+                          <p 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onView(tender.id);
+                            }}
+                            className="text-[11px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight cursor-pointer hover:underline truncate max-w-[220px]"
+                          >
+                            {tender.title}
+                          </p>
+                          <p className="text-[8px] font-medium text-slate-400 uppercase mt-0.5">
+                            REF: #{tender.reference || tender.id?.substring(0, 8)}
+                          </p>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className="text-xs font-bold text-slate-500">
-                        {tender.client?.name || 'Unassigned'}
+                    <td className="px-3.5 py-2 text-[10.5px] font-semibold text-slate-600">
+                      {tender.client?.name || getClientName(tender.clientId)}
+                    </td>
+                    <td className="px-3.5 py-2">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${getCategoryColor(tender.category)}`}>
+                        {tender.category || 'General'}
                       </span>
                     </td>
-                    <td className="px-8 py-6">
-                      <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getCategoryColor(tender.category)}`}>
-                        {tender.category || 'Private'}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                        <Calendar size={14} className="text-slate-400" />
+                    <td className="px-3.5 py-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
+                        <Calendar size={11} className="text-slate-400 shrink-0" />
                         <span>
                           {tender.submissionDate 
                             ? new Date(tender.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -176,32 +221,47 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
                         </span>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center text-sm font-black text-slate-800">
-                        <IndianRupee size={14} className="text-slate-500 mr-0.5" />
-                        <span>{parseFloat(tender.budget || 0).toLocaleString('en-IN')}</span>
-                      </div>
+                    <td className="px-3.5 py-2 text-[11px] font-extrabold text-slate-900 text-right">
+                      ₹{parseFloat(tender.budget || 0).toLocaleString('en-IN')}
                     </td>
-                    <td className="px-8 py-6">
-                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.1em] border ${getStatusColor(tender.status)}`}>
+                    <td className="px-3.5 py-2 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-2xs ${getStatusColor(tender.status)}`}>
                         {tender.status}
                       </span>
                     </td>
-                    <td className="px-8 py-6 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-3.5 py-2 text-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
                         <button 
                           onClick={() => onView(tender.id)}
                           title="View Details"
-                          className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-all active:scale-95 shadow-sm"
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all"
                         >
-                          <Eye size={16} />
+                          <Eye size={13} />
                         </button>
                         <button 
                           onClick={() => onEdit(tender)}
                           title="Edit Tender"
-                          className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100 transition-all active:scale-95 shadow-sm"
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all"
                         >
-                          <Edit3 size={16} />
+                          <Edit2 size={13} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if(window.confirm('Delete this tender?')) {
+                              fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
+                                .then(res => {
+                                  if (res.ok) {
+                                    setTenders(prev => prev.filter(t => t.id !== tender.id));
+                                  } else {
+                                    alert('Failed to delete tender. It may be linked to other records.');
+                                  }
+                                });
+                            }
+                          }}
+                          title="Delete Tender"
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all"
+                        >
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>
@@ -209,14 +269,8 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], setTenders, 
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-8 py-24 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="p-4 bg-slate-50 rounded-full text-slate-300">
-                        <FileText size={48} />
-                      </div>
-                      <p className="text-slate-400 font-bold">No tenders found.</p>
-                      <p className="text-[10px] text-slate-300 uppercase font-black tracking-widest">Register a won tender using the button above.</p>
-                    </div>
+                  <td colSpan="7" className="px-4 py-12 text-center text-slate-400 italic text-xs font-medium">
+                    No tenders found matching your search.
                   </td>
                 </tr>
               )}

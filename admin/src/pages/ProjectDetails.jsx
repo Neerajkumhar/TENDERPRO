@@ -12,16 +12,18 @@ import {
   FileText, 
   Mail, 
   Download, 
-  ChevronRight,
-  Plus,
-  FileCode,
-  FileImage,
-  MessageSquare,
-  Users,
-  ShieldCheck,
-  ShieldAlert,
-  Briefcase,
-  X
+  ChevronRight, 
+  Plus, 
+  FileCode, 
+  FileImage, 
+  MessageSquare, 
+  Users, 
+  ShieldCheck, 
+  ShieldAlert, 
+  Briefcase, 
+  X,
+  Target,
+  Flag
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -31,7 +33,7 @@ import {
 } from 'recharts';
 
 const progressData = [
-  { name: 'Completed', value: 65, color: '#3b82f6' },
+  { name: 'Completed', value: 65, color: '#2563eb' },
   { name: 'In Progress', value: 20, color: '#3b82f6' },
   { name: 'Pending', value: 10, color: '#f59e0b' },
   { name: 'Not Started', value: 5, color: '#94a3b8' },
@@ -151,20 +153,20 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
   }, [projectId]);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
-      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-slate-500 font-bold animate-pulse uppercase tracking-[0.2em] text-xs">Loading Tender Details...</p>
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-2">
+      <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-slate-500 font-bold text-xs">Loading Project Details...</p>
     </div>
   );
 
   if (error || !project) return (
-    <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
-      <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl">
-        <ArrowLeft size={32} />
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-2 p-4 text-center">
+      <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center mb-2">
+        <ArrowLeft size={24} />
       </div>
-      <h2 className="text-xl font-black text-slate-900">Oops! Something went wrong</h2>
-      <p className="text-slate-500 font-medium italic">{error || 'Project not found'}</p>
-      <button onClick={onBack} className="mt-4 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-blue-600 transition-all">Go Back</button>
+      <h2 className="text-sm font-bold text-slate-900">Project Not Found</h2>
+      <p className="text-slate-500 text-xs">{error || 'Unable to retrieve project details.'}</p>
+      <button onClick={onBack} className="mt-3 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider">Go Back</button>
     </div>
   );
 
@@ -174,11 +176,9 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
     project.teamMembers?.approver && { ...project.teamMembers.approver, role: 'Approval Owner' },
   ].filter(Boolean);
 
-  const documents = Array.isArray(project.documents) ? project.documents : [];
-
   const activities = [
-    { text: `Tender "${project.title}" was registered`, user: 'System', date: new Date(project.createdAt).toLocaleString(), color: 'blue' },
-    { text: `Last modified`, user: 'Admin User', date: new Date(project.updatedAt).toLocaleString(), color: 'blue' },
+    { text: `Tender "${project.title}" was registered`, user: 'System', date: new Date(project.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), color: 'blue' },
+    { text: `Last modified record`, user: 'Admin User', date: new Date(project.updatedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), color: 'blue' },
   ];
 
   const targetAssignment = assignmentId && projectAssignments.length > 0
@@ -207,79 +207,83 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
   const tenderManager = getTenderManager();
 
   return (
-    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfcfd]">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3 sm:space-y-3.5 animate-in fade-in duration-500 overflow-x-hidden">
       {/* Header Area */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col xl:flex-row justify-between items-start gap-6">
-          <div className="flex items-start gap-4 w-full">
+      <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col xl:flex-row justify-between items-start gap-2.5">
+          <div className="flex items-start gap-2.5 w-full">
             <button 
               onClick={onBack}
-              className="p-2.5 sm:p-3 bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 rounded-xl sm:rounded-2xl transition-all text-slate-400 hover:text-blue-600 group shrink-0"
+              className="w-8 h-8 bg-white border border-slate-200 rounded-lg shadow-2xs hover:bg-slate-50 transition-all text-slate-600 flex items-center justify-center shrink-0"
+              title="Go Back"
             >
-              <ArrowLeft size={18} className="sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft size={14} />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight truncate">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
                   {targetAssignment ? targetAssignment.title || project.title : project.title}
                 </h1>
-                <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-widest
-                    ${(targetAssignment ? targetAssignment.status : project.status) === 'Active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 
-                      (targetAssignment ? targetAssignment.status : project.status) === 'Won' || (targetAssignment ? targetAssignment.status : project.status) === 'Completed' ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
+                <div className="flex items-center gap-1.5">
+                  <span className={`px-2.5 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider ${
+                    (targetAssignment ? targetAssignment.status : project.status) === 'Active' ? 'bg-blue-600 text-white shadow-2xs' : 
+                    (targetAssignment ? targetAssignment.status : project.status) === 'Won' || (targetAssignment ? targetAssignment.status : project.status) === 'Completed' ? 'bg-blue-600 text-white shadow-2xs' : 'bg-slate-800 text-white shadow-2xs'
+                  }`}>
                     {targetAssignment ? targetAssignment.status : project.status}
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-8">
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Reference No.</p>
-                  <p className="text-xs font-black text-slate-900 mt-1 truncate">{project.reference || 'N/A'}</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Reference No.</p>
+                  <p className="text-[11px] font-bold text-slate-900 mt-0.5 truncate">{project.reference || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Client</p>
-                  <p className="text-xs font-black text-slate-900 mt-1 truncate">{project.client?.name || 'Unknown'}</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Client</p>
+                  <p className="text-[11px] font-bold text-slate-900 mt-0.5 truncate">{project.client?.name || 'Unknown'}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Tender Manager</p>
-                  <div className="flex items-center gap-2 mt-1 min-w-0">
-                    <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-[8px] text-white overflow-hidden shrink-0">
-                      {tenderManager?.image ? <img src={tenderManager.image} className="w-full h-full object-cover" alt="" /> : <User size={10} />}
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Tender Manager</p>
+                  <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                    <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center text-[7px] text-white overflow-hidden shrink-0">
+                      {tenderManager?.image ? <img src={tenderManager.image} className="w-full h-full object-cover" alt="" /> : <User size={9} />}
                     </div>
-                    <span className="text-xs font-black text-slate-900 truncate">{tenderManager?.name || 'Not Assigned'}</span>
+                    <span className="text-[11px] font-bold text-slate-900 truncate">{tenderManager?.name || 'Not Assigned'}</span>
                   </div>
                 </div>
                 {targetAssignment && (
                   <>
                     <div>
-                      <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Assigned To</p>
-                      <div className="flex items-center gap-2 mt-1 min-w-0">
-                        <div className="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-[8px] text-white overflow-hidden shrink-0">
-                          {targetAssignment.assignee?.image ? <img src={targetAssignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={10} />}
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Assigned To</p>
+                      <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                        <div className="w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center text-[7px] text-white overflow-hidden shrink-0">
+                          {targetAssignment.assignee?.image ? <img src={targetAssignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={9} />}
                         </div>
-                        <span className="text-xs font-black text-slate-900 truncate">
-                          {targetAssignment.assignee ? `${targetAssignment.assignee.name} (${targetAssignment.assignee.email})` : 'Unassigned'}
+                        <span className="text-[11px] font-bold text-slate-900 truncate">
+                          {targetAssignment.assignee?.name || 'Unassigned'}
                         </span>
                       </div>
                     </div>
                     <div>
-                      <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Department</p>
-                      <p className="text-xs font-black text-slate-900 mt-1 truncate">{targetAssignment.department?.name || 'N/A'}</p>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Department</p>
+                      <p className="text-[11px] font-bold text-slate-900 mt-0.5 truncate">{targetAssignment.department?.name || 'N/A'}</p>
                     </div>
                   </>
                 )}
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Deadline</p>
-                  <p className="text-xs font-black text-slate-900 mt-1 truncate">{targetAssignment?.deadline ? new Date(targetAssignment.deadline).toLocaleDateString() : project.submissionDate ? new Date(project.submissionDate).toLocaleDateString() : 'No Date'}</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Deadline</p>
+                  <p className="text-[11px] font-bold text-slate-900 mt-0.5 truncate">{targetAssignment?.deadline ? new Date(targetAssignment.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : project.submissionDate ? new Date(project.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'No Date'}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Budget</p>
-                  <p className="text-xs font-black text-slate-900 mt-1 truncate">₹{parseFloat(project.budget || 0).toLocaleString()}</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">Budget</p>
+                  <p className="text-[11px] font-bold text-slate-900 mt-0.5 truncate">₹{parseFloat(project.budget || 0).toLocaleString('en-IN')}</p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 w-full xl:w-auto">
+          
+          <div className="flex items-center gap-2 w-full xl:w-auto justify-end">
             <button 
               onClick={() => {
                 if (targetAssignment) {
@@ -294,337 +298,301 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                   onEdit(project);
                 }
               }}
-              className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm active:scale-95"
+              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:border-blue-600 hover:text-blue-600 transition-all shadow-2xs active:scale-95 flex items-center gap-1.5"
             >
-              <Edit2 size={16} />
+              <Edit2 size={12} />
               <span>{assignmentId ? 'Edit Project Details' : 'Edit Details'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="space-y-16 sm:space-y-24">
-        {/* Section 1: Overview */}
-        <div className="grid grid-cols-12 gap-6 sm:gap-8">
+      {/* Main Grid: Overview, Completion, Timeline, Progress */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-3.5">
         {/* Left Side: Summary & Financials */}
-        <div className="col-span-12 lg:col-span-8 space-y-6 sm:space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
+        <div className="col-span-12 lg:col-span-8 space-y-3 sm:space-y-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-3.5">
             {/* Project Summary */}
-            <div className="md:col-span-7 card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 h-full rounded-2xl sm:rounded-3xl">
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight mb-4 uppercase italic">Tender Scope</h3>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed italic mb-6 sm:mb-8">
-                {project.scope || 'No scope description provided for this tender.'}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6">
-                <div className="sm:col-span-2">
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tender Name</p>
-                  <p className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{project.title}</p>
+            <div className="md:col-span-7 p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs h-full flex flex-col justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 text-xs sm:text-sm tracking-tight mb-2 uppercase flex items-center gap-1.5">
+                  <Target size={14} className="text-blue-600" />
+                  <span>Tender Scope</span>
+                </h3>
+                <p className="text-[11px] text-slate-600 font-medium leading-relaxed mb-3">
+                  {project.scope || 'No scope description provided for this tender.'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                <div className="col-span-2">
+                  <p className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider">Tender Name</p>
+                  <p className="text-[10.5px] font-bold text-slate-800 uppercase tracking-tight truncate">{project.title}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Category</p>
-                  <p className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">{project.category}</p>
+                  <p className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider">Category</p>
+                  <p className="text-[10.5px] font-bold text-slate-800 uppercase tracking-tight truncate">{project.category}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Budget</p>
-                  <p className="text-xs sm:text-sm font-black text-slate-800">₹{parseFloat(project.budget || 0).toLocaleString()}</p>
+                  <p className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider">Estimated Budget</p>
+                  <p className="text-[10.5px] font-bold text-slate-800">₹{parseFloat(project.budget || 0).toLocaleString('en-IN')}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Submission Deadline</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Clock size={12} className="text-slate-400" />
-                    <span className="text-xs sm:text-sm font-black text-slate-800">{project.submissionDate ? new Date(project.submissionDate).toLocaleDateString() : 'N/A'}</span>
-                  </div>
+                  <p className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider">Deadline</p>
+                  <p className="text-[10.5px] font-bold text-slate-800">{project.submissionDate ? new Date(project.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tax (GST)</p>
-                  <p className="text-xs sm:text-sm font-black text-slate-800">{project.tax}%</p>
+                  <p className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider">Tax (GST)</p>
+                  <p className="text-[10.5px] font-bold text-slate-800">{project.tax || 18}%</p>
                 </div>
               </div>
             </div>
 
             {/* Progress Overview Card */}
-            <div className="md:col-span-5 card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 h-full flex flex-col items-center rounded-2xl sm:rounded-3xl">
-              <h3 className="w-full text-left font-black text-slate-900 text-lg sm:text-xl tracking-tight mb-6 sm:mb-8 uppercase italic">Progress</h3>
-              <div className="relative w-40 h-40 sm:w-48 sm:h-48 mb-6 sm:mb-8">
-                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+            <div className="md:col-span-5 p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs h-full flex flex-col items-center justify-between">
+              <h3 className="w-full text-left font-bold text-slate-900 text-xs sm:text-sm tracking-tight mb-2 uppercase">Progress Status</h3>
+              <div className="relative w-28 h-28 my-1">
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={progressData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    <Pie data={progressData} innerRadius={42} outerRadius={54} paddingAngle={4} dataKey="value">
                       {progressData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl sm:text-4xl font-black text-slate-900">100%</span>
-                  <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Registered</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-xl font-extrabold text-slate-900">100%</span>
+                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-wider">Ready</span>
                 </div>
               </div>
-              <div className="w-full space-y-3">
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-blue-600" />
-                    <span className="text-[10px] sm:text-xs font-bold text-slate-700">Readiness</span>
-                  </div>
-                  <span className="text-[10px] sm:text-xs font-black text-blue-600 uppercase">High</span>
+              <div className="w-full p-2 bg-blue-50/70 border border-blue-100 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 size={12} className="text-blue-600" />
+                  <span className="text-[9px] font-bold text-slate-700 uppercase">Readiness</span>
                 </div>
+                <span className="text-[9px] font-extrabold text-blue-600 uppercase">High</span>
+              </div>
             </div>
           </div>
+
+          {/* Completion Review UI */}
+          {project.completionStatus && project.completionStatus !== 'Pending' && (
+            <div className="p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs">
+              <div className="flex justify-between items-center mb-3">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm tracking-tight uppercase flex items-center gap-1.5">
+                    <Flag size={14} className="text-blue-600" />
+                    <span>Completion Review</span>
+                  </h3>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Handover documentation verification</p>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                  project.completionStatus === 'Submitted' ? 'bg-amber-50 text-amber-600' :
+                  project.completionStatus === 'Approved' ? 'bg-blue-50 text-blue-600' :
+                  'bg-rose-50 text-rose-600'
+                }`}>
+                  {project.completionStatus}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
+                {['deliveryChallan', 'ewayBill', 'invoice', 'installationChallan', 'noc'].map(docKey => (
+                  <div key={docKey} className="p-2 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden min-w-0">
+                      <FileText size={12} className="text-slate-400 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-bold text-slate-700 uppercase truncate">{docKey.replace(/([A-Z])/g, ' $1').trim()}</p>
+                      </div>
+                    </div>
+                    {project.completionDocuments?.[docKey] && (
+                      <a href={project.completionDocuments[docKey]} target="_blank" rel="noopener noreferrer" className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-all shrink-0">
+                        <Download size={11} />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {project.completionStatus === 'Submitted' && (
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  <button 
+                    onClick={handleRejectDocs}
+                    disabled={processingDocs}
+                    className="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-rose-50 hover:text-rose-600 transition-all disabled:opacity-50"
+                  >
+                    Reject Changes
+                  </button>
+                  <button 
+                    onClick={handleApproveDocs}
+                    disabled={processingDocs}
+                    className="px-3 py-1 bg-blue-600 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-2xs hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <CheckCircle2 size={12} />
+                    <span>Approve Handover</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Completion Review UI */}
-        {project.completionStatus && project.completionStatus !== 'Pending' && (
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Completion Review</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Review mandatory handover documents</p>
-              </div>
-              <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                project.completionStatus === 'Submitted' ? 'bg-amber-100 text-amber-600' :
-                project.completionStatus === 'Approved' ? 'bg-blue-100 text-blue-600' :
-                'bg-rose-100 text-rose-600'
-              }`}>
-                {project.completionStatus}
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              {['deliveryChallan', 'ewayBill', 'invoice', 'installationChallan', 'noc'].map(docKey => (
-                <div key={docKey} className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between group hover:border-blue-200 transition-all">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
-                      <FileText size={14} className="text-slate-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest truncate">{docKey.replace(/([A-Z])/g, ' $1').trim()}</p>
-                      <p className="text-[9px] text-slate-400 truncate italic mt-0.5">{project.completionDocuments?.[docKey] || 'No file'}</p>
-                    </div>
-                  </div>
-                  {project.completionDocuments?.[docKey] && (
-                    <a href={project.completionDocuments[docKey]} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all shrink-0">
-                      <Download size={14} />
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {project.completionStatus === 'Submitted' && (
-              <div className="flex items-center justify-end gap-4 pt-6 border-t border-slate-100">
-                <button 
-                  onClick={handleRejectDocs}
-                  disabled={processingDocs}
-                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-50"
-                >
-                  Reject & Request Changes
-                </button>
-                <button 
-                  onClick={handleApproveDocs}
-                  disabled={processingDocs}
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
-                >
-                  <CheckCircle2 size={16} />
-                  Approve Handover
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Right Side: Key Dates & Consolidated Team Card */}
-        <div className="col-span-12 lg:col-span-4 space-y-6 sm:space-y-8">
+        {/* Right Side: Key Dates & Consolidated Team Card */}
+        <div className="col-span-12 lg:col-span-4 space-y-3 sm:space-y-3.5">
           {/* Key Dates */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
-            <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight mb-6 sm:mb-8 uppercase italic">Key Dates</h3>
-            <div className="space-y-4 sm:space-y-6">
+          <div className="p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs">
+            <h3 className="font-bold text-slate-900 text-xs sm:text-sm tracking-tight mb-2.5 uppercase">Key Dates</h3>
+            <div className="space-y-2 text-xs">
               {[
-                { label: 'Submission', date: project.submissionDate ? new Date(project.submissionDate).toLocaleDateString() : 'N/A', icon: Calendar },
-                { label: 'Registered', date: new Date(project.createdAt).toLocaleDateString(), icon: Calendar },
-                { label: 'Last Modified', date: new Date(project.updatedAt).toLocaleDateString(), icon: Clock },
+                { label: 'Submission', date: project.submissionDate ? new Date(project.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A', icon: Calendar },
+                { label: 'Registered', date: new Date(project.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), icon: Calendar },
+                { label: 'Last Modified', date: new Date(project.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), icon: Clock },
                 { label: 'Status', date: project.status, icon: CheckCircle2 },
               ].map((item, i) => (
-                <div key={i} className="flex justify-between items-center group cursor-pointer">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="p-2 bg-slate-50 text-slate-400 group-hover:text-blue-600 transition-all rounded-lg">
-                      <item.icon size={14} className="sm:w-4 sm:h-4" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-500">{item.label}</span>
+                <div key={i} className="flex justify-between items-center p-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <item.icon size={12} className="text-slate-400" />
+                    <span className="text-[10px] font-medium text-slate-500">{item.label}</span>
                   </div>
-                  <span className="text-xs font-black text-slate-900">{item.date}</span>
+                  <span className="text-[10px] font-bold text-slate-900">{item.date}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Consolidated Project Team Card */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
-            <div className="flex justify-between items-center mb-6 sm:mb-8">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                  <Users size={18} />
-                </div>
-                <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Project Team</h3>
+          <div className="p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs">
+            <div className="flex justify-between items-center mb-2.5">
+              <div className="flex items-center gap-1.5">
+                <Users size={13} className="text-blue-600" />
+                <h3 className="font-bold text-slate-900 text-xs sm:text-sm tracking-tight uppercase">Project Team</h3>
               </div>
             </div>
             
-            <div className="space-y-8">
+            <div className="space-y-3">
               {/* Core Ownership */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Core Ownership</p>
+              <div className="space-y-1.5">
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50 pb-1">Core Ownership</p>
                 {coreTeam.map((member, i) => (
-                  <div key={i} className="flex justify-between items-center group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-blue-600 font-black border border-slate-100 overflow-hidden shadow-sm shrink-0">
-                        {member.image ? <img src={member.image} className="w-full h-full object-cover" alt="" /> : member.name.charAt(0)}
+                  <div key={i} className="flex justify-between items-center p-1 hover:bg-slate-50 rounded-lg">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {member.image ? <img src={member.image} className="w-full h-full object-cover rounded-lg" alt="" /> : member.name.charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-all truncate">{member.name}</p>
-                        <p className="text-[9px] text-slate-400 font-bold italic truncate uppercase tracking-tighter">{member.role}</p>
+                        <p className="text-[10.5px] font-bold text-slate-900 truncate">{member.name}</p>
+                        <p className="text-[7.5px] text-slate-400 font-semibold uppercase">{member.role}</p>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => onMemberClick?.(member.id)}
-                      className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                      title={`View Profile of ${member.name}`}
-                    >
-                      <Mail size={16} />
-                    </button>
                   </div>
                 ))}
               </div>
 
               {/* Assigned Departments & Personnel */}
               {projectAssignments.length > 0 && (
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Assigned Teams</p>
+                <div className="space-y-1.5 pt-1.5 border-t border-slate-100">
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50 pb-1">Assigned Teams</p>
                   {projectAssignments.map((assignment, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 group hover:border-blue-200 transition-all">
+                    <div key={i} className="p-2 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
                       <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <ShieldCheck size={14} className="text-indigo-500" />
-                          <div className="flex flex-col">
-                            <span className="text-xs font-black text-slate-900">{assignment.title || 'Untitled Project'}</span>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{assignment.department?.name}</span>
-                          </div>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <ShieldCheck size={12} className="text-indigo-500 shrink-0" />
+                          <span className="text-[10px] font-bold text-slate-900 truncate">{assignment.title || 'Untitled Project'}</span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${
-                          assignment.priority === 'High' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
-                        }`}>{assignment.priority}</span>
+                        <span className="px-1.5 py-0.2 rounded text-[7.5px] font-bold uppercase bg-blue-50 text-blue-600 shrink-0">{assignment.priority}</span>
                       </div>
                       {assignment.assignee && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-slate-200/50">
-                          <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
-                            {assignment.assignee.image ? <img src={assignment.assignee.image} className="w-full h-full object-cover" alt="" /> : <User size={12} className="text-slate-400" />}
-                          </div>
-                          <span className="text-[10px] font-bold text-slate-600">{assignment.assignee.name} ({assignment.assignee.email})</span>
-                        </div>
+                        <p className="text-[8.5px] font-semibold text-slate-500 truncate">{assignment.assignee.name} ({assignment.department?.name})</p>
                       )}
-                      <p className="text-[10px] text-slate-500 font-medium italic line-clamp-2 leading-relaxed">"{assignment.description}"</p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            
-            <button className="mt-8 w-full py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg active:scale-95">
-              Manage Work Assignments
-            </button>
           </div>
 
           {/* Activity Timeline */}
-          <div className="card p-6 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 rounded-2xl sm:rounded-3xl">
-            <div className="flex justify-between items-center mb-6 sm:mb-8">
-              <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Timeline</h3>
-              <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline">Full Log</button>
-            </div>
-            <div className="space-y-6 sm:space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-50">
+          <div className="p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs">
+            <h3 className="font-bold text-slate-900 text-xs sm:text-sm tracking-tight mb-2.5 uppercase">Activity Log</h3>
+            <div className="space-y-2.5">
               {activities.map((activity, i) => (
-                <div key={i} className="relative pl-10">
-                  <div className={`absolute left-0 top-1 w-6 h-6 rounded-lg bg-${activity.color}-100 border-4 border-white shadow-sm flex items-center justify-center z-10`}>
-                    <div className={`w-1.5 h-1.5 rounded-full bg-${activity.color}-500`}></div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-800 leading-tight">{activity.text}</p>
-                    <p className="text-[10px] text-slate-400 font-bold mt-1">by {activity.user}</p>
-                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-medium italic mt-1 flex items-center gap-1">
-                      <Clock size={10} /> {activity.date}
-                    </p>
-                  </div>
+                <div key={i} className="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-800 leading-tight">{activity.text}</p>
+                  <p className="text-[8px] text-slate-400 font-medium mt-0.5 flex items-center gap-1">
+                    <Clock size={9} /> {activity.date} • {activity.user}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </div>
-        </div>
       </div>
 
       {/* Edit Project Modal */}
       {editingProject && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                  <Briefcase size={20} />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-xl border border-slate-100 p-4 sm:p-5 flex flex-col gap-3 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-left">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                  <Briefcase size={15} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Edit Project</h2>
-                  <p className="text-xs font-semibold text-slate-400 mt-0.5">Modify project parameters</p>
+                  <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Edit Project</h2>
+                  <p className="text-[8.5px] font-medium text-slate-400">Modify project directives</p>
                 </div>
               </div>
               <button 
                 onClick={() => setEditingProject(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded"
               >
-                <X size={18} />
+                <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleEditSubmit} className="flex flex-col gap-2.5 text-xs">
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Title</label>
+                <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Title</label>
                 <input 
                   type="text" 
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="e.g. Smart Transit System Upgrade"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                  placeholder="e.g. Smart Transit Upgrade"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Project Manager</label>
+                  <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">Project Manager</label>
                   <select 
                     value={editManager}
                     onChange={(e) => setEditManager(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                   >
                     <option value="">Select Manager</option>
                     {members?.filter(m => m.role === 'Project Manager').map(m => (
-                      <option key={m.id} value={m.id}>{m.name} ({m.role} - {m.email})</option>
+                      <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Deadline</label>
+                  <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">Deadline</label>
                   <input 
                     type="date" 
                     value={editDeadline}
                     onChange={(e) => setEditDeadline(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Status</label>
+                  <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">Status</label>
                   <select 
                     value={editStatus}
                     onChange={(e) => setEditStatus(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                   >
                     <option value="Pending">Pending</option>
                     <option value="In Progress">In Progress</option>
@@ -633,11 +601,11 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Priority</label>
+                  <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">Priority</label>
                   <select 
                     value={editPriority}
                     onChange={(e) => setEditPriority(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
@@ -647,28 +615,28 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Description</label>
+                <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">Description</label>
                 <textarea 
-                  rows="3"
+                  rows="2"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Describe project details, scope, or requirements..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all shadow-sm resize-none"
+                  placeholder="Describe requirements..."
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:border-blue-500 resize-none"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-3 mt-4 border-t border-slate-100 pt-5">
+              <div className="flex justify-end gap-2 mt-2 border-t border-slate-100 pt-2.5">
                 <button 
                   type="button"
                   onClick={() => setEditingProject(null)}
-                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all active:scale-95"
+                  className="px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-[9.5px] font-bold uppercase tracking-wider hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all active:scale-95 shadow-md shadow-slate-200"
+                  className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-[9.5px] font-bold uppercase tracking-wider hover:bg-blue-700 shadow-2xs active:scale-95"
                 >
                   Save Changes
                 </button>
@@ -677,7 +645,6 @@ const ProjectDetails = ({ projectId, assignmentId, onBack, onEdit, members, fetc
           </div>
         </div>
       )}
-
     </div>
   );
 };

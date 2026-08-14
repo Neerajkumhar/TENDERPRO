@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -19,11 +19,13 @@ import {
   Download,
   Wallet,
   XCircle,
-  PieChart as PieChartIcon,
+  Search,
+  Check,
   Coffee,
   X,
   User as UserIcon,
   Calendar,
+  PieChart as PieChartIcon,
   UploadCloud,
   Loader2
 } from 'lucide-react';
@@ -44,17 +46,14 @@ import {
   Pie
 } from 'recharts';
 
-const categoryData = [
-  { name: 'Salaries', value: 35, color: '#3b82f6' },
-  { name: 'Marketing', value: 20, color: '#3b82f6' },
-  { name: 'Infrastructure', value: 25, color: '#f59e0b' },
-  { name: 'Operations', value: 20, color: '#6366f1' },
-];
-
 const FinancialManagement = ({ onInvoiceClick, user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const filterRef = useRef(null);
+
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(false);
@@ -87,6 +86,16 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
     paidCount: 0,
     overdueCount: 0
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilterPopover(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchLeaveRequests = async () => {
     if (!user?.departmentId) return;
@@ -237,11 +246,14 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
         });
         setIsModalOpen(false);
         fetchInvoicesAndStats();
+      } else {
+        alert('Failed to generate invoice');
       }
     } catch (err) {
       console.error('Error creating invoice:', err);
     }
   };
+
   const handleExportReport = ({ format, startDate, endDate }) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -260,11 +272,11 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
 
     if (format === 'pdf') {
       const doc = new jsPDF();
-      doc.setFontSize(20);
-      doc.text("TenderPro Financial Summary", 14, 22);
-      doc.setFontSize(10);
-      doc.text(`Generated On: ${new Date().toLocaleDateString('en-IN')}`, 14, 28);
-      doc.text(`Period: ${startDate} to ${endDate}`, 14, 34);
+      doc.setFontSize(16);
+      doc.text("TenderPro Financial Summary", 14, 20);
+      doc.setFontSize(9);
+      doc.text(`Generated On: ${new Date().toLocaleDateString('en-IN')}`, 14, 26);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 32);
       
       const invoiceData = filteredData.map(inv => [
         inv.invoiceNumber || inv.id,
@@ -275,11 +287,12 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
       ]);
 
       autoTable(doc, {
-        startY: 45,
+        startY: 38,
         head: [["Invoice ID", "Date", "Client", "Amount", "Status"]],
         body: invoiceData,
         theme: 'grid',
-        headStyles: { fillColor: [59, 130, 246] }
+        headStyles: { fillColor: [59, 130, 246] },
+        styles: { fontSize: 8 }
       });
 
       doc.save(`${filename}.pdf`);
@@ -290,6 +303,13 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
       XLSX.writeFile(wb, `${filename}.xlsx`);
     }
   };
+
+  const filteredInvoices = invoicesList.filter(inv => {
+    const matchesSearch = inv.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (inv.invoiceNumber || inv.id).toString().toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'All' || inv.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const getBudgetUsed = () => {
     try {
@@ -322,42 +342,67 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
     if (!showLeaveModal) return null;
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowLeaveModal(false)}></div>
-        <div className="bg-white w-full max-w-4xl max-h-[85vh] rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col text-left">
-          <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-500 text-white rounded-2xl shadow-lg shadow-amber-200">
-                <Coffee size={24} />
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={() => setShowLeaveModal(false)}></div>
+        <div className="bg-white w-full max-w-3xl max-h-[85vh] rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col text-left">
+          <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500 text-white rounded-xl shadow-xs">
+                <Coffee size={18} />
               </div>
-              <div><h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Team Leave Requests</h2><p className="text-xs text-slate-500 font-medium italic">Review and manage your department's time-off applications</p></div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight uppercase">Team Leave Requests</h2>
+                <p className="text-[10px] text-slate-500 font-medium italic">Review and manage time-off applications</p>
+              </div>
             </div>
-            <button onClick={() => setShowLeaveModal(false)} className="p-3 hover:bg-white rounded-full text-slate-400 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100 shadow-sm"><X size={24} /></button>
+            <button onClick={() => setShowLeaveModal(false)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400">
+              <X size={18} />
+            </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
             {loadingLeaves ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="font-black text-[10px] uppercase tracking-widest">Fetching applications...</p>
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-2">
+                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="font-bold text-[9px] uppercase tracking-wider">Fetching applications...</p>
               </div>
             ) : leaveRequests.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4 opacity-50">
-                <Coffee size={64} strokeWidth={1} />
-                <p className="font-black text-[10px] uppercase tracking-widest">No pending leave requests found</p>
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-2 opacity-60">
+                <Coffee size={40} strokeWidth={1.5} />
+                <p className="font-bold text-[9px] uppercase tracking-wider">No pending leave requests found</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {leaveRequests.map((request) => (
-                  <div key={request.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:border-blue-100 transition-all group relative overflow-hidden">
-                    <div className="absolute top-6 right-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${request.status === 'Pending' ? 'bg-amber-500 text-white shadow-amber-100' : request.status === 'Approved' ? 'bg-blue-500 text-white shadow-blue-100' : 'bg-rose-500 text-white shadow-rose-100'}`}>{request.status}</span></div>
-                    <div className="flex items-start gap-4 mb-6"><div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xl border-2 border-white shadow-sm overflow-hidden shrink-0">{request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}</div><div className="min-w-0 pr-16"><h4 className="font-black text-slate-900 uppercase tracking-tight truncate">{request.User?.name}</h4><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{request.User?.role}</p></div></div>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50"><div className="p-2 bg-white rounded-xl text-blue-500 shadow-sm"><Calendar size={16} /></div><div className="flex-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Duration</p><p className="text-xs font-black text-slate-700">{new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p></div></div>
-                      <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100/50"><div className="p-2 bg-white rounded-xl text-amber-500 shadow-sm"><AlertCircle size={16} /></div><div className="flex-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Type & Reason</p><p className="text-xs font-bold text-slate-600 italic"><span className="text-slate-900 font-black not-italic">{request.leaveType}: </span>"{request.reason || 'No reason provided'}"</p></div></div>
+                  <div key={request.id} className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs hover:border-blue-200 transition-all group relative overflow-hidden">
+                    <div className="absolute top-3.5 right-3.5">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider ${request.status === 'Pending' ? 'bg-amber-500 text-white' : request.status === 'Approved' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{request.status}</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs border border-slate-200 overflow-hidden shrink-0">
+                        {request.User?.image ? <img src={request.User.image} alt="" className="w-full h-full object-cover" /> : request.User?.name?.[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0 pr-14">
+                        <h4 className="font-bold text-slate-900 text-xs truncate">{request.User?.name}</h4>
+                        <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">{request.User?.role}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
+                        <Calendar size={13} className="text-blue-500 shrink-0" />
+                        <p className="text-[11px] font-medium text-slate-700">{new Date(request.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - {new Date(request.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      </div>
+                      <div className="flex items-start gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
+                        <AlertCircle size={13} className="text-amber-500 shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-slate-600"><span className="text-slate-900 font-bold">{request.leaveType}: </span>"{request.reason || 'No reason provided'}"</p>
+                      </div>
                     </div>
                     {request.status === 'Pending' && (
-                      <div className="flex gap-3 mt-6">
-                        <button onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-blue-100"><CheckCircle2 size={14} />Approve</button>
-                        <button onClick={() => handleLeaveStatusUpdate(request.id, 'Rejected')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-white border border-rose-100 text-rose-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all active:scale-95 shadow-sm"><XCircle size={14} />Reject</button>
+                      <div className="flex gap-2 mt-3">
+                        <button onClick={() => handleLeaveStatusUpdate(request.id, 'Approved')} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-blue-500 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-blue-600 transition-all active:scale-95 shadow-2xs">
+                          <CheckCircle2 size={12} /> Approve
+                        </button>
+                        <button onClick={() => handleLeaveStatusUpdate(request.id, 'Rejected')} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white border border-rose-200 text-rose-500 rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-rose-50 transition-all active:scale-95">
+                          <XCircle size={12} /> Reject
+                        </button>
                       </div>
                     )}
                   </div>
@@ -365,12 +410,11 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
               </div>
             )}
           </div>
-          <div className="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-between items-center px-10">
-             <div className="flex items-center gap-4">
-                <div className="flex -space-x-3">{[1,2,3].map(i => (<div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm overflow-hidden"><UserIcon size={14} /></div>))}</div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{leaveRequests.filter(r => r.status === 'Pending').length} Pending Reviews</p>
-             </div>
-             <button onClick={() => setShowLeaveModal(false)} className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95">Close Panel</button>
+          <div className="p-3.5 border-t border-slate-100 bg-slate-50/40 flex justify-between items-center px-5">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{leaveRequests.filter(r => r.status === 'Pending').length} Pending Reviews</p>
+            <button onClick={() => setShowLeaveModal(false)} className="px-5 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-600 transition-all shadow-xs">
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -378,81 +422,222 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] text-left space-y-6 sm:space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] text-left space-y-3.5 sm:space-y-4 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
         <div>
-          <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">Financial Overview</h1>
-          <p className="text-[9px] sm:text-[10px] text-slate-500 mt-1 font-medium italic uppercase tracking-widest">Track revenue, expenses, and overall financial health.</p>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Financial Overview</h1>
+          <p className="text-[9px] text-slate-500 font-medium">Track revenue, expenses, and overall financial health.</p>
         </div>
-        <div className="flex items-center gap-4 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {(user?.role === 'Admin' || user?.role?.includes('Manager')) && (
-            <button onClick={() => setShowLeaveModal(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-200 active:scale-95">
-              <Coffee size={16} />
-              <span>Leave Requests</span>
+            <button onClick={() => setShowLeaveModal(true)} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-amber-500 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-amber-600 transition-all shadow-2xs active:scale-95">
+              <Coffee size={13} />
+              <span>Leaves</span>
             </button>
           )}
-          <button onClick={() => setIsExportModalOpen(true)} className="flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-sm active:scale-95">
-              <Download size={14} />
+          <button onClick={() => setIsExportModalOpen(true)} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 hover:bg-slate-50 hover:border-blue-300 transition-all shadow-2xs active:scale-95">
+            <Download size={13} />
             <span>Export</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4">
+      {/* Top 8 KPI Mini-Cards */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-4 xl:grid-cols-8 gap-2 sm:gap-2.5">
         {statsData.map((stat, i) => (
-          <div key={i} className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
-            <div className={`absolute top-0 left-0 w-full h-1 bg-${stat.color}-500`}></div>
-            <div className="flex justify-between items-start mb-2">
-              <div className={`p-2.5 rounded-xl bg-${stat.color}-50/50 text-${stat.color}-600 mb-3`}>
-                <stat.icon size={16} />
+          <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200 relative overflow-hidden">
+            <div className="flex justify-between items-center mb-1.5 w-full">
+              <div className="w-6 h-6 rounded-md bg-blue-50/80 border border-blue-100/80 flex items-center justify-center text-blue-600 shrink-0">
+                <stat.icon size={13} />
               </div>
-              <div className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{stat.trend}</div>
+              <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">
+                {stat.trend}
+              </div>
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">{stat.label}</p>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 leading-none">{stat.value}</h3>
+            <div className="w-full">
+              <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate w-full">{stat.label}</p>
+              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight truncate w-full">{stat.value}</h3>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-4 sm:gap-8 text-left">
-        <div className="col-span-12 card p-4 sm:p-8 bg-white border-none shadow-xl shadow-slate-200/40 relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 text-left">
-            <div><h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase tracking-wider">Revenue vs Expense</h3><p className="text-[10px] sm:text-xs text-slate-500 font-medium">Monthly financial comparison</p></div>
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-600 rounded-full shadow-lg shadow-blue-200"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue (Billed)</span></div>
-              <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-200"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment (Cash)</span></div>
-              <div className="flex items-center gap-2"><span className="w-2 h-2 sm:w-3 sm:h-3 bg-rose-500 rounded-full"></span><span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Expense</span></div>
+      {/* Main Charts and Table Grid */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-4 text-left">
+        {/* Revenue vs Expense Chart */}
+        <div className="col-span-12 lg:col-span-5 xl:col-span-4 p-3.5 sm:p-4 bg-white border border-slate-200/80 rounded-xl shadow-2xs relative overflow-hidden flex flex-col justify-between">
+          <div className="flex flex-col justify-between items-start gap-2 mb-3">
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">Revenue vs Expense</h3>
+              <p className="text-[10px] text-slate-500 font-medium">Monthly performance comparison</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Revenue</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Payment</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
+                <span className="text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">Expense</span>
+              </div>
             </div>
           </div>
-          <div className="h-[250px] sm:h-[350px] w-full min-w-0">
-            <ResponsiveContainer width="100%" height="100%"><AreaChart data={revenueVsExpenseData}><defs><linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient><linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={10} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} /><Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}} /><Area type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" /><Area type="monotone" dataKey="payment" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPay)" /><Area type="monotone" dataKey="expense" stroke="#f43f5e" strokeWidth={2} fillOpacity={0} /></AreaChart></ResponsiveContainer>
+          <div className="h-[200px] sm:h-[220px] w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueVsExpenseData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#60a5fa" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 600}} 
+                  dy={5} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#94a3b8', fontSize: 9, fontWeight: 600}} 
+                />
+                <Tooltip 
+                  contentStyle={{
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    fontSize: '11px',
+                    padding: '8px 12px'
+                  }} 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="revenue" 
+                  stroke="#2563eb" 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#colorRev)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="payment" 
+                  stroke="#60a5fa" 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#colorPay)" 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="expense" 
+                  stroke="#f43f5e" 
+                  strokeWidth={1.5} 
+                  fillOpacity={0} 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="col-span-12 card bg-white border-none shadow-xl shadow-slate-200/40 overflow-hidden text-left">
-          <div className="p-4 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/30 gap-4 text-left">
-            <div><h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase italic">Invoice Status Table</h3><p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-1 uppercase tracking-widest">Detailed log of recent financial transactions</p></div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button onClick={() => setIsModalOpen(true)} className="flex-1 sm:flex-none bg-slate-900 text-white px-6 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-slate-200 hover:bg-blue-600 transition-all uppercase tracking-widest active:scale-95">Generate Invoice</button>
+        {/* Invoice Status Table Card */}
+        <div className="col-span-12 lg:col-span-7 xl:col-span-8 bg-white border border-slate-200/80 rounded-xl shadow-2xs overflow-hidden flex flex-col justify-between text-left">
+          <div className="p-3 sm:p-3.5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center bg-slate-50/40 gap-2.5 text-left">
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight">Invoice Status Table</h3>
+              <p className="text-[10px] text-slate-500 font-medium">Recent transactions and billing logs</p>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative group flex-1 sm:w-52">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={14} />
+                <input 
+                  type="text" 
+                  placeholder="Search client or ID..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all shadow-2xs" 
+                />
+              </div>
+              
+              <div className="relative flex items-center gap-1.5" ref={filterRef}>
+                <button 
+                  onClick={() => setShowFilterPopover(!showFilterPopover)}
+                  className={`p-1.5 rounded-lg border transition-all shadow-2xs active:scale-95 flex items-center justify-center ${showFilterPopover || filterStatus !== 'All' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300'}`}
+                >
+                  <Filter size={14} />
+                </button>
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-slate-900 text-white px-3.5 py-1.5 rounded-lg text-[10px] font-bold shadow-xs hover:bg-blue-600 transition-all uppercase tracking-wider text-center active:scale-95"
+                >
+                  Generate Invoice
+                </button>
+
+                {showFilterPopover && (
+                  <div className="absolute right-0 top-full mt-1.5 w-40 bg-white border border-slate-100 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">Filter Status</p>
+                    {['All', 'Paid', 'Pending', 'Overdue'].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setFilterStatus(status);
+                          setShowFilterPopover(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${filterStatus === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                      >
+                        <span>{status}</span>
+                        {filterStatus === status && <Check size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[850px]">
+            <table className="w-full text-left min-w-[700px]">
               <thead>
-                <tr className="bg-slate-50/50 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]"><th className="px-6 sm:px-8 py-4">ID</th><th className="px-6 sm:px-8 py-4">Date</th><th className="px-6 sm:px-8 py-4">Client</th><th className="px-6 sm:px-8 py-4 text-center">Amount</th><th className="px-6 sm:px-8 py-4">Status</th><th className="px-6 sm:px-8 py-4 text-center">Actions</th></tr>
+                <tr className="bg-slate-50/50 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                  <th className="px-3.5 py-2">ID</th>
+                  <th className="px-3.5 py-2">Date</th>
+                  <th className="px-3.5 py-2">Client</th>
+                  <th className="px-3.5 py-2 text-center">Amount</th>
+                  <th className="px-3.5 py-2">Status</th>
+                  <th className="px-3.5 py-2 text-center">Actions</th>
+                </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {invoicesList.length > 0 ? invoicesList.map((inv, i) => (
-                  <tr key={i} className="hover:bg-blue-50/30 transition-all group cursor-pointer" onClick={() => onInvoiceClick && onInvoiceClick(inv.id)}>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-[10px] sm:text-xs font-bold text-slate-400">{inv.invoiceNumber || inv.id.slice(0,8)}</td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-[10px] sm:text-xs font-bold text-slate-600">{inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : 'N/A'}</td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-xs sm:text-sm font-black text-slate-800 uppercase">{inv.client}</td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-xs sm:text-sm font-black text-slate-900 text-center italic">₹{parseFloat(inv.amount || 0).toLocaleString('en-IN')}</td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5"><div className={`w-fit px-2 sm:px-3 py-1 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest shadow-sm ${inv.status === 'Paid' ? 'bg-blue-500 text-white' : inv.status === 'Pending' ? 'bg-blue-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div></td>
-                    <td className="px-6 sm:px-8 py-4 sm:py-5 text-center"><MoreHorizontal size={18} className="mx-auto text-slate-400 group-hover:text-blue-500" /></td>
+                {filteredInvoices.length > 0 ? filteredInvoices.map((inv, i) => (
+                  <tr key={i} className="hover:bg-blue-50/30 transition-all group">
+                    <td className="px-3.5 py-2 text-[10px] font-bold text-slate-400">{inv.invoiceNumber || inv.id.slice(0,8)}</td>
+                    <td className="px-3.5 py-2 text-[10.5px] font-medium text-slate-600 whitespace-nowrap">{inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : 'N/A'}</td>
+                    <td className="px-3.5 py-2 text-[11px] font-bold text-slate-800">{inv.client}</td>
+                    <td className="px-3.5 py-2 text-[11px] font-bold text-slate-900 text-center whitespace-nowrap">₹{parseFloat(inv.amount || 0).toLocaleString('en-IN')}</td>
+                    <td className="px-3.5 py-2">
+                      <div className={`w-fit px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-2xs whitespace-nowrap ${inv.status === 'Paid' ? 'bg-blue-500 text-white' : inv.status === 'Pending' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'}`}>{inv.status}</div>
+                    </td>
+                    <td className="px-3.5 py-2 text-center">
+                      <button 
+                        onClick={() => onInvoiceClick && onInvoiceClick(inv.id)}
+                        className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                        title="View Details"
+                      >
+                        <MoreHorizontal size={15} />
+                      </button>
+                    </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="6" className="px-6 sm:px-8 py-10 text-center text-slate-400 italic font-bold">No transactions found.</td></tr>
+                  <tr><td colSpan="6" className="px-4 py-8 text-center text-slate-400 italic text-xs font-medium">No transactions found.</td></tr>
                 )}
               </tbody>
             </table>
@@ -460,21 +645,25 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
         </div>
       </div>
 
+      {/* Generate Invoice Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 p-6 overflow-y-auto text-left">
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-white w-full max-w-xl rounded-3xl sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col my-auto max-h-[95vh] text-left">
-            <div className="p-6 sm:p-10 overflow-y-auto custom-scrollbar">
-              <div className="flex justify-between items-center mb-8">
-                <div><h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter italic uppercase">Generate New Invoice</h2><p className="text-[10px] font-black text-slate-400 tracking-widest uppercase mt-1">Add billing & transaction logging</p></div>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 transition-colors"><X size={24} /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs animate-in fade-in" onClick={() => setIsModalOpen(false)}></div>
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-center mb-5">
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Generate New Invoice</h2>
+                  <p className="text-[9px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">Add billing & transaction logging</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400"><X size={20} /></button>
               </div>
-              <form onSubmit={handleCreateInvoice} className="space-y-6 text-left">
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Client</label>
+              <form onSubmit={handleCreateInvoice} className="space-y-4 text-left">
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Select Client</label>
                   <select 
                     required
-                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                     value={formData.client} 
                     onChange={(e) => setFormData({...formData, client: e.target.value})}
                   >
@@ -483,10 +672,10 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                   </select>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Tender</label>
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Select Tender</label>
                   <select 
-                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                     value={formData.tenderId} 
                     onChange={(e) => {
                       const t = tenders.find(t => t.id === e.target.value);
@@ -511,31 +700,31 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tender Value (₹)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 text-left">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Tender Value (₹)</label>
                     <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
                       <input 
                         type="text" 
                         disabled
                         placeholder="0.00" 
-                        className="w-full pl-10 pr-5 py-3.5 bg-slate-100 border border-slate-100 rounded-2xl text-sm font-black opacity-70" 
+                        className="w-full pl-7 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 opacity-75" 
                         value={formData.tenderValue} 
                         readOnly
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Billing Amount (₹)</label>
+                  <div className="space-y-1 text-left">
+                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Billing Amount (₹)</label>
                     <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black">₹</span>
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
                       <input 
                         type="number" 
                         required
                         placeholder="0.00" 
-                        className="w-full pl-10 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all" 
+                        className="w-full pl-7 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
                         value={formData.amount} 
                         onChange={(e) => setFormData({...formData, amount: e.target.value})} 
                       />
@@ -543,33 +732,33 @@ const FinancialManagement = ({ onInvoiceClick, user }) => {
                   </div>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload Invoice Document</label>
-                  <div className={`relative border-2 border-dashed rounded-2xl p-6 transition-all flex flex-col items-center justify-center gap-3 ${formData.attachment ? 'border-blue-200 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-blue-200'}`}>
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider ml-1">Upload Invoice Document</label>
+                  <div className={`relative border border-dashed rounded-xl p-4 transition-all flex flex-col items-center justify-center gap-2 ${formData.attachment ? 'border-blue-300 bg-blue-50/50' : 'border-slate-200 bg-slate-50 hover:border-blue-300'}`}>
                     <input 
                       type="file" 
                       className="absolute inset-0 opacity-0 cursor-pointer" 
                       onChange={(e) => handleFileUpload(e.target.files[0])}
                     />
                     {isUploading ? (
-                      <Loader2 className="animate-spin text-blue-500" size={24} />
+                      <Loader2 className="animate-spin text-blue-500" size={20} />
                     ) : formData.attachment ? (
                       <>
-                        <CheckCircle2 className="text-blue-500" size={24} />
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Document Uploaded</p>
+                        <CheckCircle2 className="text-blue-500" size={20} />
+                        <p className="text-[9px] font-bold text-blue-600 uppercase tracking-wider">Document Uploaded</p>
                       </>
                     ) : (
                       <>
-                        <UploadCloud className="text-slate-400" size={24} />
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Click or drag to upload</p>
+                        <UploadCloud className="text-slate-400" size={20} />
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Click or drag to upload</p>
                       </>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sticky bottom-0 bg-white pb-2 text-left">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="order-2 sm:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[11px] font-black uppercase tracking-widest">Cancel</button>
-                  <button type="submit" disabled={isUploading} className="order-1 sm:order-2 flex-[2] py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95 disabled:opacity-50">
+                <div className="flex gap-2.5 pt-2 sticky bottom-0 bg-white pb-1">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-slate-200 transition-all">Cancel</button>
+                  <button type="submit" disabled={isUploading} className="flex-[2] py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-xs active:scale-95 disabled:opacity-50">
                     {isUploading ? 'Uploading...' : 'Generate Invoice'}
                   </button>
                 </div>

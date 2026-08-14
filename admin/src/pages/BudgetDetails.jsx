@@ -29,17 +29,17 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
   const transactions = expenses.map(e => ({
     id: e.id,
     date: e.date,
-    description: e.description || `${e.category} payment to ${e.vendor}`,
-    amount: parseFloat(e.amount),
+    description: e.description || `${e.category} payment to ${e.vendor || 'Vendor'}`,
+    amount: parseFloat(e.amount || 0),
     status: e.status,
     vendor: e.vendor
   }));
 
   const filteredTransactions = transactions.filter(t => {
-    const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = (t.description || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (t.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (t.vendor && t.vendor.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'ALL' || t.status.toUpperCase() === statusFilter.toUpperCase();
+    const matchesStatus = statusFilter === 'ALL' || (t.status || '').toUpperCase() === statusFilter.toUpperCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -57,7 +57,7 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
       return;
     }
 
-    const filename = `Admin_Budget_Report_${category.name.replace(/\s+/g, '_')}_${startDate}_to_${endDate}`;
+    const filename = `Budget_Report_${category.name.replace(/\s+/g, '_')}_${startDate}_to_${endDate}`;
 
     if (format === 'csv') {
       const headers = ['Transaction ID', 'Date', 'Description', 'Status', 'Amount'];
@@ -96,45 +96,46 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
       XLSX.writeFile(workbook, `${filename}.xlsx`);
     } else if (format === 'pdf') {
       const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text(`Budget Report: ${category.name}`, 14, 20);
-      doc.setFontSize(10);
-      doc.text(`Period: ${startDate} to ${endDate}`, 14, 28);
+      doc.setFontSize(14);
+      doc.text(`Budget Report: ${category.name}`, 14, 15);
+      doc.setFontSize(9);
+      doc.text(`Period: ${startDate} to ${endDate}`, 14, 22);
       
-      const rows = exportData.map(trx => [trx.id, trx.date, trx.description, trx.status, trx.amount.toLocaleString()]);
+      const rows = exportData.map(trx => [trx.id, trx.date, trx.description, trx.status, `₹${trx.amount.toLocaleString('en-IN')}`]);
       autoTable(doc, {
-        startY: 35,
+        startY: 28,
         head: [["ID", "Date", "Description", "Status", "Amount"]],
         body: rows,
+        styles: { fontSize: 8 }
       });
       doc.save(`${filename}.pdf`);
     }
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-7 bg-[#f8fafc] min-h-screen text-left">
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3.5 sm:space-y-4 animate-in fade-in duration-500">
       {/* Header with Back Button */}
-      <div className="flex items-center justify-between mb-5 gap-3">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3 text-left">
+        <div className="flex items-center gap-2">
           <button 
             onClick={onBack}
-            className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-500 transition-all shadow-sm"
+            className="p-1 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-500 transition-all shadow-2xs"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={14} />
           </button>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[8px] font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-1.5 py-0.5 rounded">
                 Allocation Details
               </span>
-              <span className={`px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider
+              <span className={`px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider
                 ${category.status === 'ON TRACK' ? 'bg-blue-600 text-white' : 
                   category.status === 'OVER BUDGET' ? 'bg-rose-500 text-white' : 
                   'bg-blue-500 text-white'}`}>
                 {category.status}
               </span>
             </div>
-            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase mt-1">
+            <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight uppercase mt-0.5">
               {category.name}
             </h1>
           </div>
@@ -143,57 +144,59 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
 
       {/* Warning Alert if high utilization */}
       {category.utilization >= 80 && (
-        <div className="mb-5 p-3.5 bg-rose-50 border border-rose-100 rounded-2xl flex items-center justify-between text-rose-600 animate-in fade-in">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle size={20} className="shrink-0" />
+        <div className="p-2.5 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-between text-rose-600 animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={15} className="shrink-0" />
             <div>
-              <h5 className="text-[10px] font-black uppercase tracking-wider">Critical Utilization Alert</h5>
-              <p className="text-[9px] font-bold text-rose-505 mt-0.5">This budget category has reached {category.utilization}% of its total allocation. Please monitor expenditures closely.</p>
+              <h5 className="text-[9px] font-bold uppercase tracking-wider">Critical Utilization Alert</h5>
+              <p className="text-[8.5px] font-medium text-rose-600 mt-0.5">This budget category has reached {category.utilization}% of its total allocation. Please monitor expenditures closely.</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Top Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
-          <div className="p-2.5 rounded-xl bg-blue-50/50 text-blue-600 mb-3">
-            <Wallet size={16} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+        <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mb-1.5">
+            <Wallet size={13} />
           </div>
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Total Allocated</span>
-          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">₹{category.allocated.toLocaleString('en-IN')}</span>
-          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight block mt-1 leading-none">Fiscal Year 2024</span>
+          <div>
+            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate">Total Allocated</span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">₹{category.allocated.toLocaleString('en-IN')}</span>
+          </div>
         </div>
 
-        <div className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group">
-          <div className="p-2.5 rounded-xl bg-blue-50/50 text-blue-500 mb-3">
-            <TrendingUp size={16} />
+        <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 mb-1.5">
+            <TrendingUp size={13} />
           </div>
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Total Spent</span>
-          <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-none">₹{category.spent.toLocaleString('en-IN')}</span>
-          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight block mt-1 leading-none">Year to Date</span>
+          <div>
+            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate">Total Spent</span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">₹{category.spent.toLocaleString('en-IN')}</span>
+          </div>
         </div>
 
-        <div className="bg-white p-4.5 rounded-2xl border border-slate-100 flex flex-col items-start group sm:col-span-2">
-          <div className="flex justify-between w-full mb-3">
-            <div className="p-2.5 rounded-xl bg-purple-50/50 text-purple-600">
-              <PieChart size={16} />
+        <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between sm:col-span-2">
+          <div className="flex justify-between items-center mb-1.5">
+            <div className="w-6 h-6 rounded-md bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <PieChart size={13} />
             </div>
             <div className="text-right">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Current Trend</span>
-              <div className={`flex items-center justify-end gap-1 text-[10px] font-bold ${category.trend.startsWith('+') ? 'text-rose-500' : 'text-blue-500'}`}>
-                <ArrowUpRight size={12} className={category.trend.startsWith('-') ? 'rotate-90' : ''} />
-                <span>{category.trend} This Month</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Trend</span>
+              <div className={`flex items-center justify-end gap-0.5 text-[9px] font-bold ${category.trend.startsWith('+') ? 'text-rose-500' : 'text-blue-500'}`}>
+                <ArrowUpRight size={10} className={category.trend.startsWith('-') ? 'rotate-90' : ''} />
+                <span>{category.trend}</span>
               </div>
             </div>
           </div>
           
-          <div className="w-full mt-auto">
+          <div className="w-full">
             <div className="flex justify-between items-end mb-1">
-              <span className="text-[9px] font-black text-slate-555 uppercase tracking-widest">Utilization Progress</span>
-              <span className={`text-xs font-black ${category.utilization > 100 ? 'text-rose-500' : 'text-slate-900'}`}>{category.utilization}%</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Utilization</span>
+              <span className={`text-[10px] font-extrabold ${category.utilization > 100 ? 'text-rose-500' : 'text-slate-900'}`}>{category.utilization}%</span>
             </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
               <div 
                 className={`h-full ${category.utilization > 100 ? 'bg-rose-500' : 'bg-blue-600'} transition-all`} 
                 style={{ width: `${Math.min(category.utilization, 100)}%` }}
@@ -204,18 +207,19 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
       </div>
 
       {/* Transactions List */}
-      <div className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white text-left">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <div className="p-3 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50/40 text-left">
           <div>
-            <h2 className="text-sm sm:text-base font-black text-slate-800 tracking-tight uppercase">Recent Transactions</h2>
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight">Recent Transactions</h2>
+            <p className="text-[9px] text-slate-500 font-medium">Expenditures billed to this category.</p>
           </div>
-          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
             <div className="relative flex-1 sm:flex-none">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
               <input 
                 type="text" 
-                placeholder="Search transactions..." 
-                className="pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all w-full sm:w-48"
+                placeholder="Search..." 
+                className="pl-7 pr-2.5 py-1 bg-white border border-slate-200 rounded-lg text-[10.5px] font-medium focus:outline-none focus:border-blue-500 transition-all w-full sm:w-40"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -223,22 +227,21 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
             <div className="relative">
               <button 
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className={`p-2 rounded-xl transition-all ${showFilterDropdown ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-500 hover:text-blue-600 hover:bg-blue-50'}`}
+                className={`p-1.5 rounded-lg border transition-all ${showFilterDropdown ? 'border-blue-300 bg-blue-50 text-blue-600' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
               >
-                <Filter size={14} />
+                <Filter size={13} />
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute top-full right-0 mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-slate-100 z-50 p-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                  <div className="p-1.5 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1">Filter by Status</div>
-                  {['ALL', 'Completed', 'Pending', 'Processing'].map((status) => (
+                <div className="absolute top-full right-0 mt-1 w-36 bg-white rounded-xl shadow-lg border border-slate-100 z-50 p-1 animate-in fade-in">
+                  {['ALL', 'COMPLETED', 'PENDING', 'APPROVED'].map((status) => (
                     <button
                       key={status}
                       onClick={() => {
                         setStatusFilter(status);
                         setShowFilterDropdown(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${statusFilter === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                      className={`w-full text-left px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all ${statusFilter === status ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
                       {status}
                     </button>
@@ -248,9 +251,9 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
             </div>
             <button 
               onClick={() => setIsExportModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-100 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all shadow-2xs"
             >
-              <Download size={14} className="text-blue-500" />
+              <Download size={13} className="text-blue-500" />
               <span>Export</span>
             </button>
           </div>
@@ -259,37 +262,36 @@ const BudgetDetails = ({ category, expenses = [], onBack }) => {
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[650px]">
             <thead>
-              <tr className="text-[8.5px] sm:text-[9.5px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                <th className="px-5 sm:px-8 py-3.5">Transaction ID</th>
-                <th className="px-5 sm:px-8 py-3.5">Date</th>
-                <th className="px-5 sm:px-8 py-3.5">Description</th>
-                <th className="px-5 sm:px-8 py-3.5">Status</th>
-                <th className="px-5 sm:px-8 py-3.5 text-right">Amount</th>
+              <tr className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50 border-b border-slate-100">
+                <th className="px-3.5 py-2">Transaction ID</th>
+                <th className="px-3.5 py-2">Date</th>
+                <th className="px-3.5 py-2">Description</th>
+                <th className="px-3.5 py-2">Status</th>
+                <th className="px-3.5 py-2 text-right">Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filteredTransactions.map((trx, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                  <td className="px-5 sm:px-8 py-4 text-xs font-bold text-slate-600">{trx.id}</td>
-                  <td className="px-5 sm:px-8 py-4 text-xs font-bold text-slate-600">{trx.date}</td>
-                  <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800">{trx.description}</td>
-                  <td className="px-5 sm:px-8 py-4">
-                    <span className={`px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider
-                      ${trx.status === 'Completed' ? 'bg-blue-500 text-white' : 
-                        trx.status === 'Pending' ? 'bg-amber-555 text-white' : 
-                        'bg-blue-555 text-white'}`}>
+                <tr key={idx} className="hover:bg-slate-50/70 transition-all">
+                  <td className="px-3.5 py-2 text-[10px] font-bold text-blue-600">{trx.id}</td>
+                  <td className="px-3.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap">{trx.date}</td>
+                  <td className="px-3.5 py-2 text-[11px] font-bold text-slate-800">{trx.description}</td>
+                  <td className="px-3.5 py-2">
+                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider
+                      ${trx.status === 'COMPLETED' || trx.status === 'APPROVED' ? 'bg-blue-600 text-white' : 
+                        trx.status === 'PENDING' ? 'bg-amber-500 text-white' : 
+                        'bg-slate-500 text-white'}`}>
                       {trx.status}
                     </span>
                   </td>
-                  <td className="px-5 sm:px-8 py-4 text-xs sm:text-sm font-black text-slate-800 text-right">₹{trx.amount.toLocaleString('en-IN')}</td>
+                  <td className="px-3.5 py-2 text-[11px] font-bold text-slate-900 text-right whitespace-nowrap">₹{trx.amount.toLocaleString('en-IN')}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {filteredTransactions.length === 0 && (
-            <div className="py-12 text-center">
-              <Search className="mx-auto text-slate-300 mb-2" size={20} />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No transactions matching filters</p>
+            <div className="py-8 text-center text-slate-400 text-xs italic font-medium">
+              No transactions matching filters
             </div>
           )}
         </div>

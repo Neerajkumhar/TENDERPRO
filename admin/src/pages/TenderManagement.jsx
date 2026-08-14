@@ -19,7 +19,9 @@ import {
   TrendingUp,
   Briefcase,
   ExternalLink,
-  ArrowRight
+  ArrowRight,
+  Plus,
+  IndianRupee
 } from 'lucide-react';
 import {
   AreaChart,
@@ -37,11 +39,13 @@ import {
   Pie
 } from 'recharts';
 
-const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments = [], setTenders, clients }) => {
-  const [activeView, setActiveView] = useState('overview'); // 'overview' or 'list'
+const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments = [], setTenders, clients, user }) => {
+  const [activeView, setActiveView] = useState('list'); // 'list' or 'overview'
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const datePickerRef = useRef(null);
 
   useEffect(() => {
@@ -59,18 +63,26 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
     return client ? client.name : 'Unknown Client';
   };
 
-  const filteredTenders = tenders.filter(t => 
-    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getClientName(t.clientId).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTenders = tenders.filter(t => {
+    const matchesSearch = 
+      t.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getClientName(t.clientId)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.category?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'All' || t.status === statusFilter;
+    const matchesCategory = categoryFilter === 'All' || t.category === categoryFilter;
+
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
 
   const statsData = [
-    { label: 'Total Tenders', value: tenders.length, color: 'slate' },
-    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'blue' },
-    { label: 'Registered', value: tenders.filter(t => t.status === 'Registered').length, color: 'indigo' },
-    { label: 'Total Projects', value: assignments?.length || 0, color: 'blue' },
-    { label: 'Completed Projects', value: assignments?.filter(a => a.status === 'Completed').length || 0, color: 'teal' },
-    { label: 'Completed Tenders', value: tenders.filter(t => t.status === 'Completed').length, color: 'amber' },
+    { label: 'Total Tenders', value: tenders.length, color: 'text-slate-800' },
+    { label: 'Active Bids', value: tenders.filter(t => t.status === 'Active').length, color: 'text-blue-600' },
+    { label: 'Submitted', value: tenders.filter(t => t.status === 'Submitted' || t.status === 'Registered').length, color: 'text-blue-500' },
+    { label: 'Won Tenders', value: tenders.filter(t => t.status === 'Won').length, color: 'text-blue-600' },
+    { label: 'Lost Bids', value: tenders.filter(t => t.status === 'Lost').length, color: 'text-rose-500' },
+    { label: 'Under Review', value: tenders.filter(t => t.status === 'Under Review' || t.status === 'Pending').length, color: 'text-amber-500' },
   ];
 
   // 1. Tender Outcomes Over Time (Last 6 Months)
@@ -95,292 +107,293 @@ const TenderManagement = ({ onView, onEdit, onCreate, tenders = [], assignments 
     });
   }
 
-  // 2. Budget Distribution by Status
-  const budgetByStatus = [
-    { name: 'Secured (Won)', value: tenders.filter(t => t.status === 'Won').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#3b82f6' }, // blue-500
-    { name: 'In Pipeline (Active)', value: tenders.filter(t => ['Active', 'Registered', 'Under Review'].includes(t.status)).reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#6366f1' }, // indigo-500
-    { name: 'Lost', value: tenders.filter(t => t.status === 'Lost').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#f43f5e' }, // rose-500
-    { name: 'Drafts', value: tenders.filter(t => t.status === 'Draft').reduce((acc, t) => acc + parseFloat(t.budget || 0), 0), color: '#94a3b8' } // slate-400
-  ].filter(item => item.value > 0);
-
-  if (budgetByStatus.length === 0) {
-    budgetByStatus.push({ name: 'No Data', value: 1, color: '#f1f5f9' });
-  }
-
-  const formatCurrency = (val) => {
-    if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)}Cr`;
-    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
-    return `₹${val.toLocaleString()}`;
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Won': return 'bg-blue-600 text-white';
+      case 'Active': return 'bg-blue-500 text-white';
+      case 'Registered': return 'bg-indigo-500 text-white';
+      case 'Under Review': return 'bg-amber-500 text-white';
+      case 'Lost': return 'bg-rose-500 text-white';
+      case 'Draft': return 'bg-slate-200 text-slate-700';
+      default: return 'bg-slate-100 text-slate-600';
+    }
   };
 
-  const totalBudgetValue = budgetByStatus.reduce((acc, item) => item.name !== 'No Data' ? acc + item.value : acc, 0);
-
-  const recentTenders = [...tenders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'Government': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'Private': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'PSU': return 'bg-purple-50 text-purple-700 border-purple-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  };
 
   return (
-    <div className="p-4 sm:p-5 space-y-4 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Tab Navigation Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl shadow-slate-200/40 border border-white">
-        <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <button 
-            onClick={() => setActiveView('overview')}
-            className={`flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-              activeView === 'overview' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
-            }`}
-          >
-            <LayoutDashboard size={16} />
-            Overview
-          </button>
-          <button 
-            onClick={() => setActiveView('list')}
-            className={`flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-              activeView === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'
-            }`}
-          >
-            <FileText size={16} />
-            Master List
-          </button>
+    <div className="p-3 sm:p-4 lg:p-5 bg-[#f8fafc] min-h-screen text-left space-y-3 sm:space-y-3.5 animate-in fade-in duration-500">
+      {/* Header Toolbar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+        <div>
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <FileText className="text-blue-600" size={18} />
+            <span>Tenders Management</span>
+          </h1>
+          <p className="text-[9px] text-slate-500 font-medium">Track, manage, and review all tender applications and contracts.</p>
         </div>
-        <div className="flex gap-3 relative self-end sm:self-auto" ref={datePickerRef}>
-           <button 
-            onClick={() => setShowDatePicker(!showDatePicker)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
-           >
-              <Calendar size={14} className="text-indigo-600" />
-              <span>{new Date(selectedDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
-              <ChevronDown size={12} className={`transition-transform duration-300 ${showDatePicker ? 'rotate-180' : ''}`} />
-           </button>
 
-           {showDatePicker && (
-              <div className="absolute right-0 top-full mt-2 p-4 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-64 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Select Date</label>
-                  <input 
-                    type="date" 
-                    value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      setShowDatePicker(false);
-                    }}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400"
-                  />
-                </div>
-              </div>
-            )}
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex bg-white p-0.5 rounded-lg border border-slate-200 shadow-2xs">
+            <button 
+              onClick={() => setActiveView('list')}
+              className={`px-2.5 py-1 rounded-md text-[9.5px] font-bold uppercase tracking-wider transition-all ${
+                activeView === 'list' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              List View
+            </button>
+            <button 
+              onClick={() => setActiveView('overview')}
+              className={`px-2.5 py-1 rounded-md text-[9.5px] font-bold uppercase tracking-wider transition-all ${
+                activeView === 'overview' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Analytics
+            </button>
+          </div>
+
+          {user?.role !== 'Tender Manager' && (
+            <button 
+              onClick={onCreate}
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-700 transition-all shadow-2xs active:scale-95"
+            >
+              <Plus size={13} />
+              <span>Register Tender</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {activeView === 'overview' ? (
-        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-          {/* Stats Grid - Matching Image 2 */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {statsData.map((stat, i) => (
-              <div key={i} className="bg-white p-3.5 rounded-xl shadow-xs border border-slate-100/90 relative overflow-hidden hover:shadow-md hover:border-slate-200 transition-all duration-300">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 truncate">{stat.label}</p>
-                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
-              </div>
-            ))}
+      {/* Top 6 KPI Metric Cards */}
+      <div className="grid grid-cols-2 min-[480px]:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+        {statsData.map((stat, i) => (
+          <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all duration-200">
+            <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5 truncate">{stat.label}</span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight block leading-none">{stat.value}</span>
           </div>
+        ))}
+      </div>
 
-          {/* Charts & Recent Tenders Row - Side-by-Side */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            {/* Tender Activity Timeline Card - Reduced Horizontal Size */}
-            <div className="lg:col-span-5 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Tender Activity Timeline</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Bid outcomes over last 6 months</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                    <TrendingUp size={16} />
-                  </div>
-                </div>
-                <div className="h-[220px]">
-                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                    <AreaChart data={outcomesData}>
-                      <defs>
-                        <linearGradient id="colorWon" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={5} />
-                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dx={-5} allowDecimals={false} />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        itemStyle={{ fontSize: '11px', fontWeight: 700 }}
-                        labelStyle={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}
-                      />
-                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                      <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWon)" strokeWidth={2.5} />
-                      <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActive)" strokeWidth={2.5} />
-                      <Area type="monotone" dataKey="Lost" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} strokeWidth={2} strokeDasharray="4 4" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+      {activeView === 'overview' && (
+        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-2xs animate-in fade-in duration-300">
+          <div className="flex justify-between items-center mb-2.5">
+            <div>
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-tight">Tender Activity Timeline</h3>
+              <p className="text-[8.5px] font-medium text-slate-400 uppercase tracking-wider">Bid outcomes over last 6 months</p>
             </div>
-
-            {/* Recent Tenders Card (Placed adjacent to Tender Activity Timeline Card) */}
-            <div className="lg:col-span-7 bg-white p-4 sm:p-5 rounded-xl shadow-xs border border-slate-100/90 flex flex-col justify-between overflow-hidden">
-              <div>
-                <div className="flex justify-between items-center mb-3 border-b border-slate-50 pb-3">
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight uppercase">Recent Tenders</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Latest bid activities</p>
-                  </div>
-                  <button 
-                    onClick={() => setActiveView('list')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold text-indigo-600 hover:bg-indigo-50 transition-all shadow-xs active:scale-95"
-                  >
-                    <span>View All</span>
-                    <ArrowRight size={12} />
-                  </button>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-50">
-                        <th className="px-3 py-2">Tender</th>
-                        <th className="px-3 py-2">Client</th>
-                        <th className="px-3 py-2">Status</th>
-                        <th className="px-3 py-2">Value</th>
-                        <th className="px-3 py-2 text-center">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {recentTenders.length > 0 ? recentTenders.map((tender, i) => (
-                        <tr key={tender.id || i} className="hover:bg-slate-50/50 transition-all cursor-pointer group">
-                          <td className="px-3 py-2.5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                                {tender.title?.charAt(0) || 'T'}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate max-w-[130px]">{tender.title}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-3 py-2.5 text-xs font-semibold text-slate-500 truncate max-w-[100px]">{getClientName(tender.clientId)}</td>
-                          <td className="px-3 py-2.5">
-                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider whitespace-nowrap
-                              ${tender.status === 'Won' ? 'bg-blue-50 text-blue-600' : 
-                                tender.status === 'Active' ? 'bg-indigo-50 text-indigo-600' : 
-                                'bg-amber-50 text-amber-600'}`}>
-                              {tender.status}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 text-xs font-extrabold text-slate-900 whitespace-nowrap">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
-                          <td className="px-3 py-2.5 text-center">
-                            <button onClick={() => onView(tender.id)} className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                              <Eye size={15} />
-                            </button>
-                          </td>
-                        </tr>
-                      )) : (
-                        <tr>
-                          <td colSpan="5" className="px-4 py-6 text-center text-slate-400 italic text-xs">No recent tenders found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      ) : (
-        /* Active Tenders Master List */
-        <div className="card bg-white shadow-xl shadow-slate-200/40 border-none overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500 rounded-2xl">
-          <div className="p-4 sm:p-8 border-b border-slate-50 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-slate-50/30">
-            <h3 className="font-black text-slate-900 text-lg sm:text-xl tracking-tight uppercase tracking-[0.1em]">Active Tenders Master List</h3>
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <div className="relative group w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Search title or client..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all w-full shadow-sm" 
-                />
-              </div>
-              <button 
-                onClick={onCreate}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
-              >
-                Add New
-              </button>
+            <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <TrendingUp size={13} />
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  <th className="px-8 py-4">ID</th>
-                  <th className="px-8 py-4">Tender Title</th>
-                  <th className="px-8 py-4">Client</th>
-                  <th className="px-8 py-4">Status</th>
-                  <th className="px-8 py-4">Due Date</th>
-                  <th className="px-8 py-4">Value (₹)</th>
-                  <th className="px-8 py-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredTenders.length > 0 ? filteredTenders.map((tender, i) => (
-                  <tr key={tender.id || i} className="hover:bg-indigo-50/30 transition-all cursor-pointer group">
-                    <td className="px-8 py-5 text-xs font-bold text-slate-400">#{tender.id?.substring(0, 8)}</td>
-                    <td className="px-8 py-5 text-sm font-black text-slate-800">{tender.title}</td>
-                    <td className="px-8 py-5 text-sm font-bold text-slate-600">{getClientName(tender.clientId)}</td>
-                    <td className="px-8 py-5">
-                      <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit
-                        ${tender.status === 'Draft' ? 'bg-slate-100 text-slate-600' :
-                          tender.status === 'Active' ? 'bg-blue-100 text-blue-600' :
-                            tender.status === 'Won' ? 'bg-blue-100 text-blue-600' :
-                              'bg-amber-100 text-amber-600'}`}>
-                        {tender.status}
-                      </div>
-                    </td>
-                    <td className="px-8 py-5 text-xs font-bold text-slate-400">{tender.submissionDate ? new Date(tender.submissionDate).toLocaleDateString() : 'No Date'}</td>
-                    <td className="px-8 py-5 text-sm font-black text-slate-900">₹{parseFloat(tender.budget || 0).toLocaleString()}</td>
-                    <td className="px-8 py-5">
-                      <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => onView(tender.id)} className="p-1.5 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors"><Eye size={16} /></button>
-                        <button onClick={() => onEdit(tender)} className="p-1.5 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors"><Edit2 size={16} /></button>
-                        <button onClick={() => {
-                          if(window.confirm('Delete this tender?')) {
-                            fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
-                              .then(res => {
-                                if (res.ok) {
-                                  setTenders(prev => prev.filter(t => t.id !== tender.id));
-                                } else {
-                                  alert('Failed to delete tender. It may be linked to other records.');
-                                }
-                              });
-                          }
-                        }} className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"><Trash2 size={16} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan="7" className="px-8 py-10 text-center text-slate-400 italic font-medium">No tenders found matching your search.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={outcomesData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorWonTM" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorActiveTM" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 8.5, fontWeight: 700}} dy={3} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 8.5, fontWeight: 700}} allowDecimals={false} />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '10px', fontWeight: 600 }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '8.5px', fontWeight: 700, textTransform: 'uppercase' }} />
+                <Area type="monotone" dataKey="Won" stackId="1" stroke="#3b82f6" fill="url(#colorWonTM)" strokeWidth={2} />
+                <Area type="monotone" dataKey="Active" stackId="1" stroke="#6366f1" fill="url(#colorActiveTM)" strokeWidth={2} />
+                <Area type="monotone" dataKey="Lost" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.05} strokeWidth={1.5} strokeDasharray="3 3" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}
+
+      {/* Main Table Card */}
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        {/* Table Toolbar */}
+        <div className="p-2.5 sm:p-3 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2 bg-slate-50/40">
+          <div>
+            <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">Active Tender Portfolio</h2>
+            <p className="text-[8.5px] text-slate-500 font-medium">Search and filter registered contracts</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {/* Search Input */}
+            <div className="relative flex-1 sm:w-56">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+              <input 
+                type="text" 
+                placeholder="Search title, client, ref..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-medium outline-none focus:border-blue-500 transition-all shadow-2xs"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-2.5 pr-6 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-2xs"
+              >
+                <option value="All">All Status</option>
+                <option value="Registered">Registered</option>
+                <option value="Active">Active</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Won">Won</option>
+                <option value="Lost">Lost</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </div>
+
+            {/* Category Filter */}
+            <div className="relative">
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="pl-2.5 pr-6 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-600 outline-none cursor-pointer focus:border-blue-500 transition-all shadow-2xs"
+              >
+                <option value="All">All Categories</option>
+                <option value="Government">Government</option>
+                <option value="Private">Private</option>
+                <option value="PSU">PSU</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Table Content */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[850px]">
+            <thead>
+              <tr className="bg-slate-50/50 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                <th className="px-3.5 py-2">Tender Details</th>
+                <th className="px-3.5 py-2">Client</th>
+                <th className="px-3.5 py-2">Category</th>
+                <th className="px-3.5 py-2">Submission Date</th>
+                <th className="px-3.5 py-2 text-right">Budget (₹)</th>
+                <th className="px-3.5 py-2 text-center">Status</th>
+                <th className="px-3.5 py-2 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredTenders.length > 0 ? (
+                filteredTenders.map((tender, i) => (
+                  <tr 
+                    key={tender.id || i} 
+                    className="hover:bg-slate-50/70 transition-all cursor-pointer group"
+                    onClick={() => onView(tender.id)}
+                  >
+                    <td className="px-3.5 py-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                          {tender.title?.charAt(0) || 'T'}
+                        </div>
+                        <div className="min-w-0">
+                          <p 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onView(tender.id);
+                            }}
+                            className="text-[11px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight cursor-pointer hover:underline truncate max-w-[220px]"
+                          >
+                            {tender.title}
+                          </p>
+                          <p className="text-[8px] font-medium text-slate-400 uppercase mt-0.5">
+                            REF: #{tender.reference || tender.id?.substring(0, 8)}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3.5 py-2 text-[10.5px] font-semibold text-slate-600">
+                      {tender.client?.name || getClientName(tender.clientId)}
+                    </td>
+                    <td className="px-3.5 py-2">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${getCategoryColor(tender.category)}`}>
+                        {tender.category || 'General'}
+                      </span>
+                    </td>
+                    <td className="px-3.5 py-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
+                        <Calendar size={11} className="text-slate-400 shrink-0" />
+                        <span>
+                          {tender.submissionDate 
+                            ? new Date(tender.submissionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : 'Not Set'
+                          }
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-3.5 py-2 text-[11px] font-extrabold text-slate-900 text-right">
+                      ₹{parseFloat(tender.budget || 0).toLocaleString('en-IN')}
+                    </td>
+                    <td className="px-3.5 py-2 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-2xs ${getStatusColor(tender.status)}`}>
+                        {tender.status}
+                      </span>
+                    </td>
+                    <td className="px-3.5 py-2 text-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-1">
+                        <button 
+                          onClick={() => onView(tender.id)}
+                          title="View Details"
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all"
+                        >
+                          <Eye size={13} />
+                        </button>
+                        <button 
+                          onClick={() => onEdit(tender)}
+                          title="Edit Tender"
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if(window.confirm('Delete this tender?')) {
+                              fetch(`/api/tenders/${tender.id}`, { method: 'DELETE' })
+                                .then(res => {
+                                  if (res.ok) {
+                                    setTenders(prev => prev.filter(t => t.id !== tender.id));
+                                  } else {
+                                    alert('Failed to delete tender. It may be linked to other records.');
+                                  }
+                                });
+                            }
+                          }}
+                          title="Delete Tender"
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-4 py-12 text-center text-slate-400 italic text-xs font-medium">
+                    No tenders found matching your search.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

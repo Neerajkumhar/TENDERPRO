@@ -73,7 +73,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         const updatedAttachments = [...attachments, newAttachment];
         setAttachments(updatedAttachments);
         
-        // Save to DB if it's a database task (UUID format)
         if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
           await fetch(`/api/tasks/${taskId}`, {
             method: 'PUT',
@@ -93,7 +92,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
     const updatedAttachments = attachments.filter(att => att.id !== attachmentId);
     setAttachments(updatedAttachments);
     
-    // Save to DB if it's a database task
     if (!String(taskId).startsWith('m') && !String(taskId).startsWith('sidebar')) {
       try {
         await fetch(`/api/tasks/${taskId}`, {
@@ -177,7 +175,6 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
   useEffect(() => {
     const fetchTask = async () => {
       setLoading(true);
-      // Try to find mock tasks first
       if (String(taskId).startsWith('m') || String(taskId).startsWith('sidebar')) {
         const cleanedId = String(taskId).replace('sidebar-', '');
         const foundTask = mockTasksFallback.find(t => String(t.id) === cleanedId);
@@ -255,199 +252,197 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-slate-500 font-bold animate-pulse uppercase tracking-[0.2em] text-xs">Loading Task Details...</p>
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+        <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Loading Task Details...</p>
       </div>
     );
   }
 
   if (!task) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
-        <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl">
-          <AlertCircle size={32} />
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+        <div className="p-2 bg-rose-50 text-rose-600 rounded-lg">
+          <AlertCircle size={20} />
         </div>
-        <h2 className="text-xl font-black text-slate-900">Task Not Found</h2>
-        <button onClick={onBack} className="mt-4 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-blue-600 transition-all">Go Back</button>
+        <h2 className="text-sm font-bold text-slate-900">Task Not Found</h2>
+        <button onClick={onBack} className="mt-2 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-blue-600 transition-all">Go Back</button>
       </div>
     );
   }
 
   const getPriorityColor = (priority) => {
     switch (priority?.toUpperCase()) {
-      case 'HIGH': return 'bg-rose-50 text-rose-500 border-rose-200';
-      case 'MEDIUM': return 'bg-orange-50 text-orange-500 border-orange-200';
-      case 'LOW': return 'bg-blue-50 text-blue-500 border-blue-200';
-      default: return 'bg-slate-50 text-slate-500 border-slate-200';
+      case 'HIGH': return 'bg-rose-50 text-rose-600 border-rose-200';
+      case 'MEDIUM': return 'bg-amber-50 text-amber-600 border-amber-200';
+      case 'LOW': return 'bg-blue-50 text-blue-600 border-blue-200';
+      default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'Completed': 
-      case 'Done': return 'bg-blue-500 text-white';
-      case 'In Progress': return 'bg-blue-500 text-white';
+      case 'Done': return 'bg-blue-600 text-white';
+      case 'In Progress': return 'bg-amber-500 text-white';
       case 'Review': 
-      case 'In Review': return 'bg-purple-500 text-white';
-      default: return 'bg-slate-500 text-white';
+      case 'In Review': return 'bg-indigo-600 text-white';
+      default: return 'bg-slate-600 text-white';
     }
   };
 
   const assignee = task?.assigneeId ? members.find(m => String(m.id) === String(task.assigneeId)) : null;
 
   return (
-    <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#f8fafc] min-h-full">
+    <div className="p-3 sm:p-4 lg:p-5 space-y-3 sm:space-y-3.5 animate-in fade-in duration-500 bg-[#f8fafc] min-h-screen text-left overflow-x-hidden">
+      
       {/* Header Area */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
-        <div className="flex items-start gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+        <div className="flex items-start gap-2.5">
           <button 
             onClick={onBack}
-            className="mt-1 w-10 h-10 bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-xl flex items-center justify-center shadow-sm border border-slate-100 transition-all active:scale-95 shrink-0"
+            className="mt-0.5 w-7 h-7 bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-lg flex items-center justify-center shadow-2xs border border-slate-200 transition-all active:scale-95 shrink-0"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={14} />
           </button>
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getPriorityColor(task.priority)}`}>
-                <Flag size={10} className="inline mr-1" /> {task.priority || 'NORMAL'} PRIORITY
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`px-2 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider border ${getPriorityColor(task.priority)}`}>
+                <Flag size={8} className="inline mr-0.5" /> {task.priority || 'NORMAL'}
               </span>
-              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${getStatusColor(task.status)}`}>
+              <span className={`px-2 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider ${getStatusColor(task.status)}`}>
                 {task.status}
               </span>
-              <span className="text-[10px] font-bold text-slate-400">ID: #{String(task.id).substring(0, 8)}</span>
+              <span className="text-[8.5px] font-semibold text-slate-400">#{String(task.id).substring(0, 8)}</span>
             </div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase">{task.title}</h1>
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug uppercase">{task.title}</h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {task.status === 'Completed' || task.status === 'Done' ? (
-            <button disabled className="flex items-center gap-2 px-6 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
-              <CheckCircle2 size={16} /> Completed
+            <button disabled className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-not-allowed">
+              <CheckCircle2 size={12} /> Completed
             </button>
           ) : user.role === 'Project Manager' ? (
             <button 
               onClick={() => updateTaskStatus('Completed')}
-              className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-2xs active:scale-95 transition-all cursor-pointer"
             >
-              <CheckCircle2 size={16} /> Mark Complete
+              <CheckCircle2 size={12} /> Mark Complete
             </button>
           ) : (
-            // Core Team / General Members
             task.status === 'Review' || task.status === 'In Review' ? (
-              <button disabled className="flex items-center gap-2 px-6 py-2.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm cursor-not-allowed">
-                <Clock size={16} /> Submitted for Review
+              <button disabled className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-not-allowed">
+                <Clock size={12} /> Under Review
               </button>
             ) : (
               <button 
                 onClick={() => updateTaskStatus('Review')}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-2xs active:scale-95 transition-all cursor-pointer"
               >
-                <Clock size={16} /> Submit for Review
+                <Clock size={12} /> Submit Review
               </button>
             )
           )}
-          <button className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm">
-            <MoreVertical size={16} />
-          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5">
+        
         {/* Main Left Content */}
-        <div className="xl:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-3">
           
           {/* Description Card */}
-          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <ListTodo size={16} className="text-blue-500" /> Task Description
+          <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <ListTodo size={12} className="text-blue-500" /> Task Description
             </h3>
-            <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-slate-100">
-              <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
+            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+              <p className="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
                 {task.desc || task.description || 'No detailed description provided for this task.'}
               </p>
             </div>
           </div>
 
           {/* Subtasks / Checklist */}
-          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-blue-500" /> Subtasks & Checklist
+          <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 size={12} className="text-blue-500" /> Subtasks & Checklist
               </h3>
-              <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-lg">
-                {subtasks.length > 0 ? `${subtasks.filter(s => s.done).length}/${subtasks.length} Completed` : 'No Subtasks'}
+              <span className="text-[8px] font-bold text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">
+                {subtasks.length > 0 ? `${subtasks.filter(s => s.done).length}/${subtasks.length} Completed` : '0 Subtasks'}
               </span>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               {subtasks.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 transition-all group border border-transparent hover:border-slate-100">
-                  <label className="flex items-start gap-4 cursor-pointer flex-1">
+                <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-slate-50/70 hover:bg-slate-50 border border-slate-100 transition-all group">
+                  <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
                     <input
                       type="checkbox"
                       className="sr-only"
                       checked={item.done}
                       onChange={() => toggleSubtask(item.id)}
                     />
-                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 mt-0.5 ${item.done ? 'bg-blue-500 text-white' : 'bg-slate-100 text-transparent group-hover:bg-slate-200 border border-slate-200'}`}>
-                      <CheckCircle2 size={14} />
+                    <div className={`w-4 h-4 rounded flex items-center justify-center transition-all shrink-0 ${item.done ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300'}`}>
+                      {item.done && <CheckCircle2 size={11} />}
                     </div>
-                    <span className={`text-sm font-bold ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
+                    <span className={`text-xs font-medium truncate ${item.done ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{item.text}</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => deleteSubtask(item.id)}
-                    className="p-2 text-slate-300 hover:text-rose-500 rounded-xl hover:bg-white border border-transparent hover:border-slate-100 shadow-sm opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                    className="p-1 text-slate-300 hover:text-rose-500 rounded opacity-0 group-hover:opacity-100 transition-all"
                     title="Delete Subtask"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={11} />
                   </button>
                 </div>
               ))}
               
               {subtasks.length === 0 && !showAddSubtaskInput && (
-                <div className="text-center py-6 bg-slate-50/30 rounded-2xl border border-dashed border-slate-100">
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest italic">No subtasks created yet</p>
+                <div className="text-center py-3 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                  <p className="text-[9px] text-slate-400 font-semibold uppercase">No subtasks created yet</p>
                 </div>
               )}
             </div>
             
             {showAddSubtaskInput ? (
-              <form onSubmit={handleAddSubtask} className="mt-4 flex items-center gap-3">
+              <form onSubmit={handleAddSubtask} className="pt-1 flex items-center gap-1.5">
                 <input
                   type="text"
                   value={newSubtaskText}
                   onChange={(e) => setNewSubtaskText(e.target.value)}
                   placeholder="Enter new subtask..."
-                  className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400 shadow-sm"
+                  className="flex-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
                   autoFocus
                 />
-                <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md active:scale-95 cursor-pointer">
+                <button type="submit" className="px-2.5 py-1 bg-blue-600 text-white rounded-lg text-[9.5px] font-bold uppercase hover:bg-blue-700 transition-all shadow-2xs">
                   Save
                 </button>
-                <button type="button" onClick={() => { setShowAddSubtaskInput(false); setNewSubtaskText(''); }} className="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer">
+                <button type="button" onClick={() => { setShowAddSubtaskInput(false); setNewSubtaskText(''); }} className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9.5px] font-bold uppercase hover:bg-slate-200 transition-all">
                   Cancel
                 </button>
               </form>
             ) : (
               <button 
                 onClick={() => setShowAddSubtaskInput(true)} 
-                className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline ml-1 cursor-pointer"
+                className="text-[9px] font-bold text-blue-600 uppercase tracking-wider hover:underline block pt-1"
               >
-                + ADD SUBTASK
+                + Add Subtask
               </button>
             )}
           </div>
 
           {/* Task Attachments Card */}
-          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
+          <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Paperclip size={16} className="text-indigo-500" /> Attachments & Documents
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Paperclip size={12} className="text-indigo-500" /> Attachments & Documents
               </h3>
-              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg">
+              <span className="text-[8px] font-bold text-indigo-600 uppercase bg-indigo-50 px-2 py-0.5 rounded">
                 {attachments.length} {attachments.length === 1 ? 'File' : 'Files'}
               </span>
             </div>
@@ -463,8 +458,8 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 handleFileUpload(file);
               }}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative py-8 px-6 rounded-[2rem] border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer group
-                ${isDragging ? 'border-blue-500 bg-blue-50/50 scale-[1.02]' : 'border-slate-200 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/20'}
+              className={`py-3 px-3 rounded-lg border border-dashed transition-all flex flex-col items-center justify-center cursor-pointer
+                ${isDragging ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/20'}
               `}
             >
               <input 
@@ -473,69 +468,60 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
                 className="hidden" 
                 onChange={(e) => handleFileUpload(e.target.files[0])}
               />
-              <UploadCloud className={`mb-3 transition-transform duration-300 group-hover:scale-110 ${isUploading ? 'animate-bounce text-blue-500' : 'text-slate-400'}`} size={32} />
-              <p className="text-xs font-black text-slate-700 uppercase tracking-wider text-center">
-                {isUploading ? 'Uploading Document...' : 'Drag & Drop Document or Click to Upload'}
+              <UploadCloud className={`mb-1 ${isUploading ? 'animate-bounce text-blue-500' : 'text-slate-400'}`} size={18} />
+              <p className="text-[10px] font-bold text-slate-700 uppercase">
+                {isUploading ? 'Uploading...' : 'Drop File or Click to Upload'}
               </p>
-              <p className="text-[9px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest">Supports PDF, PNG, JPG, JPEG, and Word docs</p>
+              <p className="text-[7.5px] text-slate-400 uppercase">Supports PDF, PNG, JPG, DOC</p>
             </div>
 
             {/* Attachments List */}
-            {attachments.length === 0 ? (
-              <div className="text-center py-6 bg-slate-50/30 rounded-2xl border border-dashed border-slate-100">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest italic">No documents uploaded yet</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {attachments.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                 {attachments.map((att) => (
                   <div 
                     key={att.id} 
-                    className="p-4 bg-slate-50/50 border border-slate-100 rounded-3xl flex items-center justify-between group hover:bg-white hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-100 transition-all duration-300"
+                    className="p-2 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-between group hover:bg-white hover:border-slate-200 transition-all"
                   >
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="p-3 bg-white shadow-sm border border-slate-100 text-indigo-500 rounded-2xl flex-shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all duration-300">
-                        <Paperclip size={18} />
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <div className="p-1.5 bg-white shadow-2xs border border-slate-100 text-indigo-500 rounded shrink-0">
+                        <Paperclip size={12} />
                       </div>
                       <div className="overflow-hidden">
-                        <p className="text-xs font-black text-slate-800 truncate pr-2 group-hover:text-blue-600 transition-colors" title={att.name}>{att.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{att.size}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-200"></span>
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{att.uploadedAt}</span>
+                        <p className="text-[10.5px] font-bold text-slate-800 truncate" title={att.name}>{att.name}</p>
+                        <div className="flex items-center gap-1.5 text-[7.5px] font-semibold text-slate-400 uppercase">
+                          <span>{att.size}</span>
+                          <span>•</span>
+                          <span>{att.uploadedAt}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                      {/* Doc Preview */}
+                    <div className="flex items-center gap-0.5">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setPreviewFile(att); }}
-                        className="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100"
-                        title="Preview Document"
+                        className="p-1 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded"
+                        title="Preview"
                       >
-                        <Eye size={14} />
+                        <Eye size={11} />
                       </button>
-
-                      {/* Download */}
                       <a 
                         href={att.url} 
                         download={att.name}
-                        target="_blank"
+                        target="_blank" 
                         rel="noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100 flex items-center justify-center"
-                        title="Download Document"
+                        className="p-1 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded flex items-center justify-center"
+                        title="Download"
                       >
-                        <Download size={14} />
+                        <Download size={11} />
                       </a>
-
-                      {/* Delete */}
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleAttachmentDelete(att.id); }}
-                        className="p-2 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all shadow-sm bg-white border border-slate-100"
-                        title="Delete Document"
+                        className="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded"
+                        title="Delete"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={11} />
                       </button>
                     </div>
                   </div>
@@ -544,125 +530,109 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
             )}
           </div>
 
-          {/* Comments / Activity */}
-          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <MessageSquare size={16} className="text-purple-500" /> Comments & Activity
+          {/* Comments & Activity */}
+          <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <MessageSquare size={12} className="text-purple-500" /> Comments & Activity
             </h3>
             
-            <div className="space-y-6 mb-8">
-              {/* Mock Comments */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                  <User size={16} />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 shrink-0 text-[10px] font-bold">
+                  <User size={12} />
                 </div>
-                <div className="flex-1 bg-slate-50 p-5 rounded-2xl rounded-tl-none border border-slate-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-black text-slate-800">Sarah Wilson</span>
-                    <span className="text-[9px] font-bold text-slate-400">2 HOURS AGO</span>
+                <div className="flex-1 bg-slate-50 p-2 rounded-lg border border-slate-100 text-xs">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <span className="text-[10.5px] font-bold text-slate-800">Team Member</span>
+                    <span className="text-[8px] font-semibold text-slate-400">2h ago</span>
                   </div>
-                  <p className="text-xs text-slate-600 font-medium">I've started looking into this. The initial requirements are a bit vague, could we clarify step 2?</p>
+                  <p className="text-[10.5px] text-slate-600 font-medium">Started review on this task delivery.</p>
                 </div>
               </div>
             </div>
 
             {/* Comment Input */}
-            <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 border border-blue-200">
-                 {user?.name ? user.name.charAt(0) : <User size={16} />}
-               </div>
-               <div className="flex-1 relative">
-                 <input 
-                   type="text" 
-                   value={comment}
-                   onChange={(e) => setComment(e.target.value)}
-                   placeholder="Type a comment or update..." 
-                   className="w-full pl-6 pr-24 py-4 bg-white border border-slate-200 rounded-[2rem] text-sm font-bold text-slate-700 outline-none focus:border-blue-400 shadow-sm"
-                 />
-                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                   <button className="p-2 text-slate-400 hover:text-blue-500 transition-colors rounded-full hover:bg-slate-50">
-                     <Paperclip size={18} />
-                   </button>
-                   <button className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-md active:scale-95">
-                     <Send size={16} className="-ml-0.5 mt-0.5" />
-                   </button>
-                 </div>
-               </div>
+            <div className="flex items-center gap-2 pt-1">
+              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 text-[10px] font-bold">
+                {user?.name ? user.name.charAt(0) : 'U'}
+              </div>
+              <div className="flex-1 relative">
+                <input 
+                  type="text" 
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Type an update..." 
+                  className="w-full pl-3 pr-12 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-blue-500"
+                />
+                <button className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-2xs">
+                  <Send size={10} />
+                </button>
+              </div>
             </div>
           </div>
 
         </div>
 
         {/* Sidebar Info */}
-        <div className="xl:col-span-4 space-y-6">
-          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem] space-y-6">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-              <AlertCircle size={16} className="text-orange-500" /> Task Meta
+        <div className="lg:col-span-4 space-y-3">
+          <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2.5">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <AlertCircle size={12} className="text-amber-500" /> Task Details
             </h3>
             
-            <div className="space-y-5">
+            <div className="space-y-2">
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Project / Tender</p>
-                <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
-                    <ListTodo size={12} />
-                  </div>
-                  <span className="text-xs font-black text-slate-800">{task.project || 'General Workflow'}</span>
+                <span className="text-[8px] font-bold text-slate-400 uppercase block mb-1">Project / Tender</span>
+                <div className="flex items-center gap-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <ListTodo size={12} className="text-blue-600 shrink-0" />
+                  <span className="text-xs font-bold text-slate-800 truncate">{task.project || 'General Workflow'}</span>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Assignee</p>
-                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-[10px]">
-                    {assignee ? assignee.name.charAt(0) : 'UN'}
+                <span className="text-[8px] font-bold text-slate-400 uppercase block mb-1">Assignee</span>
+                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[9px] shrink-0">
+                    {assignee ? assignee.name.charAt(0) : 'U'}
                   </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-800">
-                      {assignee ? `${assignee.name} (${assignee.email})` : 'Unassigned'}
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">
+                      {assignee ? assignee.name : 'Unassigned'}
                     </p>
-                    <p className="text-[9px] font-bold text-slate-400">{assignee ? assignee.role : 'Engineering'}</p>
+                    <p className="text-[7.5px] text-slate-400 uppercase truncate">{assignee ? assignee.role : 'Core Team'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Due Date</p>
-                  <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-slate-400" />
-                    <span className="text-sm font-black text-rose-600">{task.deadline || 'No Date'}</span>
+                  <span className="text-[8px] font-bold text-slate-400 uppercase block mb-0.5">Due Date</span>
+                  <div className="flex items-center gap-1">
+                    <Calendar size={11} className="text-slate-400" />
+                    <span className="text-xs font-bold text-rose-600">{task.deadline || 'No Due Date'}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Est. Time</p>
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-slate-400" />
-                    <span className="text-sm font-black text-slate-800">4 Hours</span>
-                  </div>
+                  <span className="text-[8px] font-bold text-slate-400 uppercase block mb-0.5">Priority</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase inline-block ${getPriorityColor(task.priority)}`}>
+                    {task.priority || 'Medium'}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Minimal Activity Log */}
-          <div className="card p-4 sm:p-5 lg:p-6 bg-white border-none shadow-xl shadow-slate-200/40 rounded-[2rem] sm:rounded-[2.5rem]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-              <History size={16} className="text-slate-400" /> History
+          {/* Activity Log */}
+          <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs space-y-2">
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <History size={12} className="text-slate-400" /> History
             </h3>
-            <div className="space-y-4">
-              <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500"></div>
+            <div className="space-y-2">
+              <div className="flex gap-2 text-xs">
+                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
                 <div>
-                  <p className="text-xs font-bold text-slate-600">Task status changed to <span className="text-slate-900 font-black">In Progress</span></p>
-                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">YESTERDAY, 4:30 PM</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500"></div>
-                <div>
-                  <p className="text-xs font-bold text-slate-600">Task created by <span className="text-slate-900 font-black">Admin</span></p>
-                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">OCT 14, 2026</p>
+                  <p className="text-[10.5px] font-medium text-slate-700">Status updated to <span className="font-bold text-slate-900">{task.status}</span></p>
+                  <p className="text-[7.5px] text-slate-400 uppercase">Recent Update</p>
                 </div>
               </div>
             </div>
@@ -670,70 +640,50 @@ const TaskDetails = ({ taskId, onBack, user = {}, members = [] }) => {
         </div>
       </div>
 
-      {/* Premium Full-Screen Document Preview Modal */}
+      {/* Document Preview Modal */}
       {previewFile && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPreviewFile(null)}></div>
-          <div className="relative w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shadow-sm">
-                  <Paperclip size={18} />
-                </div>
-                <div className="overflow-hidden">
-                  <h2 className="text-lg font-black text-slate-900 tracking-tight truncate pr-4">{previewFile.name}</h2>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Uploaded {previewFile.uploadedAt} • {previewFile.size}</p>
-                </div>
+            <div className="px-3.5 py-2.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/40">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Paperclip size={13} className="text-blue-600 shrink-0" />
+                <span className="text-xs font-bold text-slate-900 truncate pr-2">{previewFile.name}</span>
               </div>
               <button 
                 onClick={() => setPreviewFile(null)} 
-                className="p-2 bg-white hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded"
               >
-                <X size={18} />
+                <X size={15} />
               </button>
             </div>
 
             {/* Modal Preview Body */}
-            <div className="p-4 sm:p-8 max-h-[80vh] overflow-y-auto bg-slate-50/50 flex flex-col justify-center">
+            <div className="p-3 max-h-[70vh] overflow-y-auto flex flex-col items-center justify-center bg-slate-50/20">
               {previewFile.name.match(/\.(jpeg|jpg|gif|png|webp)/i) ? (
                 <img 
                   src={previewFile.url} 
-                  className="max-w-full max-h-[65vh] rounded-2xl object-contain mx-auto shadow-md border border-slate-100 bg-white" 
+                  className="max-w-full max-h-[55vh] rounded-lg object-contain border border-slate-200 shadow-2xs" 
                   alt={previewFile.name} 
                 />
               ) : previewFile.name.match(/\.(pdf)/i) ? (
                 <iframe 
                   src={previewFile.url} 
-                  className="w-full h-[65vh] rounded-2xl border border-slate-200 shadow-sm bg-white"
+                  className="w-full h-[55vh] rounded-lg border border-slate-200 shadow-2xs bg-white"
                   title={previewFile.name}
                 />
               ) : (
-                <div className="text-center py-16 bg-white rounded-[2rem] border border-slate-100 shadow-sm max-w-lg mx-auto">
-                  <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 shadow-sm">
-                    <Paperclip size={28} />
-                  </div>
-                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-2">No Live Preview Available</h4>
-                  <p className="text-xs text-slate-400 font-medium mb-6 px-6">Direct in-browser previews are not supported for this file type. You can download or open it in a new window instead.</p>
-                  <div className="flex justify-center gap-3">
-                    <a 
-                      href={previewFile.url} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md inline-flex items-center gap-2"
-                    >
-                      Open in New Tab <ExternalLink size={12} />
-                    </a>
-                    <a 
-                      href={previewFile.url} 
-                      download={previewFile.name}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-md inline-flex items-center gap-2"
-                    >
-                      Download File <Download size={12} />
-                    </a>
-                  </div>
+                <div className="text-center py-8 space-y-2">
+                  <Paperclip size={24} className="mx-auto text-slate-400" />
+                  <p className="text-xs font-bold text-slate-800">Preview not supported for this file format</p>
+                  <a 
+                    href={previewFile.url} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-2xs"
+                  >
+                    Open Document <ExternalLink size={10} />
+                  </a>
                 </div>
               )}
             </div>
